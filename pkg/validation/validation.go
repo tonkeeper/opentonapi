@@ -303,7 +303,6 @@ func (s *Service) FetchRoundRewards(ctx context.Context, query RoundRewardsQuery
 // remaining rounds and fetches them all in parallel.
 func (s *Service) FetchValidationRounds(ctx context.Context, query RoundsQuery) ([]ValidationRound, error) {
 	client := s.client
-
 	// Determine anchor block.
 	var anchorExt ton.BlockIDExt
 	switch {
@@ -326,13 +325,10 @@ func (s *Service) FetchValidationRounds(ctx context.Context, query RoundsQuery) 
 			FileHash: ton.Bits256(res.Last.FileHash),
 		}
 	}
-
-	limit := 1
-
+	limit := 23
 	now := time.Now()
 	var rounds []ValidationRound
 	var walkErr string
-
 	// --- Step 1: Resolve anchor round
 	anchorSince, anchorUntil, err := getConfigParam34(ctx, client, anchorExt)
 	if err != nil {
@@ -343,21 +339,18 @@ func (s *Service) FetchValidationRounds(ctx context.Context, query RoundsQuery) 
 	if anchorSince == 0 {
 		return rounds, nil
 	}
-
 	startExt, err := lookupMasterchainBlockByUtime(ctx, client, anchorSince)
 	if err != nil {
 		walkErr = fmt.Sprintf("stopped after 0 rounds: %v", err)
 		log.Printf("warning: %s", walkErr)
 		return rounds, nil
 	}
-
 	anchor := ValidationRound{
 		ElectAt:    oas.NewOptInt64(int64(anchorSince)),
 		StartUtime: oas.NewOptInt64(int64(anchorSince)),
 		EndUtime:   oas.NewOptInt64(int64(anchorUntil)),
 		StartBlock: startExt.Seqno,
 	}
-
 	// Determine if anchor round is finished and compute roundLength.
 	var roundLength uint32
 	if anchorUntil > 0 && time.Unix(int64(anchorUntil), 0).Before(now) {
@@ -384,15 +377,12 @@ func (s *Service) FetchValidationRounds(ctx context.Context, query RoundsQuery) 
 			roundLength = partialBlocks * fullDuration / elapsed
 		}
 	}
-
 	rounds = append(rounds, anchor)
-
 	// --- Step 2+3: Estimate middle blocks and fan out in parallel ---
 	remaining := limit - 1
 	if remaining > 0 && roundLength > 0 && startExt.Seqno > 1 {
 		parallelRounds := make([]ValidationRound, remaining)
 		g := new(errgroup.Group)
-
 		var launched atomic.Int32
 		for i := 1; i <= remaining; i++ {
 			offset := roundLength/2 + uint32(i-1)*roundLength
@@ -400,28 +390,27 @@ func (s *Service) FetchValidationRounds(ctx context.Context, query RoundsQuery) 
 				break
 			}
 			middleBlock := startExt.Seqno - offset
-
 			g.Go(func() error {
-				idx := int(launched.Add(1)) - 1
-
 				pinnedExt, _, pinErr := lookupMasterchainBlock(ctx, client, middleBlock)
 				if pinErr != nil {
+					log.Println("validation: masterchain block lookup failure #1:", pinErr)
 					return nil
 				}
-
 				since, until, confErr := getConfigParam34(ctx, client, pinnedExt)
 				if confErr != nil {
+					log.Println("validation: error getting Elector config param34:", confErr)
 					return nil
 				}
 				if since == 0 {
+					log.Println("validation: elector config param34: zero since")
 					return nil
 				}
-
 				sExt, sErr := lookupMasterchainBlockByUtime(ctx, client, since)
 				if sErr != nil {
+					log.Println("validation: masterchain block lookup failure #2:", sErr)
 					return nil
 				}
-
+				idx := int(launched.Add(1)) - 1
 				parallelRounds[idx] = ValidationRound{
 					ElectAt:    oas.NewOptInt64(int64(since)),
 					StartUtime: oas.NewOptInt64(int64(since)),
@@ -432,23 +421,19 @@ func (s *Service) FetchValidationRounds(ctx context.Context, query RoundsQuery) 
 				return nil
 			})
 		}
-
 		err = g.Wait()
 		n := int(launched.Load())
 		if err != nil {
 			walkErr = fmt.Sprintf("stopped after %d rounds: %v", n, err)
-			log.Printf("warning: %s", walkErr)
+			log.Printf("validation: warning: %s", walkErr)
 			populatePrevNextElectionIDs(ctx, client, rounds)
 			return rounds, nil
 		}
-
 		sort.Slice(parallelRounds[:n], func(i, j int) bool {
 			return parallelRounds[i].ElectAt.Value > parallelRounds[j].ElectAt.Value
 		})
-
 		rounds = append(rounds, parallelRounds[:n]...)
 	}
-
 	// Derive end_block for rounds after the anchor.
 	for i := 1; i < len(rounds); i++ {
 		if rounds[i-1].StartBlock == 0 {
@@ -456,12 +441,10 @@ func (s *Service) FetchValidationRounds(ctx context.Context, query RoundsQuery) 
 		}
 		rounds[i].EndBlock = oas.NewOptUint32(rounds[i-1].StartBlock - 1)
 	}
-
 	// Trim to limit.
 	if len(rounds) > limit {
 		rounds = rounds[:limit]
 	}
-
 	populatePrevNextElectionIDs(ctx, client, rounds)
 	return rounds, nil
 }
