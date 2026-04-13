@@ -23,9 +23,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 )
 
-const tonstakersAddr = "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa"
-const tonstakersAPY = 21.6
-
 func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingPoolInfoParams) (*oas.GetStakingPoolInfoOK, error) {
 	pool, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
@@ -116,13 +113,7 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 	var minTF, minWhales int64
 	for _, p := range tfPools {
 		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
-		var apy float64
-		switch p.Address.ToRaw() {
-		case tonstakersAddr:
-			apy = tonstakersAPY
-		default:
-			apy = h.state.GetAPY()
-		}
+		apy := h.state.GetAPY()
 		pool := convertStakingTFPool(p, info, apy)
 		if minTF == 0 || pool.MinStake < minTF {
 			minTF = pool.MinStake
@@ -146,13 +137,7 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		if err != nil {
 			continue
 		}
-		var apy float64
-		switch k.ToRaw() {
-		case tonstakersAddr:
-			apy = tonstakersAPY
-		default:
-			apy = h.state.GetAPY()
-		}
+		apy := h.state.GetAPY()
 		pool := convertStakingWhalesPool(k, w, poolStatus, poolConfig, apy, true, nominatorsCount, stake)
 		if minWhales == 0 || pool.MinStake < minWhales {
 			minWhales = pool.MinStake
@@ -181,10 +166,6 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 	for _, p := range liquidPools {
 		info, _ := h.addressBook.GetAddressInfoByAddress(p.Address)
 		p.Name = info.Name
-		switch p.Address.ToRaw() {
-		case tonstakersAddr:
-			p.APY = tonstakersAPY
-		}
 		result.Pools = append(result.Pools, convertLiquidStaking(p, cycleStart, cycleEnd))
 	}
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) int {
