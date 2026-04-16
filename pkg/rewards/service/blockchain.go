@@ -1,14 +1,13 @@
-package validation
+package service
 
 import (
 	"context"
 	"fmt"
 	"math/big"
-	"time"
 
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
+	"github.com/tonkeeper/opentonapi/pkg/rewards/model"
 )
 
 // electorAddr is the well-known address of the TON elector contract (-1:333...333).
@@ -40,24 +39,14 @@ type RawPastElection struct {
 	Bonuses    *big.Int         // nil if not available
 }
 
-// lookupMasterchainBlock resolves a seqno to a BlockIDExt and returns the block time.
-func lookupMasterchainBlock(ctx context.Context, client *liteapi.Client, seqno uint32) (ton.BlockIDExt, time.Time, error) {
-	blockID := ton.BlockID{
-		Workchain: -1,
-		Shard:     0x8000000000000000,
-		Seqno:     seqno,
-	}
-	ext, info, err := client.LookupBlock(ctx, blockID, 1, nil, nil)
-	if err != nil {
-		return ton.BlockIDExt{}, time.Time{}, err
-	}
-	return ext, time.Unix(int64(info.GenUtime), 0), nil
-}
-
 // getRoundInfo returns the unix timestamps of the current validation round start and end.
 // Config param 34 has two TL-B variants: "validators#11" (legacy) and "validators_ext#12"
 // (current, adds TotalWeight). Both carry UtimeSince/UtimeUntil so we handle both.
-func getRoundInfo(conf *ton.BlockchainConfig) (since, until uint32) {
+func getRoundInfo(c *ton.BlockchainConfig) (since, until uint32) {
+	if c == nil {
+		return
+	}
+	conf := *c
 	if conf.ConfigParam34 == nil {
 		return
 	}
@@ -73,25 +62,19 @@ func getRoundInfo(conf *ton.BlockchainConfig) (since, until uint32) {
 	return since, until
 }
 
-// lookupMasterchainBlockByUtime resolves a unix timestamp to the nearest masterchain block.
-func lookupMasterchainBlockByUtime(ctx context.Context, client *liteapi.Client, utime uint32) (ton.BlockIDExt, error) {
-	blockID := ton.BlockID{
-		Workchain: -1,
-		Shard:     0x8000000000000000,
-	}
-	ext, _, err := client.LookupBlock(ctx, blockID, 4, nil, &utime)
-	return ext, err
-}
-
 // computeReturnedStake calls the elector's compute_returned_stake(addr) get method.
 // Returns the credits balance for the given address.
-func computeReturnedStake(ctx context.Context, client *liteapi.Client, addr ton.AccountID) (*big.Int, error) {
+func computeReturnedStake(ctx context.Context, client LiteClient, addr ton.AccountID) (*big.Int, error) {
 	addrInt := new(big.Int).SetBytes(addr.Address[:])
 	param := tlb.VmStackValue{
 		SumType:  "VmStkInt",
 		VmStkInt: tlb.Int257(*addrInt),
 	}
-	_, stack, err := client.RunSmcMethod(ctx, electorAddr, "compute_returned_stake", tlb.VmStack{param})
+	stack, err := retry(func() (tlb.VmStack, error) {
+		model.CountRPC(ctx)
+		_, stack, err := client.RunSmcMethod(ctx, electorAddr, "compute_returned_stake", tlb.VmStack{param})
+		return stack, err
+	})
 	if err != nil {
 		return nil, fmt.Errorf("compute_returned_stake(%s): %w", addr.ToRaw(), err)
 	}

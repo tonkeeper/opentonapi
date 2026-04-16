@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/otelogen"
@@ -16,6 +17,8 @@ import (
 )
 
 var (
+	// Allocate option closure once.
+	clientSpanKind = trace.WithSpanKind(trace.SpanKindClient)
 	// Allocate option closure once.
 	serverSpanKind = trace.WithSpanKind(trace.SpanKindServer)
 )
@@ -158,9 +161,64 @@ func (cfg serverConfig) baseServer() (s baseServer, err error) {
 	return s, nil
 }
 
+type clientConfig struct {
+	otelConfig
+	Client ht.Client
+}
+
+// ClientOption is client config option.
+type ClientOption interface {
+	applyClient(*clientConfig)
+}
+
+var _ ClientOption = (optionFunc[clientConfig])(nil)
+
+func (o optionFunc[C]) applyClient(c *C) {
+	o(c)
+}
+
+var _ ClientOption = (otelOptionFunc)(nil)
+
+func (o otelOptionFunc) applyClient(c *clientConfig) {
+	o(&c.otelConfig)
+}
+
+func newClientConfig(opts ...ClientOption) clientConfig {
+	cfg := clientConfig{
+		Client: http.DefaultClient,
+	}
+	for _, opt := range opts {
+		opt.applyClient(&cfg)
+	}
+	cfg.initOTEL()
+	return cfg
+}
+
+type baseClient struct {
+	cfg      clientConfig
+	requests metric.Int64Counter
+	errors   metric.Int64Counter
+	duration metric.Float64Histogram
+}
+
+func (cfg clientConfig) baseClient() (c baseClient, err error) {
+	c = baseClient{cfg: cfg}
+	if c.requests, err = otelogen.ClientRequestCountCounter(c.cfg.Meter); err != nil {
+		return c, err
+	}
+	if c.errors, err = otelogen.ClientErrorsCountCounter(c.cfg.Meter); err != nil {
+		return c, err
+	}
+	if c.duration, err = otelogen.ClientDurationHistogram(c.cfg.Meter); err != nil {
+		return c, err
+	}
+	return c, nil
+}
+
 // Option is config option.
 type Option interface {
 	ServerOption
+	ClientOption
 }
 
 // WithTracerProvider specifies a tracer provider to use for creating a tracer.
@@ -189,6 +247,15 @@ func WithMeterProvider(provider metric.MeterProvider) Option {
 func WithAttributes(attributes ...attribute.KeyValue) Option {
 	return otelOptionFunc(func(cfg *otelConfig) {
 		cfg.Attributes = attributes
+	})
+}
+
+// WithClient specifies http client to use.
+func WithClient(client ht.Client) ClientOption {
+	return optionFunc[clientConfig](func(cfg *clientConfig) {
+		if client != nil {
+			cfg.Client = client
+		}
 	})
 }
 

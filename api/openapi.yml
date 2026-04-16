@@ -2978,11 +2978,11 @@ paths:
                 $ref: '#/components/schemas/AccountPurchases'
         'default':
           $ref: '#/components/responses/Error'
-  /v2/validation/validators:
+  /v2/rewards/validators:
     get:
       operationId: getValidators
       tags:
-        - Validation
+        - Rewards
       summary: Get all current validators
       description: >
         Returns all current validators with stakes, rewards, pool addresses,
@@ -2990,11 +2990,33 @@ paths:
       parameters:
         - name: seqno
           in: query
-          description: Masterchain block seqno. Defaults to latest.
+          description: >
+            Masterchain block seqno. Defaults to latest.
+            Mutually exclusive with `unixtime`.
           required: false
           schema:
             type: integer
             format: uint32
+        - name: unixtime
+          in: query
+          description: >
+            Unix timestamp (seconds). Looks up the masterchain block at this
+            time and uses it as the anchor. Mutually exclusive with `seqno`.
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: shallow
+          in: query
+          description: >
+            Set to `1` to return only basic validator info (rank, pubkey,
+            effective_stake, weight, reward, pool). Skips pool type detection,
+            owner/validator addresses, nominator data, and returned-stake
+            lookup — significantly faster.
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Successful response
@@ -3004,11 +3026,11 @@ paths:
                 $ref: "#/components/schemas/ValidatorsResponse"
         'default':
           $ref: '#/components/responses/Error'
-  /v2/validation/rounds:
+  /v2/rewards/validation-rounds:
     get:
       operationId: getValidationRounds
       tags:
-        - Validation
+        - Rewards
       summary: Get validation round metadata
       description: >
         Returns past and current validation rounds with boundaries, stakes,
@@ -3018,7 +3040,7 @@ paths:
           in: query
           description: >
             Return the single round matching this election ID.
-            Mutually exclusive with `block`.
+            Mutually exclusive with `block` and `unixtime`.
           required: false
           schema:
             type: integer
@@ -3028,7 +3050,17 @@ paths:
           description: >
             Find the round containing this masterchain block seqno and return
             it plus up to `limit-1` older rounds. Mutually exclusive with
-            `election_id`.
+            `election_id` and `unixtime`.
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: unixtime
+          in: query
+          description: >
+            Unix timestamp (seconds). Looks up the masterchain block at this
+            time and uses it as the anchor. Mutually exclusive with
+            `election_id` and `block`.
           required: false
           schema:
             type: integer
@@ -3042,11 +3074,11 @@ paths:
                 $ref: "#/components/schemas/ValidationRoundsResponse"
         'default':
           $ref: '#/components/responses/Error'
-  /v2/validation/rewards:
+  /v2/rewards/round-rewards:
     get:
       operationId: getRoundRewards
       tags:
-        - Validation
+        - Rewards
       summary: Get per-validator reward distribution for a finished round
       description: >
         Computes per-validator and per-nominator reward distribution for a
@@ -3055,7 +3087,7 @@ paths:
         - name: election_id
           in: query
           description: >
-            Election ID of the finished round. Mutually exclusive with `block`.
+            Election ID of the finished round. Mutually exclusive with `block` and `unixtime`.
           required: false
           schema:
             type: integer
@@ -3064,11 +3096,32 @@ paths:
           in: query
           description: >
             Masterchain block seqno within the finished round.
-            Mutually exclusive with `election_id`.
+            Mutually exclusive with `election_id` and `unixtime`.
           required: false
           schema:
             type: integer
             format: uint32
+        - name: unixtime
+          in: query
+          description: >
+            Unix timestamp (seconds). Looks up the masterchain block at this
+            time and uses it as the anchor. Mutually exclusive with
+            `election_id` and `block`.
+          required: false
+          schema:
+            type: integer
+            format: uint32
+        - name: shallow
+          in: query
+          description: >
+            Set to `1` to return only basic validator info (rank, pubkey,
+            effective_stake, weight, reward, pool). Skips pool type detection,
+            owner/validator addresses, nominator data, and returned-stake
+            lookup — significantly faster.
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Successful response
@@ -8555,7 +8608,7 @@ components:
       type: object
       required: [election_id, start, end, start_block, finished]
       properties:
-        elect_at:
+        election_id:
           type: integer
           format: int64
           description: Election ID (electAt timestamp).

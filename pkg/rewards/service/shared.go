@@ -1,4 +1,4 @@
-package validation
+package service
 
 import (
 	"context"
@@ -7,11 +7,12 @@ import (
 	"math/big"
 	"sort"
 
-	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/tonkeeper/opentonapi/pkg/rewards/model"
+	"github.com/tonkeeper/opentonapi/pkg/rewards/utils"
 )
 
 func msgAddressToHuman(addr tlb.MsgAddress, bounce bool) (string, bool) {
@@ -31,14 +32,15 @@ type roundData struct {
 
 // fetchRoundData fetches config param 34, pool addresses, and past elections in parallel.
 // roundPinned is used for config and pool data (should be pinned within the round).
+// roundSeqno is the seqno of the pinned block (used as dataloader cache key).
 // electionsPinned is used for past elections (may need to be pinned after the round ends).
-func fetchRoundData(ctx context.Context, roundPinned, electionsPinned *liteapi.Client) (roundData, error) {
+func fetchRoundData(ctx context.Context, roundPinned, electionsPinned LiteClient, roundSeqno uint32) (roundData, error) {
 	var rd roundData
-	var g errgroup.Group
+	g := new(errgroup.Group)
 
 	// Config param 34 → validator list.
 	g.Go(func() error {
-		params, err := roundPinned.GetConfigParams(ctx, 0, []uint32{34})
+		params, err := cachedGetConfigParams(ctx, roundPinned, 0, []uint32{34}, roundSeqno)
 		if err != nil {
 			return fmt.Errorf("GetConfigParams: %w", err)
 		}
@@ -119,7 +121,7 @@ func validatorWeight(trueStake, totalTrueStake *big.Int) float64 {
 	if totalTrueStake.Sign() <= 0 {
 		return 0
 	}
-	return InaccurateDivFloat(trueStake, totalTrueStake)
+	return utils.InaccurateDivFloat(trueStake, totalTrueStake)
 }
 
 // poolAddressInfo holds resolved pool type and addresses.
@@ -131,7 +133,7 @@ type poolAddressInfo struct {
 }
 
 // resolvePoolAddresses fetches pool data and resolves validator/owner addresses.
-func resolvePoolAddresses(ctx context.Context, client *liteapi.Client, poolAddr ton.AccountID) poolAddressInfo {
+func resolvePoolAddresses(ctx context.Context, client LiteClient, poolAddr ton.AccountID) poolAddressInfo {
 	poolType, pd := fetchPoolData(ctx, client, poolAddr)
 	info := poolAddressInfo{poolType: poolType, pd: pd}
 
@@ -191,7 +193,7 @@ func findElection(elections []RawPastElection, electAt int64) *RawPastElection {
 // computeValidatorRewards computes per-validator rewards, sorts by stake, and
 // enriches each validator with pool data and nominator reward splits in parallel.
 // rewardPool is the total reward to distribute (bonuses for round rewards, rewardPerBlock for per-block).
-func computeValidatorRewards(ctx context.Context, pinned *liteapi.Client, rows []validatorRow, totalTrueStake, rewardPool *big.Int) []ValidatorReward {
+func computeValidatorRewards(ctx context.Context, pinned LiteClient, rows []validatorRow, totalTrueStake, rewardPool *big.Int, shallow bool) []model.ValidatorReward {
 	type rewardRow struct {
 		validatorRow
 		reward *big.Int
@@ -200,7 +202,7 @@ func computeValidatorRewards(ctx context.Context, pinned *liteapi.Client, rows [
 	for i, row := range rows {
 		var reward *big.Int
 		if totalTrueStake.Sign() > 0 {
-			reward = MulDiv(rewardPool, row.trueStake, totalTrueStake)
+			reward = utils.MulDiv(rewardPool, row.trueStake, totalTrueStake)
 		} else {
 			reward = new(big.Int)
 		}
@@ -208,29 +210,29 @@ func computeValidatorRewards(ctx context.Context, pinned *liteapi.Client, rows [
 	}
 	sort.Slice(rewardRows, func(i, j int) bool { return rewardRows[i].trueStake.Cmp(rewardRows[j].trueStake) > 0 })
 
-	validatorRewards := make([]ValidatorReward, len(rewardRows))
+	validatorRewards := make([]model.ValidatorReward, len(rewardRows))
 	g := new(errgroup.Group)
 
 	for i, row := range rewardRows {
 		g.Go(func() error {
-			validatorRewards[i] = ValidatorReward{
+			validatorRewards[i] = model.ValidatorReward{
 				Rank:           i + 1,
-				PublicKey:      fmt.Sprintf("%x", row.descr.PubKey()),
-				EffectiveStake: row.trueStake.Int64(),
+				Pubkey:         fmt.Sprintf("%x", row.descr.PubKey()),
+				EffectiveStake: &model.NTon{Int: row.trueStake},
 				Weight:         validatorWeight(row.trueStake, totalTrueStake),
-				Reward:         row.reward.Int64(),
-				Pool:           oas.NewOptString(row.pool),
+				Reward:         &model.NTon{Int: row.reward},
+				Pool:           row.pool,
 			}
 
-			if row.poolAddr == nil {
+			if shallow || row.poolAddr == nil {
 				return nil
 			}
 
 			poolAddr := *row.poolAddr
 			info := resolvePoolAddresses(ctx, pinned, poolAddr)
-			validatorRewards[i].PoolType = oas.NewOptValidatorRewardEntryPoolType(oas.ValidatorRewardEntryPoolType(info.poolType))
-			validatorRewards[i].ValidatorAddress = oas.NewOptString(info.validatorAddress)
-			validatorRewards[i].OwnerAddress = oas.NewOptString(info.ownerAddress)
+			validatorRewards[i].PoolType = info.poolType
+			validatorRewards[i].ValidatorAddress = info.validatorAddress
+			validatorRewards[i].OwnerAddress = info.ownerAddress
 
 			// TotalStake from elector: true_stake + credit (leftover balance kept in contract after election)
 			credit, err := computeReturnedStake(ctx, pinned, poolAddr)
@@ -240,7 +242,7 @@ func computeValidatorRewards(ctx context.Context, pinned *liteapi.Client, rows [
 			}
 
 			totalStake := new(big.Int).Add(row.trueStake, credit)
-			validatorRewards[i].TotalStake = oas.NewOptInt64(totalStake.Int64())
+			validatorRewards[i].TotalStake = &model.NTon{Int: totalStake}
 
 			if info.pd == nil || info.poolType != poolTypeNominatorV10 {
 				return nil
@@ -248,10 +250,10 @@ func computeValidatorRewards(ctx context.Context, pinned *liteapi.Client, rows [
 
 			// Nominator Pool: extract metadata and compute per-nominator rewards.
 			meta := computeNominatorPoolMeta(info.pd)
-			validatorRewards[i].ValidatorStake = oas.NewOptInt64(meta.validatorStake.Int64())
-			validatorRewards[i].NominatorsStake = oas.NewOptInt64(meta.nominatorsStake.Int64())
-			validatorRewards[i].ValidatorRewardShare = oas.NewOptFloat64(meta.validatorRewardShare)
-			validatorRewards[i].NominatorsCount = oas.NewOptUint32(meta.nominatorsCount)
+			validatorRewards[i].ValidatorStake = &model.NTon{Int: meta.validatorStake}
+			validatorRewards[i].NominatorsStake = &model.NTon{Int: meta.nominatorsStake}
+			validatorRewards[i].ValidatorRewardShare = meta.validatorRewardShare
+			validatorRewards[i].NominatorsCount = meta.nominatorsCount
 
 			if info.pd.Nominators == nil {
 				return nil
@@ -262,19 +264,20 @@ func computeValidatorRewards(ctx context.Context, pinned *liteapi.Client, rows [
 			// nominatorsReward = totalValidatorReward - validatorSelfReward
 			rewardShare := big.NewInt(int64(info.pd.RewardShare))
 			tenThousand := big.NewInt(10000)
+			totalValidatorReward := validatorRewards[i].Reward.Int
 
-			validatorSelfReward := MulDiv(row.reward, rewardShare, tenThousand)
-			if validatorSelfReward.Cmp(row.reward) > 0 {
-				validatorSelfReward.Set(row.reward)
+			validatorSelfReward := utils.MulDiv(totalValidatorReward, rewardShare, tenThousand)
+			if validatorSelfReward.Cmp(totalValidatorReward) > 0 {
+				validatorSelfReward.Set(totalValidatorReward)
 			}
 
-			nominatorsReward := new(big.Int).Sub(row.reward, validatorSelfReward)
+			nominatorsReward := new(big.Int).Sub(totalValidatorReward, validatorSelfReward)
 			nominatorsTotalStake := info.pd.NominatorsAmount
 
 			for _, n := range info.pd.Nominators {
 				addr := ton.AccountID{Workchain: 0, Address: tlb.Bits256(n.Address)}
 				nominatorStake := new(big.Int).SetUint64(n.Amount)
-				nominatorReward := MulDiv(nominatorsReward, nominatorStake, nominatorsTotalStake)
+				nominatorReward := utils.MulDiv(nominatorsReward, nominatorStake, nominatorsTotalStake)
 
 				// total stake 5
 				// effective stake 3
@@ -286,14 +289,14 @@ func computeValidatorRewards(ctx context.Context, pinned *liteapi.Client, rows [
 
 				// nominator effective stake = nominator stake * effective stake / total stake
 
-				nominatorEffectiveStake := MulDiv(nominatorStake, row.trueStake, totalStake)
+				nominatorEffectiveStake := utils.MulDiv(nominatorStake, row.trueStake, totalStake)
 
-				validatorRewards[i].Nominators = append(validatorRewards[i].Nominators, NominatorReward{
+				validatorRewards[i].Nominators = append(validatorRewards[i].Nominators, model.NominatorReward{
 					Address:        addr.ToHuman(true, false),
-					Weight:         InaccurateDivFloat(nominatorStake, nominatorsTotalStake),
-					Reward:         nominatorReward.Int64(),
-					EffectiveStake: nominatorEffectiveStake.Int64(),
-					Stake:          nominatorStake.Int64(),
+					Weight:         utils.InaccurateDivFloat(nominatorStake, nominatorsTotalStake),
+					Reward:         &model.NTon{Int: nominatorReward},
+					EffectiveStake: &model.NTon{Int: nominatorEffectiveStake},
+					Stake:          &model.NTon{Int: nominatorStake},
 				})
 			}
 

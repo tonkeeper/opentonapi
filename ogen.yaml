@@ -3,10 +3,10 @@ generator:
   features:
     enable:
       - paths/server
+      - paths/client
     disable:
       - server/response/validation
       - debug/example_tests
       - client/request/validation
-      - paths/client
       - webhooks/client
       - webhooks/server
