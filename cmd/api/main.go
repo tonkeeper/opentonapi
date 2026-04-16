@@ -16,6 +16,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
+	ton "github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
 )
@@ -37,6 +38,16 @@ func main() {
 	}
 	if err != nil {
 		log.Fatal("failed to create liteapi client", zap.Error(err))
+	}
+	var rewardsLiteServers []ton.LiteServer
+	if len(cfg.App.ArchiveLiteServers) != 0 {
+		rewardsLiteServers = cfg.App.ArchiveLiteServers
+	} else if len(cfg.App.LiteServers) != 0 {
+		rewardsLiteServers = cfg.App.LiteServers
+	} else {
+		var opt liteapi.Options
+		liteapi.Mainnet()(&opt)
+		rewardsLiteServers = opt.LiteServers
 	}
 
 	storage, err := litestorage.NewLiteStorage(
@@ -70,7 +81,7 @@ func main() {
 		api.WithMessageSender(msgSender),
 		api.WithSpamFilter(spamFilter),
 		api.WithTonConnectSecret(cfg.TonConnect.Secret),
-		api.WithLiteapiClient(client),
+		api.WithRewards(rewardsLiteServers),
 	)
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))

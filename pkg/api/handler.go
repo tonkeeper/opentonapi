@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 	"sync"
 
 	"golang.org/x/exp/slog"
@@ -11,12 +12,12 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
+	rewards "github.com/tonkeeper/opentonapi/pkg/rewards/service"
 	"github.com/tonkeeper/opentonapi/pkg/score"
-	"github.com/tonkeeper/opentonapi/pkg/validation"
 	"github.com/tonkeeper/opentonapi/pkg/verifier"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/contract/dns"
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tonconnect"
@@ -50,7 +51,7 @@ type Handler struct {
 	metaCache      metadataCache
 	tonConnect     *tonconnect.Server
 	verifierSource verifierSource
-	validation     *validation.Service
+	rewards        *rewards.Service
 
 	// parallelTraceProcessing enables parallel trace-to-action conversion.
 	parallelTraceProcessing bool
@@ -95,7 +96,7 @@ type Options struct {
 	verifier                verifierSource
 	score                   scoreSource
 	parallelTraceProcessing bool
-	liteapi                 *liteapi.Client
+	rewardsLiteServers      []config.LiteServer
 }
 
 type Option func(o *Options)
@@ -183,9 +184,9 @@ func WithParallelTraceProcessing(enabled bool) Option {
 	}
 }
 
-func WithLiteapiClient(client *liteapi.Client) Option {
+func WithRewards(s []config.LiteServer) Option {
 	return func(o *Options) {
-		o.liteapi = client
+		o.rewardsLiteServers = s
 	}
 }
 
@@ -244,9 +245,15 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if err != nil {
 		slog.Warn("unable to detect tongo version", "err", err)
 	}
-	var validationService *validation.Service
-	if options.liteapi != nil {
-		validationService = validation.New(options.liteapi)
+	var rwd *rewards.Service
+	if len(options.rewardsLiteServers) != 0 {
+		cli, err := rewards.NewClient(options.rewardsLiteServers)
+		if err == nil {
+			rwd = rewards.New(cli, options.rewardsLiteServers)
+			log.Println("rewards service initialized")
+		} else {
+			log.Println("rewards service unavailable:", err)
+		}
 	}
 	return &Handler{
 		logger:         logger,
@@ -279,7 +286,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		getMethodsCache:         cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),
 		tonConnect:              tonConnect,
 		configPool:              configPool,
-		validation:              validationService,
+		rewards:                 rwd,
 	}, nil
 }
 

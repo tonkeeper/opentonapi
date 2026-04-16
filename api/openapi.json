@@ -6874,7 +6874,7 @@
       "type": "integer",
       "x-js-format": "bigint"
      },
-     "elect_at": {
+     "election_id": {
       "description": "Election ID (electAt timestamp).",
       "example": 1740053384,
       "format": "int64",
@@ -11785,6 +11785,187 @@
     ]
    }
   },
+  "/v2/rewards/round-rewards": {
+   "get": {
+    "description": "Computes per-validator and per-nominator reward distribution for a finished validation round using the elector's bonuses value.\n",
+    "operationId": "getRoundRewards",
+    "parameters": [
+     {
+      "description": "Election ID of the finished round. Mutually exclusive with `block` and `unixtime`.\n",
+      "in": "query",
+      "name": "election_id",
+      "required": false,
+      "schema": {
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Masterchain block seqno within the finished round. Mutually exclusive with `election_id` and `unixtime`.\n",
+      "in": "query",
+      "name": "block",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Unix timestamp (seconds). Looks up the masterchain block at this time and uses it as the anchor. Mutually exclusive with `election_id` and `block`.\n",
+      "in": "query",
+      "name": "unixtime",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Set to `1` to return only basic validator info (rank, pubkey, effective_stake, weight, reward, pool). Skips pool type detection, owner/validator addresses, nominator data, and returned-stake lookup — significantly faster.\n",
+      "in": "query",
+      "name": "shallow",
+      "required": false,
+      "schema": {
+       "default": false,
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RoundRewardsResponse"
+        }
+       }
+      },
+      "description": "Successful response"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "summary": "Get per-validator reward distribution for a finished round",
+    "tags": [
+     "Rewards"
+    ]
+   }
+  },
+  "/v2/rewards/validation-rounds": {
+   "get": {
+    "description": "Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the latest masterchain block.\n",
+    "operationId": "getValidationRounds",
+    "parameters": [
+     {
+      "description": "Return the single round matching this election ID. Mutually exclusive with `block` and `unixtime`.\n",
+      "in": "query",
+      "name": "election_id",
+      "required": false,
+      "schema": {
+       "format": "int64",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Find the round containing this masterchain block seqno and return it plus up to `limit-1` older rounds. Mutually exclusive with `election_id` and `unixtime`.\n",
+      "in": "query",
+      "name": "block",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Unix timestamp (seconds). Looks up the masterchain block at this time and uses it as the anchor. Mutually exclusive with `election_id` and `block`.\n",
+      "in": "query",
+      "name": "unixtime",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ValidationRoundsResponse"
+        }
+       }
+      },
+      "description": "Successful response"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "summary": "Get validation round metadata",
+    "tags": [
+     "Rewards"
+    ]
+   }
+  },
+  "/v2/rewards/validators": {
+   "get": {
+    "description": "Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator breakdowns.\n",
+    "operationId": "getValidators",
+    "parameters": [
+     {
+      "description": "Masterchain block seqno. Defaults to latest. Mutually exclusive with `unixtime`.\n",
+      "in": "query",
+      "name": "seqno",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Unix timestamp (seconds). Looks up the masterchain block at this time and uses it as the anchor. Mutually exclusive with `seqno`.\n",
+      "in": "query",
+      "name": "unixtime",
+      "required": false,
+      "schema": {
+       "format": "uint32",
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Set to `1` to return only basic validator info (rank, pubkey, effective_stake, weight, reward, pool). Skips pool type detection, owner/validator addresses, nominator data, and returned-stake lookup — significantly faster.\n",
+      "in": "query",
+      "name": "shallow",
+      "required": false,
+      "schema": {
+       "default": false,
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ValidatorsResponse"
+        }
+       }
+      },
+      "description": "Successful response"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "summary": "Get all current validators",
+    "tags": [
+     "Rewards"
+    ]
+   }
+  },
   "/v2/staking/nominator/{account_id}/pools": {
    "get": {
     "description": "All pools where account participates",
@@ -12174,137 +12355,6 @@
     },
     "tags": [
      "Traces"
-    ]
-   }
-  },
-  "/v2/validation/rewards": {
-   "get": {
-    "description": "Computes per-validator and per-nominator reward distribution for a finished validation round using the elector's bonuses value.\n",
-    "operationId": "getRoundRewards",
-    "parameters": [
-     {
-      "description": "Election ID of the finished round. Mutually exclusive with `block`.\n",
-      "in": "query",
-      "name": "election_id",
-      "required": false,
-      "schema": {
-       "format": "int64",
-       "type": "integer"
-      }
-     },
-     {
-      "description": "Masterchain block seqno within the finished round. Mutually exclusive with `election_id`.\n",
-      "in": "query",
-      "name": "block",
-      "required": false,
-      "schema": {
-       "format": "uint32",
-       "type": "integer"
-      }
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/RoundRewardsResponse"
-        }
-       }
-      },
-      "description": "Successful response"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "summary": "Get per-validator reward distribution for a finished round",
-    "tags": [
-     "Validation"
-    ]
-   }
-  },
-  "/v2/validation/rounds": {
-   "get": {
-    "description": "Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the latest masterchain block.\n",
-    "operationId": "getValidationRounds",
-    "parameters": [
-     {
-      "description": "Return the single round matching this election ID. Mutually exclusive with `block`.\n",
-      "in": "query",
-      "name": "election_id",
-      "required": false,
-      "schema": {
-       "format": "int64",
-       "type": "integer"
-      }
-     },
-     {
-      "description": "Find the round containing this masterchain block seqno and return it plus up to `limit-1` older rounds. Mutually exclusive with `election_id`.\n",
-      "in": "query",
-      "name": "block",
-      "required": false,
-      "schema": {
-       "format": "uint32",
-       "type": "integer"
-      }
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/ValidationRoundsResponse"
-        }
-       }
-      },
-      "description": "Successful response"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "summary": "Get validation round metadata",
-    "tags": [
-     "Validation"
-    ]
-   }
-  },
-  "/v2/validation/validators": {
-   "get": {
-    "description": "Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator breakdowns.\n",
-    "operationId": "getValidators",
-    "parameters": [
-     {
-      "description": "Masterchain block seqno. Defaults to latest.",
-      "in": "query",
-      "name": "seqno",
-      "required": false,
-      "schema": {
-       "format": "uint32",
-       "type": "integer"
-      }
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/ValidatorsResponse"
-        }
-       }
-      },
-      "description": "Successful response"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    },
-    "summary": "Get all current validators",
-    "tags": [
-     "Validation"
     ]
    }
   },

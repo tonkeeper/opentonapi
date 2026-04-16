@@ -21,6 +21,7 @@ type Config struct {
 		MetricsPort        int                 `env:"METRICS_PORT" envDefault:"9010"`
 		Accounts           accountsList        `env:"ACCOUNTS"`
 		LiteServers        []config.LiteServer `env:"LITE_SERVERS"`
+		ArchiveLiteServers []config.LiteServer `env:"ARCHIVE_LITE_SERVERS"`
 		SendingLiteservers []config.LiteServer `env:"SENDING_LITE_SERVERS"`
 		IsTestnet          bool                `env:"IS_TESTNET" envDefault:"false"`
 	}
