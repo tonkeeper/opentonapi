@@ -484,6 +484,15 @@ func (UnimplementedHandler) GetChartRates(ctx context.Context, params GetChartRa
 	return r, ht.ErrNotImplemented
 }
 
+// GetCocoonWorkers implements getCocoonWorkers operation.
+//
+// Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes).
+//
+// GET /cocoon/workers
+func (UnimplementedHandler) GetCocoonWorkers(ctx context.Context) (r GetCocoonWorkersRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetDnsInfo implements getDnsInfo operation.
 //
 // Get full information about domain name.
@@ -987,6 +996,15 @@ func (UnimplementedHandler) GetWalletsByPublicKey(ctx context.Context, params Ge
 //
 // POST /v2/pubkeys/wallets/_bulk
 func (UnimplementedHandler) GetWalletsByPublicKeyBulk(ctx context.Context, req OptGetWalletsByPublicKeyBulkReq) (r *WalletsByPublicKeys, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// PostCocoonQuery implements postCocoonQuery operation.
+//
+// Proxy arbitrary OpenAI-style JSON to Cocoon (POST).
+//
+// POST /cocoon/query
+func (UnimplementedHandler) PostCocoonQuery(ctx context.Context, req jx.Raw, params PostCocoonQueryParams) (r PostCocoonQueryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

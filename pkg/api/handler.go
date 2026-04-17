@@ -51,6 +51,7 @@ type Handler struct {
 	tonConnect     *tonconnect.Server
 	verifierSource verifierSource
 	validation     *validation.Service
+	cocoonPool     *CocoonPool
 
 	// parallelTraceProcessing enables parallel trace-to-action conversion.
 	parallelTraceProcessing bool
@@ -96,6 +97,7 @@ type Options struct {
 	score                   scoreSource
 	parallelTraceProcessing bool
 	liteapi                 *liteapi.Client
+	cocoonPool              *CocoonPool
 }
 
 type Option func(o *Options)
@@ -186,6 +188,12 @@ func WithParallelTraceProcessing(enabled bool) Option {
 func WithLiteapiClient(client *liteapi.Client) Option {
 	return func(o *Options) {
 		o.liteapi = client
+	}
+}
+
+func WithCocoonPool(pool *CocoonPool) Option {
+	return func(o *Options) {
+		o.cocoonPool = pool
 	}
 }
 
@@ -280,6 +288,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		tonConnect:              tonConnect,
 		configPool:              configPool,
 		validation:              validationService,
+		cocoonPool:              options.cocoonPool,
 	}, nil
 }
 

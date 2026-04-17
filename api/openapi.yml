@@ -3078,6 +3078,90 @@ paths:
                 $ref: "#/components/schemas/RoundRewardsResponse"
         'default':
           $ref: '#/components/responses/Error'
+
+  /cocoon/workers:
+    get:
+      operationId: getCocoonWorkers
+      description: Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CocoonWorkersResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      type:
+                        type: string
+        '501':
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                type: object
+        'default':
+          $ref: '#/components/responses/Error'
+
+  /cocoon/query:
+    post:
+      operationId: postCocoonQuery
+      description: Proxy arbitrary OpenAI-style JSON to Cocoon (POST)
+      parameters:
+        - name: model
+          in: query
+          description: Cocoon worker model name passed to the proxy.
+          schema:
+            type: string
+        - name: path
+          in: query
+          description: HTTP path on the Cocoon worker (e.g. /v1/chat/completions).
+          schema:
+            type: string
+            default: "/query"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { } # Free-form JSON value
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: { } # Free-form JSON value
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      type:
+                        type: string
+        '501':
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                type: object
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     masterchainSeqno:
@@ -3651,6 +3735,46 @@ components:
         error:
           type: string
           example: error description
+    CocoonWorkerInstance:
+      type: object
+      required:
+        - coefficient
+        - active_requests
+        - max_active_requests
+      properties:
+        coefficient:
+          type: integer
+          format: int64
+          minimum: 0
+        active_requests:
+          type: integer
+          format: int64
+          minimum: 0
+        max_active_requests:
+          type: integer
+          format: int64
+          minimum: 0
+    CocoonWorkerType:
+      type: object
+      required:
+        - name
+        - workers
+      properties:
+        name:
+          type: string
+        workers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CocoonWorkerInstance'
+    CocoonWorkersResponse:
+      type: object
+      required:
+        - types
+      properties:
+        types:
+          type: array
+          items:
+            $ref: '#/components/schemas/CocoonWorkerType'
     AccountAddress:
       type: object
       required:
