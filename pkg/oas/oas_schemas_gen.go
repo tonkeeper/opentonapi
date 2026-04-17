@@ -19823,7 +19823,7 @@ func (s *UnSubscriptionAction) SetAdmin(val AccountAddress) {
 // Ref: #/components/schemas/ValidationRound
 type ValidationRound struct {
 	// Election ID (electAt timestamp).
-	ElectAt    OptInt64 `json:"elect_at"`
+	ElectionID int64    `json:"election_id"`
 	StartUtime OptInt64 `json:"start_utime"`
 	EndUtime   OptInt64 `json:"end_utime"`
 	// Masterchain block seqno at (or nearest to) round start.
@@ -19843,9 +19843,9 @@ type ValidationRound struct {
 	Finished bool `json:"finished"`
 }
 
-// GetElectAt returns the value of ElectAt.
-func (s *ValidationRound) GetElectAt() OptInt64 {
-	return s.ElectAt
+// GetElectionID returns the value of ElectionID.
+func (s *ValidationRound) GetElectionID() int64 {
+	return s.ElectionID
 }
 
 // GetStartUtime returns the value of StartUtime.
@@ -19893,9 +19893,9 @@ func (s *ValidationRound) GetFinished() bool {
 	return s.Finished
 }
 
-// SetElectAt sets the value of ElectAt.
-func (s *ValidationRound) SetElectAt(val OptInt64) {
-	s.ElectAt = val
+// SetElectionID sets the value of ElectionID.
+func (s *ValidationRound) SetElectionID(val int64) {
+	s.ElectionID = val
 }
 
 // SetStartUtime sets the value of StartUtime.

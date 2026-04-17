@@ -893,7 +893,7 @@ func (UnimplementedHandler) GetReducedBlockchainBlocks(ctx context.Context, para
 // Computes per-validator and per-nominator reward distribution for a finished validation round using
 // the elector's bonuses value.
 //
-// GET /v2/validation/rewards
+// GET /v2/rewards/round-rewards
 func (UnimplementedHandler) GetRoundRewards(ctx context.Context, params GetRoundRewardsParams) (r *RoundRewardsResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -957,7 +957,7 @@ func (UnimplementedHandler) GetTrace(ctx context.Context, params GetTraceParams)
 // Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the
 // latest masterchain block.
 //
-// GET /v2/validation/rounds
+// GET /v2/rewards/validation-rounds
 func (UnimplementedHandler) GetValidationRounds(ctx context.Context, params GetValidationRoundsParams) (r *ValidationRoundsResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -967,7 +967,7 @@ func (UnimplementedHandler) GetValidationRounds(ctx context.Context, params GetV
 // Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator
 // breakdowns.
 //
-// GET /v2/validation/validators
+// GET /v2/rewards/validators
 func (UnimplementedHandler) GetValidators(ctx context.Context, params GetValidatorsParams) (r *ValidatorsResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }

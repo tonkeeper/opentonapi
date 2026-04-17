@@ -622,7 +622,7 @@ type Invoker interface {
 	// Computes per-validator and per-nominator reward distribution for a finished validation round using
 	// the elector's bonuses value.
 	//
-	// GET /v2/validation/rewards
+	// GET /v2/rewards/round-rewards
 	GetRoundRewards(ctx context.Context, params GetRoundRewardsParams) (*RoundRewardsResponse, error)
 	// GetStakingPoolHistory invokes getStakingPoolHistory operation.
 	//
@@ -665,14 +665,14 @@ type Invoker interface {
 	// Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the
 	// latest masterchain block.
 	//
-	// GET /v2/validation/rounds
+	// GET /v2/rewards/validation-rounds
 	GetValidationRounds(ctx context.Context, params GetValidationRoundsParams) (*ValidationRoundsResponse, error)
 	// GetValidators invokes getValidators operation.
 	//
 	// Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator
 	// breakdowns.
 	//
-	// GET /v2/validation/validators
+	// GET /v2/rewards/validators
 	GetValidators(ctx context.Context, params GetValidatorsParams) (*ValidatorsResponse, error)
 	// GetWalletInfo invokes getWalletInfo operation.
 	//
@@ -11171,7 +11171,7 @@ func (c *Client) sendGetReducedBlockchainBlocks(ctx context.Context, params GetR
 // Computes per-validator and per-nominator reward distribution for a finished validation round using
 // the elector's bonuses value.
 //
-// GET /v2/validation/rewards
+// GET /v2/rewards/round-rewards
 func (c *Client) GetRoundRewards(ctx context.Context, params GetRoundRewardsParams) (*RoundRewardsResponse, error) {
 	res, err := c.sendGetRoundRewards(ctx, params)
 	return res, err
@@ -11181,7 +11181,7 @@ func (c *Client) sendGetRoundRewards(ctx context.Context, params GetRoundRewards
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRoundRewards"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/v2/validation/rewards"),
+		semconv.URLTemplateKey.String("/v2/rewards/round-rewards"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -11215,7 +11215,7 @@ func (c *Client) sendGetRoundRewards(ctx context.Context, params GetRoundRewards
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/v2/validation/rewards"
+	pathParts[0] = "/v2/rewards/round-rewards"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -11248,6 +11248,40 @@ func (c *Client) sendGetRoundRewards(ctx context.Context, params GetRoundRewards
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.Block.Get(); ok {
 				return e.EncodeValue(conv.Uint32ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "unixtime" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "unixtime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Unixtime.Get(); ok {
+				return e.EncodeValue(conv.Uint32ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "shallow" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "shallow",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Shallow.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
 			}
 			return nil
 		}); err != nil {
@@ -11893,7 +11927,7 @@ func (c *Client) sendGetTrace(ctx context.Context, params GetTraceParams) (res *
 // Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the
 // latest masterchain block.
 //
-// GET /v2/validation/rounds
+// GET /v2/rewards/validation-rounds
 func (c *Client) GetValidationRounds(ctx context.Context, params GetValidationRoundsParams) (*ValidationRoundsResponse, error) {
 	res, err := c.sendGetValidationRounds(ctx, params)
 	return res, err
@@ -11903,7 +11937,7 @@ func (c *Client) sendGetValidationRounds(ctx context.Context, params GetValidati
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getValidationRounds"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/v2/validation/rounds"),
+		semconv.URLTemplateKey.String("/v2/rewards/validation-rounds"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -11937,7 +11971,7 @@ func (c *Client) sendGetValidationRounds(ctx context.Context, params GetValidati
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/v2/validation/rounds"
+	pathParts[0] = "/v2/rewards/validation-rounds"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -11976,6 +12010,23 @@ func (c *Client) sendGetValidationRounds(ctx context.Context, params GetValidati
 			return res, errors.Wrap(err, "encode query")
 		}
 	}
+	{
+		// Encode "unixtime" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "unixtime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Unixtime.Get(); ok {
+				return e.EncodeValue(conv.Uint32ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
 	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
@@ -12006,7 +12057,7 @@ func (c *Client) sendGetValidationRounds(ctx context.Context, params GetValidati
 // Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator
 // breakdowns.
 //
-// GET /v2/validation/validators
+// GET /v2/rewards/validators
 func (c *Client) GetValidators(ctx context.Context, params GetValidatorsParams) (*ValidatorsResponse, error) {
 	res, err := c.sendGetValidators(ctx, params)
 	return res, err
@@ -12016,7 +12067,7 @@ func (c *Client) sendGetValidators(ctx context.Context, params GetValidatorsPara
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getValidators"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/v2/validation/validators"),
+		semconv.URLTemplateKey.String("/v2/rewards/validators"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -12050,7 +12101,7 @@ func (c *Client) sendGetValidators(ctx context.Context, params GetValidatorsPara
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/v2/validation/validators"
+	pathParts[0] = "/v2/rewards/validators"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -12066,6 +12117,40 @@ func (c *Client) sendGetValidators(ctx context.Context, params GetValidatorsPara
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.Seqno.Get(); ok {
 				return e.EncodeValue(conv.Uint32ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "unixtime" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "unixtime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Unixtime.Get(); ok {
+				return e.EncodeValue(conv.Uint32ToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "shallow" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "shallow",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Shallow.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
 			}
 			return nil
 		}); err != nil {

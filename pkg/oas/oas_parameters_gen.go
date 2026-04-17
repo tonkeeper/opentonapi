@@ -11378,10 +11378,18 @@ func decodeGetReducedBlockchainBlocksParams(args [0]string, argsEscaped bool, r 
 
 // GetRoundRewardsParams is parameters of getRoundRewards operation.
 type GetRoundRewardsParams struct {
-	// Election ID of the finished round. Mutually exclusive with `block`.
+	// Election ID of the finished round. Mutually exclusive with `block` and `unixtime`.
 	ElectionID OptInt64 `json:",omitempty,omitzero"`
-	// Masterchain block seqno within the finished round. Mutually exclusive with `election_id`.
+	// Masterchain block seqno within the finished round. Mutually exclusive with `election_id` and
+	// `unixtime`.
 	Block OptUint32 `json:",omitempty,omitzero"`
+	// Unix timestamp (seconds). Looks up the masterchain block at this time and uses it as the anchor.
+	// Mutually exclusive with `election_id` and `block`.
+	Unixtime OptUint32 `json:",omitempty,omitzero"`
+	// Set to `1` to return only basic validator info (rank, pubkey, effective_stake, weight, reward,
+	// pool). Skips pool type detection, owner/validator addresses, nominator data, and returned-stake
+	// lookup — significantly faster.
+	Shallow OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackGetRoundRewardsParams(packed middleware.Parameters) (params GetRoundRewardsParams) {
@@ -11401,6 +11409,24 @@ func unpackGetRoundRewardsParams(packed middleware.Parameters) (params GetRoundR
 		}
 		if v, ok := packed[key]; ok {
 			params.Block = v.(OptUint32)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "unixtime",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Unixtime = v.(OptUint32)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "shallow",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Shallow = v.(OptBool)
 		}
 	}
 	return params
@@ -11486,6 +11512,93 @@ func decodeGetRoundRewardsParams(args [0]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "block",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: unixtime.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "unixtime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotUnixtimeVal uint32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUint32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotUnixtimeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Unixtime.SetTo(paramsDotUnixtimeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "unixtime",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: shallow.
+	{
+		val := bool(false)
+		params.Shallow.SetTo(val)
+	}
+	// Decode query: shallow.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "shallow",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotShallowVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotShallowVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Shallow.SetTo(paramsDotShallowVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "shallow",
 			In:   "query",
 			Err:  err,
 		}
@@ -12054,11 +12167,14 @@ func decodeGetTraceParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 
 // GetValidationRoundsParams is parameters of getValidationRounds operation.
 type GetValidationRoundsParams struct {
-	// Return the single round matching this election ID. Mutually exclusive with `block`.
+	// Return the single round matching this election ID. Mutually exclusive with `block` and `unixtime`.
 	ElectionID OptInt64 `json:",omitempty,omitzero"`
 	// Find the round containing this masterchain block seqno and return it plus up to `limit-1` older
-	// rounds. Mutually exclusive with `election_id`.
+	// rounds. Mutually exclusive with `election_id` and `unixtime`.
 	Block OptUint32 `json:",omitempty,omitzero"`
+	// Unix timestamp (seconds). Looks up the masterchain block at this time and uses it as the anchor.
+	// Mutually exclusive with `election_id` and `block`.
+	Unixtime OptUint32 `json:",omitempty,omitzero"`
 }
 
 func unpackGetValidationRoundsParams(packed middleware.Parameters) (params GetValidationRoundsParams) {
@@ -12078,6 +12194,15 @@ func unpackGetValidationRoundsParams(packed middleware.Parameters) (params GetVa
 		}
 		if v, ok := packed[key]; ok {
 			params.Block = v.(OptUint32)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "unixtime",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Unixtime = v.(OptUint32)
 		}
 	}
 	return params
@@ -12167,13 +12292,61 @@ func decodeGetValidationRoundsParams(args [0]string, argsEscaped bool, r *http.R
 			Err:  err,
 		}
 	}
+	// Decode query: unixtime.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "unixtime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotUnixtimeVal uint32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUint32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotUnixtimeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Unixtime.SetTo(paramsDotUnixtimeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "unixtime",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	return params, nil
 }
 
 // GetValidatorsParams is parameters of getValidators operation.
 type GetValidatorsParams struct {
-	// Masterchain block seqno. Defaults to latest.
+	// Masterchain block seqno. Defaults to latest. Mutually exclusive with `unixtime`.
 	Seqno OptUint32 `json:",omitempty,omitzero"`
+	// Unix timestamp (seconds). Looks up the masterchain block at this time and uses it as the anchor.
+	// Mutually exclusive with `seqno`.
+	Unixtime OptUint32 `json:",omitempty,omitzero"`
+	// Set to `1` to return only basic validator info (rank, pubkey, effective_stake, weight, reward,
+	// pool). Skips pool type detection, owner/validator addresses, nominator data, and returned-stake
+	// lookup — significantly faster.
+	Shallow OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackGetValidatorsParams(packed middleware.Parameters) (params GetValidatorsParams) {
@@ -12184,6 +12357,24 @@ func unpackGetValidatorsParams(packed middleware.Parameters) (params GetValidato
 		}
 		if v, ok := packed[key]; ok {
 			params.Seqno = v.(OptUint32)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "unixtime",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Unixtime = v.(OptUint32)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "shallow",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Shallow = v.(OptBool)
 		}
 	}
 	return params
@@ -12228,6 +12419,93 @@ func decodeGetValidatorsParams(args [0]string, argsEscaped bool, r *http.Request
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "seqno",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: unixtime.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "unixtime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotUnixtimeVal uint32
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUint32(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotUnixtimeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Unixtime.SetTo(paramsDotUnixtimeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "unixtime",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: shallow.
+	{
+		val := bool(false)
+		params.Shallow.SetTo(val)
+	}
+	// Decode query: shallow.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "shallow",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotShallowVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotShallowVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Shallow.SetTo(paramsDotShallowVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "shallow",
 			In:   "query",
 			Err:  err,
 		}

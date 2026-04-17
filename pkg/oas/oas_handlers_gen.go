@@ -14973,14 +14973,14 @@ func (s *Server) handleGetReducedBlockchainBlocksRequest(args [0]string, argsEsc
 // Computes per-validator and per-nominator reward distribution for a finished validation round using
 // the elector's bonuses value.
 //
-// GET /v2/validation/rewards
+// GET /v2/rewards/round-rewards
 func (s *Server) handleGetRoundRewardsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRoundRewards"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/validation/rewards"),
+		semconv.HTTPRouteKey.String("/v2/rewards/round-rewards"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -15076,6 +15076,14 @@ func (s *Server) handleGetRoundRewardsRequest(args [0]string, argsEscaped bool, 
 					Name: "block",
 					In:   "query",
 				}: params.Block,
+				{
+					Name: "unixtime",
+					In:   "query",
+				}: params.Unixtime,
+				{
+					Name: "shallow",
+					In:   "query",
+				}: params.Shallow,
 			},
 			Raw: r,
 		}
@@ -16038,14 +16046,14 @@ func (s *Server) handleGetTraceRequest(args [1]string, argsEscaped bool, w http.
 // Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the
 // latest masterchain block.
 //
-// GET /v2/validation/rounds
+// GET /v2/rewards/validation-rounds
 func (s *Server) handleGetValidationRoundsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getValidationRounds"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/validation/rounds"),
+		semconv.HTTPRouteKey.String("/v2/rewards/validation-rounds"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -16141,6 +16149,10 @@ func (s *Server) handleGetValidationRoundsRequest(args [0]string, argsEscaped bo
 					Name: "block",
 					In:   "query",
 				}: params.Block,
+				{
+					Name: "unixtime",
+					In:   "query",
+				}: params.Unixtime,
 			},
 			Raw: r,
 		}
@@ -16197,14 +16209,14 @@ func (s *Server) handleGetValidationRoundsRequest(args [0]string, argsEscaped bo
 // Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator
 // breakdowns.
 //
-// GET /v2/validation/validators
+// GET /v2/rewards/validators
 func (s *Server) handleGetValidatorsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getValidators"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v2/validation/validators"),
+		semconv.HTTPRouteKey.String("/v2/rewards/validators"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -16296,6 +16308,14 @@ func (s *Server) handleGetValidatorsRequest(args [0]string, argsEscaped bool, w 
 					Name: "seqno",
 					In:   "query",
 				}: params.Seqno,
+				{
+					Name: "unixtime",
+					In:   "query",
+				}: params.Unixtime,
+				{
+					Name: "shallow",
+					In:   "query",
+				}: params.Shallow,
 			},
 			Raw: r,
 		}

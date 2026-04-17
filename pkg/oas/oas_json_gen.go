@@ -44829,10 +44829,8 @@ func (s *ValidationRound) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *ValidationRound) encodeFields(e *jx.Encoder) {
 	{
-		if s.ElectAt.Set {
-			e.FieldStart("elect_at")
-			s.ElectAt.Encode(e)
-		}
+		e.FieldStart("election_id")
+		e.Int64(s.ElectionID)
 	}
 	{
 		if s.StartUtime.Set {
@@ -44887,7 +44885,7 @@ func (s *ValidationRound) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfValidationRound = [10]string{
-	0: "elect_at",
+	0: "election_id",
 	1: "start_utime",
 	2: "end_utime",
 	3: "start_block",
@@ -44908,15 +44906,17 @@ func (s *ValidationRound) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "elect_at":
+		case "election_id":
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.ElectAt.Reset()
-				if err := s.ElectAt.Decode(d); err != nil {
+				v, err := d.Int64()
+				s.ElectionID = int64(v)
+				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"elect_at\"")
+				return errors.Wrap(err, "decode field \"election_id\"")
 			}
 		case "start_utime":
 			if err := func() error {
@@ -45022,7 +45022,7 @@ func (s *ValidationRound) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00001000,
+		0b00001001,
 		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
