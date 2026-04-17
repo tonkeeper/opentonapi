@@ -44,11 +44,11 @@ func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID t
 	}
 	code, data := accountCode(account), accountData(account)
 	if code == nil || data == nil {
-		return 0, nil, errors.New("account not found")
+		return 0, tlb.VmStack{}, errors.New("account not found")
 	}
 	codeHash, err := code.Hash()
 	if err != nil {
-		return 0, nil, err
+		return 0, tlb.VmStack{}, err
 	}
 	precompile := precompiled.KnownMethods[precompiled.MethodCode{MethodID: methodID, CodeHash: [32]byte(codeHash)}]
 	if precompile != nil {
@@ -63,22 +63,22 @@ func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID t
 	}
 	codeBoc, err := code.ToBocBase64()
 	if err != nil {
-		return 0, nil, err
+		return 0, tlb.VmStack{}, err
 	}
 	dataBoc, err := data.ToBocBase64()
 	if err != nil {
-		return 0, nil, err
+		return 0, tlb.VmStack{}, err
 	}
 	libraries := core.StateInitLibraries(accountLibraries(account))
 	librariesBase64, err := core.PrepareLibraries(ctx, code, libraries, s.resolver)
 	if err != nil {
-		return 0, nil, err
+		return 0, tlb.VmStack{}, err
 	}
 	configObject := s.configPool.Get().(*tvm.Config)
 	defer s.configPool.Put(configObject)
 
 	if configObject == nil {
-		return 0, nil, errors.New("error getting BlockchainConfig from the pool")
+		return 0, tlb.VmStack{}, errors.New("error getting BlockchainConfig from the pool")
 	}
 
 	e, err := tvm.NewEmulatorFromBOCsBase64(codeBoc, dataBoc, "",
@@ -86,7 +86,7 @@ func (s shardsAccountExecutor) RunSmcMethodByID(ctx context.Context, accountID t
 		tvm.WithLibraryResolver(s.resolver),
 		tvm.WithConfig(configObject))
 	if err != nil {
-		return 0, nil, err
+		return 0, tlb.VmStack{}, err
 	}
 	return e.RunSmcMethodByID(ctx, accountID, methodID, params)
 }

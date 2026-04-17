@@ -598,7 +598,7 @@ func TestConverter_DecodeTupleMatrix(t *testing.T) {
 			if err := tlb.Unmarshal(stackCell, &stack); err != nil {
 				t.Fatal(err)
 			}
-			value, err := convertTvmStackValue(stack[0])
+			value, err := convertTvmStackValue(stack.Peek(stack.Len() - 1))
 			if err != nil {
 				t.Error(err)
 			}
