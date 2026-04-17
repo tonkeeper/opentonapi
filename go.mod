@@ -25,7 +25,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tonkeeper/scam_backoffice_rules v0.0.11
-	github.com/tonkeeper/tongo v1.19.0
+	github.com/tonkeeper/tongo v1.19.1-0.20260417135212-97ef83ef6640
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/metric v1.43.0
 	go.opentelemetry.io/otel/trace v1.43.0
@@ -59,6 +59,7 @@ require (
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/snksoft/crc v1.1.0 // indirect
+	github.com/tonkeeper/gocoon v0.0.0-20260417144551-b6d55ffca6ae // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect

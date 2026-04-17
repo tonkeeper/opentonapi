@@ -4411,6 +4411,86 @@ func (s *BouncePhaseType) UnmarshalText(data []byte) error {
 
 type ChartPoints [][]float64
 
+// Ref: #/components/schemas/CocoonWorkerInstance
+type CocoonWorkerInstance struct {
+	Coefficient       int64 `json:"coefficient"`
+	ActiveRequests    int64 `json:"active_requests"`
+	MaxActiveRequests int64 `json:"max_active_requests"`
+}
+
+// GetCoefficient returns the value of Coefficient.
+func (s *CocoonWorkerInstance) GetCoefficient() int64 {
+	return s.Coefficient
+}
+
+// GetActiveRequests returns the value of ActiveRequests.
+func (s *CocoonWorkerInstance) GetActiveRequests() int64 {
+	return s.ActiveRequests
+}
+
+// GetMaxActiveRequests returns the value of MaxActiveRequests.
+func (s *CocoonWorkerInstance) GetMaxActiveRequests() int64 {
+	return s.MaxActiveRequests
+}
+
+// SetCoefficient sets the value of Coefficient.
+func (s *CocoonWorkerInstance) SetCoefficient(val int64) {
+	s.Coefficient = val
+}
+
+// SetActiveRequests sets the value of ActiveRequests.
+func (s *CocoonWorkerInstance) SetActiveRequests(val int64) {
+	s.ActiveRequests = val
+}
+
+// SetMaxActiveRequests sets the value of MaxActiveRequests.
+func (s *CocoonWorkerInstance) SetMaxActiveRequests(val int64) {
+	s.MaxActiveRequests = val
+}
+
+// Ref: #/components/schemas/CocoonWorkerType
+type CocoonWorkerType struct {
+	Name    string                 `json:"name"`
+	Workers []CocoonWorkerInstance `json:"workers"`
+}
+
+// GetName returns the value of Name.
+func (s *CocoonWorkerType) GetName() string {
+	return s.Name
+}
+
+// GetWorkers returns the value of Workers.
+func (s *CocoonWorkerType) GetWorkers() []CocoonWorkerInstance {
+	return s.Workers
+}
+
+// SetName sets the value of Name.
+func (s *CocoonWorkerType) SetName(val string) {
+	s.Name = val
+}
+
+// SetWorkers sets the value of Workers.
+func (s *CocoonWorkerType) SetWorkers(val []CocoonWorkerInstance) {
+	s.Workers = val
+}
+
+// Ref: #/components/schemas/CocoonWorkersResponse
+type CocoonWorkersResponse struct {
+	Types []CocoonWorkerType `json:"types"`
+}
+
+// GetTypes returns the value of Types.
+func (s *CocoonWorkersResponse) GetTypes() []CocoonWorkerType {
+	return s.Types
+}
+
+// SetTypes sets the value of Types.
+func (s *CocoonWorkersResponse) SetTypes(val []CocoonWorkerType) {
+	s.Types = val
+}
+
+func (*CocoonWorkersResponse) getCocoonWorkersRes() {}
+
 // Ref: #/components/schemas/ComputePhase
 type ComputePhase struct {
 	Skipped             bool                 `json:"skipped"`
@@ -6782,6 +6862,51 @@ func (s *GetChartRatesOK) GetPoints() ChartPoints {
 // SetPoints sets the value of Points.
 func (s *GetChartRatesOK) SetPoints(val ChartPoints) {
 	s.Points = val
+}
+
+type GetCocoonWorkersNotImplemented struct{}
+
+func (*GetCocoonWorkersNotImplemented) getCocoonWorkersRes() {}
+
+type GetCocoonWorkersUnauthorized struct {
+	Error OptGetCocoonWorkersUnauthorizedError `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *GetCocoonWorkersUnauthorized) GetError() OptGetCocoonWorkersUnauthorizedError {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *GetCocoonWorkersUnauthorized) SetError(val OptGetCocoonWorkersUnauthorizedError) {
+	s.Error = val
+}
+
+func (*GetCocoonWorkersUnauthorized) getCocoonWorkersRes() {}
+
+type GetCocoonWorkersUnauthorizedError struct {
+	Message OptString `json:"message"`
+	Type    OptString `json:"type"`
+}
+
+// GetMessage returns the value of Message.
+func (s *GetCocoonWorkersUnauthorizedError) GetMessage() OptString {
+	return s.Message
+}
+
+// GetType returns the value of Type.
+func (s *GetCocoonWorkersUnauthorizedError) GetType() OptString {
+	return s.Type
+}
+
+// SetMessage sets the value of Message.
+func (s *GetCocoonWorkersUnauthorizedError) SetMessage(val OptString) {
+	s.Message = val
+}
+
+// SetType sets the value of Type.
+func (s *GetCocoonWorkersUnauthorizedError) SetType(val OptString) {
+	s.Type = val
 }
 
 type GetJettonInfosByAddressesReq struct {
@@ -13927,6 +14052,52 @@ func (o OptGetBlockchainAccountTransactionsSortOrder) Or(d GetBlockchainAccountT
 	return d
 }
 
+// NewOptGetCocoonWorkersUnauthorizedError returns new OptGetCocoonWorkersUnauthorizedError with value set to v.
+func NewOptGetCocoonWorkersUnauthorizedError(v GetCocoonWorkersUnauthorizedError) OptGetCocoonWorkersUnauthorizedError {
+	return OptGetCocoonWorkersUnauthorizedError{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetCocoonWorkersUnauthorizedError is optional GetCocoonWorkersUnauthorizedError.
+type OptGetCocoonWorkersUnauthorizedError struct {
+	Value GetCocoonWorkersUnauthorizedError
+	Set   bool
+}
+
+// IsSet returns true if OptGetCocoonWorkersUnauthorizedError was set.
+func (o OptGetCocoonWorkersUnauthorizedError) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetCocoonWorkersUnauthorizedError) Reset() {
+	var v GetCocoonWorkersUnauthorizedError
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetCocoonWorkersUnauthorizedError) SetTo(v GetCocoonWorkersUnauthorizedError) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetCocoonWorkersUnauthorizedError) Get() (v GetCocoonWorkersUnauthorizedError, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetCocoonWorkersUnauthorizedError) Or(d GetCocoonWorkersUnauthorizedError) GetCocoonWorkersUnauthorizedError {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGetJettonInfosByAddressesReq returns new OptGetJettonInfosByAddressesReq with value set to v.
 func NewOptGetJettonInfosByAddressesReq(v GetJettonInfosByAddressesReq) OptGetJettonInfosByAddressesReq {
 	return OptGetJettonInfosByAddressesReq{
@@ -15088,6 +15259,52 @@ func (o OptPictureDNS) Get() (v PictureDNS, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptPictureDNS) Or(d PictureDNS) PictureDNS {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPostCocoonQueryUnauthorizedError returns new OptPostCocoonQueryUnauthorizedError with value set to v.
+func NewOptPostCocoonQueryUnauthorizedError(v PostCocoonQueryUnauthorizedError) OptPostCocoonQueryUnauthorizedError {
+	return OptPostCocoonQueryUnauthorizedError{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPostCocoonQueryUnauthorizedError is optional PostCocoonQueryUnauthorizedError.
+type OptPostCocoonQueryUnauthorizedError struct {
+	Value PostCocoonQueryUnauthorizedError
+	Set   bool
+}
+
+// IsSet returns true if OptPostCocoonQueryUnauthorizedError was set.
+func (o OptPostCocoonQueryUnauthorizedError) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPostCocoonQueryUnauthorizedError) Reset() {
+	var v PostCocoonQueryUnauthorizedError
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPostCocoonQueryUnauthorizedError) SetTo(v PostCocoonQueryUnauthorizedError) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPostCocoonQueryUnauthorizedError) Get() (v PostCocoonQueryUnauthorizedError, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPostCocoonQueryUnauthorizedError) Or(d PostCocoonQueryUnauthorizedError) PostCocoonQueryUnauthorizedError {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -16809,6 +17026,55 @@ func (s *PoolInfo) SetValidatorStake(val int64) {
 // SetCycleLength sets the value of CycleLength.
 func (s *PoolInfo) SetCycleLength(val OptInt64) {
 	s.CycleLength = val
+}
+
+type PostCocoonQueryNotImplemented struct{}
+
+func (*PostCocoonQueryNotImplemented) postCocoonQueryRes() {}
+
+type PostCocoonQueryOKApplicationJSON jx.Raw
+
+func (*PostCocoonQueryOKApplicationJSON) postCocoonQueryRes() {}
+
+type PostCocoonQueryUnauthorized struct {
+	Error OptPostCocoonQueryUnauthorizedError `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *PostCocoonQueryUnauthorized) GetError() OptPostCocoonQueryUnauthorizedError {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *PostCocoonQueryUnauthorized) SetError(val OptPostCocoonQueryUnauthorizedError) {
+	s.Error = val
+}
+
+func (*PostCocoonQueryUnauthorized) postCocoonQueryRes() {}
+
+type PostCocoonQueryUnauthorizedError struct {
+	Message OptString `json:"message"`
+	Type    OptString `json:"type"`
+}
+
+// GetMessage returns the value of Message.
+func (s *PostCocoonQueryUnauthorizedError) GetMessage() OptString {
+	return s.Message
+}
+
+// GetType returns the value of Type.
+func (s *PostCocoonQueryUnauthorizedError) GetType() OptString {
+	return s.Type
+}
+
+// SetMessage sets the value of Message.
+func (s *PostCocoonQueryUnauthorizedError) SetMessage(val OptString) {
+	s.Message = val
+}
+
+// SetType sets the value of Type.
+func (s *PostCocoonQueryUnauthorizedError) SetType(val OptString) {
+	s.Type = val
 }
 
 // Ref: #/components/schemas/Price
@@ -19557,7 +19823,7 @@ func (s *UnSubscriptionAction) SetAdmin(val AccountAddress) {
 // Ref: #/components/schemas/ValidationRound
 type ValidationRound struct {
 	// Election ID (electAt timestamp).
-	ElectionID int64    `json:"election_id"`
+	ElectAt    OptInt64 `json:"elect_at"`
 	StartUtime OptInt64 `json:"start_utime"`
 	EndUtime   OptInt64 `json:"end_utime"`
 	// Masterchain block seqno at (or nearest to) round start.
@@ -19577,9 +19843,9 @@ type ValidationRound struct {
 	Finished bool `json:"finished"`
 }
 
-// GetElectionID returns the value of ElectionID.
-func (s *ValidationRound) GetElectionID() int64 {
-	return s.ElectionID
+// GetElectAt returns the value of ElectAt.
+func (s *ValidationRound) GetElectAt() OptInt64 {
+	return s.ElectAt
 }
 
 // GetStartUtime returns the value of StartUtime.
@@ -19627,9 +19893,9 @@ func (s *ValidationRound) GetFinished() bool {
 	return s.Finished
 }
 
-// SetElectionID sets the value of ElectionID.
-func (s *ValidationRound) SetElectionID(val int64) {
-	s.ElectionID = val
+// SetElectAt sets the value of ElectAt.
+func (s *ValidationRound) SetElectAt(val OptInt64) {
+	s.ElectAt = val
 }
 
 // SetStartUtime sets the value of StartUtime.

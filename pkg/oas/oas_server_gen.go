@@ -327,6 +327,12 @@ type Handler interface {
 	//
 	// GET /v2/rates/chart
 	GetChartRates(ctx context.Context, params GetChartRatesParams) (*GetChartRatesOK, error)
+	// GetCocoonWorkers implements getCocoonWorkers operation.
+	//
+	// Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes).
+	//
+	// GET /cocoon/workers
+	GetCocoonWorkers(ctx context.Context) (GetCocoonWorkersRes, error)
 	// GetDnsInfo implements getDnsInfo operation.
 	//
 	// Get full information about domain name.
@@ -598,7 +604,7 @@ type Handler interface {
 	// Computes per-validator and per-nominator reward distribution for a finished validation round using
 	// the elector's bonuses value.
 	//
-	// GET /v2/rewards/round-rewards
+	// GET /v2/validation/rewards
 	GetRoundRewards(ctx context.Context, params GetRoundRewardsParams) (*RoundRewardsResponse, error)
 	// GetStakingPoolHistory implements getStakingPoolHistory operation.
 	//
@@ -641,14 +647,14 @@ type Handler interface {
 	// Returns past and current validation rounds with boundaries, stakes, and bonuses. Always uses the
 	// latest masterchain block.
 	//
-	// GET /v2/rewards/validation-rounds
+	// GET /v2/validation/rounds
 	GetValidationRounds(ctx context.Context, params GetValidationRoundsParams) (*ValidationRoundsResponse, error)
 	// GetValidators implements getValidators operation.
 	//
 	// Returns all current validators with stakes, rewards, pool addresses, and (optionally) nominator
 	// breakdowns.
 	//
-	// GET /v2/rewards/validators
+	// GET /v2/validation/validators
 	GetValidators(ctx context.Context, params GetValidatorsParams) (*ValidatorsResponse, error)
 	// GetWalletInfo implements getWalletInfo operation.
 	//
@@ -668,6 +674,12 @@ type Handler interface {
 	//
 	// POST /v2/pubkeys/wallets/_bulk
 	GetWalletsByPublicKeyBulk(ctx context.Context, req OptGetWalletsByPublicKeyBulkReq) (*WalletsByPublicKeys, error)
+	// PostCocoonQuery implements postCocoonQuery operation.
+	//
+	// Proxy arbitrary OpenAI-style JSON to Cocoon (POST).
+	//
+	// POST /cocoon/query
+	PostCocoonQuery(ctx context.Context, req jx.Raw, params PostCocoonQueryParams) (PostCocoonQueryRes, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.
