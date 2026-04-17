@@ -331,12 +331,12 @@ func fetchRawPastElections(ctx context.Context, client LiteClient, electorAddr t
 	if err != nil {
 		return nil, fmt.Errorf("past_elections: %w", err)
 	}
-	if len(stack) == 0 {
+	if stack.Len() == 0 {
 		return nil, fmt.Errorf("past_elections returned empty stack")
 	}
 
-	top := stack[0].VmStkTuple
-	elections, err := top.RecursiveToSlice()
+	bottom := stack.Peek(stack.Len() - 1).VmStkTuple
+	elections, err := bottom.RecursiveToSlice()
 	if err != nil {
 		return nil, fmt.Errorf("RecursiveToSlice: %w", err)
 	}

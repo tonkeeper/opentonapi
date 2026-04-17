@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/pkg/rewards/model"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
-	"github.com/tonkeeper/opentonapi/pkg/rewards/model"
 )
 
 // electorAddr is the well-known address of the TON elector contract (-1:333...333).
@@ -72,18 +72,19 @@ func computeReturnedStake(ctx context.Context, client LiteClient, addr ton.Accou
 	}
 	stack, err := retry(func() (tlb.VmStack, error) {
 		model.CountRPC(ctx)
-		_, stack, err := client.RunSmcMethod(ctx, electorAddr, "compute_returned_stake", tlb.VmStack{param})
+		_, stack, err := client.RunSmcMethod(ctx, electorAddr, "compute_returned_stake", param.ToStack())
 		return stack, err
 	})
 	if err != nil {
 		return nil, fmt.Errorf("compute_returned_stake(%s): %w", addr.ToRaw(), err)
 	}
-	if len(stack) == 0 {
+	if stack.Len() == 0 {
 		return nil, fmt.Errorf("compute_returned_stake(%s): empty stack", addr.ToRaw())
 	}
-	val := extractBigInt(stack[0])
+	bottom := stack.Peek(stack.Len() - 1)
+	val := extractBigInt(bottom)
 	if val == nil {
-		return nil, fmt.Errorf("compute_returned_stake(%s): unexpected stack type %s", addr.ToRaw(), stack[0].SumType)
+		return nil, fmt.Errorf("compute_returned_stake(%s): unexpected stack type %s", addr.ToRaw(), bottom.SumType)
 	}
 	return val, nil
 }

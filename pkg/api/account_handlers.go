@@ -223,13 +223,13 @@ func (h *Handler) ExecGetMethodForBlockchainAccount(ctx context.Context, params 
 	if result, ok := h.getMethodsCache.Get(key); ok {
 		return result, nil
 	}
-	stack := make([]tlb.VmStackValue, 0, len(params.Args))
-	for i := len(params.Args) - 1; i >= 0; i-- {
-		r, err := stringToTVMStackRecord(params.Args[i])
+	stack := tlb.VmStack{}
+	for _, arg := range params.Args {
+		r, err := stringToTVMStackRecord(arg)
 		if err != nil {
-			return nil, toError(http.StatusBadRequest, fmt.Errorf("can't parse arg '%v' as any TVMStackValue", params.Args[i]))
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("can't parse arg '%v' as any TVMStackValue", arg))
 		}
-		stack = append(stack, r) // arguments go in reverse order
+		stack.Put(r)
 	}
 	result, err := h.execGetMethod(ctx, account.ID, params.MethodName, stack)
 	if err != nil {
@@ -263,13 +263,13 @@ func (h *Handler) ExecGetMethodWithBodyForBlockchainAccount(ctx context.Context,
 	if result, ok := h.getMethodsCache.Get(key); ok {
 		return result, nil
 	}
-	stack := make([]tlb.VmStackValue, 0, len(args))
-	for i := len(args) - 1; i >= 0; i-- {
-		r, err := parseExecGetMethodArgs(args[i])
+	stack := tlb.VmStack{}
+	for _, arg := range args {
+		r, err := parseExecGetMethodArgs(arg)
 		if err != nil {
-			return nil, toError(http.StatusBadRequest, fmt.Errorf("can't parse arg '%v': %v", args[i], err))
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("can't parse arg '%v': %v", arg, err))
 		}
-		stack = append(stack, r)
+		stack.Put(r)
 	}
 	result, err := h.execGetMethod(ctx, account.ID, params.MethodName, stack)
 	if err != nil {
@@ -649,7 +649,7 @@ func (h *Handler) GetAccountExtraCurrencyHistoryByID(ctx context.Context, params
 	return &oas.AccountEvents{}, nil
 }
 
-func (h *Handler) execGetMethod(ctx context.Context, accountID ton.AccountID, methodName string, args []tlb.VmStackValue) (*oas.MethodExecutionResult, error) {
+func (h *Handler) execGetMethod(ctx context.Context, accountID ton.AccountID, methodName string, args tlb.VmStack) (*oas.MethodExecutionResult, error) {
 	// Execute the smart contract method by account ID and method name.
 	// Note: RunSmcMethodByID fetches the latest state of the contract.
 	// If the contract has changed and has a different logical time (lt),
@@ -664,10 +664,10 @@ func (h *Handler) execGetMethod(ctx context.Context, accountID ton.AccountID, me
 	result := oas.MethodExecutionResult{
 		Success:  exitCode == 0 || exitCode == 1,
 		ExitCode: int(exitCode),
-		Stack:    make([]oas.TvmStackRecord, 0, len(stack)),
+		Stack:    make([]oas.TvmStackRecord, 0, stack.Len()),
 	}
-	for i := range stack {
-		value, err := convertTvmStackValue(stack[i])
+	for i := range stack.Len() {
+		value, err := convertTvmStackValue(stack.Peek(stack.Len() - i - 1))
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
