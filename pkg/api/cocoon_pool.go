@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const defaultCocoonPoolRefreshInterval = 30 * time.Second
+const defaultCocoonPoolRefreshInterval = 5 * time.Minute
 
 type CocoonDialer interface {
 	Connect(ctx context.Context, logger *zap.Logger) (*gocoon.Connection, error)
