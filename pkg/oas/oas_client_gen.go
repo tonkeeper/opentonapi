@@ -349,7 +349,7 @@ type Invoker interface {
 	//
 	// Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes).
 	//
-	// GET /cocoon/workers
+	// GET /v2/cocoon/workers
 	GetCocoonWorkers(ctx context.Context) (GetCocoonWorkersRes, error)
 	// GetDnsInfo invokes getDnsInfo operation.
 	//
@@ -696,16 +696,14 @@ type Invoker interface {
 	//
 	// Proxy arbitrary OpenAI-style JSON to Cocoon (POST).
 	//
-	// POST /cocoon/query
+	// POST /v2/cocoon/query
 	PostCocoonQuery(ctx context.Context, request jx.Raw, params PostCocoonQueryParams) (PostCocoonQueryRes, error)
 	// PostCocoonV1ChatCompletions invokes postCocoonV1ChatCompletions operation.
 	//
 	// OpenAI-compatible [Create chat completion](https://developers.openai.
 	// com/api/reference/resources/chat/subresources/completions/methods/create).
-	// Forwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with
-	// `path=/v1/chat/completions`).
 	//
-	// POST /cocoon/v1/chat/completions
+	// POST /v2/cocoon/v1/chat/completions
 	PostCocoonV1ChatCompletions(ctx context.Context, request jx.Raw) (PostCocoonV1ChatCompletionsRes, error)
 	// ReindexAccount invokes reindexAccount operation.
 	//
@@ -6630,7 +6628,7 @@ func (c *Client) sendGetChartRates(ctx context.Context, params GetChartRatesPara
 //
 // Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes).
 //
-// GET /cocoon/workers
+// GET /v2/cocoon/workers
 func (c *Client) GetCocoonWorkers(ctx context.Context) (GetCocoonWorkersRes, error) {
 	res, err := c.sendGetCocoonWorkers(ctx)
 	return res, err
@@ -6640,7 +6638,7 @@ func (c *Client) sendGetCocoonWorkers(ctx context.Context) (res GetCocoonWorkers
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getCocoonWorkers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.URLTemplateKey.String("/cocoon/workers"),
+		semconv.URLTemplateKey.String("/v2/cocoon/workers"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -6674,7 +6672,7 @@ func (c *Client) sendGetCocoonWorkers(ctx context.Context) (res GetCocoonWorkers
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/cocoon/workers"
+	pathParts[0] = "/v2/cocoon/workers"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -12457,7 +12455,7 @@ func (c *Client) sendGetWalletsByPublicKeyBulk(ctx context.Context, request OptG
 //
 // Proxy arbitrary OpenAI-style JSON to Cocoon (POST).
 //
-// POST /cocoon/query
+// POST /v2/cocoon/query
 func (c *Client) PostCocoonQuery(ctx context.Context, request jx.Raw, params PostCocoonQueryParams) (PostCocoonQueryRes, error) {
 	res, err := c.sendPostCocoonQuery(ctx, request, params)
 	return res, err
@@ -12467,7 +12465,7 @@ func (c *Client) sendPostCocoonQuery(ctx context.Context, request jx.Raw, params
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("postCocoonQuery"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/cocoon/query"),
+		semconv.URLTemplateKey.String("/v2/cocoon/query"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -12501,7 +12499,7 @@ func (c *Client) sendPostCocoonQuery(ctx context.Context, request jx.Raw, params
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/cocoon/query"
+	pathParts[0] = "/v2/cocoon/query"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -12572,10 +12570,8 @@ func (c *Client) sendPostCocoonQuery(ctx context.Context, request jx.Raw, params
 //
 // OpenAI-compatible [Create chat completion](https://developers.openai.
 // com/api/reference/resources/chat/subresources/completions/methods/create).
-// Forwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with
-// `path=/v1/chat/completions`).
 //
-// POST /cocoon/v1/chat/completions
+// POST /v2/cocoon/v1/chat/completions
 func (c *Client) PostCocoonV1ChatCompletions(ctx context.Context, request jx.Raw) (PostCocoonV1ChatCompletionsRes, error) {
 	res, err := c.sendPostCocoonV1ChatCompletions(ctx, request)
 	return res, err
@@ -12585,7 +12581,7 @@ func (c *Client) sendPostCocoonV1ChatCompletions(ctx context.Context, request jx
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("postCocoonV1ChatCompletions"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/cocoon/v1/chat/completions"),
+		semconv.URLTemplateKey.String("/v2/cocoon/v1/chat/completions"),
 	}
 	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
@@ -12619,7 +12615,7 @@ func (c *Client) sendPostCocoonV1ChatCompletions(ctx context.Context, request jx
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/cocoon/v1/chat/completions"
+	pathParts[0] = "/v2/cocoon/v1/chat/completions"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"

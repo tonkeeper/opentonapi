@@ -331,7 +331,7 @@ type Handler interface {
 	//
 	// Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes).
 	//
-	// GET /cocoon/workers
+	// GET /v2/cocoon/workers
 	GetCocoonWorkers(ctx context.Context) (GetCocoonWorkersRes, error)
 	// GetDnsInfo implements getDnsInfo operation.
 	//
@@ -678,16 +678,14 @@ type Handler interface {
 	//
 	// Proxy arbitrary OpenAI-style JSON to Cocoon (POST).
 	//
-	// POST /cocoon/query
+	// POST /v2/cocoon/query
 	PostCocoonQuery(ctx context.Context, req jx.Raw, params PostCocoonQueryParams) (PostCocoonQueryRes, error)
 	// PostCocoonV1ChatCompletions implements postCocoonV1ChatCompletions operation.
 	//
 	// OpenAI-compatible [Create chat completion](https://developers.openai.
 	// com/api/reference/resources/chat/subresources/completions/methods/create).
-	// Forwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with
-	// `path=/v1/chat/completions`).
 	//
-	// POST /cocoon/v1/chat/completions
+	// POST /v2/cocoon/v1/chat/completions
 	PostCocoonV1ChatCompletions(ctx context.Context, req jx.Raw) (PostCocoonV1ChatCompletionsRes, error)
 	// ReindexAccount implements reindexAccount operation.
 	//

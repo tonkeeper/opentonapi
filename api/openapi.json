@@ -7768,199 +7768,6 @@
  },
  "openapi": "3.0.0",
  "paths": {
-  "/cocoon/query": {
-   "post": {
-    "description": "Proxy arbitrary OpenAI-style JSON to Cocoon (POST)",
-    "operationId": "postCocoonQuery",
-    "parameters": [
-     {
-      "description": "Cocoon worker model name passed to the proxy.",
-      "in": "query",
-      "name": "model",
-      "schema": {
-       "type": "string"
-      }
-     },
-     {
-      "description": "HTTP path on the Cocoon worker (e.g. /v1/chat/completions).",
-      "in": "query",
-      "name": "path",
-      "schema": {
-       "default": "/query",
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {}
-      }
-     },
-     "required": true
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {}
-       }
-      },
-      "description": "Successful response"
-     },
-     "401": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "properties": {
-          "error": {
-           "properties": {
-            "message": {
-             "type": "string"
-            },
-            "type": {
-             "type": "string"
-            }
-           },
-           "type": "object"
-          }
-         },
-         "type": "object"
-        }
-       }
-      },
-      "description": "Unauthorized"
-     },
-     "501": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "type": "object"
-        }
-       }
-      },
-      "description": "Not implemented"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    }
-   }
-  },
-  "/cocoon/v1/chat/completions": {
-   "post": {
-    "description": "OpenAI-compatible [Create chat completion](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create).\nForwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with `path=/v1/chat/completions`).\n",
-    "operationId": "postCocoonV1ChatCompletions",
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {}
-      }
-     },
-     "required": true
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {}
-       }
-      },
-      "description": "Successful response"
-     },
-     "401": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "properties": {
-          "error": {
-           "properties": {
-            "message": {
-             "type": "string"
-            },
-            "type": {
-             "type": "string"
-            }
-           },
-           "type": "object"
-          }
-         },
-         "type": "object"
-        }
-       }
-      },
-      "description": "Unauthorized"
-     },
-     "501": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "type": "object"
-        }
-       }
-      },
-      "description": "Not implemented"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    }
-   }
-  },
-  "/cocoon/workers": {
-   "get": {
-    "description": "Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes)",
-    "operationId": "getCocoonWorkers",
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/CocoonWorkersResponse"
-        }
-       }
-      },
-      "description": "Successful response"
-     },
-     "401": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "properties": {
-          "error": {
-           "properties": {
-            "message": {
-             "type": "string"
-            },
-            "type": {
-             "type": "string"
-            }
-           },
-           "type": "object"
-          }
-         },
-         "type": "object"
-        }
-       }
-      },
-      "description": "Unauthorized"
-     },
-     "501": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "type": "object"
-        }
-       }
-      },
-      "description": "Not implemented"
-     },
-     "default": {
-      "$ref": "#/components/responses/Error"
-     }
-    }
-   }
-  },
   "/v2/accounts/_bulk": {
    "post": {
     "description": "Get human-friendly information about several accounts without low-level details.",
@@ -9729,6 +9536,199 @@
     "tags": [
      "Blockchain"
     ]
+   }
+  },
+  "/v2/cocoon/query": {
+   "post": {
+    "description": "Proxy arbitrary OpenAI-style JSON to Cocoon (POST)",
+    "operationId": "postCocoonQuery",
+    "parameters": [
+     {
+      "description": "Cocoon worker model name passed to the proxy.",
+      "in": "query",
+      "name": "model",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "HTTP path on the Cocoon worker (e.g. /v1/chat/completions).",
+      "in": "query",
+      "name": "path",
+      "schema": {
+       "default": "/query",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "error": {
+           "properties": {
+            "message": {
+             "type": "string"
+            },
+            "type": {
+             "type": "string"
+            }
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Unauthorized"
+     },
+     "501": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Not implemented"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    }
+   }
+  },
+  "/v2/cocoon/v1/chat/completions": {
+   "post": {
+    "description": "OpenAI-compatible [Create chat completion](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create).\n",
+    "operationId": "postCocoonV1ChatCompletions",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "error": {
+           "properties": {
+            "message": {
+             "type": "string"
+            },
+            "type": {
+             "type": "string"
+            }
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Unauthorized"
+     },
+     "501": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Not implemented"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    }
+   }
+  },
+  "/v2/cocoon/workers": {
+   "get": {
+    "description": "Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes)",
+    "operationId": "getCocoonWorkers",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CocoonWorkersResponse"
+        }
+       }
+      },
+      "description": "Successful response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "error": {
+           "properties": {
+            "message": {
+             "type": "string"
+            },
+            "type": {
+             "type": "string"
+            }
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Unauthorized"
+     },
+     "501": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Not implemented"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    }
    }
   },
   "/v2/dns/auctions": {

@@ -3131,7 +3131,7 @@ paths:
                 $ref: "#/components/schemas/RoundRewardsResponse"
         'default':
           $ref: '#/components/responses/Error'
-  /cocoon/workers:
+  /v2/cocoon/workers:
     get:
       operationId: getCocoonWorkers
       description: Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes)
@@ -3165,7 +3165,7 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
 
-  /cocoon/query:
+  /v2/cocoon/query:
     post:
       operationId: postCocoonQuery
       description: Proxy arbitrary OpenAI-style JSON to Cocoon (POST)
@@ -3215,7 +3215,7 @@ paths:
         'default':
           $ref: '#/components/responses/Error'
 
-  /cocoon/v1/chat/completions:
+  /v2/cocoon/v1/chat/completions:
     post:
       operationId: postCocoonV1ChatCompletions
       description: |

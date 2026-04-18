@@ -8188,14 +8188,14 @@ func (s *Server) handleGetChartRatesRequest(args [0]string, argsEscaped bool, w 
 //
 // Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes).
 //
-// GET /cocoon/workers
+// GET /v2/cocoon/workers
 func (s *Server) handleGetCocoonWorkersRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getCocoonWorkers"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/cocoon/workers"),
+		semconv.HTTPRouteKey.String("/v2/cocoon/workers"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -16833,14 +16833,14 @@ func (s *Server) handleGetWalletsByPublicKeyBulkRequest(args [0]string, argsEsca
 //
 // Proxy arbitrary OpenAI-style JSON to Cocoon (POST).
 //
-// POST /cocoon/query
+// POST /v2/cocoon/query
 func (s *Server) handlePostCocoonQueryRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("postCocoonQuery"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/cocoon/query"),
+		semconv.HTTPRouteKey.String("/v2/cocoon/query"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
@@ -17006,17 +17006,15 @@ func (s *Server) handlePostCocoonQueryRequest(args [0]string, argsEscaped bool, 
 //
 // OpenAI-compatible [Create chat completion](https://developers.openai.
 // com/api/reference/resources/chat/subresources/completions/methods/create).
-// Forwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with
-// `path=/v1/chat/completions`).
 //
-// POST /cocoon/v1/chat/completions
+// POST /v2/cocoon/v1/chat/completions
 func (s *Server) handlePostCocoonV1ChatCompletionsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("postCocoonV1ChatCompletions"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/cocoon/v1/chat/completions"),
+		semconv.HTTPRouteKey.String("/v2/cocoon/v1/chat/completions"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
