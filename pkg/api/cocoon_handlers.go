@@ -15,6 +15,11 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
+const (
+	cocoonPoolRetries     = 5
+	cocoonPoolMaxAttempts = 1 + cocoonPoolRetries
+)
+
 func cocoonResponseAsJSON(resp []byte) ([]byte, error) {
 	if len(resp) == 0 {
 		return nil, fmt.Errorf("empty cocoon response")
@@ -99,14 +104,11 @@ func (h *Handler) PostCocoonV1ChatCompletions(ctx context.Context, req jx.Raw) (
 		return &oas.PostCocoonV1ChatCompletionsNotImplemented{}, nil
 	}
 	body, model := mergeCocoonModelIntoBody(req, oas.OptString{})
-	const (
-		cocoonV1ChatCompletionsRetries     = 5
-		upstreamPath                       = "/v1/chat/completions"
-	)
+	const upstreamPath = "/v1/chat/completions"
 	var jsonBody []byte
 	var lastErr error
 	lastFailedPick := false
-	for attempt := 0; attempt < cocoonV1ChatCompletionsRetries; attempt++ {
+	for attempt := 0; attempt < cocoonPoolMaxAttempts; attempt++ {
 		conn, err := h.cocoonPool.pick(ctx)
 		if err != nil {
 			lastErr = err
@@ -140,15 +142,30 @@ func (h *Handler) GetCocoonWorkers(ctx context.Context) (oas.GetCocoonWorkersRes
 	if h.cocoonPool == nil {
 		return &oas.GetCocoonWorkersNotImplemented{}, nil
 	}
-	conn, err := h.cocoonPool.pick(ctx)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+	var types []gocoon.WorkerType
+	var lastErr error
+	lastFailedPick := false
+	for attempt := 0; attempt < cocoonPoolMaxAttempts; attempt++ {
+		conn, err := h.cocoonPool.pick(ctx)
+		if err != nil {
+			lastErr = err
+			lastFailedPick = true
+			fmt.Println("cocoon pick error: ", err)
+			continue
+		}
+		lastFailedPick = false
+		types, err = conn.GetWorkerTypes(ctx)
+		if err != nil {
+			lastErr = err
+			fmt.Println("cocoon GetWorkerTypes error: ", err)
+			continue
+		}
+		return workerTypesToResponse(types), nil
 	}
-	types, err := conn.GetWorkerTypes(ctx)
-	if err != nil {
-		return nil, toError(http.StatusBadGateway, err)
+	if lastFailedPick {
+		return nil, toError(http.StatusInternalServerError, lastErr)
 	}
-	return workerTypesToResponse(types), nil
+	return nil, toError(http.StatusBadGateway, lastErr)
 }
 
 func workerTypesToResponse(types []gocoon.WorkerType) *oas.CocoonWorkersResponse {
