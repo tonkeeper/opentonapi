@@ -106,10 +106,12 @@ func (h *Handler) PostCocoonV1ChatCompletions(ctx context.Context, req jx.Raw) (
 	const upstreamPath = "/v1/chat/completions"
 	respBody, err := conn.POST(ctx, model, upstreamPath, body)
 	if err != nil {
+		fmt.Println("cocoon error POST: ", err)
 		return nil, toError(http.StatusBadGateway, err)
 	}
 	jsonBody, err := cocoonResponseAsJSON(respBody)
 	if err != nil {
+		fmt.Println("cocoon json error: ", err)
 		return nil, toError(http.StatusBadGateway, err)
 	}
 	ok := oas.PostCocoonV1ChatCompletionsOKApplicationJSON(jx.Raw(jsonBody))
