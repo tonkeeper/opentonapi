@@ -680,6 +680,15 @@ type Handler interface {
 	//
 	// POST /cocoon/query
 	PostCocoonQuery(ctx context.Context, req jx.Raw, params PostCocoonQueryParams) (PostCocoonQueryRes, error)
+	// PostCocoonV1ChatCompletions implements postCocoonV1ChatCompletions operation.
+	//
+	// OpenAI-compatible [Create chat completion](https://developers.openai.
+	// com/api/reference/resources/chat/subresources/completions/methods/create).
+	// Forwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with
+	// `path=/v1/chat/completions`).
+	//
+	// POST /cocoon/v1/chat/completions
+	PostCocoonV1ChatCompletions(ctx context.Context, req jx.Raw) (PostCocoonV1ChatCompletionsRes, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.

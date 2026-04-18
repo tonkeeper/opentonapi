@@ -7847,6 +7847,66 @@
     }
    }
   },
+  "/cocoon/v1/chat/completions": {
+   "post": {
+    "description": "OpenAI-compatible [Create chat completion](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create).\nForwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with `path=/v1/chat/completions`).\n",
+    "operationId": "postCocoonV1ChatCompletions",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {}
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "error": {
+           "properties": {
+            "message": {
+             "type": "string"
+            },
+            "type": {
+             "type": "string"
+            }
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Unauthorized"
+     },
+     "501": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Not implemented"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    }
+   }
+  },
   "/cocoon/workers": {
    "get": {
     "description": "Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes)",

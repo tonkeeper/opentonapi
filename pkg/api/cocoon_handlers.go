@@ -1,8 +1,12 @@
 package api
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/go-faster/jx"
@@ -11,23 +15,48 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
 
-func (h *Handler) PostCocoonQuery(ctx context.Context, req jx.Raw, params oas.PostCocoonQueryParams) (oas.PostCocoonQueryRes, error) {
-	if h.cocoonPool == nil {
-		return &oas.PostCocoonQueryNotImplemented{}, nil
+func cocoonResponseAsJSON(resp []byte) ([]byte, error) {
+	if len(resp) == 0 {
+		return nil, fmt.Errorf("empty cocoon response")
 	}
-	conn, err := h.cocoonPool.pick(ctx)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+	trim := bytes.TrimLeft(resp, " \t\r\n")
+	body := resp
+	if bytes.HasPrefix(trim, []byte("HTTP/")) {
+		httpRes, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(resp)), nil)
+		if err != nil {
+			return nil, fmt.Errorf("parse cocoon http response: %w", err)
+		}
+		defer httpRes.Body.Close()
+		b, err := io.ReadAll(httpRes.Body)
+		if err != nil {
+			return nil, err
+		}
+		body = bytes.TrimSpace(b)
+	} else {
+		i := bytes.IndexFunc(trim, func(c rune) bool { return c == '{' || c == '[' })
+		if i < 0 {
+			return nil, fmt.Errorf("no JSON value in cocoon response")
+		}
+		off := len(resp) - len(trim) + i
+		body = bytes.TrimSpace(resp[off:])
 	}
+	body = bytes.TrimPrefix(body, []byte{0xEF, 0xBB, 0xBF})
+	dec := json.NewDecoder(bytes.NewReader(body))
+	var out json.RawMessage
+	if err := dec.Decode(&out); err != nil {
+		return nil, fmt.Errorf("cocoon response is not valid JSON: %w", err)
+	}
+	return []byte(out), nil
+}
 
-	body := []byte(req)
+func mergeCocoonModelIntoBody(req jx.Raw, modelQuery oas.OptString) (body []byte, model string) {
+	body = []byte(req)
 	if len(body) == 0 {
 		body = []byte("{}")
 	}
-
-	model := ""
-	if params.Model.Set {
-		model = params.Model.Value
+	model = ""
+	if modelQuery.Set {
+		model = modelQuery.Value
 	}
 	var obj map[string]any
 	if err := json.Unmarshal(body, &obj); err == nil && obj != nil {
@@ -40,14 +69,50 @@ func (h *Handler) PostCocoonQuery(ctx context.Context, req jx.Raw, params oas.Po
 			body = b
 		}
 	}
+	return body, model
+}
 
-	upstreamPath := params.Path.Value
+func (h *Handler) PostCocoonQuery(ctx context.Context, req jx.Raw, params oas.PostCocoonQueryParams) (oas.PostCocoonQueryRes, error) {
+	//if h.cocoonPool == nil {
+	//	return &oas.PostCocoonQueryNotImplemented{}, nil
+	//}
+	//body, model := mergeCocoonModelIntoBody(req, params.Model)
+	//conn, err := h.cocoonPool.pick(ctx)
+	//if err != nil {
+	//	return nil, toError(http.StatusInternalServerError, err)
+	//}
+	//respBody, err := conn.POST(ctx, model, params.Path.Value, body)
+	//if err != nil {
+	//	return nil, toError(http.StatusBadGateway, err)
+	//}
+	//jsonBody, err := cocoonResponseAsJSON(respBody)
+	//if err != nil {
+	//	return nil, toError(http.StatusBadGateway, err)
+	//}
+	//ok := oas.PostCocoonQueryOKApplicationJSON(jx.Raw(jsonBody))
+	//return &ok, nil
+	return &oas.PostCocoonQueryNotImplemented{}, nil
+}
+
+func (h *Handler) PostCocoonV1ChatCompletions(ctx context.Context, req jx.Raw) (oas.PostCocoonV1ChatCompletionsRes, error) {
+	if h.cocoonPool == nil {
+		return &oas.PostCocoonV1ChatCompletionsNotImplemented{}, nil
+	}
+	body, model := mergeCocoonModelIntoBody(req, oas.OptString{})
+	conn, err := h.cocoonPool.pick(ctx)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	const upstreamPath = "/v1/chat/completions"
 	respBody, err := conn.POST(ctx, model, upstreamPath, body)
 	if err != nil {
 		return nil, toError(http.StatusBadGateway, err)
 	}
-
-	ok := oas.PostCocoonQueryOKApplicationJSON(jx.Raw(respBody))
+	jsonBody, err := cocoonResponseAsJSON(respBody)
+	if err != nil {
+		return nil, toError(http.StatusBadGateway, err)
+	}
+	ok := oas.PostCocoonV1ChatCompletionsOKApplicationJSON(jx.Raw(jsonBody))
 	return &ok, nil
 }
 

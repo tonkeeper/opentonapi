@@ -698,6 +698,15 @@ type Invoker interface {
 	//
 	// POST /cocoon/query
 	PostCocoonQuery(ctx context.Context, request jx.Raw, params PostCocoonQueryParams) (PostCocoonQueryRes, error)
+	// PostCocoonV1ChatCompletions invokes postCocoonV1ChatCompletions operation.
+	//
+	// OpenAI-compatible [Create chat completion](https://developers.openai.
+	// com/api/reference/resources/chat/subresources/completions/methods/create).
+	// Forwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with
+	// `path=/v1/chat/completions`).
+	//
+	// POST /cocoon/v1/chat/completions
+	PostCocoonV1ChatCompletions(ctx context.Context, request jx.Raw) (PostCocoonV1ChatCompletionsRes, error)
 	// ReindexAccount invokes reindexAccount operation.
 	//
 	// Update internal cache for a particular account.
@@ -12552,6 +12561,86 @@ func (c *Client) sendPostCocoonQuery(ctx context.Context, request jx.Raw, params
 
 	stage = "DecodeResponse"
 	result, err := decodePostCocoonQueryResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostCocoonV1ChatCompletions invokes postCocoonV1ChatCompletions operation.
+//
+// OpenAI-compatible [Create chat completion](https://developers.openai.
+// com/api/reference/resources/chat/subresources/completions/methods/create).
+// Forwards the JSON body to Cocoon as `POST /v1/chat/completions` (same as `/cocoon/query` with
+// `path=/v1/chat/completions`).
+//
+// POST /cocoon/v1/chat/completions
+func (c *Client) PostCocoonV1ChatCompletions(ctx context.Context, request jx.Raw) (PostCocoonV1ChatCompletionsRes, error) {
+	res, err := c.sendPostCocoonV1ChatCompletions(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostCocoonV1ChatCompletions(ctx context.Context, request jx.Raw) (res PostCocoonV1ChatCompletionsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("postCocoonV1ChatCompletions"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/cocoon/v1/chat/completions"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, PostCocoonV1ChatCompletionsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/cocoon/v1/chat/completions"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostCocoonV1ChatCompletionsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePostCocoonV1ChatCompletionsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

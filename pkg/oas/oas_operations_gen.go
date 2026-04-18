@@ -114,6 +114,7 @@ const (
 	GetWalletsByPublicKeyOperation                     OperationName = "GetWalletsByPublicKey"
 	GetWalletsByPublicKeyBulkOperation                 OperationName = "GetWalletsByPublicKeyBulk"
 	PostCocoonQueryOperation                           OperationName = "PostCocoonQuery"
+	PostCocoonV1ChatCompletionsOperation               OperationName = "PostCocoonV1ChatCompletions"
 	ReindexAccountOperation                            OperationName = "ReindexAccount"
 	SearchAccountsOperation                            OperationName = "SearchAccounts"
 	SendBlockchainMessageOperation                     OperationName = "SendBlockchainMessage"

@@ -15311,6 +15311,52 @@ func (o OptPostCocoonQueryUnauthorizedError) Or(d PostCocoonQueryUnauthorizedErr
 	return d
 }
 
+// NewOptPostCocoonV1ChatCompletionsUnauthorizedError returns new OptPostCocoonV1ChatCompletionsUnauthorizedError with value set to v.
+func NewOptPostCocoonV1ChatCompletionsUnauthorizedError(v PostCocoonV1ChatCompletionsUnauthorizedError) OptPostCocoonV1ChatCompletionsUnauthorizedError {
+	return OptPostCocoonV1ChatCompletionsUnauthorizedError{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPostCocoonV1ChatCompletionsUnauthorizedError is optional PostCocoonV1ChatCompletionsUnauthorizedError.
+type OptPostCocoonV1ChatCompletionsUnauthorizedError struct {
+	Value PostCocoonV1ChatCompletionsUnauthorizedError
+	Set   bool
+}
+
+// IsSet returns true if OptPostCocoonV1ChatCompletionsUnauthorizedError was set.
+func (o OptPostCocoonV1ChatCompletionsUnauthorizedError) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPostCocoonV1ChatCompletionsUnauthorizedError) Reset() {
+	var v PostCocoonV1ChatCompletionsUnauthorizedError
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPostCocoonV1ChatCompletionsUnauthorizedError) SetTo(v PostCocoonV1ChatCompletionsUnauthorizedError) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPostCocoonV1ChatCompletionsUnauthorizedError) Get() (v PostCocoonV1ChatCompletionsUnauthorizedError, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPostCocoonV1ChatCompletionsUnauthorizedError) Or(d PostCocoonV1ChatCompletionsUnauthorizedError) PostCocoonV1ChatCompletionsUnauthorizedError {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptPrice returns new OptPrice with value set to v.
 func NewOptPrice(v Price) OptPrice {
 	return OptPrice{
@@ -17074,6 +17120,55 @@ func (s *PostCocoonQueryUnauthorizedError) SetMessage(val OptString) {
 
 // SetType sets the value of Type.
 func (s *PostCocoonQueryUnauthorizedError) SetType(val OptString) {
+	s.Type = val
+}
+
+type PostCocoonV1ChatCompletionsNotImplemented struct{}
+
+func (*PostCocoonV1ChatCompletionsNotImplemented) postCocoonV1ChatCompletionsRes() {}
+
+type PostCocoonV1ChatCompletionsOKApplicationJSON jx.Raw
+
+func (*PostCocoonV1ChatCompletionsOKApplicationJSON) postCocoonV1ChatCompletionsRes() {}
+
+type PostCocoonV1ChatCompletionsUnauthorized struct {
+	Error OptPostCocoonV1ChatCompletionsUnauthorizedError `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *PostCocoonV1ChatCompletionsUnauthorized) GetError() OptPostCocoonV1ChatCompletionsUnauthorizedError {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *PostCocoonV1ChatCompletionsUnauthorized) SetError(val OptPostCocoonV1ChatCompletionsUnauthorizedError) {
+	s.Error = val
+}
+
+func (*PostCocoonV1ChatCompletionsUnauthorized) postCocoonV1ChatCompletionsRes() {}
+
+type PostCocoonV1ChatCompletionsUnauthorizedError struct {
+	Message OptString `json:"message"`
+	Type    OptString `json:"type"`
+}
+
+// GetMessage returns the value of Message.
+func (s *PostCocoonV1ChatCompletionsUnauthorizedError) GetMessage() OptString {
+	return s.Message
+}
+
+// GetType returns the value of Type.
+func (s *PostCocoonV1ChatCompletionsUnauthorizedError) GetType() OptString {
+	return s.Type
+}
+
+// SetMessage sets the value of Message.
+func (s *PostCocoonV1ChatCompletionsUnauthorizedError) SetMessage(val OptString) {
+	s.Message = val
+}
+
+// SetType sets the value of Type.
+func (s *PostCocoonV1ChatCompletionsUnauthorizedError) SetType(val OptString) {
 	s.Type = val
 }
 

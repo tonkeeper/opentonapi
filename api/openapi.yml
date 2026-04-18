@@ -3214,6 +3214,45 @@ paths:
                 type: object
         'default':
           $ref: '#/components/responses/Error'
+
+  /cocoon/v1/chat/completions:
+    post:
+      operationId: postCocoonV1ChatCompletions
+      description: |
+        OpenAI-compatible [Create chat completion](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { } # OpenAI-style chat completion request
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: { } # OpenAI-style chat completion response
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      type:
+                        type: string
+        '501':
+          description: Not implemented
+          content:
+            application/json:
+              schema:
+                type: object
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     masterchainSeqno:

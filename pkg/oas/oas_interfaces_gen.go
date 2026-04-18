@@ -8,3 +8,7 @@ type GetCocoonWorkersRes interface {
 type PostCocoonQueryRes interface {
 	postCocoonQueryRes()
 }
+
+type PostCocoonV1ChatCompletionsRes interface {
+	postCocoonV1ChatCompletionsRes()
+}

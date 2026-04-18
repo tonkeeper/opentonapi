@@ -14,6 +14,9 @@ var (
 	rn193AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
+	rn194AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
 	rn63AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
@@ -38,7 +41,7 @@ var (
 	rn27AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn196AllowedHeaders = map[string]string{
+	rn197AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn22AllowedHeaders = map[string]string{
@@ -59,7 +62,7 @@ var (
 	rn107AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn197AllowedHeaders = map[string]string{
+	rn198AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn12AllowedHeaders = map[string]string{
@@ -89,7 +92,7 @@ var (
 	rn23AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn200AllowedHeaders = map[string]string{
+	rn201AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn24AllowedHeaders = map[string]string{
@@ -177,6 +180,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							s.notAllowed(w, r, notAllowedParams{
 								allowedMethods: "POST",
 								allowedHeaders: rn193AllowedHeaders,
+								acceptPost:     "application/json",
+								acceptPatch:    "",
+							})
+						}
+
+						return
+					}
+
+				case 'v': // Prefix: "v1/chat/completions"
+
+					if l := len("v1/chat/completions"); len(elem) >= l && elem[0:l] == "v1/chat/completions" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handlePostCocoonV1ChatCompletionsRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, notAllowedParams{
+								allowedMethods: "POST",
+								allowedHeaders: rn194AllowedHeaders,
 								acceptPost:     "application/json",
 								acceptPatch:    "",
 							})
@@ -1575,7 +1603,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								default:
 									s.notAllowed(w, r, notAllowedParams{
 										allowedMethods: "POST",
-										allowedHeaders: rn196AllowedHeaders,
+										allowedHeaders: rn197AllowedHeaders,
 										acceptPost:     "application/json",
 										acceptPatch:    "",
 									})
@@ -2956,7 +2984,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "POST",
-									allowedHeaders: rn197AllowedHeaders,
+									allowedHeaders: rn198AllowedHeaders,
 									acceptPost:     "application/json",
 									acceptPatch:    "",
 								})
@@ -4135,7 +4163,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "POST",
-									allowedHeaders: rn200AllowedHeaders,
+									allowedHeaders: rn201AllowedHeaders,
 									acceptPost:     "application/json",
 									acceptPatch:    "",
 								})
@@ -4359,6 +4387,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.operationID = "postCocoonQuery"
 							r.operationGroup = ""
 							r.pathPattern = "/cocoon/query"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+				case 'v': // Prefix: "v1/chat/completions"
+
+					if l := len("v1/chat/completions"); len(elem) >= l && elem[0:l] == "v1/chat/completions" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = PostCocoonV1ChatCompletionsOperation
+							r.summary = ""
+							r.operationID = "postCocoonV1ChatCompletions"
+							r.operationGroup = ""
+							r.pathPattern = "/cocoon/v1/chat/completions"
 							r.args = args
 							r.count = 0
 							return r, true
