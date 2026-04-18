@@ -327,6 +327,12 @@ type Handler interface {
 	//
 	// GET /v2/rates/chart
 	GetChartRates(ctx context.Context, params GetChartRatesParams) (*GetChartRatesOK, error)
+	// GetCocoonWorkers implements getCocoonWorkers operation.
+	//
+	// Cocoon worker types (same shape as gocoon Connection.GetWorkerTypes).
+	//
+	// GET /v2/cocoon/workers
+	GetCocoonWorkers(ctx context.Context) (GetCocoonWorkersRes, error)
 	// GetDnsInfo implements getDnsInfo operation.
 	//
 	// Get full information about domain name.
@@ -668,6 +674,19 @@ type Handler interface {
 	//
 	// POST /v2/pubkeys/wallets/_bulk
 	GetWalletsByPublicKeyBulk(ctx context.Context, req OptGetWalletsByPublicKeyBulkReq) (*WalletsByPublicKeys, error)
+	// PostCocoonQuery implements postCocoonQuery operation.
+	//
+	// Proxy arbitrary OpenAI-style JSON to Cocoon (POST).
+	//
+	// POST /v2/cocoon/query
+	PostCocoonQuery(ctx context.Context, req jx.Raw, params PostCocoonQueryParams) (PostCocoonQueryRes, error)
+	// PostCocoonV1ChatCompletions implements postCocoonV1ChatCompletions operation.
+	//
+	// OpenAI-compatible [Create chat completion](https://developers.openai.
+	// com/api/reference/resources/chat/subresources/completions/methods/create).
+	//
+	// POST /v2/cocoon/v1/chat/completions
+	PostCocoonV1ChatCompletions(ctx context.Context, req jx.Raw) (PostCocoonV1ChatCompletionsRes, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.

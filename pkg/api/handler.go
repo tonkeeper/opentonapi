@@ -74,6 +74,7 @@ type Handler struct {
 	mu         sync.Mutex
 	dns        *dns.DNS // todo: update when blockchain config changes
 	configPool *sync.Pool
+	cocoonPool *CocoonPool
 }
 
 func (h *Handler) NewError(ctx context.Context, err error) *oas.ErrorStatusCode {
@@ -97,6 +98,7 @@ type Options struct {
 	score                   scoreSource
 	parallelTraceProcessing bool
 	rewardsLiteServers      []config.LiteServer
+	cocoonPool              *CocoonPool
 }
 
 type Option func(o *Options)
@@ -187,6 +189,12 @@ func WithParallelTraceProcessing(enabled bool) Option {
 func WithRewards(s []config.LiteServer) Option {
 	return func(o *Options) {
 		o.rewardsLiteServers = s
+	}
+}
+
+func WithCocoonPool(pool *CocoonPool) Option {
+	return func(o *Options) {
+		o.cocoonPool = pool
 	}
 }
 
@@ -287,6 +295,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		tonConnect:              tonConnect,
 		configPool:              configPool,
 		rewards:                 rwd,
+		cocoonPool:              options.cocoonPool,
 	}, nil
 }
 

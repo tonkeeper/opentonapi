@@ -12644,6 +12644,128 @@ func decodeGetWalletsByPublicKeyParams(args [1]string, argsEscaped bool, r *http
 	return params, nil
 }
 
+// PostCocoonQueryParams is parameters of postCocoonQuery operation.
+type PostCocoonQueryParams struct {
+	// Cocoon worker model name passed to the proxy.
+	Model OptString `json:",omitempty,omitzero"`
+	// HTTP path on the Cocoon worker (e.g. /v1/chat/completions).
+	Path OptString `json:",omitempty,omitzero"`
+}
+
+func unpackPostCocoonQueryParams(packed middleware.Parameters) (params PostCocoonQueryParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "model",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Model = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "path",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Path = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodePostCocoonQueryParams(args [0]string, argsEscaped bool, r *http.Request) (params PostCocoonQueryParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: model.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "model",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotModelVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotModelVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Model.SetTo(paramsDotModelVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "model",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: path.
+	{
+		val := string("/query")
+		params.Path.SetTo(val)
+	}
+	// Decode query: path.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "path",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotPathVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPathVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Path.SetTo(paramsDotPathVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "path",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ReindexAccountParams is parameters of reindexAccount operation.
 type ReindexAccountParams struct {
 	// Account ID.
