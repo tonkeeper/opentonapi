@@ -103,6 +103,10 @@ github.com/tonkeeper/gocoon v0.0.0-20260418091633-712b860c1b01 h1:nHpkyYsB29pgSf
 github.com/tonkeeper/gocoon v0.0.0-20260418091633-712b860c1b01/go.mod h1:VbjDK6sCA/fsbvdgGjMWs1Xt2hPehA3uP2MTPSY2Ag4=
 github.com/tonkeeper/gocoon v1.0.1 h1:h9LDzqwwNLJU8to7x89GaIUHuZ0jL40UpX9rJ2veZLU=
 github.com/tonkeeper/gocoon v1.0.1/go.mod h1:VbjDK6sCA/fsbvdgGjMWs1Xt2hPehA3uP2MTPSY2Ag4=
+github.com/tonkeeper/gocoon v1.0.2 h1:rsV8VP0LsGhgdk/RV2vcnkKTEvSVF3NYqVuTFhZAKYg=
+github.com/tonkeeper/gocoon v1.0.2/go.mod h1:VbjDK6sCA/fsbvdgGjMWs1Xt2hPehA3uP2MTPSY2Ag4=
+github.com/tonkeeper/gocoon v1.0.3 h1:LZgxfnEBH4DSCKzFo5P2yznMzzeipWLqRgzumQ9CGfQ=
+github.com/tonkeeper/gocoon v1.0.3/go.mod h1:VbjDK6sCA/fsbvdgGjMWs1Xt2hPehA3uP2MTPSY2Ag4=
 github.com/tonkeeper/scam_backoffice_rules v0.0.11 h1:VXbNNyTO49OArvQwPRCU+1WUEyfQgkqG7Q8NVhQ7320=
 github.com/tonkeeper/scam_backoffice_rules v0.0.11/go.mod h1:SqZXYO9vbID8ku+xnnaKXeNGmehxigODGrk5V1KqbRA=
 github.com/tonkeeper/tongo v1.19.1-0.20260417135212-97ef83ef6640 h1:U4npFMpt3aY4TZcM6v3+0OUxJvHMxo3j5WdAZydtaag=
