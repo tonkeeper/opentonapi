@@ -10,7 +10,7 @@ import (
 	"net/http"
 
 	"github.com/go-faster/jx"
-	gocoon "github.com/tonkeeper/gocoon/pkg/client"
+	"github.com/tonkeeper/gocoon"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
@@ -99,23 +99,41 @@ func (h *Handler) PostCocoonV1ChatCompletions(ctx context.Context, req jx.Raw) (
 		return &oas.PostCocoonV1ChatCompletionsNotImplemented{}, nil
 	}
 	body, model := mergeCocoonModelIntoBody(req, oas.OptString{})
-	conn, err := h.cocoonPool.pick(ctx)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+	const (
+		cocoonV1ChatCompletionsRetries     = 5
+		upstreamPath                       = "/v1/chat/completions"
+	)
+	var jsonBody []byte
+	var lastErr error
+	lastFailedPick := false
+	for attempt := 0; attempt < cocoonV1ChatCompletionsRetries; attempt++ {
+		conn, err := h.cocoonPool.pick(ctx)
+		if err != nil {
+			lastErr = err
+			lastFailedPick = true
+			fmt.Println("cocoon pick error: ", err)
+			continue
+		}
+		lastFailedPick = false
+		respBody, err := conn.POST(ctx, model, upstreamPath, body)
+		if err != nil {
+			lastErr = err
+			fmt.Println("cocoon error POST: ", err)
+			continue
+		}
+		jsonBody, err = cocoonResponseAsJSON(respBody)
+		if err != nil {
+			lastErr = err
+			fmt.Println("cocoon json error: ", err)
+			continue
+		}
+		ok := oas.PostCocoonV1ChatCompletionsOKApplicationJSON(jx.Raw(jsonBody))
+		return &ok, nil
 	}
-	const upstreamPath = "/v1/chat/completions"
-	respBody, err := conn.POST(ctx, model, upstreamPath, body)
-	if err != nil {
-		fmt.Println("cocoon error POST: ", err)
-		return nil, toError(http.StatusBadGateway, err)
+	if lastFailedPick {
+		return nil, toError(http.StatusInternalServerError, lastErr)
 	}
-	jsonBody, err := cocoonResponseAsJSON(respBody)
-	if err != nil {
-		fmt.Println("cocoon json error: ", err)
-		return nil, toError(http.StatusBadGateway, err)
-	}
-	ok := oas.PostCocoonV1ChatCompletionsOKApplicationJSON(jx.Raw(jsonBody))
-	return &ok, nil
+	return nil, toError(http.StatusBadGateway, lastErr)
 }
 
 func (h *Handler) GetCocoonWorkers(ctx context.Context) (oas.GetCocoonWorkersRes, error) {

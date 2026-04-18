@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	gocoon "github.com/tonkeeper/gocoon/pkg/client"
+	"github.com/tonkeeper/gocoon"
 	"go.uber.org/zap"
 )
 
