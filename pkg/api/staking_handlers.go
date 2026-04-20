@@ -300,7 +300,7 @@ func (h *Handler) GetStakingPoolHistory(ctx context.Context, params oas.GetStaki
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		result.Apy = append(result.Apy, oas.ApyHistory{
-			Apy:  (math.Pow(float64(round.Returned-round.Borrowed)/float64(round.TotalBalance)+1, 365*24*60*60/float64(65536)) - 1) * 100,
+			Apy:  (math.Pow(float64(round.Profit)/float64(round.TotalBalance)+1, 365*24*60*60/float64(65536)) - 1) * 100,
 			Time: int(l.CreatedAt),
 		})
 	}
