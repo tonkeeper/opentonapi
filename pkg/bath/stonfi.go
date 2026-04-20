@@ -244,6 +244,7 @@ var StonfiV2PTONStrawReverse = Straw[BubbleJettonTransfer]{
 					newAction.recipient = &tx.account
 					return nil
 				},
+				Optional: true,
 			},
 		},
 		{
