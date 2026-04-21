@@ -17305,6 +17305,34 @@ func (s *RemoveExtensionAction) SetExtension(val string) {
 	s.Extension = val
 }
 
+// Ref: #/components/schemas/RewardsStats
+type RewardsStats struct {
+	// Time series of APY values as [timestamp_ms, apy] pairs.
+	Apy [][]float64 `json:"apy"`
+	// Time series of total stake in TON as [timestamp_ms, stake] pairs.
+	TotalStake [][]float64 `json:"total_stake"`
+}
+
+// GetApy returns the value of Apy.
+func (s *RewardsStats) GetApy() [][]float64 {
+	return s.Apy
+}
+
+// GetTotalStake returns the value of TotalStake.
+func (s *RewardsStats) GetTotalStake() [][]float64 {
+	return s.TotalStake
+}
+
+// SetApy sets the value of Apy.
+func (s *RewardsStats) SetApy(val [][]float64) {
+	s.Apy = val
+}
+
+// SetTotalStake sets the value of TotalStake.
+func (s *RewardsStats) SetTotalStake(val [][]float64) {
+	s.TotalStake = val
+}
+
 // Conservative upper bound on assets this wallet may lose if the emulated message is sent and the
 // counterparty behaves maliciously. Values may exceed current balances (e.g. already-authorized
 // future receipts). For UI display only.

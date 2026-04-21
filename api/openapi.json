@@ -5836,6 +5836,37 @@
     ],
     "type": "object"
    },
+   "RewardsStats": {
+    "properties": {
+     "apy": {
+      "description": "Time series of APY values as [timestamp_ms, apy] pairs",
+      "items": {
+       "items": {
+        "format": "double",
+        "type": "number"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "total_stake": {
+      "description": "Time series of total stake in TON as [timestamp_ms, stake] pairs",
+      "items": {
+       "items": {
+        "format": "double",
+        "type": "number"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "apy",
+     "total_stake"
+    ],
+    "type": "object"
+   },
    "Risk": {
     "description": "Conservative upper bound on assets this wallet may lose if the emulated message is sent and the counterparty behaves maliciously. Values may exceed current balances (e.g. already-authorized future receipts). For UI display only.\n",
     "properties": {
@@ -11847,6 +11878,31 @@
      }
     },
     "summary": "Get per-validator reward distribution for a finished round",
+    "tags": [
+     "Rewards"
+    ]
+   }
+  },
+  "/v2/rewards/stats": {
+   "get": {
+    "description": "Returns time series of APY and total stake from past validation rounds.",
+    "operationId": "getRewardsStats",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RewardsStats"
+        }
+       }
+      },
+      "description": "APY and stake statistics"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "summary": "Get historical APY and stake statistics",
     "tags": [
      "Rewards"
     ]

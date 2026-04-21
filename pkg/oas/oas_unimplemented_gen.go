@@ -879,6 +879,15 @@ func (UnimplementedHandler) GetReducedBlockchainBlocks(ctx context.Context, para
 	return r, ht.ErrNotImplemented
 }
 
+// GetRewardsStats implements getRewardsStats operation.
+//
+// Returns time series of APY and total stake from past validation rounds.
+//
+// GET /v2/rewards/stats
+func (UnimplementedHandler) GetRewardsStats(ctx context.Context) (r *RewardsStats, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRoundRewards implements getRoundRewards operation.
 //
 // Computes per-validator and per-nominator reward distribution for a finished validation round using

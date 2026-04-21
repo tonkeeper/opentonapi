@@ -280,3 +280,11 @@ func (h *Handler) GetRoundRewards(ctx context.Context, params oas.GetRoundReward
 	res.ResponseTimeMs = time.Since(timeStart).Milliseconds()
 	return res, nil
 }
+
+func (h *Handler) GetRewardsStats(ctx context.Context) (*oas.RewardsStats, error) {
+	if h.rewardsStats == nil {
+		return nil, toError(http.StatusServiceUnavailable, errServiceUnavailable)
+	}
+	res := h.rewardsStats.GetStats()
+	return &res, nil
+}

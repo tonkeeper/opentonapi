@@ -39,15 +39,15 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create liteapi client", zap.Error(err))
 	}
-	var rewardsLiteServers []ton.LiteServer
+	var archiveLiteServers []ton.LiteServer
 	if len(cfg.App.ArchiveLiteServers) != 0 {
-		rewardsLiteServers = cfg.App.ArchiveLiteServers
+		archiveLiteServers = cfg.App.ArchiveLiteServers
 	} else if len(cfg.App.LiteServers) != 0 {
-		rewardsLiteServers = cfg.App.LiteServers
+		archiveLiteServers = cfg.App.LiteServers
 	} else {
 		var opt liteapi.Options
 		liteapi.Mainnet()(&opt)
-		rewardsLiteServers = opt.LiteServers
+		archiveLiteServers = opt.LiteServers
 	}
 
 	storage, err := litestorage.NewLiteStorage(
@@ -81,7 +81,7 @@ func main() {
 		api.WithMessageSender(msgSender),
 		api.WithSpamFilter(spamFilter),
 		api.WithTonConnectSecret(cfg.TonConnect.Secret),
-		api.WithRewards(rewardsLiteServers),
+		api.WithArchiveLiteServers(archiveLiteServers),
 	)
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
