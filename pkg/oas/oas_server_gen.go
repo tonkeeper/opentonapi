@@ -593,6 +593,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/reduced/blocks
 	GetReducedBlockchainBlocks(ctx context.Context, params GetReducedBlockchainBlocksParams) (*ReducedBlocks, error)
+	// GetRewardsStats implements getRewardsStats operation.
+	//
+	// Returns time series of APY and total stake from past validation rounds.
+	//
+	// GET /v2/rewards/stats
+	GetRewardsStats(ctx context.Context) (*RewardsStats, error)
 	// GetRoundRewards implements getRoundRewards operation.
 	//
 	// Computes per-validator and per-nominator reward distribution for a finished validation round using

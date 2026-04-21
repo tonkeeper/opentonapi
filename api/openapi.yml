@@ -3131,6 +3131,22 @@ paths:
                 $ref: "#/components/schemas/RoundRewardsResponse"
         'default':
           $ref: '#/components/responses/Error'
+  /v2/rewards/stats:
+    get:
+      operationId: getRewardsStats
+      tags:
+        - Rewards
+      summary: Get historical APY and stake statistics
+      description: Returns time series of APY and total stake from past validation rounds.
+      responses:
+        '200':
+          description: APY and stake statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardsStats'
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     masterchainSeqno:
@@ -8847,6 +8863,26 @@ components:
             $ref: "#/components/schemas/ValidatorRewardEntry"
         error:
           type: string
+    RewardsStats:
+      type: object
+      required: [apy, total_stake]
+      properties:
+        apy:
+          type: array
+          description: Time series of APY values as [timestamp_ms, apy] pairs
+          items:
+            type: array
+            items:
+              type: number
+              format: double
+        total_stake:
+          type: array
+          description: Time series of total stake in TON as [timestamp_ms, stake] pairs
+          items:
+            type: array
+            items:
+              type: number
+              format: double
   responses:
     Error:
       description: Some error during request processing

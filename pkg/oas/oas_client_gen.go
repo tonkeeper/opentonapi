@@ -611,6 +611,12 @@ type Invoker interface {
 	//
 	// GET /v2/blockchain/reduced/blocks
 	GetReducedBlockchainBlocks(ctx context.Context, params GetReducedBlockchainBlocksParams) (*ReducedBlocks, error)
+	// GetRewardsStats invokes getRewardsStats operation.
+	//
+	// Returns time series of APY and total stake from past validation rounds.
+	//
+	// GET /v2/rewards/stats
+	GetRewardsStats(ctx context.Context) (*RewardsStats, error)
 	// GetRoundRewards invokes getRoundRewards operation.
 	//
 	// Computes per-validator and per-nominator reward distribution for a finished validation round using
@@ -11073,6 +11079,80 @@ func (c *Client) sendGetReducedBlockchainBlocks(ctx context.Context, params GetR
 
 	stage = "DecodeResponse"
 	result, err := decodeGetReducedBlockchainBlocksResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetRewardsStats invokes getRewardsStats operation.
+//
+// Returns time series of APY and total stake from past validation rounds.
+//
+// GET /v2/rewards/stats
+func (c *Client) GetRewardsStats(ctx context.Context) (*RewardsStats, error) {
+	res, err := c.sendGetRewardsStats(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetRewardsStats(ctx context.Context) (res *RewardsStats, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getRewardsStats"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v2/rewards/stats"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetRewardsStatsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/rewards/stats"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetRewardsStatsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

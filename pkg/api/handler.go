@@ -18,6 +18,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/contract/dns"
+	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tonconnect"
@@ -52,6 +53,7 @@ type Handler struct {
 	tonConnect     *tonconnect.Server
 	verifierSource verifierSource
 	rewards        *rewards.Service
+	rewardsStats   *rewards.Stats
 
 	// parallelTraceProcessing enables parallel trace-to-action conversion.
 	parallelTraceProcessing bool
@@ -96,7 +98,7 @@ type Options struct {
 	verifier                verifierSource
 	score                   scoreSource
 	parallelTraceProcessing bool
-	rewardsLiteServers      []config.LiteServer
+	archiveLiteServers      []config.LiteServer
 }
 
 type Option func(o *Options)
@@ -184,9 +186,9 @@ func WithParallelTraceProcessing(enabled bool) Option {
 	}
 }
 
-func WithRewards(s []config.LiteServer) Option {
+func WithArchiveLiteServers(s []config.LiteServer) Option {
 	return func(o *Options) {
-		o.rewardsLiteServers = s
+		o.archiveLiteServers = s
 	}
 }
 
@@ -246,13 +248,21 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		slog.Warn("unable to detect tongo version", "err", err)
 	}
 	var rwd *rewards.Service
-	if len(options.rewardsLiteServers) != 0 {
-		cli, err := rewards.NewClient(options.rewardsLiteServers)
+	var stats *rewards.Stats
+	if len(options.archiveLiteServers) != 0 {
+		cli, err := rewards.NewClient(options.archiveLiteServers)
 		if err == nil {
-			rwd = rewards.New(cli, options.rewardsLiteServers)
+			rwd = rewards.New(cli, options.archiveLiteServers)
 			log.Println("rewards service initialized")
 		} else {
 			log.Println("rewards service unavailable:", err)
+		}
+		statsCli, err := liteapi.NewClient(liteapi.WithLiteServers(options.archiveLiteServers))
+		if err == nil {
+			stats = rewards.NewStats(statsCli)
+			log.Println("rewards stats service initialized")
+		} else {
+			log.Println("rewards stats service unavailable:", err)
 		}
 	}
 	return &Handler{
@@ -287,6 +297,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		tonConnect:              tonConnect,
 		configPool:              configPool,
 		rewards:                 rwd,
+		rewardsStats:            stats,
 	}, nil
 }
 

@@ -100,6 +100,7 @@ const (
 	GetRawTimeOperation                                OperationName = "GetRawTime"
 	GetRawTransactionsOperation                        OperationName = "GetRawTransactions"
 	GetReducedBlockchainBlocksOperation                OperationName = "GetReducedBlockchainBlocks"
+	GetRewardsStatsOperation                           OperationName = "GetRewardsStats"
 	GetRoundRewardsOperation                           OperationName = "GetRoundRewards"
 	GetStakingPoolHistoryOperation                     OperationName = "GetStakingPoolHistory"
 	GetStakingPoolInfoOperation                        OperationName = "GetStakingPoolInfo"
