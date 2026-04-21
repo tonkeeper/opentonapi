@@ -53,7 +53,7 @@ type Handler struct {
 	tonConnect     *tonconnect.Server
 	verifierSource verifierSource
 	rewards        *rewards.Service
-	rewardsStats   *rewards.Stats
+	stats          *rewards.Stats
 
 	// parallelTraceProcessing enables parallel trace-to-action conversion.
 	parallelTraceProcessing bool
@@ -248,7 +248,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		slog.Warn("unable to detect tongo version", "err", err)
 	}
 	var rwd *rewards.Service
-	var stats *rewards.Stats
 	if len(options.archiveLiteServers) != 0 {
 		cli, err := rewards.NewClient(options.archiveLiteServers)
 		if err == nil {
@@ -256,13 +255,6 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			log.Println("rewards service initialized")
 		} else {
 			log.Println("rewards service unavailable:", err)
-		}
-		statsCli, err := liteapi.NewClient(liteapi.WithLiteServers(options.archiveLiteServers))
-		if err == nil {
-			stats = rewards.NewStats(statsCli)
-			log.Println("rewards stats service initialized")
-		} else {
-			log.Println("rewards stats service unavailable:", err)
 		}
 	}
 	return &Handler{
@@ -297,7 +289,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		tonConnect:              tonConnect,
 		configPool:              configPool,
 		rewards:                 rwd,
-		rewardsStats:            stats,
+		stats:                   rewards.NewStats(liteapi.WithLiteServers(options.archiveLiteServers)),
 	}, nil
 }
 

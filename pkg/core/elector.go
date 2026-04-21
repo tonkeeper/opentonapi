@@ -228,19 +228,19 @@ func (r ElectorRound) Duration() time.Duration {
 	return r.EndTime().Sub(r.StartTime())
 }
 
-func (r ElectorRound) APY() float64 {
+func (r ElectorRound) APYOrDefault(v float64) float64 {
 	if r.Bonuses == 0 {
 		log.Println("Zero elector round bonus:", r.StartTime())
-		return 0
+		return v
 	}
 	if r.TotalStake == 0 {
 		log.Println("Zero elector round stake:", r.StartTime())
-		return 0
+		return v
 	}
 	roundDuration := r.Duration().Seconds()
 	if roundDuration == 0 {
 		log.Println("Zero elector round duration:", r.StartTime())
-		return 0
+		return v
 	}
 	const secondsInYear = 365 * 24 * 60 * 60
 	yieldPerRound := float64(r.Bonuses) / float64(r.TotalStake)
