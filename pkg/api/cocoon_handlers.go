@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-faster/jx"
 	"github.com/tonkeeper/gocoon"
+	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 )
@@ -77,6 +78,35 @@ func mergeCocoonModelIntoBody(req jx.Raw, modelQuery oas.OptString) (body []byte
 	return body, model
 }
 
+func parseCocoonChatCompletionUsage(body []byte) (tokens int64, cost int64, ok bool) {
+	var root struct {
+		Usage *struct {
+			TotalTokens int64 `json:"total_tokens"`
+			TotalCost   int64 `json:"total_cost"`
+		} `json:"usage"`
+	}
+	if err := json.Unmarshal(body, &root); err != nil || root.Usage == nil {
+		return 0, 0, false
+	}
+	if root.Usage.TotalTokens <= 0 || root.Usage.TotalCost <= 0 {
+		return 0, 0, false
+	}
+	return root.Usage.TotalTokens, root.Usage.TotalCost, true
+}
+
+func (h *Handler) recordCocoonChatCompletionUsage(ctx context.Context, jsonBody []byte) {
+	if h.tonConsole == nil {
+		return
+	}
+	tokens, cost, ok := parseCocoonChatCompletionUsage(jsonBody)
+	if !ok {
+		return
+	}
+	if err := h.tonConsole.CreateCocoonUsageEvent(ctx, tokens, cost); err != nil {
+		h.logger.Warn("cocoon usage event", zap.Error(err))
+	}
+}
+
 func (h *Handler) PostCocoonQuery(ctx context.Context, req jx.Raw, params oas.PostCocoonQueryParams) (oas.PostCocoonQueryRes, error) {
 	//if h.cocoonPool == nil {
 	//	return &oas.PostCocoonQueryNotImplemented{}, nil
@@ -130,6 +160,7 @@ func (h *Handler) PostCocoonV1ChatCompletions(ctx context.Context, req jx.Raw) (
 			continue
 		}
 		ok := oas.PostCocoonV1ChatCompletionsOKApplicationJSON(jx.Raw(jsonBody))
+		h.recordCocoonChatCompletionUsage(ctx, jsonBody)
 		return &ok, nil
 	}
 	if lastFailedPick {

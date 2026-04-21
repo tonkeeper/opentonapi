@@ -215,6 +215,10 @@ type verifierSource interface {
 	GetAccountSource(accountID ton.AccountID) (verifier.Source, error)
 }
 
+type TonConsole interface {
+	CreateCocoonUsageEvent(ctx context.Context, tokensSpent int64, totalCost int64) error
+}
+
 type metadataCache struct {
 	collectionsCache cache.Cache[tongo.AccountID, tep64.Metadata]
 	jettonsCache     cache.Cache[tongo.AccountID, tep64.Metadata]
