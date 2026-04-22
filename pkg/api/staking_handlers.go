@@ -39,14 +39,14 @@ func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingP
 				Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": poolConfig.MinStake / 1_000_000_000}}),
 				URL:         references.WhalesPoolImplementationsURL,
 			},
-			Pool: convertStakingWhalesPool(pool.ID, w, poolStatus, poolConfig, h.stats.GetAPY(), true, nominators, stake),
+			Pool: convertStakingWhalesPool(pool.ID, w, poolStatus, poolConfig, h.stats.GetPoolAPY(), true, nominators, stake),
 		}, nil
 	}
 	lPool, err := h.storage.GetLiquidPool(ctx, pool.ID)
 	if err == nil {
 		info, _ := h.addressBook.GetAddressInfoByAddress(lPool.Address)
 		lPool.Name = info.Name
-		lPool.APY = h.stats.GetAPY()
+		lPool.APY = h.stats.GetPoolAPY()
 		config, err := h.storage.GetLastConfig(ctx)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -85,7 +85,7 @@ func (h *Handler) GetStakingPoolInfo(ctx context.Context, params oas.GetStakingP
 			Description: i18n.T(params.AcceptLanguage.Value, i18n.C{MessageID: "poolImplementationDescription", TemplateData: map[string]interface{}{"Deposit": p.MinNominatorStake / 1_000_000_000}}),
 			URL:         references.TFPoolImplementationsURL,
 		},
-		Pool: convertStakingTFPool(p, info, h.stats.GetAPY()),
+		Pool: convertStakingTFPool(p, info, h.stats.GetPoolAPY()),
 	}, nil
 }
 
@@ -114,7 +114,7 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 	var minTF, minWhales int64
 	for _, p := range tfPools {
 		info, _ := h.addressBook.GetTFPoolInfo(p.Address)
-		apy := h.stats.GetAPY()
+		apy := h.stats.GetPoolAPY()
 		pool := convertStakingTFPool(p, info, apy)
 		if minTF == 0 || pool.MinStake < minTF {
 			minTF = pool.MinStake
@@ -138,7 +138,7 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 		if err != nil {
 			continue
 		}
-		apy := h.stats.GetAPY()
+		apy := h.stats.GetPoolAPY()
 		pool := convertStakingWhalesPool(k, w, poolStatus, poolConfig, apy, true, nominatorsCount, stake)
 		if minWhales == 0 || pool.MinStake < minWhales {
 			minWhales = pool.MinStake

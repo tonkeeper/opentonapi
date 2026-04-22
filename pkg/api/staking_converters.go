@@ -11,7 +11,6 @@ import (
 )
 
 func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64, verified bool, nominators int, stake uint64) oas.PoolInfo {
-
 	return oas.PoolInfo{
 		Address:           address.ToRaw(),
 		Name:              w.Name + " " + w.Queue,
@@ -19,7 +18,7 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 		NominatorsStake:   int64(stake),
 		ValidatorStake:    int64(poolStatus.StakeSent) - int64(stake),
 		Implementation:    oas.PoolImplementationTypeWhales,
-		Apy:               apy * float64(10000-poolConfig.PoolFee) / 10000,
+		Apy:               apy,
 		MinStake:          poolConfig.MinStake + poolConfig.DepositFee + poolConfig.ReceiptPrice,
 		CycleEnd:          int64(poolStatus.StakeUntil),
 		CycleStart:        int64(poolStatus.StakeAt),
@@ -40,7 +39,7 @@ func convertStakingTFPool(p core.TFPool, info addressbook.TFPoolInfo, apy float6
 		Name:              name,
 		TotalAmount:       p.TotalAmount,
 		Implementation:    oas.PoolImplementationTypeTf,
-		Apy:               apy * float64(10000-p.ValidatorShare) / 10000,
+		Apy:               apy,
 		MinStake:          p.MinNominatorStake + 1_000_000_000, //this is not in contract. just hardcoded value from documentation
 		CycleStart:        int64(p.StakeAt),
 		CycleEnd:          int64(p.StakeAt) + 3600*36, //todo: make correct
