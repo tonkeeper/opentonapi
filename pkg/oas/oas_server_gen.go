@@ -593,6 +593,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/reduced/blocks
 	GetReducedBlockchainBlocks(ctx context.Context, params GetReducedBlockchainBlocksParams) (*ReducedBlocks, error)
+	// GetRewardsApy implements getRewardsApy operation.
+	//
+	// Returns the current TON blockchain APY as a percent based on the latest completed validation round.
+	//
+	// GET /v2/rewards/apy
+	GetRewardsApy(ctx context.Context) (float64, error)
 	// GetRewardsStats implements getRewardsStats operation.
 	//
 	// Returns time series of APY and total stake from past validation rounds.

@@ -3147,6 +3147,24 @@ paths:
                 $ref: '#/components/schemas/RewardsStats'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/rewards/apy:
+    get:
+      operationId: getRewardsApy
+      tags:
+        - Rewards
+      summary: Get current TON blockchain APY
+      description: Returns the current TON blockchain APY as a percent based on the latest completed validation round.
+      responses:
+        '200':
+          description: current TON blockchain APY as a percent
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+                example: 3.3
+        'default':
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     masterchainSeqno:

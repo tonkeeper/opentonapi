@@ -15,7 +15,6 @@ import (
 
 const maxRounds = 101
 const defaultAPY = 0.22
-const poolAPYMul = 76.02
 
 var errServiceUnavailable = errors.New("Service Unavailable")
 
@@ -38,7 +37,7 @@ func NewStats(options ...liteapi.Option) *Stats {
 	return res
 }
 
-func (s *Stats) GetPoolAPY() float64 {
+func (s *Stats) GetAPY(poolAPYMul float64) float64 {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	timeNow := time.Now()
@@ -76,7 +75,10 @@ func (s *Stats) GetRewardsStats() (*oas.RewardsStats, error) {
 	return &res, nil
 }
 
-func (s *Stats) GetStakingPoolHistory(limit int) (*oas.GetStakingPoolHistoryOK, error) {
+func (s *Stats) GetStakingPoolHistory(poolAPYMul float64, limit int) (*oas.GetStakingPoolHistoryOK, error) {
+	if poolAPYMul <= 0 || 100 < poolAPYMul {
+		poolAPYMul = 100
+	}
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if limit <= 0 || len(s.rounds) < limit {

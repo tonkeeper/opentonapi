@@ -11816,6 +11816,33 @@
     ]
    }
   },
+  "/v2/rewards/apy": {
+   "get": {
+    "description": "Returns the current TON blockchain APY as a percent based on the latest completed validation round.",
+    "operationId": "getRewardsApy",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "example": 3.3,
+         "format": "double",
+         "type": "number"
+        }
+       }
+      },
+      "description": "current TON blockchain APY as a percent"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "summary": "Get current TON blockchain APY",
+    "tags": [
+     "Rewards"
+    ]
+   }
+  },
   "/v2/rewards/round-rewards": {
    "get": {
     "description": "Computes per-validator and per-nominator reward distribution for a finished validation round using the elector's bonuses value.\n",

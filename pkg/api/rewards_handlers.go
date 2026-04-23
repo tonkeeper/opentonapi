@@ -284,3 +284,7 @@ func (h *Handler) GetRoundRewards(ctx context.Context, params oas.GetRoundReward
 func (h *Handler) GetRewardsStats(ctx context.Context) (*oas.RewardsStats, error) {
 	return h.stats.GetRewardsStats()
 }
+
+func (h *Handler) GetRewardsApy(ctx context.Context) (float64, error) {
+	return h.stats.GetAPY(100), nil
+}
