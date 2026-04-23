@@ -879,6 +879,15 @@ func (UnimplementedHandler) GetReducedBlockchainBlocks(ctx context.Context, para
 	return r, ht.ErrNotImplemented
 }
 
+// GetRewardsApy implements getRewardsApy operation.
+//
+// Returns the current TON blockchain APY as a percent based on the latest completed validation round.
+//
+// GET /v2/rewards/apy
+func (UnimplementedHandler) GetRewardsApy(ctx context.Context) (r float64, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetRewardsStats implements getRewardsStats operation.
 //
 // Returns time series of APY and total stake from past validation rounds.
