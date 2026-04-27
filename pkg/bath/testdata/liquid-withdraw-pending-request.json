@@ -3,7 +3,14 @@
      {
        "WithdrawStakeRequest": {
          "Staker": "0:f63660ff947e5fe6ed4a8f729f1b24ef859497d0483aaa9d9ae48414297c4e1b",
-         "Amount": 996209389,
+         "Amount": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 996209389
+         },
          "Pool": "0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa",
          "Implementation": "liquidTF"
        },

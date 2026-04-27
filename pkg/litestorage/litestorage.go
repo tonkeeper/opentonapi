@@ -30,6 +30,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/pyth"
 )
 
 var storageTimeHistogramVec = promauto.NewHistogramVec(
@@ -52,6 +53,10 @@ func extractInMsgCreatedLT(accountID tongo.AccountID, tx *tlb.Transaction) (inMs
 		return inMsgCreatedLT{account: accountID, lt: tx.Msgs.InMsg.Value.Value.Info.IntMsgInfo.CreatedLt}, true
 	}
 	return inMsgCreatedLT{}, false
+}
+
+type PriceFeeds interface {
+	GetFeed(id string) (pyth.PriceFeedAttributes, bool)
 }
 
 type LiteStorage struct {
@@ -80,6 +85,16 @@ type LiteStorage struct {
 	// it's performance optimization.
 	// tmv and txEmulator work much faster with a smaller config.
 	trimmedConfigBase64 string
+
+	pythPriceFeeds PriceFeeds
+}
+
+func (s *LiteStorage) GetPythPriceFeedMeta(id string) (pyth.PriceFeedAttributes, bool) {
+	feeds := s.pythPriceFeeds
+	if feeds == nil {
+		return pyth.PriceFeedAttributes{}, false
+	}
+	return feeds.GetFeed(id)
 }
 
 type Options struct {
@@ -89,7 +104,14 @@ type Options struct {
 	jettons         []tongo.AccountID
 	executor        abi.Executor
 	// blockCh is used to receive new blocks in the blockchain, if set.
-	blockCh <-chan indexer.IDandBlock
+	blockCh        <-chan indexer.IDandBlock
+	pythPriceFeeds PriceFeeds
+}
+
+func WithPythPriceFeeds(feeds PriceFeeds) Option {
+	return func(o *Options) {
+		o.pythPriceFeeds = feeds
+	}
 }
 
 func WithPreloadAccounts(a []tongo.AccountID) Option {
@@ -152,6 +174,7 @@ func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*Lite
 		accountInterfacesCache:  xsync.NewTypedMapOf[tongo.AccountID, []abi.ContractInterface](hashAccountID),
 		tvmLibraryCache:         cache.NewLRUCache[string, boc.Cell](10000, "tvm_libraries"),
 		configCache:             cache.NewLRUCache[int, ton.BlockchainConfig](4, "config"),
+		pythPriceFeeds:          o.pythPriceFeeds,
 	}
 	storage.knownAccounts["tf_pools"] = o.tfPools
 	storage.knownAccounts["jettons"] = o.jettons
@@ -318,6 +341,7 @@ func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
 		return err
 	}
 	s.blockCache.Store(extID, &block)
+	errs := []error{}
 	for _, tx := range block.AllTransactions() {
 		accountID := tongo.AccountID{
 			Workchain: extID.Workchain,
@@ -326,12 +350,18 @@ func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
 		inspector := abi.NewContractInspector(abi.InspectWithLibraryResolver(s))
 		account, err := s.GetRawAccount(ctx, accountID)
 		if err != nil {
-			return err
+			errs = append(errs, err)
+			continue
 		}
 		cd, err := inspector.InspectContract(ctx, account.Code, s.executor, accountID)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
 		t, err := core.ConvertTransaction(extID.Workchain, tongo.Transaction{Transaction: *tx, BlockID: extID}, cd)
 		if err != nil {
-			return err
+			errs = append(errs, err)
+			continue
 		}
 		hash := tongo.Bits256(tx.Hash())
 		s.transactionsIndexByHash.Store(hash, t)
@@ -339,7 +369,7 @@ func (s *LiteStorage) preloadBlock(id tongo.BlockID) error {
 			s.transactionsByInMsgLT.Store(createLT, hash)
 		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 func (s *LiteStorage) GetBlockHeader(ctx context.Context, id tongo.BlockID) (*core.BlockHeader, error) {

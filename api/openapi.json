@@ -1213,6 +1213,9 @@
      "NftPurchase": {
       "$ref": "#/components/schemas/NftPurchaseAction"
      },
+     "OracleRequest": {
+      "$ref": "#/components/schemas/OracleRequestAction"
+     },
      "Purchase": {
       "$ref": "#/components/schemas/PurchaseAction"
      },
@@ -1292,6 +1295,7 @@
        "DepositTokenStake",
        "WithdrawTokenStakeRequest",
        "LiquidityDeposit",
+       "OracleRequest",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -3168,6 +3172,10 @@
      },
      "pool": {
       "$ref": "#/components/schemas/AccountAddress"
+     },
+     "stake_meta": {
+      "$ref": "#/components/schemas/Price",
+      "description": "If present, should be used instead of amount"
      },
      "staker": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -5503,6 +5511,50 @@
     ],
     "type": "object"
    },
+   "OraclePriceFeed": {
+    "properties": {
+     "display_symbol": {
+      "example": "TON/USD",
+      "type": "string"
+     },
+     "id": {
+      "example": "e62df6c8b4a85fe1a67f1c4d1f1e1d4335c04d1d7e2c50e0d7da7ad911f2d4",
+      "type": "string"
+     },
+     "rate": {
+      "example": 5.24,
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "required": [
+     "id",
+     "display_symbol"
+    ],
+    "type": "object"
+   },
+   "OracleRequestAction": {
+    "properties": {
+     "price_feeds": {
+      "items": {
+       "$ref": "#/components/schemas/OraclePriceFeed"
+      },
+      "type": "array"
+     },
+     "requester": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "response_to": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "requester",
+     "response_to",
+     "price_feeds"
+    ],
+    "type": "object"
+   },
    "PictureDNS": {
     "properties": {
      "bag_id": {
@@ -5559,7 +5611,8 @@
     "enum": [
      "whales",
      "tf",
-     "liquidTF"
+     "liquidTF",
+     "ffvault"
     ],
     "type": "string"
    },
@@ -7703,6 +7756,10 @@
      },
      "pool": {
       "$ref": "#/components/schemas/AccountAddress"
+     },
+     "stake_meta": {
+      "$ref": "#/components/schemas/Price",
+      "description": "If present, should be used instead of amount"
      },
      "staker": {
       "$ref": "#/components/schemas/AccountAddress"

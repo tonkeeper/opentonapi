@@ -50,6 +50,7 @@ const (
 	StakingImplementationTF       StakingImplementation = "tf"
 	StakingImplementationLiquidTF StakingImplementation = "liquidTF"
 	StakingImplementationWhales   StakingImplementation = "whales"
+	StakingImplementationFfVault  StakingImplementation = "ffvault"
 )
 
 func CalculateAPY(roundExpected, roundBorrowed int64, governanceFee int32) float64 {

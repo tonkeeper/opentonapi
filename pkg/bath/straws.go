@@ -3,6 +3,7 @@ package bath
 import (
 	"math/big"
 
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/ton"
 )
@@ -32,7 +33,7 @@ var NFTStraws = []Merger{
 	NftTransferNotifyStraw,
 }
 
-func DefaultStraws(book AddressBook) []Merger {
+func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger {
 	return []Merger{
 		//0
 		StrawFindAuctionBidFragmentSimple,
@@ -111,6 +112,10 @@ func DefaultStraws(book AddressBook) []Merger {
 		WithdrawAffluentEarnRequestStraw,
 		InstantWithdrawAffluentEarnStraw,
 		InstantWithdrawAffluentEarnWithOraclesStraw,
+		PythOraclePriceUpdateStraw(infoSource),
+		// 65
+		DepositFFVaultStakeStraw,
+		WithdrawalRequestFFVaultStraw,
 	}
 }
 

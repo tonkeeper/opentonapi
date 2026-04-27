@@ -1,0 +1,39 @@
+{
+   "Actions": [
+     {
+       "WithdrawStakeRequest": {
+         "Staker": "0:18e0ce3934cd97282f8f6399cb2ae011d5e29f1b1cfe3774aa4844210d734a6e",
+         "Amount": {
+           "Currency": {
+             "Type": "jetton",
+             "Jetton": "0:757f204003da900cfe8b106685ddc6d4f976ebfa9e844816469ea94790720700",
+             "CurrencyID": null
+           },
+           "Amount": 9974
+         },
+         "Pool": "0:4c4e2d27a27721f2b8fa3f9993e13c9696e9d701b2f498f981294ece2afdedda",
+         "Implementation": "ffvault"
+       },
+       "Success": true,
+       "Type": "WithdrawStakeRequest",
+       "BaseTransactions": [
+         "f64f387effe7280311be8ba857974adbd1b20c80485d4f3f72ed3555831df7b2",
+         "176fe658e587d1075e95e236ba2359c2d440c825fed462d55eb68f411f8890e9"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:14a83c75b1bfb35c493bac32df0ffdda5883b1c8ec2dd24b63bdcc2573f75a72",
+       "Ton": 0,
+       "Fee": 2124252,
+       "Jettons": null
+     },
+     {
+       "Account": "0:18e0ce3934cd97282f8f6399cb2ae011d5e29f1b1cfe3774aa4844210d734a6e",
+       "Ton": -5556912,
+       "Fee": 3432660,
+       "Jettons": null
+     }
+   ]
+ }

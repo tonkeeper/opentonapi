@@ -739,6 +739,7 @@ type Action struct {
 	DepositTokenStake         OptDepositTokenStakeAction         `json:"DepositTokenStake"`
 	WithdrawTokenStakeRequest OptWithdrawTokenStakeRequestAction `json:"WithdrawTokenStakeRequest"`
 	LiquidityDeposit          OptLiquidityDepositAction          `json:"LiquidityDeposit"`
+	OracleRequest             OptOracleRequestAction             `json:"OracleRequest"`
 	SimplePreview             ActionSimplePreview                `json:"simple_preview"`
 	BaseTransactions          []string                           `json:"base_transactions"`
 }
@@ -891,6 +892,11 @@ func (s *Action) GetWithdrawTokenStakeRequest() OptWithdrawTokenStakeRequestActi
 // GetLiquidityDeposit returns the value of LiquidityDeposit.
 func (s *Action) GetLiquidityDeposit() OptLiquidityDepositAction {
 	return s.LiquidityDeposit
+}
+
+// GetOracleRequest returns the value of OracleRequest.
+func (s *Action) GetOracleRequest() OptOracleRequestAction {
+	return s.OracleRequest
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -1051,6 +1057,11 @@ func (s *Action) SetWithdrawTokenStakeRequest(val OptWithdrawTokenStakeRequestAc
 // SetLiquidityDeposit sets the value of LiquidityDeposit.
 func (s *Action) SetLiquidityDeposit(val OptLiquidityDepositAction) {
 	s.LiquidityDeposit = val
+}
+
+// SetOracleRequest sets the value of OracleRequest.
+func (s *Action) SetOracleRequest(val OptOracleRequestAction) {
+	s.OracleRequest = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1289,6 +1300,7 @@ const (
 	ActionTypeDepositTokenStake         ActionType = "DepositTokenStake"
 	ActionTypeWithdrawTokenStakeRequest ActionType = "WithdrawTokenStakeRequest"
 	ActionTypeLiquidityDeposit          ActionType = "LiquidityDeposit"
+	ActionTypeOracleRequest             ActionType = "OracleRequest"
 	ActionTypeUnknown                   ActionType = "Unknown"
 )
 
@@ -1323,6 +1335,7 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeDepositTokenStake,
 		ActionTypeWithdrawTokenStakeRequest,
 		ActionTypeLiquidityDeposit,
+		ActionTypeOracleRequest,
 		ActionTypeUnknown,
 	}
 }
@@ -1385,6 +1398,8 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeWithdrawTokenStakeRequest:
 		return []byte(s), nil
 	case ActionTypeLiquidityDeposit:
+		return []byte(s), nil
+	case ActionTypeOracleRequest:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1479,6 +1494,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeLiquidityDeposit:
 		*s = ActionTypeLiquidityDeposit
+		return nil
+	case ActionTypeOracleRequest:
+		*s = ActionTypeOracleRequest
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -5158,6 +5176,8 @@ type DepositStakeAction struct {
 	Staker         AccountAddress         `json:"staker"`
 	Pool           AccountAddress         `json:"pool"`
 	Implementation PoolImplementationType `json:"implementation"`
+	// If present, should be used instead of amount.
+	StakeMeta OptPrice `json:"stake_meta"`
 }
 
 // GetAmount returns the value of Amount.
@@ -5180,6 +5200,11 @@ func (s *DepositStakeAction) GetImplementation() PoolImplementationType {
 	return s.Implementation
 }
 
+// GetStakeMeta returns the value of StakeMeta.
+func (s *DepositStakeAction) GetStakeMeta() OptPrice {
+	return s.StakeMeta
+}
+
 // SetAmount sets the value of Amount.
 func (s *DepositStakeAction) SetAmount(val int64) {
 	s.Amount = val
@@ -5198,6 +5223,11 @@ func (s *DepositStakeAction) SetPool(val AccountAddress) {
 // SetImplementation sets the value of Implementation.
 func (s *DepositStakeAction) SetImplementation(val PoolImplementationType) {
 	s.Implementation = val
+}
+
+// SetStakeMeta sets the value of StakeMeta.
+func (s *DepositStakeAction) SetStakeMeta(val OptPrice) {
+	s.StakeMeta = val
 }
 
 // Ref: #/components/schemas/DepositTokenStakeAction
@@ -15393,6 +15423,52 @@ func (o OptNilString) Or(d string) string {
 	return d
 }
 
+// NewOptOracleRequestAction returns new OptOracleRequestAction with value set to v.
+func NewOptOracleRequestAction(v OracleRequestAction) OptOracleRequestAction {
+	return OptOracleRequestAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptOracleRequestAction is optional OracleRequestAction.
+type OptOracleRequestAction struct {
+	Value OracleRequestAction
+	Set   bool
+}
+
+// IsSet returns true if OptOracleRequestAction was set.
+func (o OptOracleRequestAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptOracleRequestAction) Reset() {
+	var v OracleRequestAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptOracleRequestAction) SetTo(v OracleRequestAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptOracleRequestAction) Get() (v OracleRequestAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptOracleRequestAction) Or(d OracleRequestAction) OracleRequestAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptPictureDNS returns new OptPictureDNS with value set to v.
 func NewOptPictureDNS(v PictureDNS) OptPictureDNS {
 	return OptPictureDNS{
@@ -16801,6 +16877,80 @@ func (s *OracleBridgeParams) SetOracles(val []Oracle) {
 	s.Oracles = val
 }
 
+// Ref: #/components/schemas/OraclePriceFeed
+type OraclePriceFeed struct {
+	ID            string     `json:"id"`
+	DisplaySymbol string     `json:"display_symbol"`
+	Rate          OptFloat64 `json:"rate"`
+}
+
+// GetID returns the value of ID.
+func (s *OraclePriceFeed) GetID() string {
+	return s.ID
+}
+
+// GetDisplaySymbol returns the value of DisplaySymbol.
+func (s *OraclePriceFeed) GetDisplaySymbol() string {
+	return s.DisplaySymbol
+}
+
+// GetRate returns the value of Rate.
+func (s *OraclePriceFeed) GetRate() OptFloat64 {
+	return s.Rate
+}
+
+// SetID sets the value of ID.
+func (s *OraclePriceFeed) SetID(val string) {
+	s.ID = val
+}
+
+// SetDisplaySymbol sets the value of DisplaySymbol.
+func (s *OraclePriceFeed) SetDisplaySymbol(val string) {
+	s.DisplaySymbol = val
+}
+
+// SetRate sets the value of Rate.
+func (s *OraclePriceFeed) SetRate(val OptFloat64) {
+	s.Rate = val
+}
+
+// Ref: #/components/schemas/OracleRequestAction
+type OracleRequestAction struct {
+	Requester  AccountAddress    `json:"requester"`
+	ResponseTo AccountAddress    `json:"response_to"`
+	PriceFeeds []OraclePriceFeed `json:"price_feeds"`
+}
+
+// GetRequester returns the value of Requester.
+func (s *OracleRequestAction) GetRequester() AccountAddress {
+	return s.Requester
+}
+
+// GetResponseTo returns the value of ResponseTo.
+func (s *OracleRequestAction) GetResponseTo() AccountAddress {
+	return s.ResponseTo
+}
+
+// GetPriceFeeds returns the value of PriceFeeds.
+func (s *OracleRequestAction) GetPriceFeeds() []OraclePriceFeed {
+	return s.PriceFeeds
+}
+
+// SetRequester sets the value of Requester.
+func (s *OracleRequestAction) SetRequester(val AccountAddress) {
+	s.Requester = val
+}
+
+// SetResponseTo sets the value of ResponseTo.
+func (s *OracleRequestAction) SetResponseTo(val AccountAddress) {
+	s.ResponseTo = val
+}
+
+// SetPriceFeeds sets the value of PriceFeeds.
+func (s *OracleRequestAction) SetPriceFeeds(val []OraclePriceFeed) {
+	s.PriceFeeds = val
+}
+
 // Ref: #/components/schemas/PictureDNS
 type PictureDNS struct {
 	Type PictureDNSType `json:"type"`
@@ -16936,6 +17086,7 @@ const (
 	PoolImplementationTypeWhales   PoolImplementationType = "whales"
 	PoolImplementationTypeTf       PoolImplementationType = "tf"
 	PoolImplementationTypeLiquidTF PoolImplementationType = "liquidTF"
+	PoolImplementationTypeFfvault  PoolImplementationType = "ffvault"
 )
 
 // AllValues returns all PoolImplementationType values.
@@ -16944,6 +17095,7 @@ func (PoolImplementationType) AllValues() []PoolImplementationType {
 		PoolImplementationTypeWhales,
 		PoolImplementationTypeTf,
 		PoolImplementationTypeLiquidTF,
+		PoolImplementationTypeFfvault,
 	}
 }
 
@@ -16955,6 +17107,8 @@ func (s PoolImplementationType) MarshalText() ([]byte, error) {
 	case PoolImplementationTypeTf:
 		return []byte(s), nil
 	case PoolImplementationTypeLiquidTF:
+		return []byte(s), nil
+	case PoolImplementationTypeFfvault:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -16972,6 +17126,9 @@ func (s *PoolImplementationType) UnmarshalText(data []byte) error {
 		return nil
 	case PoolImplementationTypeLiquidTF:
 		*s = PoolImplementationTypeLiquidTF
+		return nil
+	case PoolImplementationTypeFfvault:
+		*s = PoolImplementationTypeFfvault
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -21200,6 +21357,8 @@ type WithdrawStakeRequestAction struct {
 	Staker         AccountAddress         `json:"staker"`
 	Pool           AccountAddress         `json:"pool"`
 	Implementation PoolImplementationType `json:"implementation"`
+	// If present, should be used instead of amount.
+	StakeMeta OptPrice `json:"stake_meta"`
 }
 
 // GetAmount returns the value of Amount.
@@ -21222,6 +21381,11 @@ func (s *WithdrawStakeRequestAction) GetImplementation() PoolImplementationType 
 	return s.Implementation
 }
 
+// GetStakeMeta returns the value of StakeMeta.
+func (s *WithdrawStakeRequestAction) GetStakeMeta() OptPrice {
+	return s.StakeMeta
+}
+
 // SetAmount sets the value of Amount.
 func (s *WithdrawStakeRequestAction) SetAmount(val OptInt64) {
 	s.Amount = val
@@ -21240,6 +21404,11 @@ func (s *WithdrawStakeRequestAction) SetPool(val AccountAddress) {
 // SetImplementation sets the value of Implementation.
 func (s *WithdrawStakeRequestAction) SetImplementation(val PoolImplementationType) {
 	s.Implementation = val
+}
+
+// SetStakeMeta sets the value of StakeMeta.
+func (s *WithdrawStakeRequestAction) SetStakeMeta(val OptPrice) {
+	s.StakeMeta = val
 }
 
 // Ref: #/components/schemas/WithdrawTokenStakeRequestAction

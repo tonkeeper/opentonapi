@@ -14,6 +14,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
+	"github.com/tonkeeper/opentonapi/pkg/pyth"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
 	ton "github.com/tonkeeper/tongo/config"
@@ -50,11 +51,13 @@ func main() {
 		archiveLiteServers = opt.LiteServers
 	}
 
+	pythFeeds := pyth.GetUpdatedWithFallback(context.Background(), log)
 	storage, err := litestorage.NewLiteStorage(
 		log,
 		client,
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
 		litestorage.WithBlockChannel(storageBlockCh),
+		litestorage.WithPythPriceFeeds(pythFeeds),
 	)
 	book := addressbook.NewAddressBook(log, config.AddressPath, config.JettonPath, config.CollectionPath, storage)
 	// The executor is used to resolve DNS records.

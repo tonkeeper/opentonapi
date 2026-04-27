@@ -1,0 +1,108 @@
+{
+   "Actions": [
+     {
+       "DepositStake": {
+         "Staker": "0:18e0ce3934cd97282f8f6399cb2ae011d5e29f1b1cfe3774aa4844210d734a6e",
+         "Amount": {
+           "Currency": {
+             "Type": "jetton",
+             "Jetton": "0:757f204003da900cfe8b106685ddc6d4f976ebfa9e844816469ea94790720700",
+             "CurrencyID": null
+           },
+           "Amount": 19949
+         },
+         "Pool": "0:4c4e2d27a27721f2b8fa3f9993e13c9696e9d701b2f498f981294ece2afdedda",
+         "Implementation": "ffvault"
+       },
+       "Success": true,
+       "Type": "DepositStake",
+       "BaseTransactions": [
+         "6fd54e5ca58d561c6f320763d6780b4a9871694e2e8f45beb40984b828d71bc2",
+         "645eb67904ade0229330c8ad9dc37cb1226fa3464d29f8c61bc9a9900cc194d8",
+         "382330e769a04534d1f6edb5a2343cf5ff25cf2ce2d5bb8655f9b33fdd6864cc",
+         "c12aed57dda0d0492717e72a70b8594b81684bca42d144d8cbf246515643171a",
+         "677f74f33d04ca4c7fab3151298f0863641c3fe23dd63b3131f5b754e1438984",
+         "1e1b434fcd26d799ca8ddcbdedc97335b0c4015d8250c4ab6d195f6c2f0e0bc3"
+       ]
+     },
+     {
+       "OracleRequest": {
+         "Requester": "0:4c4e2d27a27721f2b8fa3f9993e13c9696e9d701b2f498f981294ece2afdedda",
+         "Oracle": "0:3934fca37d9ced0e6f237130704c053d346b20244930d7dcfad7279c5f44e5b1",
+         "ResponseTo": "0:4c4e2d27a27721f2b8fa3f9993e13c9696e9d701b2f498f981294ece2afdedda",
+         "PriceFeeds": [
+           {
+             "ID": "2817b78438c769357182c04346fddaad1178c82f4048828fe0997c3c64624e14",
+             "DisplaySymbol": "SPYX/USD",
+             "Rate": 653.40164557
+           }
+         ]
+       },
+       "Success": true,
+       "Type": "OracleRequest",
+       "BaseTransactions": [
+         "91e2da6de76a7d0ff7b687dfba93af384578b722fc7ccc1877c9c2508ad46b10",
+         "b1b9455558a329c813e6884c0c054b0f60a973ed111d561d43928bcc246e0a56"
+       ]
+     },
+     {
+       "ContractDeploy": {
+         "Address": "0:14a83c75b1bfb35c493bac32df0ffdda5883b1c8ec2dd24b63bdcc2573f75a72",
+         "Interfaces": null
+       },
+       "Success": true,
+       "Type": "ContractDeploy",
+       "BaseTransactions": [
+         "1e1b434fcd26d799ca8ddcbdedc97335b0c4015d8250c4ab6d195f6c2f0e0bc3"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:14a83c75b1bfb35c493bac32df0ffdda5883b1c8ec2dd24b63bdcc2573f75a72",
+       "Ton": 10000000,
+       "Fee": 2090400,
+       "Jettons": null
+     },
+     {
+       "Account": "0:18e0ce3934cd97282f8f6399cb2ae011d5e29f1b1cfe3774aa4844210d734a6e",
+       "Ton": -157072891,
+       "Fee": 13728228,
+       "Jettons": [
+         {
+           "Address": "0:757f204003da900cfe8b106685ddc6d4f976ebfa9e844816469ea94790720700",
+           "Quantity": -19949
+         }
+       ]
+     },
+     {
+       "Account": "0:1fa21e9e48db9e56272a188fc34b38b43aa6fa51ae5a6e6d71adf21e643905c8",
+       "Ton": -3130,
+       "Fee": 6250730,
+       "Jettons": null
+     },
+     {
+       "Account": "0:3934fca37d9ced0e6f237130704c053d346b20244930d7dcfad7279c5f44e5b1",
+       "Ton": -3104,
+       "Fee": 102381105,
+       "Jettons": null
+     },
+     {
+       "Account": "0:4c4e2d27a27721f2b8fa3f9993e13c9696e9d701b2f498f981294ece2afdedda",
+       "Ton": 0,
+       "Fee": 16543532,
+       "Jettons": [
+         {
+           "Address": "0:757f204003da900cfe8b106685ddc6d4f976ebfa9e844816469ea94790720700",
+           "Quantity": 19949
+         }
+       ]
+     },
+     {
+       "Account": "0:cb9edd90eee09419360a7cf2ba3a82e9f158dc08caf30ab0a41a93fa2f64c8cb",
+       "Ton": 0,
+       "Fee": 6085130,
+       "Jettons": null
+     }
+   ]
+ }

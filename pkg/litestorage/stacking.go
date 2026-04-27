@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
+	abiFfVault "github.com/tonkeeper/tongo/abi-tolk/abiGenerated/ffVault"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 
@@ -214,4 +215,60 @@ func (s *LiteStorage) GetLiquidPools(ctx context.Context, onlyVerified bool) ([]
 
 func (s *LiteStorage) GetParticipatingInLiquidPools(ctx context.Context, member tongo.AccountID) ([]core.Nominator, error) {
 	return nil, nil
+}
+
+func (s *LiteStorage) GetFfVaultPositionDatas(ctx context.Context, positions []tongo.AccountID) (map[tongo.AccountID]core.VaultPositionData, error) {
+	datas := make(map[tongo.AccountID]core.VaultPositionData)
+	for _, accID := range positions {
+		_, value, err := abi.GetNftData(ctx, s.executor, accID)
+		if err != nil {
+			return nil, err
+		}
+		if result, ok := value.(abi.GetNftDataResult); ok {
+			stakerID, err := tongo.AccountIDFromTlb(result.OwnerAddress)
+			if err != nil {
+				return nil, err
+			}
+			poolID, err := tongo.AccountIDFromTlb(result.CollectionAddress)
+			if err != nil {
+				return nil, err
+			}
+			datas[accID] = core.VaultPositionData{
+				Staker: *stakerID,
+				Pool:   *poolID,
+			}
+		}
+	}
+	return datas, nil
+}
+
+func (s *LiteStorage) GetFfVaultJettonMasters(ctx context.Context, vaults []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
+	if len(vaults) == 0 {
+		return make(map[tongo.AccountID]tongo.AccountID), nil
+	}
+	assetWallets := make(map[tongo.AccountID]tongo.AccountID) // vault -> asset wallet
+	for _, vault := range vaults {
+		_, storage, err := abiFfVault.Vault_AccountState(ctx, s, vault)
+		if err != nil {
+			return nil, err
+		}
+		raw := storage.StaticData.Value.AssetJettonWallet
+		walletID := tongo.AccountID{Workchain: int32(raw.Workchain), Address: raw.Address}
+		assetWallets[vault] = walletID
+	}
+	wallets := make([]tongo.AccountID, 0, len(assetWallets))
+	for _, w := range assetWallets {
+		wallets = append(wallets, w)
+	}
+	walletToMaster, err := s.JettonMastersForWallets(ctx, wallets)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[tongo.AccountID]tongo.AccountID, len(assetWallets))
+	for vault, wallet := range assetWallets {
+		if master, ok := walletToMaster[wallet]; ok {
+			result[vault] = master
+		}
+	}
+	return result, nil
 }
