@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -382,10 +383,31 @@ func (h *Handler) convertActionJettonMint(ctx context.Context, m *bath.JettonMin
 	return action, simplePreview, nil
 }
 
-func (h *Handler) convertDepositStake(d *bath.DepositStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDepositStakeAction, oas.ActionSimplePreview) {
+func (h *Handler) formatPrice(ctx context.Context, amount core.Price, eventLt int64) (value string, price oas.OptPrice, err error) {
+	p := h.convertPrice(ctx, amount)
+	scaledUiParams, err := h.scaledUIParamsFromPrice(ctx, amount, &eventLt)
+	if err != nil {
+		return "", oas.OptPrice{}, err
+	}
+	if amount.Currency.Type == core.CurrencyTON {
+		return i18n.FormatTONs(amount.Amount.Int64()), oas.NewOptPrice(p), nil
+	}
+	return i18n.FormatTokens(amount.Amount, int32(p.Decimals), p.TokenName, scaledUiParams), oas.NewOptPrice(p), nil
+}
+
+func (h *Handler) convertDepositStake(ctx context.Context, d *bath.DepositStakeAction, acceptLanguage string, viewer *tongo.AccountID, eventLt int64) (oas.OptDepositStakeAction, oas.ActionSimplePreview, error) {
+	value, stakeMeta, err := h.formatPrice(ctx, d.Amount, eventLt)
+	if err != nil {
+		return oas.OptDepositStakeAction{}, oas.ActionSimplePreview{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+	}
+	tonAmount := int64(0)
+	if d.Amount.Currency.Type == core.CurrencyTON {
+		tonAmount = d.Amount.Amount.Int64()
+	}
 	var action oas.OptDepositStakeAction
 	action.SetTo(oas.DepositStakeAction{
-		Amount:         d.Amount,
+		Amount:         tonAmount,
+		StakeMeta:      stakeMeta,
 		Staker:         convertAccountAddress(d.Staker, h.addressBook),
 		Pool:           convertAccountAddress(d.Pool, h.addressBook),
 		Implementation: oas.PoolImplementationType(d.Implementation),
@@ -397,28 +419,36 @@ func (h *Handler) convertDepositStake(d *bath.DepositStakeAction, acceptLanguage
 				ID:    "depositStakeAction",
 				Other: "Deposit {{.Value}} to staking pool",
 			},
-			TemplateData: i18n.Template{
-				"Value": i18n.FormatTONs(d.Amount),
-			},
+			TemplateData: i18n.Template{"Value": value},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &d.Staker, &d.Pool),
-		Value:    oas.NewOptString(i18n.FormatTONs(d.Amount)),
+		Value:    oas.NewOptString(value),
 	}
-	return action, simplePreview
+	return action, simplePreview, nil
 }
 
-func (h *Handler) convertWithdrawStakeRequest(d *bath.WithdrawStakeRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawStakeRequestAction, oas.ActionSimplePreview) {
+func (h *Handler) convertWithdrawStakeRequest(ctx context.Context, d *bath.WithdrawStakeRequestAction, acceptLanguage string, viewer *tongo.AccountID, eventLt int64) (oas.OptWithdrawStakeRequestAction, oas.ActionSimplePreview, error) {
+	var stakeMeta oas.OptPrice
+	var tonAmount oas.OptInt64
 	var action oas.OptWithdrawStakeRequestAction
+	value := "ALL"
+	if d.Amount != nil {
+		var err error
+		value, stakeMeta, err = h.formatPrice(ctx, *d.Amount, eventLt)
+		if err != nil {
+			return oas.OptWithdrawStakeRequestAction{}, oas.ActionSimplePreview{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
+		}
+		if d.Amount.Currency.Type == core.CurrencyTON {
+			tonAmount = oas.NewOptInt64(d.Amount.Amount.Int64())
+		}
+	}
 	action.SetTo(oas.WithdrawStakeRequestAction{
-		Amount:         g.Opt(d.Amount),
+		Amount:         tonAmount,
+		StakeMeta:      stakeMeta,
 		Staker:         convertAccountAddress(d.Staker, h.addressBook),
 		Pool:           convertAccountAddress(d.Pool, h.addressBook),
 		Implementation: oas.PoolImplementationType(d.Implementation),
 	})
-	value := "ALL"
-	if d.Amount != nil {
-		value = i18n.FormatTONs(*d.Amount)
-	}
 	simplePreview := oas.ActionSimplePreview{
 		Name: "Withdraw Stake Request",
 		Description: i18n.T(acceptLanguage, i18n.C{
@@ -431,10 +461,7 @@ func (h *Handler) convertWithdrawStakeRequest(d *bath.WithdrawStakeRequestAction
 		Accounts: distinctAccounts(viewer, h.addressBook, &d.Staker, &d.Pool),
 		Value:    oas.NewOptString(value),
 	}
-	if d.Amount != nil {
-		simplePreview.Value = oas.NewOptString(i18n.FormatTONs(*d.Amount))
-	}
-	return action, simplePreview
+	return action, simplePreview, nil
 }
 
 func (h *Handler) convertWithdrawStake(d *bath.WithdrawStakeAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptWithdrawStakeAction, oas.ActionSimplePreview) {
@@ -658,6 +685,43 @@ func (h *Handler) convertLiquidityDepositAction(ctx context.Context, l *bath.Liq
 	var action oas.OptLiquidityDepositAction
 	action.SetTo(liquidityDepositAction)
 	return action, simplePreview, nil
+}
+
+func (h *Handler) convertOracleRequestAction(o *bath.OracleRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptOracleRequestAction, oas.ActionSimplePreview) {
+	priceFeeds := make([]oas.OraclePriceFeed, 0, len(o.PriceFeeds))
+	symbols := make([]string, 0, len(o.PriceFeeds))
+	rates := make([]string, 0, len(o.PriceFeeds))
+	for _, feed := range o.PriceFeeds {
+		priceFeed := oas.OraclePriceFeed{
+			ID:            feed.ID,
+			DisplaySymbol: feed.DisplaySymbol,
+		}
+		if feed.Rate != nil {
+			priceFeed.Rate.SetTo(*feed.Rate)
+			rates = append(rates, strconv.FormatFloat(*feed.Rate, 'g', 4, 64))
+		} else {
+			rates = append(rates, "-")
+		}
+		priceFeeds = append(priceFeeds, priceFeed)
+		if feed.DisplaySymbol != "" {
+			symbols = append(symbols, feed.DisplaySymbol)
+		}
+	}
+	description := strings.Join(symbols, ", ")
+	value := strings.Join(rates, ", ")
+	var action oas.OptOracleRequestAction
+	action.SetTo(oas.OracleRequestAction{
+		Requester:  convertAccountAddress(o.Requester, h.addressBook),
+		ResponseTo: convertAccountAddress(o.ResponseTo, h.addressBook),
+		PriceFeeds: priceFeeds,
+	})
+	simplePreview := oas.ActionSimplePreview{
+		Name:        "Oracle Request",
+		Description: description,
+		Value:       oas.NewOptString(value),
+		Accounts:    distinctAccounts(viewer, h.addressBook, &o.Requester, &o.Oracle, &o.ResponseTo),
+	}
+	return action, simplePreview
 }
 
 func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a bath.Action, acceptLanguage oas.OptString, eventLt int64) (oas.Action, error) {
@@ -974,7 +1038,10 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		}
 		action.SmartContractExec.SetTo(contractAction)
 	case bath.DepositStake:
-		action.DepositStake, action.SimplePreview = h.convertDepositStake(a.DepositStake, acceptLanguage.Value, viewer)
+		action.DepositStake, action.SimplePreview, err = h.convertDepositStake(ctx, a.DepositStake, acceptLanguage.Value, viewer, eventLt)
+		if err != nil {
+			return oas.Action{}, fmt.Errorf("failed to convert deposit stake: %w", err)
+		}
 	case bath.WithdrawTokenStakeRequest:
 		action.WithdrawTokenStakeRequest, action.SimplePreview = h.convertWithdrawTokenStakeRequest(ctx, a.WithdrawTokenStakeRequest, acceptLanguage.Value, viewer)
 	case bath.DepositTokenStake:
@@ -983,7 +1050,10 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			return oas.Action{}, fmt.Errorf("failed to convert deposit token stake: %w", err)
 		}
 	case bath.WithdrawStakeRequest:
-		action.WithdrawStakeRequest, action.SimplePreview = h.convertWithdrawStakeRequest(a.WithdrawStakeRequest, acceptLanguage.Value, viewer)
+		action.WithdrawStakeRequest, action.SimplePreview, err = h.convertWithdrawStakeRequest(ctx, a.WithdrawStakeRequest, acceptLanguage.Value, viewer, eventLt)
+		if err != nil {
+			return oas.Action{}, fmt.Errorf("failed to convert withdraw stake request: %w", err)
+		}
 	case bath.WithdrawStake:
 		action.WithdrawStake, action.SimplePreview = h.convertWithdrawStake(a.WithdrawStake, acceptLanguage.Value, viewer)
 	case bath.DomainRenew:
@@ -1006,6 +1076,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		if err != nil {
 			return oas.Action{}, fmt.Errorf("failed to convert liquidity deposit action: %w", err)
 		}
+	case bath.OracleRequest:
+		action.OracleRequest, action.SimplePreview = h.convertOracleRequestAction(a.OracleRequest, acceptLanguage.Value, viewer)
 	}
 	return action, nil
 }

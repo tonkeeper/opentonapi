@@ -6498,6 +6498,7 @@ components:
             - DepositTokenStake
             - WithdrawTokenStakeRequest
             - LiquidityDeposit
+            - OracleRequest
             - Unknown
         status:
           type: string
@@ -6561,6 +6562,8 @@ components:
           $ref: '#/components/schemas/WithdrawTokenStakeRequestAction'
         LiquidityDeposit:
           $ref: '#/components/schemas/LiquidityDepositAction'
+        OracleRequest:
+          $ref: '#/components/schemas/OracleRequestAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6593,6 +6596,37 @@ components:
           $ref: '#/components/schemas/EncryptedComment'
         refund:
           $ref: '#/components/schemas/Refund'
+    OracleRequestAction:
+      type: object
+      required:
+        - requester
+        - response_to
+        - price_feeds
+      properties:
+        requester:
+          $ref: '#/components/schemas/AccountAddress'
+        response_to:
+          $ref: '#/components/schemas/AccountAddress'
+        price_feeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/OraclePriceFeed'
+    OraclePriceFeed:
+      type: object
+      required:
+        - id
+        - display_symbol
+      properties:
+        id:
+          type: string
+          example: e62df6c8b4a85fe1a67f1c4d1f1e1d4335c04d1d7e2c50e0d7da7ad911f2d4
+        display_symbol:
+          type: string
+          example: TON/USD
+        rate:
+          type: number
+          format: double
+          example: 5.24
     ExtraCurrencies:
       type: object
       required:
@@ -7006,6 +7040,9 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         implementation:
           $ref: '#/components/schemas/PoolImplementationType'
+        stake_meta:
+          description: "If present, should be used instead of amount"
+          $ref: '#/components/schemas/Price'
     WithdrawStakeAction:
       description: "validator's participation in elections"
       type: object
@@ -7045,6 +7082,9 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         implementation:
           $ref: '#/components/schemas/PoolImplementationType'
+        stake_meta:
+          description: "If present, should be used instead of amount"
+          $ref: '#/components/schemas/Price'
     ElectionsRecoverStakeAction:
       type: object
       required:
@@ -8372,6 +8412,7 @@ components:
         - whales
         - tf
         - liquidTF
+        - ffvault
     TokenRates:
       type: object
       properties:

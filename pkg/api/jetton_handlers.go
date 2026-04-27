@@ -185,10 +185,7 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 	}
 	offset := 0
 	if params.Offset.IsSet() {
-		offset = int(params.Offset.Value)
-		if offset < 0 {
-			offset = 0
-		}
+		offset = max(int(params.Offset.Value), 0)
 	}
 	jettons, err := h.storage.GetJettonMasters(ctx, limit, offset)
 	if err != nil {

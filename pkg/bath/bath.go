@@ -55,7 +55,7 @@ func FindActions(ctx context.Context, trace *core.Trace, opts ...Option) (*Actio
 		o(&options)
 	}
 	if options.straws == nil {
-		options.straws = DefaultStraws(options.addressBook)
+		options.straws = DefaultStraws(options.addressBook, options.informationSource)
 	}
 	if err := core.CollectAdditionalInfo(ctx, options.informationSource, trace); err != nil {
 		return nil, err

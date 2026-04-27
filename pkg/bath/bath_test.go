@@ -3,9 +3,12 @@ package bath
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,8 +19,10 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
+	"golang.org/x/exp/maps"
 
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
+	"github.com/tonkeeper/opentonapi/pkg/pyth"
 )
 
 type jettonItem struct {
@@ -42,6 +47,18 @@ type mockInfoSource struct {
 	OnJettonMastersForWallets func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
 	OnNftSaleContracts        func(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error)
 	OnSubscriptionsInfos      func(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error)
+}
+
+func (m *mockInfoSource) GetFfVaultPositionDatas(ctx context.Context, positions []tongo.AccountID) (map[tongo.AccountID]core.VaultPositionData, error) {
+	return map[tongo.AccountID]core.VaultPositionData{}, nil
+}
+
+func (m *mockInfoSource) GetFfVaultJettonMasters(ctx context.Context, vaults []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
+	return map[tongo.AccountID]tongo.AccountID{}, nil
+}
+
+func (m *mockInfoSource) GetPythPriceFeedMeta(id string) (pyth.PriceFeedAttributes, bool) {
+	return pyth.Default.GetFeed(id)
 }
 
 func (m *mockInfoSource) NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error) {
@@ -76,6 +93,21 @@ func (m *mockInfoSource) DedustPools(ctx context.Context, contracts []tongo.Acco
 
 var _ core.InformationSource = &mockInfoSource{}
 
+func isFocusedRun() bool {
+	run := flag.Lookup("test.run")
+	return run != nil && strings.Contains(run.Value.String(), "/")
+}
+
+func newBathTestStorage(t *testing.T, cli *liteapi.Client, blocks []tongo.BlockID) *litestorage.LiteStorage {
+	t.Helper()
+	storage, err := litestorage.NewLiteStorage(zap.L(),
+		cli,
+		litestorage.WithPreloadBlocks(blocks),
+	)
+	require.Nil(t, err)
+	return storage
+}
+
 func TestFindActions(t *testing.T) {
 	if os.Getenv("TEST_CI") == "1" {
 		t.SkipNow()
@@ -84,87 +116,98 @@ func TestFindActions(t *testing.T) {
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.Nil(t, err)
 
-	storage, err := litestorage.NewLiteStorage(zap.L(),
-		cli,
-		litestorage.WithPreloadBlocks([]tongo.BlockID{
-			// subscription v2
-			tongo.MustParseBlockID("(0,2000000000000000,54592412)"),
-			tongo.MustParseBlockID("(0,a000000000000000,54231006)"),
-			tongo.MustParseBlockID("(0,2000000000000000,54592579)"),
-			tongo.MustParseBlockID("(0,6000000000000000,54605580)"),
-			tongo.MustParseBlockID("(0,2000000000000000,54593195)"),
-			tongo.MustParseBlockID("(0,a000000000000000,54231771)"),
-			tongo.MustParseBlockID("(0,6000000000000000,54607040)"),
-			tongo.MustParseBlockID("(0,2000000000000000,54594034)"),
-			tongo.MustParseBlockID("(0,6000000000000000,54607046)"),
-			tongo.MustParseBlockID("(0,a000000000000000,54232590)"),
-			tongo.MustParseBlockID("(0,2000000000000000,54593363)"),
-			tongo.MustParseBlockID("(0,6000000000000000,54606375)"),
-			tongo.MustParseBlockID("(0,6000000000000000,54607085)"),
-			tongo.MustParseBlockID("(0,2000000000000000,54594077)"),
-			tongo.MustParseBlockID("(0,e000000000000000,54251225)"),
-			tongo.MustParseBlockID("(0,2000000000000000,54593545)"),
-			tongo.MustParseBlockID("(0,6000000000000000,54606554)"),
-			tongo.MustParseBlockID("(0,8000000000000000,54937287)"),
-			tongo.MustParseBlockID("(0,8000000000000000,55058271)"),
-			tongo.MustParseBlockID("(0,8000000000000000,54937935)"),
-			tongo.MustParseBlockID("(0,8000000000000000,55058346)"),
-			tongo.MustParseBlockID("(0,8000000000000000,54938365)"),
-			tongo.MustParseBlockID("(0,8000000000000000,55058632)"),
-			tongo.MustParseBlockID("(0,8000000000000000,55058873)"),
-			// failed simple transfer
-			tongo.MustParseBlockID("(0,2000000000000000,45502666)"),
-			// simple transfer, one of two failed
-			tongo.MustParseBlockID("(0,2000000000000000,45502701)"),
-			// domain renew
-			tongo.MustParseBlockID("(0,8000000000000000,38651597)"),
-			// subscription init
-			tongo.MustParseBlockID("(0,8000000000000000,25031484)"),
-			// subscription prolongation
-			tongo.MustParseBlockID("(0,8000000000000000,24056733)"),
-			// getgems nft purchase
+	// this map is a separate, because using testCases (if we want the map to be inferred)
+	//      breaks IDEA's ability to "click specific test case" perhaps in other IDE's too
+	txBlocks := map[string][]tongo.BlockID{
+		"6e4cfc51eeef38a46896a556c9faae05754b31f563592fc866207234dec5966a": {
+			tongo.MustParseBlockID("(0,8000000000000000,68194499)"),
+		},
+		"2f7965a4897662fedda00bf070e7d5bdd3884ecadb81cf2f37f7caa455c36931": {
+			tongo.MustParseBlockID("(0,8000000000000000,63406725)"),
+		},
+		"71572d212e78e76c7c8b2af83835860f639568aeaee0561e2003742a84137181": {
+			tongo.MustParseBlockID("(0,8000000000000000,63441137)"),
+		},
+		"74ed6e6076dfa3ffb3e319285c3517c10e46c5a3352791f9d2bcf1f06116711f": {
+			tongo.MustParseBlockID("(0,8000000000000000,61657368)"),
+		},
+		"431b7e8d728c419fc6e85baa91b849795bc0cb024fa0cf973837224ea5be4df8": {
+			tongo.MustParseBlockID("(0,8000000000000000,61720236)"),
+		},
+		"4b8b2a18abb6784c23eefa6f71d20aa2475c0a379dc2459c413e381fc7379803": {
+			tongo.MustParseBlockID("(0,8000000000000000,38493203)"),
+		},
+		"ba379e2e3f7636cc7a00d867d3f5213a681c0331b603226c1efb04697e9432f4": {
+			tongo.MustParseBlockID("(0,8000000000000000,55602899)"),
+		},
+		"4a419223a45d331f1e6b48adb6dbde7f498072ac5cbea527beaa090b104ac431": {
+			tongo.MustParseBlockID("(0,8000000000000000,34021598)"),
+		},
+		"648b9fb6f0781778b5128efcffd306545695e019795ca35e4a7ff981c544f0ea": {
+			tongo.MustParseBlockID("(0,8000000000000000,33600829)"),
+		},
+		"8feb00edd889f8a36fb8af5b4d5370190fcbe872088cd1247c445e3c3b39a795": {
 			tongo.MustParseBlockID("(0,8000000000000000,35121696)"),
-			// tf nominator deposit
+		},
+		"7592e2c406c4320c408341989d42fae6dc18654af0f2110d76b3c44c2b0b5495": {
+			tongo.MustParseBlockID("(0,8000000000000000,35667628)"),
+		},
+		"ae633abecf6cd94c93fd1697dfbb05a8af1e0ba0ed455577c614d1466563cf92": {
+			tongo.MustParseBlockID("(0,8000000000000000,58460832)"),
+		},
+		"039265f4baeece69168d724ecfed546267d95278a7a6d6445912fe6cc1766056": {
+			tongo.MustParseBlockID("(0,8000000000000000,25031484)"),
+		},
+		"d5cf39c85392e40a7f5b0e706c4df56ad89cb214e4c5b5206fbe82c6d71a09cf": {
+			tongo.MustParseBlockID("(0,8000000000000000,24056733)"),
+		},
+		"75a0c3eef9a40479f3dd1fc82ff3728b9547a89044adb72862384c01428553bc": {
+			tongo.MustParseBlockID("(0,8000000000000000,34392947)"),
+		},
+		"e3d4dfb292db3bb612b7b9b1a0c6ae658a58a249b1152a4cd6bc1e4a60068e21": {
+			tongo.MustParseBlockID("(0,8000000000000000,39685391)"),
+		},
+		"36eabfbae72435be9bb60a0e79dfb9846509b40c4848516ca73edcfae1b97dfe": {
+			tongo.MustParseBlockID("(0,8000000000000000,43480182)"),
+		},
+		"6e90e927c76d2eeed4e854586ea788ae6e7df50b72ca422fea2c396dd03b4c2f": {
 			tongo.MustParseBlockID("(0,8000000000000000,35205653)"),
 			tongo.MustParseBlockID("(-1,8000000000000000,29537038)"),
-			// tf nominator process withdraws
+		},
+		"89eb69765b3b4cd2635657d60a0e6c8be9422095e0dff4b98469f40f8d0a5566": {
 			tongo.MustParseBlockID("(-1,8000000000000000,28086143)"),
 			tongo.MustParseBlockID("(0,8000000000000000,33674077)"),
-			// tf nominator withdraw request
+		},
+		"67247836603b8e2b538520ad57661ad594dc6f4cf2740c0c3a3529a11ae14c23": {
 			tongo.MustParseBlockID("(0,8000000000000000,35988956)"),
 			tongo.MustParseBlockID("(-1,8000000000000000,30311440)"),
 			tongo.MustParseBlockID("(0,8000000000000000,35988959)"),
-			// tf update validator set
+		},
+		"8ee4410c8159287702c78a32e166a8566036c752092d1d8cc520e890e6181042": {
 			tongo.MustParseBlockID("(-1,8000000000000000,30311911)"),
-			// stonfi usdt<>ton swap with tonkeeper battery
-			tongo.MustParseBlockID("(0,8000000000000000,61657368)"),
-			// stonfi usdt<>ton swap
-			tongo.MustParseBlockID("(0,8000000000000000,61720236)"),
-			// stonfi swap
+		},
+		"ace68c0da7833cb042ce6049cfac5fcf5fa9f3c93bfc9c02871381253d9e2157": {
 			tongo.MustParseBlockID("(0,8000000000000000,36716516)"),
-			// stonfi swap
+		},
+		"449aae1c0b5ebe55bc7c9efa6e511bd31b659b4bc92f3f40f50598fbbd9ca243": {
 			tongo.MustParseBlockID("(0,8000000000000000,36693371)"),
-			// failed stonfi swap
+		},
+		"77f5acb88fd863e9c00a164eb551ef83c17088d1f603bf463f64f952b93406b0": {
 			tongo.MustParseBlockID("(0,8000000000000000,38072131)"),
-			// deploy contract actions
+		},
+		"657623f3db93397a3bb956e0e621d7a37e4ff27b80013a68f2dd91c8094b50e3": {
 			tongo.MustParseBlockID("(0,8000000000000000,22029126)"),
-			// encrypted comment
+		},
+		"6f3e1f2c05df05345198a9d26456dcb51d4c78ce64ced56fb9976e92941211d3": {
 			tongo.MustParseBlockID("(0,8000000000000000,36828763)"),
-			// cancel sale at getgems
-			tongo.MustParseBlockID("(0,8000000000000000,36025985)"),
-			// multiple call contracts
-			tongo.MustParseBlockID("(0,8000000000000000,36692636)"),
-			// megatonfi swap
-			tongo.MustParseBlockID("(0,8000000000000000,37707758)"),
-			// deposit liquid staking
-			tongo.MustParseBlockID("(0,8000000000000000,38159152)"),
-			// withdraw liquid staking
+		},
+		"066ea6e9c4e6a6bbc0d3c2aed8a4d80a76a8d6ae47a6d1baffe1275f667dacf5": {
 			tongo.MustParseBlockID("(0,8000000000000000,38474426)"),
-			tongo.MustParseBlockID("(0,8000000000000000,55602899)"),
-			tongo.MustParseBlockID("(0,8000000000000000,56373078)"),
-			// dedust swap
+		},
+		"831c7f1efaef9ac58fd39981468cea2bbd9c86a1bb72fc425cfc7734ae4a282f": {
 			tongo.MustParseBlockID("(0,8000000000000000,38293409)"),
-			// dedust swap from TON
+		},
+		"05536d0c200ac0d02f93e369fe29571c13b734b7f741c9fb366786d8144f1430": {
 			tongo.MustParseBlockID("(0,a000000000000000,45489132)"),
 			tongo.MustParseBlockID("(0,d000000000000000,45499358)"),
 			tongo.MustParseBlockID("(0,a000000000000000,45489138)"),
@@ -172,127 +215,244 @@ func TestFindActions(t *testing.T) {
 			tongo.MustParseBlockID("(0,f000000000000000,45499384)"),
 			tongo.MustParseBlockID("(0,2000000000000000,45500261)"),
 			tongo.MustParseBlockID("(0,a000000000000000,45489148)"),
-			// dedust swap to TON
+		},
+		"d2249d07091e57c43bcc6978db643dc6af14755e115ac48f6630a315b5e53498": {
 			tongo.MustParseBlockID("(0,2000000000000000,45500987)"),
 			tongo.MustParseBlockID("(0,d000000000000000,45500297)"),
 			tongo.MustParseBlockID("(0,2000000000000000,45500992)"),
 			tongo.MustParseBlockID("(0,9000000000000000,45489907)"),
 			tongo.MustParseBlockID("(0,d000000000000000,45500305)"),
 			tongo.MustParseBlockID("(0,2000000000000000,45500998)"),
-			tongo.MustParseBlockID("(0,8000000000000000,59172679)"),
-			tongo.MustParseBlockID("(0,8000000000000000,59172963)"),
-			// wton mint
-			tongo.MustParseBlockID("(0,8000000000000000,38493203)"),
-			// buy nft on fragment
+		},
+		"9900285c0f5a7cc18bdb61564013452461ead3bba84c6feb5195921e443cd79e": {
+			tongo.MustParseBlockID("(0,8000000000000000,36025985)"),
+		},
+		"e87ec0ae9ebdba400b82887462dd0908a954fe2165c1a89775742d85a5e2a5f8": {
+			tongo.MustParseBlockID("(0,8000000000000000,36692636)"),
+		},
+		"6a4c8e0dca5b052ab75f535df9d42ede949054f0004d3dd7aa6197af9dff0e1e": {
+			tongo.MustParseBlockID("(0,8000000000000000,37707758)"),
+		},
+		"482ef80fc6a147fba22c9e1d426ae0a5208e490aaccf0f0c51fd0a78b278a2a1": {
+			tongo.MustParseBlockID("(0,8000000000000000,38159152)"),
+		},
+		"db735068c5d52ac56a35079d9821f38ba177d40adaea0073bf0464490d30ccb3": {
 			tongo.MustParseBlockID("(0,8000000000000000,38499308)"),
-			// liquid withdraw
+		},
+		"98e8f0a2aeca64b74eecfb871f01debaf19d529d65c3b0fde9034897a79ad557": {
 			tongo.MustParseBlockID("(0,8000000000000000,38912382)"),
-			// telemint deploy
+		},
+		"08013737ecc5796d635f5c439d6d6913b4e894a8cdd86fd329c09bc51ea55239": {
 			tongo.MustParseBlockID("(0,8000000000000000,38603492)"),
-			// jetton transfer to another person
-			tongo.MustParseBlockID("(0,8000000000000000,39685391)"),
-			// ihr fee
+		},
+		"bcc48fcebc9635febcd1834ef40e1afab71c3ab46dd81ddf1d267474dae13923": {
+			tongo.MustParseBlockID("(0,8000000000000000,38651597)"),
+		},
+		"2da9737c4da572382f7a5abfdb923f223455280089f4b627c6cb028b2b8350d2": {
 			tongo.MustParseBlockID("(0,8000000000000000,40834551)"),
-			// failed transfer with gas fee 1 TON
+		},
+		"cf2eb5eb694dc3134cfb10135807efe08b4183267564c1fd04906526297e8c7f": {
 			tongo.MustParseBlockID("(0,a800000000000000,42491964)"),
-			// jetton mint
+		},
+		"e27cdf1d6987a3e74dc8d9c4a52a5b22112fe3946d0dceadf8160b74f80b9d46": {
 			tongo.MustParseBlockID("(0,4000000000000000,42924030)"),
 			tongo.MustParseBlockID("(0,4000000000000000,42924031)"),
 			tongo.MustParseBlockID("(0,c000000000000000,42921231)"),
 			tongo.MustParseBlockID("(0,4000000000000000,42924037)"),
 			tongo.MustParseBlockID("(0,c000000000000000,42921237)"),
 			tongo.MustParseBlockID("(0,4000000000000000,42924043)"),
-			// disintar purchase
-			tongo.MustParseBlockID("(0,8000000000000000,35667628)"),
-			//cut jetton transfer
-			tongo.MustParseBlockID("(0,8000000000000000,43480182)"),
-			// jetton transfer to myself
-			tongo.MustParseBlockID("(0,8000000000000000,34392947)"),
-			// simple transfer
-			tongo.MustParseBlockID("(0,8000000000000000,34021598)"),
-			// nft transfer
-			tongo.MustParseBlockID("(0,8000000000000000,33600829)"),
-			// failed dedust swap
+		},
+		"63d358331c0154ade48ab92b4634c3fff004f42ce7201a37973938862d232c0f": {
+			tongo.MustParseBlockID("(0,2000000000000000,45502666)"),
+		},
+		"ac0b8bf04949cb72759832ec6c123b3677b8ca140899ac859aa66a558e4f4c11": {
+			tongo.MustParseBlockID("(0,2000000000000000,45502701)"),
+		},
+		"887c7763f41ca4a4b9de28900ab514caabc0c27ed5b41d9918d60f5e7f4a9d96": {
 			tongo.MustParseBlockID("(0,7000000000000000,45592983)"),
-			// stonfi v2 swap simple
+		},
+		"3fa256638e5f6cd356afa70eb37c89de80846973dea0c9c46adf4df5cca39a68": {
 			tongo.MustParseBlockID("(0,6000000000000000,46034062)"),
 			tongo.MustParseBlockID("(0,e000000000000000,46027828)"),
 			tongo.MustParseBlockID("(0,9000000000000000,45998794)"),
 			tongo.MustParseBlockID("(0,6000000000000000,46034070)"),
 			tongo.MustParseBlockID("(0,6000000000000000,46034067)"),
-			// stonfi v2 swap with ref
+		},
+		"d70fddb4786c04932669bf589ee73c16293115a1927dfbee5b719304232e2e1b": {
 			tongo.MustParseBlockID("(0,2000000000000000,46145069)"),
 			tongo.MustParseBlockID("(0,6000000000000000,46151880)"),
 			tongo.MustParseBlockID("(0,2000000000000000,46145074)"),
-			// ethena deposit stake request
+		},
+		"a9c8ffdb11f1d6f80feae77c7fcbefad48dbb95999c3524538d832c5c6a7ff6c": {
+			tongo.MustParseBlockID("(0,2000000000000000,54592412)"),
+			tongo.MustParseBlockID("(0,a000000000000000,54231006)"),
+		},
+		"043ae4fb3ef7546262a709aea01a2e4fdfb6fce66826974eeb7d9eaa61659815": {
+			tongo.MustParseBlockID("(0,2000000000000000,54592579)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54605580)"),
+		},
+		"faa897623808c6d2f8eaf3effb04d1944451c08323064ab4d11aeb568a2179d7": {
+			tongo.MustParseBlockID("(0,2000000000000000,54593195)"),
+			tongo.MustParseBlockID("(0,a000000000000000,54231771)"),
+		},
+		"d877ae7ab945912a8d4d5a2759e747af133c763d3d3749619021b99bf436f794": {
+			tongo.MustParseBlockID("(0,6000000000000000,54607040)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54594034)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54607046)"),
+			tongo.MustParseBlockID("(0,a000000000000000,54232590)"),
+		},
+		"4adceddfffe48e8f58a5a4519ecbdac00b40e1e139e5a147b4a1b884cd26332d": {
+			tongo.MustParseBlockID("(0,2000000000000000,54593363)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54606375)"),
+		},
+		"fb84cdcd719debf6937720f26c354c8ff0358d978af36ea682b7a24b2581c9e2": {
+			tongo.MustParseBlockID("(0,6000000000000000,54607085)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54594077)"),
+		},
+		"4f3309c9e68a860a20451de261e0cd10b5c8d2308c92408814889494405fe6e5": {
+			tongo.MustParseBlockID("(0,e000000000000000,54251225)"),
+			tongo.MustParseBlockID("(0,2000000000000000,54593545)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54606554)"),
+		},
+		"cd3b772e94a122e81fe34acbb59777dabcfef8a4fce60cffc205a6baa13bc4ff": {
+			tongo.MustParseBlockID("(0,8000000000000000,54937287)"),
+		},
+		"7a0150ed126ec7339af9a76337cf776b3712f69494e1cdefe601bfe7ababee58": {
+			tongo.MustParseBlockID("(0,8000000000000000,55058271)"),
+		},
+		"b2b96a30aa07124deaead600df33991e68be1e6f45dd1f273b31b571a1a4012d": {
+			tongo.MustParseBlockID("(0,8000000000000000,54937935)"),
+		},
+		"b25c2e62568777f1ae87cc92bc0764bce0b8fb125c2e6e609f49fbb04156a357": {
+			tongo.MustParseBlockID("(0,8000000000000000,55058346)"),
+		},
+		"41a0256861a62d2ff0146dd48349650e9447f1f6195885c25300dc58e142ac62": {
+			tongo.MustParseBlockID("(0,8000000000000000,54938365)"),
+		},
+		"2cd867233ed7c4c95025ad34db74c4371c12adfd12f025dff786399c5ce269f4": {
+			tongo.MustParseBlockID("(0,8000000000000000,55058632)"),
+		},
+		"b4ee52a17cda3a1b07f0cb3741f9545aa60385032b81e053092937fca0e7de84": {
+			tongo.MustParseBlockID("(0,8000000000000000,55058873)"),
+		},
+		"aebe3933b325fe74094406919b9bfe60f0daccba8d893fe6d2b6ef06c8f5804b": {
 			tongo.MustParseBlockID("(0,8000000000000000,55504556)"),
-			// ethena withdraw stake request
+		},
+		"b8336722a26a86e03b986e9c8207b94a31105e75115af62649e1a95e0d4033bc": {
 			tongo.MustParseBlockID("(0,8000000000000000,55504824)"),
-			// deposit liquidity bidask ton + bmTON
+		},
+		"bebf12180fa2e0a548ede0bc2aa9d3d4169eef4500f52fdff2e08238be33f6a4": {
 			tongo.MustParseBlockID("(0,2000000000000000,54478860)"),
 			tongo.MustParseBlockID("(0,e000000000000000,54137670)"),
 			tongo.MustParseBlockID("(0,6000000000000000,54491689)"),
 			tongo.MustParseBlockID("(0,2000000000000000,54478869)"),
-			// deposit liquidity bidask ton + bmTON with refund
+		},
+		"0f80ada2a5f96e615c85039a92b860e1237cf956e7b440acf2a904e11f061aa8": {
 			tongo.MustParseBlockID("(0,8000000000000000,56013085)"),
-			// deposit liquidity bidask usdt
+		},
+		"3c3981df59c333abb8d0b3aeb11c75889f4403870bb2afa9353ffde2fb2b718a": {
 			tongo.MustParseBlockID("(0,8000000000000000,55134140)"),
-			// deposit liquidity bidask hydra + usdt
+		},
+		"705b8261a3ba7790220233d81726131c4ab051396ea69b97e1340d5224de65f7": {
 			tongo.MustParseBlockID("(0,8000000000000000,56246091)"),
-			// bidask swap
+		},
+		"89615121509a69920399f94aa5adfa9ac1b6b2e968ed772c7d3e6067f10530bf": {
 			tongo.MustParseBlockID("(0,8000000000000000,56384438)"),
+		},
+		"93d5bee270c65516b6213ace03c84110c0c8fa2b1626f21dec5b848eb88ba334": {
 			tongo.MustParseBlockID("(0,8000000000000000,56435662)"),
+		},
+		"f1cc8a4b6108c27df57a92ddb84fb25ed4f1f866c6b10c75905f34903f47edcf": {
 			tongo.MustParseBlockID("(0,8000000000000000,56435563)"),
+		},
+		"8ab5cc797da6d5788ad68fc48f1ec15ee4b3a1df75c918fae2376461f2690918": {
 			tongo.MustParseBlockID("(0,8000000000000000,57372589)"),
-			// mooncx swap
+		},
+		"f1cb797e6b4ddf9fca55243cc7cec3bf2d8fc27170e091bb9a28ce28e11d1090": {
 			tongo.MustParseBlockID("(0,8000000000000000,58583334)"),
+		},
+		"115cdea693961371766cd968358482984039756712323235b5abd9b41d16429f": {
 			tongo.MustParseBlockID("(0,8000000000000000,58586713)"),
-			// mooncx liquidity deposit
-			tongo.MustParseBlockID("(0,2000000000000000,53995726)"),
-			tongo.MustParseBlockID("(0,2000000000000000,53995729)"),
-			tongo.MustParseBlockID("(0,2000000000000000,53995732)"),
+		},
+		"f73fa4e43b75d900320bcce05caf8a18a6dcef364049e5a7303466f9dcaac917": {
 			tongo.MustParseBlockID("(0,6000000000000000,54008087)"),
-			tongo.MustParseBlockID("(0,6000000000000000,54008097)"),
-			tongo.MustParseBlockID("(0,6000000000000000,54008103)"),
 			tongo.MustParseBlockID("(0,e000000000000000,53659133)"),
+			tongo.MustParseBlockID("(0,2000000000000000,53995729)"),
+			tongo.MustParseBlockID("(0,2000000000000000,53995726)"),
 			tongo.MustParseBlockID("(0,e000000000000000,53659136)"),
+			tongo.MustParseBlockID("(0,2000000000000000,53995732)"),
 			tongo.MustParseBlockID("(0,e000000000000000,53659143)"),
-			// tonco swap
+			tongo.MustParseBlockID("(0,6000000000000000,54008103)"),
+			tongo.MustParseBlockID("(0,6000000000000000,54008097)"),
+		},
+		"780cab64043ac03070f1018f98601939a2e94681278be1c1f4908bb1779d049e": {
 			tongo.MustParseBlockID("(0,8000000000000000,56804640)"),
+		},
+		"47cda8509e406d6475f173ad5a69645b2158db3191d8c087d5bbe4e8c49474ca": {
 			tongo.MustParseBlockID("(0,8000000000000000,56834937)"),
+		},
+		"410e1fda05a63baf1ab3227886755dad96450922c400538910fbf91efc070488": {
 			tongo.MustParseBlockID("(0,8000000000000000,56349139)"),
+		},
+		"1cb7e5fcae043079a3c742775602c8f39b9495597d1ece582d0541a4fe75fd4a": {
 			tongo.MustParseBlockID("(0,8000000000000000,60894631)"),
-			// liquidity deposit stonfi
+		},
+		"444e275c0fc0e8d76f2075363ff2bdc8756f315c2e159bda0c5e40b899260e07": {
+			tongo.MustParseBlockID("(0,8000000000000000,56373078)"),
+		},
+		"3db0c9bfb9ad1944f55ef35ac90245b03c82b4a797726b94bfff93c84d84943b": {
 			tongo.MustParseBlockID("(0,8000000000000000,57142299)"),
-			// liquidity deposit tonco
+		},
+		"ede6bf7c4dd8c1f236a1048d5401cd8e7156f256476f639051814baf555c4fa5": {
 			tongo.MustParseBlockID("(0,8000000000000000,57250836)"),
+		},
+		"09c1061806e01b94fa8bf5e8fb9130f42a401f46137ce7e582cf4642d40d26da": {
 			tongo.MustParseBlockID("(0,8000000000000000,57237195)"),
-			// deposit/withdraw affluent
+		},
+		"30b1487a16d3b04e19b2d66ab993eaaba0e3ceb7a91bb022bd897a0d8343eb38": {
 			tongo.MustParseBlockID("(0,8000000000000000,58000093)"),
-			tongo.MustParseBlockID("(0,8000000000000000,58000202)"),
-			tongo.MustParseBlockID("(0,8000000000000000,57971762)"),
-			tongo.MustParseBlockID("(0,8000000000000000,58456395)"),
-			tongo.MustParseBlockID("(0,8000000000000000,58582951)"),
+		},
+		"ef5c2f765be8f59fa2bec8d7a2fa6f2a5f6a7a226de4620d6b80ea4db8c714c4": {
 			tongo.MustParseBlockID("(0,8000000000000000,58456309)"),
-			// nft purchase
-			tongo.MustParseBlockID("(0,8000000000000000,58460832)"),
-			// flawed jetton trasnfer
+		},
+		"3219afb5d13fd687fc616cc7b0ccf6de7eaa8e4510a15aceb708ad4a0df27bba": {
+			tongo.MustParseBlockID("(0,8000000000000000,58000202)"),
+		},
+		"0ed86c1e6d97887f0e644174dc8063afabfe0a088cdd1987033baf468c253b94": {
+			tongo.MustParseBlockID("(0,8000000000000000,58456395)"),
+		},
+		"42288aca8358bb322c2fa0a97d549a675b68d535ed89af3c311bdfe437e4f576": {
+			tongo.MustParseBlockID("(0,8000000000000000,58582951)"),
+		},
+		"d171a300521c222094899c6b1b5fb15992a5eb4ba9dc7f8ac9c6033fed647d1c": {
+			tongo.MustParseBlockID("(0,8000000000000000,57971762)"),
+		},
+		"668af03f00aaad8cfe1065151dbdda96310d4dad1c42cd86ca27a937e0741108": {
+			tongo.MustParseBlockID("(0,8000000000000000,59172679)"),
+		},
+		"2e3eb4b79911185891d54c042f648d5e6764ce7569b3071582177ba84a2097f0": {
+			tongo.MustParseBlockID("(0,8000000000000000,59172963)"),
+		},
+		"2aed6cf09d52919ea67a057407b9dfb3d758a30ff89385ba97ed8c76c65c5252": {
 			tongo.MustParseBlockID("(0,8000000000000000,60561386)"),
+		},
+		"40c65501ab8fc4a0ca1d687e49776e9cc6a21aacd78d9b24ed3d108094310d9a": {
 			tongo.MustParseBlockID("(0,8000000000000000,60214898)"),
-			//stonfi multihop
+		},
+		"240835c21dafcdcc7340d3050ea9e730a6dd246b30b7e01fba81e2767f881f2e": {
 			tongo.MustParseBlockID("(0,8000000000000000,60211010)"),
-			// tonstakers additional case
+		},
+		"fe1482f280383bbd791f0cd8df1920a726335d2843b7b68190f9f9d777bd3bc8": {
 			tongo.MustParseBlockID("(0,8000000000000000,62341628)"),
-			// stonfi ton-usdt-shitok
+		},
+		"9a8054e9b42f8290c820b39c6496b13d00d9bd8aad516e1d0e83bbf673c1571e": {
 			tongo.MustParseBlockID("(0,8000000000000000,61823141)"),
-			// swap stonfi then tonco
+		},
+		"9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa": {
 			tongo.MustParseBlockID("(0,8000000000000000,62729945)"),
-		}),
-	)
-
-	if err != nil {
-		t.Fatal(err)
+		},
 	}
+
 	type Case struct {
 		skip bool
 		name string
@@ -305,6 +465,21 @@ func TestFindActions(t *testing.T) {
 		straws         []Merger
 	}
 	testCases := []Case{
+		{
+			name:           "oracle-request",
+			hash:           "6e4cfc51eeef38a46896a556c9faae05754b31f563592fc866207234dec5966a",
+			filenamePrefix: "oracle-request",
+		},
+		{
+			name:           "ffvault-deposit-stake",
+			hash:           "2f7965a4897662fedda00bf070e7d5bdd3884ecadb81cf2f37f7caa455c36931",
+			filenamePrefix: "ffvault-deposit-stake",
+		},
+		{
+			name:           "ffvault-withdrawal-request",
+			hash:           "71572d212e78e76c7c8b2af83835860f639568aeaee0561e2003742a84137181",
+			filenamePrefix: "ffvault-withdrawal-request",
+		},
 		{
 			name:           "stonfi usdt-ton exchange with tonkeeper battery",
 			hash:           "74ed6e6076dfa3ffb3e319285c3517c10e46c5a3352791f9d2bcf1f06116711f",
@@ -1046,10 +1221,21 @@ func TestFindActions(t *testing.T) {
 		},
 	}
 
+	var sharedStorage *litestorage.LiteStorage
+	if !isFocusedRun() {
+		sharedStorage = newBathTestStorage(t, cli, slices.Concat(maps.Values(txBlocks)...))
+	}
+
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
 			if c.skip {
 				t.Skip()
+			}
+			storage := sharedStorage
+			if sharedStorage == nil {
+				blocks, ok := txBlocks[c.hash]
+				require.Truef(t, ok, "missing blocks for tx %s", c.hash)
+				storage = newBathTestStorage(t, cli, blocks)
 			}
 			trace, err := storage.GetTrace(context.Background(), tongo.MustParseHash(c.hash))
 			require.Nil(t, err)
@@ -1057,7 +1243,7 @@ func TestFindActions(t *testing.T) {
 			if c.source == nil {
 				source = storage
 			}
-			straws := DefaultStraws(nil)
+			straws := DefaultStraws(nil, source)
 			if len(c.straws) > 0 {
 				straws = c.straws
 			}

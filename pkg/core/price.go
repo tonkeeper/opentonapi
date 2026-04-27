@@ -30,3 +30,10 @@ type VaultDepositInfo struct {
 	Price Price
 	Vault tongo.AccountID
 }
+
+func PriceNanoTON(amount int64) Price {
+	return Price{
+		Currency: Currency{Type: CurrencyTON},
+		Amount:   *big.NewInt(amount),
+	}
+}

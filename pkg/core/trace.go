@@ -12,6 +12,8 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"golang.org/x/exp/maps"
+
+	"github.com/tonkeeper/opentonapi/pkg/pyth"
 )
 
 var (
@@ -63,6 +65,9 @@ type TraceAdditionalInfo struct {
 
 	// SubscriptionContract is set, if a transaction's account implements method "get_subscription_data" for V1 or "get_subscription_info" for V2.
 	SubscriptionInfo *SubscriptionInfo
+
+	// VaultPositionData is set, if a transaction's account has the FfVaultPosition interface.
+	VaultPositionData *VaultPositionData
 }
 
 func (t *Trace) AdditionalInfo() *TraceAdditionalInfo {
@@ -231,6 +236,12 @@ type SubscriptionInfo struct {
 	PaymentPerPeriod          int64
 }
 
+type VaultPositionData struct {
+	Staker       tongo.AccountID
+	Pool         tongo.AccountID
+	JettonMaster *tongo.AccountID
+}
+
 // InformationSource provides methods to construct TraceAdditionalInfo.
 type InformationSource interface {
 	JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
@@ -238,6 +249,9 @@ type InformationSource interface {
 	STONfiPools(ctx context.Context, poolIDs []STONfiPoolID) (map[tongo.AccountID]STONfiPool, error)
 	DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]DedustPool, error)
 	SubscriptionInfos(ctx context.Context, ids []SubscriptionID) (map[tongo.AccountID]SubscriptionInfo, error)
+	GetFfVaultPositionDatas(ctx context.Context, positions []tongo.AccountID) (map[tongo.AccountID]VaultPositionData, error)
+	GetFfVaultJettonMasters(ctx context.Context, vaults []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
+	GetPythPriceFeedMeta(id string) (pyth.PriceFeedAttributes, bool)
 }
 
 func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInterface) bool {
@@ -309,6 +323,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		return nil
 	}
 	var jettonWallets []tongo.AccountID
+	var vaultPositions []tongo.AccountID
 	var saleContracts []tongo.AccountID
 	var stonfiPoolIDs []STONfiPoolID
 	var dedustPoolIDs []tongo.AccountID
@@ -347,6 +362,9 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.SubscriptionV2) {
 			subsciptionIDs = append(subsciptionIDs, SubscriptionID{Account: trace.Account, Interface: abi.SubscriptionV2})
 		}
+		if hasInterface(trace.AccountInterfaces, abi.FfVaultPosition) {
+			vaultPositions = append(vaultPositions, trace.Account)
+		}
 	})
 	stonfiPools, err := infoSource.STONfiPools(ctx, stonfiPoolIDs)
 	if err != nil {
@@ -369,6 +387,18 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		return err
 	}
 	subscriptionInfos, err := infoSource.SubscriptionInfos(ctx, subsciptionIDs)
+	if err != nil {
+		return err
+	}
+	vaultPositionDatas, err := infoSource.GetFfVaultPositionDatas(ctx, vaultPositions)
+	if err != nil {
+		return err
+	}
+	vaultAddresses := make([]tongo.AccountID, 0, len(vaultPositionDatas))
+	for _, data := range vaultPositionDatas {
+		vaultAddresses = append(vaultAddresses, data.Pool)
+	}
+	vaultMasters, err := infoSource.GetFfVaultJettonMasters(ctx, vaultAddresses)
 	if err != nil {
 		return err
 	}
@@ -409,6 +439,14 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.SubscriptionV1) || hasInterface(trace.AccountInterfaces, abi.SubscriptionV2) {
 			if sub, ok := subscriptionInfos[trace.Account]; ok {
 				additionalInfo.SubscriptionInfo = &sub
+			}
+		}
+		if hasInterface(trace.AccountInterfaces, abi.FfVaultPosition) {
+			if posData, ok := vaultPositionDatas[trace.Account]; ok {
+				if master, ok := vaultMasters[posData.Pool]; ok {
+					posData.JettonMaster = &master
+				}
+				additionalInfo.VaultPositionData = &posData
 			}
 		}
 		trace.SetAdditionalInfo(additionalInfo)

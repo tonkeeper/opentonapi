@@ -248,7 +248,13 @@ func HasTextComment(comment string) bubbleCheck {
 }
 func HasInterface(iface abi.ContractInterface) bubbleCheck {
 	return func(bubble *Bubble) bool {
-		return bubble.Info.(BubbleTx).account.Is(iface)
+		if tx, ok := bubble.Info.(BubbleTx); ok {
+			return tx.account.Is(iface)
+		}
+		if jt, ok := bubble.Info.(BubbleJettonTransfer); ok {
+			return jt.recipient != nil && jt.recipient.Is(iface)
+		}
+		return false
 	}
 }
 

@@ -49,6 +49,7 @@ const (
 	RemoveExtension           ActionType = "RemoveExtension"
 	SetSignatureAllowed       ActionType = "SetSignatureAllowed"
 	LiquidityDeposit          ActionType = "LiquidityDeposit"
+	OracleRequest             ActionType = "OracleRequest"
 	Unknown                   ActionType = "Unknown"
 )
 
@@ -103,6 +104,7 @@ type (
 		RemoveExtension           *RemoveExtensionAction           `json:",omitempty"`
 		SetSignatureAllowed       *SetSignatureAllowedAction       `json:",omitempty"`
 		LiquidityDepositAction    *LiquidityDepositAction          `json:",omitempty"`
+		OracleRequest             *OracleRequestAction             `json:",omitempty"`
 		Success                   bool
 		Type                      ActionType
 		Error                     *string `json:",omitempty"`
@@ -232,7 +234,7 @@ type (
 	}
 	DepositStakeAction struct {
 		Staker         tongo.AccountID
-		Amount         int64
+		Amount         core.Price
 		Pool           tongo.AccountID
 		Implementation core.StakingImplementation
 	}
@@ -244,7 +246,7 @@ type (
 	}
 	WithdrawStakeRequestAction struct {
 		Staker         tongo.AccountID
-		Amount         *int64
+		Amount         *core.Price
 		Pool           tongo.AccountID
 		Implementation core.StakingImplementation
 	}
@@ -290,6 +292,19 @@ type (
 		Protocol core.Protocol
 		From     tongo.AccountID
 		Tokens   []core.VaultDepositInfo
+	}
+
+	OraclePriceFeedInfo struct {
+		ID            string
+		DisplaySymbol string
+		Rate          *float64 `json:",omitempty"`
+	}
+
+	OracleRequestAction struct {
+		Requester  tongo.AccountID
+		Oracle     tongo.AccountID
+		ResponseTo tongo.AccountID
+		PriceFeeds []OraclePriceFeedInfo
 	}
 )
 
@@ -339,7 +354,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed, FlawedJettonTransfer: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed, FlawedJettonTransfer, OracleRequest: // actions without extra
 		return 0
 	case Purchase:
 		if a.Purchase.Price.Currency.Type == core.CurrencyTON {
@@ -375,7 +390,10 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		}
 		return 0
 	case DepositStake:
-		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Pool, a.DepositStake.Amount)
+		if a.DepositStake.Amount.Currency.Type != core.CurrencyTON {
+			return 0
+		}
+		return detectDirection(account, a.DepositStake.Staker, a.DepositStake.Pool, a.DepositStake.Amount.Amount.Int64())
 	case JettonTransfer:
 		if !a.JettonTransfer.isWrappedTon {
 			return 0

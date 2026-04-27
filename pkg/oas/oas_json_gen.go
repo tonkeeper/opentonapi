@@ -2015,6 +2015,12 @@ func (s *Action) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.OracleRequest.Set {
+			e.FieldStart("OracleRequest")
+			s.OracleRequest.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("simple_preview")
 		s.SimplePreview.Encode(e)
 	}
@@ -2028,7 +2034,7 @@ func (s *Action) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAction = [32]string{
+var jsonFieldsNameOfAction = [33]string{
 	0:  "type",
 	1:  "status",
 	2:  "TonTransfer",
@@ -2059,8 +2065,9 @@ var jsonFieldsNameOfAction = [32]string{
 	27: "DepositTokenStake",
 	28: "WithdrawTokenStakeRequest",
 	29: "LiquidityDeposit",
-	30: "simple_preview",
-	31: "base_transactions",
+	30: "OracleRequest",
+	31: "simple_preview",
+	32: "base_transactions",
 }
 
 // Decode decodes Action from json.
@@ -2068,7 +2075,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Action to nil")
 	}
-	var requiredBitSet [4]uint8
+	var requiredBitSet [5]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -2372,8 +2379,18 @@ func (s *Action) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"LiquidityDeposit\"")
 			}
+		case "OracleRequest":
+			if err := func() error {
+				s.OracleRequest.Reset()
+				if err := s.OracleRequest.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"OracleRequest\"")
+			}
 		case "simple_preview":
-			requiredBitSet[3] |= 1 << 6
+			requiredBitSet[3] |= 1 << 7
 			if err := func() error {
 				if err := s.SimplePreview.Decode(d); err != nil {
 					return err
@@ -2383,7 +2400,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"simple_preview\"")
 			}
 		case "base_transactions":
-			requiredBitSet[3] |= 1 << 7
+			requiredBitSet[4] |= 1 << 0
 			if err := func() error {
 				s.BaseTransactions = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -2411,11 +2428,12 @@ func (s *Action) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [4]uint8{
+	for i, mask := range [5]uint8{
 		0b00000011,
 		0b00000000,
 		0b00000000,
-		0b11000000,
+		0b10000000,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -2962,6 +2980,8 @@ func (s *ActionType) Decode(d *jx.Decoder) error {
 		*s = ActionTypeWithdrawTokenStakeRequest
 	case ActionTypeLiquidityDeposit:
 		*s = ActionTypeLiquidityDeposit
+	case ActionTypeOracleRequest:
+		*s = ActionTypeOracleRequest
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
 	default:
@@ -14034,13 +14054,20 @@ func (s *DepositStakeAction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("implementation")
 		s.Implementation.Encode(e)
 	}
+	{
+		if s.StakeMeta.Set {
+			e.FieldStart("stake_meta")
+			s.StakeMeta.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfDepositStakeAction = [4]string{
+var jsonFieldsNameOfDepositStakeAction = [5]string{
 	0: "amount",
 	1: "staker",
 	2: "pool",
 	3: "implementation",
+	4: "stake_meta",
 }
 
 // Decode decodes DepositStakeAction from json.
@@ -14093,6 +14120,16 @@ func (s *DepositStakeAction) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"implementation\"")
+			}
+		case "stake_meta":
+			if err := func() error {
+				s.StakeMeta.Reset()
+				if err := s.StakeMeta.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"stake_meta\"")
 			}
 		default:
 			return d.Skip()
@@ -35227,6 +35264,39 @@ func (s *OptNilString) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes OracleRequestAction as json.
+func (o OptOracleRequestAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes OracleRequestAction from json.
+func (o *OptOracleRequestAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptOracleRequestAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptOracleRequestAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptOracleRequestAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes PictureDNS as json.
 func (o OptPictureDNS) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -36464,6 +36534,272 @@ func (s *OracleBridgeParams) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *OraclePriceFeed) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *OraclePriceFeed) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		e.Str(s.ID)
+	}
+	{
+		e.FieldStart("display_symbol")
+		e.Str(s.DisplaySymbol)
+	}
+	{
+		if s.Rate.Set {
+			e.FieldStart("rate")
+			s.Rate.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfOraclePriceFeed = [3]string{
+	0: "id",
+	1: "display_symbol",
+	2: "rate",
+}
+
+// Decode decodes OraclePriceFeed from json.
+func (s *OraclePriceFeed) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode OraclePriceFeed to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "display_symbol":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.DisplaySymbol = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"display_symbol\"")
+			}
+		case "rate":
+			if err := func() error {
+				s.Rate.Reset()
+				if err := s.Rate.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rate\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode OraclePriceFeed")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfOraclePriceFeed) {
+					name = jsonFieldsNameOfOraclePriceFeed[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *OraclePriceFeed) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OraclePriceFeed) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *OracleRequestAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *OracleRequestAction) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("requester")
+		s.Requester.Encode(e)
+	}
+	{
+		e.FieldStart("response_to")
+		s.ResponseTo.Encode(e)
+	}
+	{
+		e.FieldStart("price_feeds")
+		e.ArrStart()
+		for _, elem := range s.PriceFeeds {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfOracleRequestAction = [3]string{
+	0: "requester",
+	1: "response_to",
+	2: "price_feeds",
+}
+
+// Decode decodes OracleRequestAction from json.
+func (s *OracleRequestAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode OracleRequestAction to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "requester":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Requester.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"requester\"")
+			}
+		case "response_to":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.ResponseTo.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"response_to\"")
+			}
+		case "price_feeds":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.PriceFeeds = make([]OraclePriceFeed, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem OraclePriceFeed
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.PriceFeeds = append(s.PriceFeeds, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"price_feeds\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode OracleRequestAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfOracleRequestAction) {
+					name = jsonFieldsNameOfOracleRequestAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *OracleRequestAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OracleRequestAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *PictureDNS) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -36812,6 +37148,8 @@ func (s *PoolImplementationType) Decode(d *jx.Decoder) error {
 		*s = PoolImplementationTypeTf
 	case PoolImplementationTypeLiquidTF:
 		*s = PoolImplementationTypeLiquidTF
+	case PoolImplementationTypeFfvault:
+		*s = PoolImplementationTypeFfvault
 	default:
 		*s = PoolImplementationType(v)
 	}
@@ -48226,13 +48564,20 @@ func (s *WithdrawStakeRequestAction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("implementation")
 		s.Implementation.Encode(e)
 	}
+	{
+		if s.StakeMeta.Set {
+			e.FieldStart("stake_meta")
+			s.StakeMeta.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfWithdrawStakeRequestAction = [4]string{
+var jsonFieldsNameOfWithdrawStakeRequestAction = [5]string{
 	0: "amount",
 	1: "staker",
 	2: "pool",
 	3: "implementation",
+	4: "stake_meta",
 }
 
 // Decode decodes WithdrawStakeRequestAction from json.
@@ -48283,6 +48628,16 @@ func (s *WithdrawStakeRequestAction) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"implementation\"")
+			}
+		case "stake_meta":
+			if err := func() error {
+				s.StakeMeta.Reset()
+				if err := s.StakeMeta.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"stake_meta\"")
 			}
 		default:
 			return d.Skip()

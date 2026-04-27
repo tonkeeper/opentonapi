@@ -1,6 +1,8 @@
 package bath
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/config"
@@ -8,6 +10,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	abiFfVault "github.com/tonkeeper/tongo/abi-tolk/abiGenerated/ffVault"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -87,7 +90,7 @@ var ElectionsRecoverStakeStraw = Straw[BubbleElectionsRecoverStake]{
 
 type BubbleDepositStake struct {
 	Staker         tongo.AccountID
-	Amount         int64
+	Amount         core.Price
 	Success        bool
 	Pool           tongo.AccountID
 	Implementation core.StakingImplementation
@@ -112,7 +115,7 @@ var DepositTFStakeStraw = Straw[BubbleDepositStake]{
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address
 		newAction.Staker = tx.inputFrom.Address
-		newAction.Amount = tx.inputAmount
+		newAction.Amount = core.PriceNanoTON(tx.inputAmount)
 		newAction.Success = tx.success
 		newAction.Implementation = core.StakingImplementationTF
 		return nil
@@ -125,7 +128,7 @@ var DepositTFStakeStraw = Straw[BubbleDepositStake]{
 
 type BubbleWithdrawStakeRequest struct {
 	Staker         tongo.AccountID
-	Amount         *int64
+	Amount         *core.Price
 	Success        bool
 	Pool           tongo.AccountID
 	Implementation core.StakingImplementation
@@ -203,16 +206,105 @@ var WithdrawStakeImmediatelyStraw = Straw[BubbleWithdrawStake]{
 	},
 }
 
+var DepositFFVaultStakeStraw = Straw[BubbleDepositStake]{
+	CheckFuncs: []bubbleCheck{
+		Is(BubbleJettonTransfer{}),
+		JettonTransferOperation(abiFfVault.FfVaultAssetDepositMsgOp),
+		HasInterface(abi.FfVault),
+	},
+	Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleJettonTransfer)
+		if tx.recipient == nil {
+			return fmt.Errorf("ff vault deposit: nil recipient")
+		}
+		newAction.Staker = tx.sender.Address
+		newAction.Pool = tx.recipient.Address
+		newAction.Implementation = core.StakingImplementationFfVault
+		newAction.Amount = core.Price{
+			Currency: core.Currency{
+				Type:   core.CurrencyJetton,
+				Jetton: &tx.master,
+			},
+			Amount: big.Int(tx.amount),
+		}
+		return nil
+	},
+	Children: []Straw[BubbleDepositStake]{
+		{
+			CheckFuncs: []bubbleCheck{func(bubble *Bubble) bool {
+				oracleRequest, ok := bubble.Info.(BubbleOraclePriceUpdate)
+				return ok && oracleRequest.Success && oracleRequest.Requester == oracleRequest.ResponseTo
+			}},
+			NotMergeBubble: true,
+			Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
+				return nil
+			},
+			Children: []Straw[BubbleDepositStake]{
+				{
+					CheckFuncs: []bubbleCheck{
+						HasInterface(abi.FfVaultPosition),
+					},
+					Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
+						tx := bubble.Info.(BubbleTx)
+						newAction.Success = tx.success
+						return nil
+					},
+					Children: []Straw[BubbleDepositStake]{
+						{
+							CheckFuncs: []bubbleCheck{HasOperation(abi.ExcessMsgOp)},
+							Optional:   true,
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
+var WithdrawalRequestFFVaultStraw = Straw[BubbleWithdrawStakeRequest]{
+	CheckFuncs: []bubbleCheck{
+		IsTx,
+		HasOperation(abiFfVault.FfVaultUnstakeRequestMsgOp),
+		HasInterface(abi.FfVaultPosition),
+	},
+	Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		if tx.additionalInfo.VaultPositionData == nil {
+			return errors.New("no vault position data in tx")
+		}
+		newAction.Staker = tx.additionalInfo.VaultPositionData.Staker
+		newAction.Pool = tx.additionalInfo.VaultPositionData.Pool
+		newAction.Success = tx.success
+		newAction.Implementation = core.StakingImplementationFfVault
+
+		opBody, ok := tx.decodedBody.Value.(*abiFfVault.UnstakeRequest)
+		if !ok || opBody == nil {
+			return errors.New("invalid tx body, expected abiFfVault.UnstakeRequest")
+		}
+		newAction.Amount = &core.Price{
+			Currency: core.Currency{
+				Type:   core.CurrencyJetton,
+				Jetton: tx.additionalInfo.VaultPositionData.JettonMaster,
+			},
+			Amount: *big.NewInt(int64(opBody.AmountWantedToUnstake)),
+		}
+		return nil
+	},
+	Children: []Straw[BubbleWithdrawStakeRequest]{
+		{
+			CheckFuncs: []bubbleCheck{HasOperation(abi.ExcessMsgOp)},
+			Optional:   true,
+		},
+	},
+}
+
 var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolDepositMsgOp)}, //todo: check interface HasInterface(abi.TonstakePool),
 	Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address
 		newAction.Staker = tx.inputFrom.Address
-		newAction.Amount = tx.inputAmount - int64(ton.OneTON)
-		if newAction.Amount < 0 {
-			newAction.Amount = 0
-		}
+		newAction.Amount = core.PriceNanoTON(max(tx.inputAmount-int64(ton.OneTON), 0))
 		newAction.Success = tx.success
 		newAction.Implementation = core.StakingImplementationLiquidTF
 		return nil
@@ -249,8 +341,8 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 		newAction.Success = true
 		newAction.Implementation = core.StakingImplementationLiquidTF
 		amount := big.Int(bubble.Info.(BubbleJettonBurn).amount)
-		i := amount.Int64()
-		newAction.Amount = &i
+		p := core.PriceNanoTON(amount.Int64())
+		newAction.Amount = &p
 		return nil
 	},
 	SingleChild: &Straw[BubbleWithdrawStakeRequest]{
