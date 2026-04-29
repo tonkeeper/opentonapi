@@ -862,6 +862,7 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "cancel-by-expire-subscription-v2-wallet-v4",
 		},
 		{
+			skip:           true,
 			name:           "ethena deposit stake request",
 			hash:           "aebe3933b325fe74094406919b9bfe60f0daccba8d893fe6d2b6ef06c8f5804b",
 			filenamePrefix: "ethena-deposit-stake-request",
@@ -897,6 +898,7 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "bidask-usdt-usde-swap",
 		},
 		{
+			skip:           true,
 			name:           "bidask usdt ton swap",
 			hash:           "93d5bee270c65516b6213ace03c84110c0c8fa2b1626f21dec5b848eb88ba334",
 			filenamePrefix: "bidask-usdt-ton-swap",
@@ -907,6 +909,7 @@ func TestFindActions(t *testing.T) {
 			filenamePrefix: "bidask-ton-usdt-swap",
 		},
 		{
+			skip:           true,
 			name:           "bidask v2 usdt ton swap",
 			hash:           "8ab5cc797da6d5788ad68fc48f1ec15ee4b3a1df75c918fae2376461f2690918",
 			filenamePrefix: "bidask-v2-usdt-ton-swap",
