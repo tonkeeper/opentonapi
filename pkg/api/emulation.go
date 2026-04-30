@@ -5,16 +5,18 @@ import (
 	"encoding/base64"
 	"errors"
 	"math/big"
+	"slices"
 	"sync"
 	"time"
-
-	"go.uber.org/zap"
-
-	"golang.org/x/exp/slices"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/shopspring/decimal"
+	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/opentonapi/pkg/blockchain"
+	"github.com/tonkeeper/opentonapi/pkg/cache"
+	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/sentry"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -22,11 +24,7 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/txemulator"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
-
-	"github.com/tonkeeper/opentonapi/pkg/blockchain"
-	"github.com/tonkeeper/opentonapi/pkg/cache"
-	"github.com/tonkeeper/opentonapi/pkg/core"
-	"github.com/tonkeeper/opentonapi/pkg/sentry"
+	"go.uber.org/zap"
 )
 
 var (
@@ -177,11 +175,25 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		newMemHashes = append(newMemHashes, ton.Bits256(hash)) // it's important to make it last
 		h.mempoolEmulate.accountsTraces.Set(account, newMemHashes, cache.WithExpiration(time.Second*time.Duration(ttl)))
 	}
+	res := core.Accounts{
+		TraceID: core.TraceID{
+			Hash:  tongo.Bits256(hash),
+			Lt:    trace.Lt,
+			UTime: trace.Utime,
+		},
+		Trace: trace,
+	}
+	res.Actions, err = bath.FindActions(ctx, trace, bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
+	if err == nil {
+		res.Actions = bath.EnrichWithIntentions(trace, res.Actions)
+	} else {
+		h.logger.Warn("mempool account events: bath.FindActions failed", zap.Error(err), zap.String("trace_id", hash.Hex()))
+	}
 	emulationCh <- blockchain.ExtInMsgCopy{
 		MsgBoc:   base64.StdEncoding.EncodeToString(bytesBoc),
 		Details:  h.ctxToDetails(ctx),
 		Payload:  bytesBoc,
-		Accounts: accounts,
+		Accounts: &res,
 	}
 	return newShardAccount, nil
 }

@@ -32,6 +32,10 @@ func (m *mockMemPool) SubscribeToMessages(ctx context.Context, deliveryFn source
 	return m.OnSubscribeToMessages(ctx, deliveryFn, opts)
 }
 
+func (m *mockMemPool) SubscribeToAccounts(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error) {
+	return nil, nil
+}
+
 type mockTraceSource struct {
 	OnSubscribeToTraces func(ctx context.Context, deliveryFn sources.DeliveryFn, opts sources.SubscribeToTraceOptions) sources.CancelFn
 }

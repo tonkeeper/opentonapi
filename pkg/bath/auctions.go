@@ -21,15 +21,6 @@ type AuctionBidBubble struct {
 	Success        bool
 }
 
-type AuctionBidAction struct {
-	Type       NftAuctionType
-	Amount     core.Price
-	Nft        *core.NftItem
-	NftAddress *tongo.AccountID
-	Bidder     tongo.AccountID
-	Auction    tongo.AccountID
-}
-
 func (a AuctionBidBubble) ToAction() *Action {
 	return &Action{
 		AuctionBid: &AuctionBidAction{

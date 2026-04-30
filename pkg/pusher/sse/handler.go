@@ -102,6 +102,25 @@ func (h *Handler) SubscribeToTransactions(session *session, request *http.Reques
 	return nil
 }
 
+func (h *Handler) SubscribeToAccounts(session *session, request *http.Request) error {
+	if h.memPool== nil {
+		return errors.BadRequest("mempool emulation source is not configured")
+	}
+	cancel, err := h.memPool.SubscribeToAccounts(request.Context(), func(data []byte) {
+		event := Event{
+			Name:    events.MempoolEvent,
+			EventID: h.nextID(),
+			Data:    data,
+		}
+		session.SendEvent(event)
+	})
+	if err != nil {
+		return err
+	}
+	session.SetCancelFn(cancel)
+	return nil
+}
+
 func (h *Handler) SubscribeToMessages(session *session, request *http.Request) error {
 	if h.memPool == nil {
 		return errors.BadRequest("mempool source is not configured")

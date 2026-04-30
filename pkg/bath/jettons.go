@@ -1,10 +1,8 @@
 package bath
 
 import (
-	"fmt"
 	"math/big"
 
-	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
@@ -46,32 +44,13 @@ func (b BubbleJettonTransfer) ToAction() (action *Action) {
 			RecipientsWallet: b.recipientWallet,
 			SendersWallet:    b.senderWallet,
 			Amount:           b.amount,
-			isWrappedTon:     b.isWrappedTon,
+			IsWrappedTon:     b.isWrappedTon,
 		},
 		Success: b.success,
 		Type:    JettonTransfer,
 	}
 	a.JettonTransfer.PayloadFromABI(b.payload)
 	return &a
-}
-
-func (jta *JettonTransferAction) PayloadFromABI(payload abi.JettonPayload) {
-	switch payload.SumType {
-	case abi.TextCommentJettonOp:
-		jta.Comment = g.Pointer(string(payload.Value.(abi.TextCommentJettonPayload).Text))
-	case abi.EncryptedTextCommentJettonOp:
-		jta.EncryptedComment = &EncryptedComment{
-			CipherText:     payload.Value.(abi.EncryptedTextCommentJettonPayload).CipherText,
-			EncryptionType: "simple",
-		}
-	case abi.EmptyJettonOp:
-	default:
-		if payload.SumType != abi.UnknownJettonOp {
-			jta.Comment = g.Pointer("Call: " + payload.SumType)
-		} else if payload.OpCode != nil {
-			jta.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *payload.OpCode))
-		}
-	}
 }
 
 type BubbleFlawedJettonTransfer struct {
@@ -100,25 +79,6 @@ func (b BubbleFlawedJettonTransfer) ToAction() (action *Action) {
 	}
 	a.FlawedJettonTransfer.PayloadFromABI(b.payload)
 	return &a
-}
-
-func (fjta *FlawedJettonTransferAction) PayloadFromABI(payload abi.JettonPayload) {
-	switch payload.SumType {
-	case abi.TextCommentJettonOp:
-		fjta.Comment = g.Pointer(string(payload.Value.(abi.TextCommentJettonPayload).Text))
-	case abi.EncryptedTextCommentJettonOp:
-		fjta.EncryptedComment = &EncryptedComment{
-			CipherText:     payload.Value.(abi.EncryptedTextCommentJettonPayload).CipherText,
-			EncryptionType: "simple",
-		}
-	case abi.EmptyJettonOp:
-	default:
-		if payload.SumType != abi.UnknownJettonOp {
-			fjta.Comment = g.Pointer("Call: " + payload.SumType)
-		} else if payload.OpCode != nil {
-			fjta.Comment = g.Pointer(fmt.Sprintf("Call: 0x%08x", *payload.OpCode))
-		}
-	}
 }
 
 type BubbleJettonMint struct {

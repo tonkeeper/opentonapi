@@ -8,11 +8,6 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-type ActionsList struct {
-	Actions   []Action
-	ValueFlow *ValueFlow
-}
-
 type Options struct {
 	straws            []Merger
 	account           *tongo.AccountID
@@ -92,15 +87,4 @@ func recursiveMerge(bubble *Bubble, s Merger, idx int) bool {
 		}
 	}
 	return false
-}
-
-func (l *ActionsList) Extra(account tongo.AccountID) int64 {
-	extra := int64(0)
-	if flow, ok := l.ValueFlow.Accounts[account]; ok {
-		extra += flow.Ton
-	}
-	for _, action := range l.Actions {
-		extra -= action.ContributeToExtra(account)
-	}
-	return extra
 }

@@ -3,7 +3,6 @@ package bath
 import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
-	"github.com/tonkeeper/tongo/ton"
 )
 
 type BubbleDnsItemRenew struct {
@@ -11,17 +10,8 @@ type BubbleDnsItemRenew struct {
 	Success bool
 }
 
-type DnsRenewAction struct {
-	Item    ton.AccountID
-	Renewer ton.AccountID
-}
-
 func (b BubbleDnsItemRenew) ToAction() *Action {
 	return &Action{Success: b.Success, Type: DomainRenew, DnsRenew: &b.DnsRenewAction}
-}
-
-func (a DnsRenewAction) SubjectAccounts() []ton.AccountID {
-	return []ton.AccountID{a.Renewer, a.Item}
 }
 
 var DNSRenewStraw = Straw[BubbleDnsItemRenew]{

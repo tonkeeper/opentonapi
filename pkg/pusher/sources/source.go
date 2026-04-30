@@ -60,6 +60,7 @@ type EmulationMessageEventData struct {
 // MemPoolSource provides a method to subscribe to notifications about pending inbound messages.
 type MemPoolSource interface {
 	SubscribeToMessages(ctx context.Context, deliveryFn DeliveryFn, opts SubscribeToMempoolOptions) (CancelFn, error)
+	SubscribeToAccounts(ctx context.Context, deliveryFn DeliveryFn) (CancelFn, error)
 }
 
 // SubscribeToBlockHeadersOptions configures subscription to block events.

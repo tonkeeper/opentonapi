@@ -31,6 +31,10 @@ func (m *mockMemPoolSource) SubscribeToMessages(ctx context.Context, deliveryFn 
 	return nil, nil
 }
 
+func (m *mockMemPoolSource) SubscribeToAccounts(ctx context.Context, deliveryFn sources.DeliveryFn) (sources.CancelFn, error) {
+	return nil, nil
+}
+
 type mockBlockSource struct {
 	headersOptions sources.SubscribeToBlockHeadersOptions
 	blockOptions   sources.SubscribeToBlocksOptions

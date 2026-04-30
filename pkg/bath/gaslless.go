@@ -25,16 +25,6 @@ func (b GasRelayBubble) ToAction() *Action {
 	}
 }
 
-type GasRelayAction struct {
-	Amount  int64
-	Relayer ton.AccountID
-	Target  ton.AccountID
-}
-
-func (a GasRelayAction) SubjectAccounts() []ton.AccountID {
-	return []ton.AccountID{a.Relayer} //target is not a subject account because we don't want to show it in the list of actions in wallet
-}
-
 var defaultGasProxyRelayers = map[ton.AccountID]bool{
 	// https://github.com/tonkeeper/ton-assets/blob/7d40927aa9dab54bf4dbf58ef44b1e01995efea8/accounts/infrastructure.yaml#L23
 	// currently used relayers

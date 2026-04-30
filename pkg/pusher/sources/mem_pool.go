@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
 // MemPool implements "MemPoolSource" interface
@@ -27,6 +28,7 @@ type MemPool struct {
 	regularSubscribers map[subscriberID]mempoolDeliveryFn
 	// emulationSubscribers subscribed to mempool events with emulation.
 	emulationSubscribers map[subscriberID]mempoolDeliveryFn
+	accountsSubcribers   map[subscriberID]DeliveryFn
 }
 
 func NewMemPool(logger *zap.Logger) *MemPool {
@@ -35,6 +37,7 @@ func NewMemPool(logger *zap.Logger) *MemPool {
 		currentID:            1,
 		regularSubscribers:   map[subscriberID]mempoolDeliveryFn{},
 		emulationSubscribers: map[subscriberID]mempoolDeliveryFn{},
+		accountsSubcribers:   map[subscriberID]DeliveryFn{},
 	}
 }
 
@@ -82,6 +85,20 @@ func (m *MemPool) SubscribeToMessages(ctx context.Context, deliveryFn DeliveryFn
 
 }
 
+func (m *MemPool) SubscribeToAccounts(ctx context.Context, deliveryFn DeliveryFn) (CancelFn, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	subID := m.currentID
+	m.currentID += 1
+	m.accountsSubcribers[subID] = deliveryFn
+	cancel := func() {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		delete(m.accountsSubcribers, subID)
+	}
+	return cancel, nil
+}
+
 // Run runs a goroutine with a fan-out event-loop that resends an incoming payload to all subscribers.
 func (m *MemPool) Run(ctx context.Context) chan blockchain.ExtInMsgCopy {
 	// TODO: replace with elastic channel
@@ -121,27 +138,39 @@ func (m *MemPool) sendPayloadToSubscribers(payload []byte) {
 	}
 }
 
-func (m *MemPool) sendPayloadToEmulationSubscribers(msgCopy blockchain.ExtInMsgCopy) {
-	msg := EmulationMessageEventData{
-		BOC:              msgCopy.Payload,
-		InvolvedAccounts: make([]tongo.AccountID, 0, len(msgCopy.Accounts)),
+func (m *MemPool) sendPayloadToEmulationSubscribers(msgCopy core.ExtInMsgCopy) {
+	accountM := make(map[tongo.AccountID]struct{})
+	var accounts []tongo.AccountID
+	if msgCopy.Accounts != nil {
+		core.Visit(msgCopy.Accounts.Trace, func(node *core.Trace) {
+			accountM[node.Account] = struct{}{}
+			accounts = append(accounts, node.Account)
+		})
 	}
-	for account := range msgCopy.Accounts {
-		msg.InvolvedAccounts = append(msg.InvolvedAccounts, account)
-	}
-	sort.Slice(msg.InvolvedAccounts, func(i, j int) bool {
-		// TODO: add quick sorting capability to tongo.AccountID
-		return msg.InvolvedAccounts[i].ToRaw() < msg.InvolvedAccounts[j].ToRaw()
+	sort.Slice(accounts, func(i, j int) bool {
+		return accounts[i].ToRaw() < accounts[j].ToRaw()
 	})
-	eventData, err := json.Marshal(msg)
+	eventData, err := json.Marshal(EmulationMessageEventData{
+		BOC:              msgCopy.Payload,
+		InvolvedAccounts: accounts,
+	})
 	if err != nil {
-		m.logger.Error("mempool failed to marshal payload to json",
-			zap.Error(err))
-		return
+		m.logger.Error("mempool failed to marshal payload to json", zap.Error(err))
+	}
+	eventData2, err2 := json.Marshal(msgCopy.Accounts)
+	if err2 != nil {
+		m.logger.Warn("mempool failed to marshal account event to json", zap.Error(err2))
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	for _, fn := range m.emulationSubscribers {
-		fn(eventData, msgCopy.Accounts)
+	if err == nil {
+		for _, fn := range m.emulationSubscribers {
+			fn(eventData, accountM)
+		}
+	}
+	if err2 == nil {
+		for _, fn := range m.accountsSubcribers {
+			fn(eventData2)
+		}
 	}
 }

@@ -10,8 +10,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sourcegraph/conc/iter"
-
-	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
@@ -38,29 +36,9 @@ type batchOfMessages struct {
 	RecvAt int64
 }
 
-// ExtInMsgCopy represents an external message we receive on /v2/blockchain/message endpoint.
-type ExtInMsgCopy struct {
-	// MsgBoc is a base64 encoded message boc.
-	MsgBoc string
-	// Payload is a decoded message boc.
-	Payload []byte
-	// Details contains some optional details from a request context.
-	Details any
-	// Accounts is set when the message is emulated.
-	Accounts map[tongo.AccountID]struct{}
-
-	Meta map[string]string
-
-	SendFailed bool // default is false, so we are good with backward compatibility.
-}
-
 var liteserverMessageSendMc = promauto.NewCounterVec(prometheus.CounterOpts{
 	Name: "liteserver_message_send",
 }, []string{"server", "result", "iteration"})
-
-func (m *ExtInMsgCopy) IsEmulation() bool {
-	return len(m.Accounts) > 0
-}
 
 func NewMsgSender(logger *zap.Logger, servers []config.LiteServer, receivers map[string]chan<- ExtInMsgCopy) (*MsgSender, error) {
 	var (

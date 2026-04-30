@@ -1087,7 +1087,7 @@ func TestFindActions(t *testing.T) {
 				return results.Accounts[i].Account < results.Accounts[j].Account
 			})
 			if len(c.account) > 0 {
-				accountID := tongo.MustParseAccountID(c.account)
+				accountID := tongo.MustParseAddress(c.account).ID
 				extra := actionsList.Extra(accountID)
 				results.Extra = &extra
 			}
