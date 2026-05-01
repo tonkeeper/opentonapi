@@ -2769,6 +2769,20 @@
     ],
     "type": "object"
    },
+   "BlockchainRawAccounts": {
+    "properties": {
+     "accounts": {
+      "items": {
+       "$ref": "#/components/schemas/BlockchainRawAccount"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "accounts"
+    ],
+    "type": "object"
+   },
    "BouncePhaseType": {
     "enum": [
      "TrPhaseBounceNegfunds",
@@ -8806,6 +8820,33 @@
     },
     "tags": [
      "Utilities"
+    ]
+   }
+  },
+  "/v2/blockchain/accounts/_bulk": {
+   "post": {
+    "description": "Get low-level information about several accounts taken directly from the blockchain.",
+    "operationId": "getBlockchainRawAccounts",
+    "requestBody": {
+     "$ref": "#/components/requestBodies/AccountIDs"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BlockchainRawAccounts"
+        }
+       }
+      },
+      "description": "a list of raw accounts"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Blockchain"
     ]
    }
   },

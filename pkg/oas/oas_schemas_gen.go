@@ -4360,6 +4360,21 @@ func (s *BlockchainRawAccountLibrariesItem) SetRoot(val string) {
 	s.Root = val
 }
 
+// Ref: #/components/schemas/BlockchainRawAccounts
+type BlockchainRawAccounts struct {
+	Accounts []BlockchainRawAccount `json:"accounts"`
+}
+
+// GetAccounts returns the value of Accounts.
+func (s *BlockchainRawAccounts) GetAccounts() []BlockchainRawAccount {
+	return s.Accounts
+}
+
+// SetAccounts sets the value of Accounts.
+func (s *BlockchainRawAccounts) SetAccounts(val []BlockchainRawAccount) {
+	s.Accounts = val
+}
+
 // Ref: #/components/schemas/BouncePhaseType
 type BouncePhaseType string
 
@@ -6768,6 +6783,20 @@ func (s *GetBlockchainAccountTransactionsSortOrder) UnmarshalText(data []byte) e
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+type GetBlockchainRawAccountsReq struct {
+	AccountIds []string `json:"account_ids"`
+}
+
+// GetAccountIds returns the value of AccountIds.
+func (s *GetBlockchainRawAccountsReq) GetAccountIds() []string {
+	return s.AccountIds
+}
+
+// SetAccountIds sets the value of AccountIds.
+func (s *GetBlockchainRawAccountsReq) SetAccountIds(val []string) {
+	s.AccountIds = val
 }
 
 type GetChartRatesOK struct {
@@ -13921,6 +13950,52 @@ func (o OptGetBlockchainAccountTransactionsSortOrder) Get() (v GetBlockchainAcco
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetBlockchainAccountTransactionsSortOrder) Or(d GetBlockchainAccountTransactionsSortOrder) GetBlockchainAccountTransactionsSortOrder {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetBlockchainRawAccountsReq returns new OptGetBlockchainRawAccountsReq with value set to v.
+func NewOptGetBlockchainRawAccountsReq(v GetBlockchainRawAccountsReq) OptGetBlockchainRawAccountsReq {
+	return OptGetBlockchainRawAccountsReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetBlockchainRawAccountsReq is optional GetBlockchainRawAccountsReq.
+type OptGetBlockchainRawAccountsReq struct {
+	Value GetBlockchainRawAccountsReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetBlockchainRawAccountsReq was set.
+func (o OptGetBlockchainRawAccountsReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetBlockchainRawAccountsReq) Reset() {
+	var v GetBlockchainRawAccountsReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetBlockchainRawAccountsReq) SetTo(v GetBlockchainRawAccountsReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetBlockchainRawAccountsReq) Get() (v GetBlockchainRawAccountsReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetBlockchainRawAccountsReq) Or(d GetBlockchainRawAccountsReq) GetBlockchainRawAccountsReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}

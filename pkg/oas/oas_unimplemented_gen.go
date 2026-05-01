@@ -448,6 +448,15 @@ func (UnimplementedHandler) GetBlockchainRawAccount(ctx context.Context, params 
 	return r, ht.ErrNotImplemented
 }
 
+// GetBlockchainRawAccounts implements getBlockchainRawAccounts operation.
+//
+// Get low-level information about several accounts taken directly from the blockchain.
+//
+// POST /v2/blockchain/accounts/_bulk
+func (UnimplementedHandler) GetBlockchainRawAccounts(ctx context.Context, req OptGetBlockchainRawAccountsReq) (r *BlockchainRawAccounts, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetBlockchainTransaction implements getBlockchainTransaction operation.
 //
 // Get transaction data.

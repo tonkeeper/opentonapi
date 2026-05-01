@@ -53,6 +53,7 @@ const (
 	GetBlockchainMasterchainShardsOperation            OperationName = "GetBlockchainMasterchainShards"
 	GetBlockchainMasterchainTransactionsOperation      OperationName = "GetBlockchainMasterchainTransactions"
 	GetBlockchainRawAccountOperation                   OperationName = "GetBlockchainRawAccount"
+	GetBlockchainRawAccountsOperation                  OperationName = "GetBlockchainRawAccounts"
 	GetBlockchainTransactionOperation                  OperationName = "GetBlockchainTransaction"
 	GetBlockchainTransactionByMessageHashOperation     OperationName = "GetBlockchainTransactionByMessageHash"
 	GetBlockchainValidatorsOperation                   OperationName = "GetBlockchainValidators"

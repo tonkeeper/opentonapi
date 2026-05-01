@@ -381,6 +381,23 @@ paths:
                 $ref: '#/components/schemas/BlockchainRawAccount'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/blockchain/accounts/_bulk:
+    post:
+      description: Get low-level information about several accounts taken directly from the blockchain.
+      operationId: getBlockchainRawAccounts
+      tags:
+        - Blockchain
+      requestBody:
+        $ref: "#/components/requestBodies/AccountIDs"
+      responses:
+        '200':
+          description: a list of raw accounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainRawAccounts'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/blockchain/accounts/{account_id}/transactions:
     get:
       description: Get account transactions
@@ -4983,6 +5000,15 @@ components:
               root:
                 type: string
                 format: cell
+    BlockchainRawAccounts:
+      type: object
+      required:
+        - accounts
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlockchainRawAccount'
     BlockchainLibrary:
       type: object
       required:

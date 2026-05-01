@@ -303,6 +303,12 @@ type Handler interface {
 	//
 	// GET /v2/blockchain/accounts/{account_id}
 	GetBlockchainRawAccount(ctx context.Context, params GetBlockchainRawAccountParams) (*BlockchainRawAccount, error)
+	// GetBlockchainRawAccounts implements getBlockchainRawAccounts operation.
+	//
+	// Get low-level information about several accounts taken directly from the blockchain.
+	//
+	// POST /v2/blockchain/accounts/_bulk
+	GetBlockchainRawAccounts(ctx context.Context, req OptGetBlockchainRawAccountsReq) (*BlockchainRawAccounts, error)
 	// GetBlockchainTransaction implements getBlockchainTransaction operation.
 	//
 	// Get transaction data.

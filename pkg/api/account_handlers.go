@@ -52,6 +52,49 @@ func (h *Handler) GetBlockchainRawAccount(ctx context.Context, params oas.GetBlo
 	return &res, nil
 }
 
+func (h *Handler) GetBlockchainRawAccounts(ctx context.Context, request oas.OptGetBlockchainRawAccountsReq) (*oas.BlockchainRawAccounts, error) {
+	if len(request.Value.AccountIds) == 0 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("empty list of ids"))
+	}
+	if !h.limits.isBulkQuantityAllowed(len(request.Value.AccountIds)) {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("the maximum number of accounts to request at once: %v", h.limits.BulkLimits))
+	}
+	ids := make([]tongo.AccountID, 0, len(request.Value.AccountIds))
+	pending := make(map[tongo.AccountID]struct{}, len(request.Value.AccountIds))
+	for _, str := range request.Value.AccountIds {
+		account, err := tongo.ParseAddress(str)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		ids = append(ids, account.ID)
+		pending[account.ID] = struct{}{}
+	}
+	accounts, err := h.storage.GetRawAccounts(ctx, ids)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	results := make(map[ton.AccountID]oas.BlockchainRawAccount, len(ids))
+	for _, account := range accounts {
+		delete(pending, account.AccountAddress)
+		converted, err := convertToRawAccount(account)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+		results[account.AccountAddress] = converted
+	}
+	for accountID := range pending {
+		results[accountID] = oas.BlockchainRawAccount{
+			Address: accountID.ToRaw(),
+			Status:  oas.AccountStatusNonexist,
+		}
+	}
+	resp := &oas.BlockchainRawAccounts{Accounts: make([]oas.BlockchainRawAccount, 0, len(ids))}
+	for _, id := range ids {
+		resp.Accounts = append(resp.Accounts, results[id])
+	}
+	return resp, nil
+}
+
 func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (*oas.Account, error) {
 	account, err := tongo.ParseAddress(params.AccountID)
 	if err != nil {
