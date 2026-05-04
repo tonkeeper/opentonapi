@@ -103,6 +103,7 @@ func newBathTestStorage(t *testing.T, cli *liteapi.Client, blocks []tongo.BlockI
 	storage, err := litestorage.NewLiteStorage(zap.L(),
 		cli,
 		litestorage.WithPreloadBlocks(blocks),
+		litestorage.WithPythPriceFeeds(pyth.Default),
 	)
 	require.Nil(t, err)
 	return storage
@@ -466,9 +467,9 @@ func TestFindActions(t *testing.T) {
 	}
 	testCases := []Case{
 		{
-			name:           "oracle-request",
+			name:           "pyth-oracle-request",
 			hash:           "6e4cfc51eeef38a46896a556c9faae05754b31f563592fc866207234dec5966a",
-			filenamePrefix: "oracle-request",
+			filenamePrefix: "pyth-oracle-request",
 		},
 		{
 			name:           "ffvault-deposit-stake",
