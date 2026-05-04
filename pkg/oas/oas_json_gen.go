@@ -6404,6 +6404,12 @@ func (s *BlockchainConfig) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.R30.Set {
+			e.FieldStart("30")
+			s.R30.Encode(e)
+		}
+	}
+	{
 		if s.R31.Set {
 			e.FieldStart("31")
 			s.R31.Encode(e)
@@ -6505,7 +6511,7 @@ func (s *BlockchainConfig) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfBlockchainConfig = [45]string{
+var jsonFieldsNameOfBlockchainConfig = [46]string{
 	0:  "raw",
 	1:  "0",
 	2:  "1",
@@ -6534,23 +6540,24 @@ var jsonFieldsNameOfBlockchainConfig = [45]string{
 	25: "25",
 	26: "28",
 	27: "29",
-	28: "31",
-	29: "32",
-	30: "33",
-	31: "34",
-	32: "35",
-	33: "36",
-	34: "37",
-	35: "40",
-	36: "43",
-	37: "44",
-	38: "45",
-	39: "71",
-	40: "72",
-	41: "73",
-	42: "79",
-	43: "81",
-	44: "82",
+	28: "30",
+	29: "31",
+	30: "32",
+	31: "33",
+	32: "34",
+	33: "35",
+	34: "36",
+	35: "37",
+	36: "40",
+	37: "43",
+	38: "44",
+	39: "45",
+	40: "71",
+	41: "72",
+	42: "73",
+	43: "79",
+	44: "81",
+	45: "82",
 }
 
 // Decode decodes BlockchainConfig from json.
@@ -6852,6 +6859,16 @@ func (s *BlockchainConfig) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"29\"")
 			}
+		case "30":
+			if err := func() error {
+				s.R30.Reset()
+				if err := s.R30.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"30\"")
+			}
 		case "31":
 			if err := func() error {
 				s.R31.Reset()
@@ -6943,7 +6960,7 @@ func (s *BlockchainConfig) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"43\"")
 			}
 		case "44":
-			requiredBitSet[4] |= 1 << 5
+			requiredBitSet[4] |= 1 << 6
 			if err := func() error {
 				if err := s.R44.Decode(d); err != nil {
 					return err
@@ -7036,7 +7053,7 @@ func (s *BlockchainConfig) Decode(d *jx.Decoder) error {
 		0b00000000,
 		0b00000000,
 		0b00000000,
-		0b00100000,
+		0b01000000,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -9368,6 +9385,86 @@ func (s *BlockchainConfig29) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *BlockchainConfig29) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *BlockchainConfig30) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *BlockchainConfig30) encodeFields(e *jx.Encoder) {
+	{
+		if s.Mc.Set {
+			e.FieldStart("mc")
+			s.Mc.Encode(e)
+		}
+	}
+	{
+		if s.Shard.Set {
+			e.FieldStart("shard")
+			s.Shard.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfBlockchainConfig30 = [2]string{
+	0: "mc",
+	1: "shard",
+}
+
+// Decode decodes BlockchainConfig30 from json.
+func (s *BlockchainConfig30) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BlockchainConfig30 to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "mc":
+			if err := func() error {
+				s.Mc.Reset()
+				if err := s.Mc.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"mc\"")
+			}
+		case "shard":
+			if err := func() error {
+				s.Shard.Reset()
+				if err := s.Shard.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"shard\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode BlockchainConfig30")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *BlockchainConfig30) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BlockchainConfig30) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -29916,6 +30013,260 @@ func (s *Multisigs) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *NewConsensusConfig) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NewConsensusConfig) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("flags")
+		e.Int(s.Flags)
+	}
+	{
+		e.FieldStart("use_quic")
+		e.Bool(s.UseQuic)
+	}
+	{
+		if s.TargetRateMs.Set {
+			e.FieldStart("target_rate_ms")
+			s.TargetRateMs.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("slots_per_leader_window")
+		e.Int64(s.SlotsPerLeaderWindow)
+	}
+	{
+		if s.FirstBlockTimeoutMs.Set {
+			e.FieldStart("first_block_timeout_ms")
+			s.FirstBlockTimeoutMs.Encode(e)
+		}
+	}
+	{
+		if s.MaxLeaderWindowDesync.Set {
+			e.FieldStart("max_leader_window_desync")
+			s.MaxLeaderWindowDesync.Encode(e)
+		}
+	}
+	{
+		if s.NoncriticalParams.Set {
+			e.FieldStart("noncritical_params")
+			s.NoncriticalParams.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfNewConsensusConfig = [7]string{
+	0: "flags",
+	1: "use_quic",
+	2: "target_rate_ms",
+	3: "slots_per_leader_window",
+	4: "first_block_timeout_ms",
+	5: "max_leader_window_desync",
+	6: "noncritical_params",
+}
+
+// Decode decodes NewConsensusConfig from json.
+func (s *NewConsensusConfig) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewConsensusConfig to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "flags":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Flags = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"flags\"")
+			}
+		case "use_quic":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.UseQuic = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"use_quic\"")
+			}
+		case "target_rate_ms":
+			if err := func() error {
+				s.TargetRateMs.Reset()
+				if err := s.TargetRateMs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"target_rate_ms\"")
+			}
+		case "slots_per_leader_window":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.SlotsPerLeaderWindow = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"slots_per_leader_window\"")
+			}
+		case "first_block_timeout_ms":
+			if err := func() error {
+				s.FirstBlockTimeoutMs.Reset()
+				if err := s.FirstBlockTimeoutMs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"first_block_timeout_ms\"")
+			}
+		case "max_leader_window_desync":
+			if err := func() error {
+				s.MaxLeaderWindowDesync.Reset()
+				if err := s.MaxLeaderWindowDesync.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"max_leader_window_desync\"")
+			}
+		case "noncritical_params":
+			if err := func() error {
+				s.NoncriticalParams.Reset()
+				if err := s.NoncriticalParams.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"noncritical_params\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NewConsensusConfig")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNewConsensusConfig) {
+					name = jsonFieldsNameOfNewConsensusConfig[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewConsensusConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewConsensusConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s NewConsensusConfigNoncriticalParams) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s NewConsensusConfigNoncriticalParams) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		e.Int64(elem)
+	}
+}
+
+// Decode decodes NewConsensusConfigNoncriticalParams from json.
+func (s *NewConsensusConfigNoncriticalParams) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewConsensusConfigNoncriticalParams to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem int64
+		if err := func() error {
+			v, err := d.Int64()
+			elem = int64(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NewConsensusConfigNoncriticalParams")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NewConsensusConfigNoncriticalParams) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewConsensusConfigNoncriticalParams) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes NftApprovedBy as json.
 func (s NftApprovedBy) Encode(e *jx.Encoder) {
 	unwrapped := []NftApprovedByItem(s)
@@ -32633,6 +32984,39 @@ func (s *OptBlockchainConfig29) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes BlockchainConfig30 as json.
+func (o OptBlockchainConfig30) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes BlockchainConfig30 from json.
+func (o *OptBlockchainConfig30) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptBlockchainConfig30 to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptBlockchainConfig30) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptBlockchainConfig30) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes BlockchainConfig31 as json.
 func (o OptBlockchainConfig31) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -34555,6 +34939,73 @@ func (s OptMultisigOrderChangingParameters) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptMultisigOrderChangingParameters) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NewConsensusConfig as json.
+func (o OptNewConsensusConfig) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes NewConsensusConfig from json.
+func (o *OptNewConsensusConfig) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNewConsensusConfig to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNewConsensusConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNewConsensusConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NewConsensusConfigNoncriticalParams as json.
+func (o OptNewConsensusConfigNoncriticalParams) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes NewConsensusConfigNoncriticalParams from json.
+func (o *OptNewConsensusConfigNoncriticalParams) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNewConsensusConfigNoncriticalParams to nil")
+	}
+	o.Set = true
+	o.Value = make(NewConsensusConfigNoncriticalParams)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNewConsensusConfigNoncriticalParams) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNewConsensusConfigNoncriticalParams) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

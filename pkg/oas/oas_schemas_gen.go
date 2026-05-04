@@ -2742,6 +2742,9 @@ type BlockchainConfig struct {
 	R28 OptBlockchainConfig28 `json:"28"`
 	// The configuration for the consensus protocol above catchain.
 	R29 OptBlockchainConfig29 `json:"29"`
+	// The configuration for the new consensus protocol. Each chain can have its own optional
+	// configuration.
+	R30 OptBlockchainConfig30 `json:"30"`
 	// The configuration for the consensus protocol above catchain.
 	R31 OptBlockchainConfig31 `json:"31"`
 	R32 OptValidatorsSet      `json:"32"`
@@ -2911,6 +2914,11 @@ func (s *BlockchainConfig) GetR28() OptBlockchainConfig28 {
 // GetR29 returns the value of R29.
 func (s *BlockchainConfig) GetR29() OptBlockchainConfig29 {
 	return s.R29
+}
+
+// GetR30 returns the value of R30.
+func (s *BlockchainConfig) GetR30() OptBlockchainConfig30 {
+	return s.R30
 }
 
 // GetR31 returns the value of R31.
@@ -3136,6 +3144,11 @@ func (s *BlockchainConfig) SetR28(val OptBlockchainConfig28) {
 // SetR29 sets the value of R29.
 func (s *BlockchainConfig) SetR29(val OptBlockchainConfig29) {
 	s.R29 = val
+}
+
+// SetR30 sets the value of R30.
+func (s *BlockchainConfig) SetR30(val OptBlockchainConfig30) {
+	s.R30 = val
 }
 
 // SetR31 sets the value of R31.
@@ -3848,6 +3861,33 @@ func (s *BlockchainConfig29) SetProtoVersion(val OptInt64) {
 // SetCatchainMaxBlocksCoeff sets the value of CatchainMaxBlocksCoeff.
 func (s *BlockchainConfig29) SetCatchainMaxBlocksCoeff(val OptInt64) {
 	s.CatchainMaxBlocksCoeff = val
+}
+
+// The configuration for the new consensus protocol. Each chain can have its own optional
+// configuration.
+type BlockchainConfig30 struct {
+	Mc    OptNewConsensusConfig `json:"mc"`
+	Shard OptNewConsensusConfig `json:"shard"`
+}
+
+// GetMc returns the value of Mc.
+func (s *BlockchainConfig30) GetMc() OptNewConsensusConfig {
+	return s.Mc
+}
+
+// GetShard returns the value of Shard.
+func (s *BlockchainConfig30) GetShard() OptNewConsensusConfig {
+	return s.Shard
+}
+
+// SetMc sets the value of Mc.
+func (s *BlockchainConfig30) SetMc(val OptNewConsensusConfig) {
+	s.Mc = val
+}
+
+// SetShard sets the value of Shard.
+func (s *BlockchainConfig30) SetShard(val OptNewConsensusConfig) {
+	s.Shard = val
 }
 
 // The configuration for the consensus protocol above catchain.
@@ -10269,6 +10309,98 @@ func (s *Multisigs) SetMultisigs(val []Multisig) {
 	s.Multisigs = val
 }
 
+// Ref: #/components/schemas/NewConsensusConfig
+type NewConsensusConfig struct {
+	Flags                 int                                    `json:"flags"`
+	UseQuic               bool                                   `json:"use_quic"`
+	TargetRateMs          OptInt64                               `json:"target_rate_ms"`
+	SlotsPerLeaderWindow  int64                                  `json:"slots_per_leader_window"`
+	FirstBlockTimeoutMs   OptInt64                               `json:"first_block_timeout_ms"`
+	MaxLeaderWindowDesync OptInt64                               `json:"max_leader_window_desync"`
+	NoncriticalParams     OptNewConsensusConfigNoncriticalParams `json:"noncritical_params"`
+}
+
+// GetFlags returns the value of Flags.
+func (s *NewConsensusConfig) GetFlags() int {
+	return s.Flags
+}
+
+// GetUseQuic returns the value of UseQuic.
+func (s *NewConsensusConfig) GetUseQuic() bool {
+	return s.UseQuic
+}
+
+// GetTargetRateMs returns the value of TargetRateMs.
+func (s *NewConsensusConfig) GetTargetRateMs() OptInt64 {
+	return s.TargetRateMs
+}
+
+// GetSlotsPerLeaderWindow returns the value of SlotsPerLeaderWindow.
+func (s *NewConsensusConfig) GetSlotsPerLeaderWindow() int64 {
+	return s.SlotsPerLeaderWindow
+}
+
+// GetFirstBlockTimeoutMs returns the value of FirstBlockTimeoutMs.
+func (s *NewConsensusConfig) GetFirstBlockTimeoutMs() OptInt64 {
+	return s.FirstBlockTimeoutMs
+}
+
+// GetMaxLeaderWindowDesync returns the value of MaxLeaderWindowDesync.
+func (s *NewConsensusConfig) GetMaxLeaderWindowDesync() OptInt64 {
+	return s.MaxLeaderWindowDesync
+}
+
+// GetNoncriticalParams returns the value of NoncriticalParams.
+func (s *NewConsensusConfig) GetNoncriticalParams() OptNewConsensusConfigNoncriticalParams {
+	return s.NoncriticalParams
+}
+
+// SetFlags sets the value of Flags.
+func (s *NewConsensusConfig) SetFlags(val int) {
+	s.Flags = val
+}
+
+// SetUseQuic sets the value of UseQuic.
+func (s *NewConsensusConfig) SetUseQuic(val bool) {
+	s.UseQuic = val
+}
+
+// SetTargetRateMs sets the value of TargetRateMs.
+func (s *NewConsensusConfig) SetTargetRateMs(val OptInt64) {
+	s.TargetRateMs = val
+}
+
+// SetSlotsPerLeaderWindow sets the value of SlotsPerLeaderWindow.
+func (s *NewConsensusConfig) SetSlotsPerLeaderWindow(val int64) {
+	s.SlotsPerLeaderWindow = val
+}
+
+// SetFirstBlockTimeoutMs sets the value of FirstBlockTimeoutMs.
+func (s *NewConsensusConfig) SetFirstBlockTimeoutMs(val OptInt64) {
+	s.FirstBlockTimeoutMs = val
+}
+
+// SetMaxLeaderWindowDesync sets the value of MaxLeaderWindowDesync.
+func (s *NewConsensusConfig) SetMaxLeaderWindowDesync(val OptInt64) {
+	s.MaxLeaderWindowDesync = val
+}
+
+// SetNoncriticalParams sets the value of NoncriticalParams.
+func (s *NewConsensusConfig) SetNoncriticalParams(val OptNewConsensusConfigNoncriticalParams) {
+	s.NoncriticalParams = val
+}
+
+type NewConsensusConfigNoncriticalParams map[string]int64
+
+func (s *NewConsensusConfigNoncriticalParams) init() NewConsensusConfigNoncriticalParams {
+	m := *s
+	if m == nil {
+		m = map[string]int64{}
+		*s = m
+	}
+	return m
+}
+
 type NftApprovedBy []NftApprovedByItem
 
 type NftApprovedByItem string
@@ -12064,6 +12196,52 @@ func (o OptBlockchainConfig29) Get() (v BlockchainConfig29, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBlockchainConfig29) Or(d BlockchainConfig29) BlockchainConfig29 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBlockchainConfig30 returns new OptBlockchainConfig30 with value set to v.
+func NewOptBlockchainConfig30(v BlockchainConfig30) OptBlockchainConfig30 {
+	return OptBlockchainConfig30{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBlockchainConfig30 is optional BlockchainConfig30.
+type OptBlockchainConfig30 struct {
+	Value BlockchainConfig30
+	Set   bool
+}
+
+// IsSet returns true if OptBlockchainConfig30 was set.
+func (o OptBlockchainConfig30) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBlockchainConfig30) Reset() {
+	var v BlockchainConfig30
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBlockchainConfig30) SetTo(v BlockchainConfig30) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBlockchainConfig30) Get() (v BlockchainConfig30, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBlockchainConfig30) Or(d BlockchainConfig30) BlockchainConfig30 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -14824,6 +15002,98 @@ func (o OptMultisigOrderChangingParameters) Get() (v MultisigOrderChangingParame
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMultisigOrderChangingParameters) Or(d MultisigOrderChangingParameters) MultisigOrderChangingParameters {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNewConsensusConfig returns new OptNewConsensusConfig with value set to v.
+func NewOptNewConsensusConfig(v NewConsensusConfig) OptNewConsensusConfig {
+	return OptNewConsensusConfig{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNewConsensusConfig is optional NewConsensusConfig.
+type OptNewConsensusConfig struct {
+	Value NewConsensusConfig
+	Set   bool
+}
+
+// IsSet returns true if OptNewConsensusConfig was set.
+func (o OptNewConsensusConfig) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNewConsensusConfig) Reset() {
+	var v NewConsensusConfig
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNewConsensusConfig) SetTo(v NewConsensusConfig) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNewConsensusConfig) Get() (v NewConsensusConfig, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNewConsensusConfig) Or(d NewConsensusConfig) NewConsensusConfig {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNewConsensusConfigNoncriticalParams returns new OptNewConsensusConfigNoncriticalParams with value set to v.
+func NewOptNewConsensusConfigNoncriticalParams(v NewConsensusConfigNoncriticalParams) OptNewConsensusConfigNoncriticalParams {
+	return OptNewConsensusConfigNoncriticalParams{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNewConsensusConfigNoncriticalParams is optional NewConsensusConfigNoncriticalParams.
+type OptNewConsensusConfigNoncriticalParams struct {
+	Value NewConsensusConfigNoncriticalParams
+	Set   bool
+}
+
+// IsSet returns true if OptNewConsensusConfigNoncriticalParams was set.
+func (o OptNewConsensusConfigNoncriticalParams) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNewConsensusConfigNoncriticalParams) Reset() {
+	var v NewConsensusConfigNoncriticalParams
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNewConsensusConfigNoncriticalParams) SetTo(v NewConsensusConfigNoncriticalParams) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNewConsensusConfigNoncriticalParams) Get() (v NewConsensusConfigNoncriticalParams, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNewConsensusConfigNoncriticalParams) Or(d NewConsensusConfigNoncriticalParams) NewConsensusConfigNoncriticalParams {
 	if v, ok := o.Get(); ok {
 		return v
 	}

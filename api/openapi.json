@@ -2375,6 +2375,18 @@
       "format": "address",
       "type": "string"
      },
+     "30": {
+      "description": "The configuration for the new consensus protocol. Each chain can have its own optional configuration.",
+      "properties": {
+       "mc": {
+        "$ref": "#/components/schemas/NewConsensusConfig"
+       },
+       "shard": {
+        "$ref": "#/components/schemas/NewConsensusConfig"
+       }
+      },
+      "type": "object"
+     },
      "31": {
       "description": "The configuration for the consensus protocol above catchain.",
       "properties": {
@@ -5042,6 +5054,58 @@
     },
     "required": [
      "multisigs"
+    ],
+    "type": "object"
+   },
+   "NewConsensusConfig": {
+    "properties": {
+     "first_block_timeout_ms": {
+      "example": 1000,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "flags": {
+      "example": 0,
+      "format": "int",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "max_leader_window_desync": {
+      "example": 4,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "noncritical_params": {
+      "additionalProperties": {
+       "format": "int64",
+       "type": "integer",
+       "x-js-format": "bigint"
+      },
+      "type": "object"
+     },
+     "slots_per_leader_window": {
+      "example": 1,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "target_rate_ms": {
+      "example": 1000,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "use_quic": {
+      "example": false,
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "flags",
+     "use_quic",
+     "slots_per_leader_window"
     ],
     "type": "object"
    },

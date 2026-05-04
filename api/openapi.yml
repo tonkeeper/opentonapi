@@ -4729,6 +4729,47 @@ components:
           type: integer
           format: int64
           example: 1000000
+    NewConsensusConfig:
+      type: object
+      required:
+        - flags
+        - use_quic
+        - slots_per_leader_window
+      properties:
+        flags:
+          type: integer
+          format: int
+          example: 0
+          x-js-format: bigint
+        use_quic:
+          type: boolean
+          example: false
+        target_rate_ms:
+          type: integer
+          format: int64
+          example: 1000
+          x-js-format: bigint
+        slots_per_leader_window:
+          type: integer
+          format: int64
+          example: 1
+          x-js-format: bigint
+        first_block_timeout_ms:
+          type: integer
+          format: int64
+          example: 1000
+          x-js-format: bigint
+        max_leader_window_desync:
+          type: integer
+          format: int64
+          example: 4
+          x-js-format: bigint
+        noncritical_params:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+            x-js-format: bigint
     ValidatorsSet:
       type: object
       required:
@@ -5782,6 +5823,14 @@ components:
               type: integer
               format: int64
               example: 10000
+        "30":
+          type: object
+          description: The configuration for the new consensus protocol. Each chain can have its own optional configuration.
+          properties:
+            mc:
+              $ref: '#/components/schemas/NewConsensusConfig'
+            shard:
+              $ref: '#/components/schemas/NewConsensusConfig'
         "31":
           type: object
           description: The configuration for the consensus protocol above catchain.
