@@ -508,6 +508,16 @@ func convertConfig(logger *zap.Logger, cfg tlb.ConfigParams) (*oas.BlockchainCon
 	if p29 := blockchainConfig.ConfigParam29; p29 != nil {
 		config.R29 = oas.NewOptBlockchainConfig29(convertConsensusConfig(logger, p29.ConsensusConfig))
 	}
+	if p30 := blockchainConfig.ConfigParam30; p30 != nil {
+		var param30 oas.BlockchainConfig30
+		if p30.NewConsensusConfigAll.Mc != nil {
+			param30.Mc = oas.NewOptNewConsensusConfig(convertNewConsensusConfig(logger, *p30.NewConsensusConfigAll.Mc))
+		}
+		if p30.NewConsensusConfigAll.Shard != nil {
+			param30.Shard = oas.NewOptNewConsensusConfig(convertNewConsensusConfig(logger, *p30.NewConsensusConfigAll.Shard))
+		}
+		config.R30 = oas.NewOptBlockchainConfig30(param30)
+	}
 	if p31 := blockchainConfig.ConfigParam31; p31 != nil {
 		param31 := oas.BlockchainConfig31{
 			FundamentalSmcAddr: make([]string, 0, len(p31.FundamentalSmcAddr.Keys())),
@@ -756,6 +766,33 @@ func convertConsensusConfig(logger *zap.Logger, cfg tlb.ConsensusConfig) oas.Blo
 	}
 	logger.Error("unsupported ConsensusConfig format")
 	return oas.BlockchainConfig29{}
+}
+
+func convertNewConsensusConfig(logger *zap.Logger, cfg tlb.NewConsensusConfig) oas.NewConsensusConfig {
+	switch cfg.SumType {
+	case "SimplexConfig":
+		return oas.NewConsensusConfig{
+			Flags:                 int(cfg.SimplexConfig.Flags),
+			UseQuic:               cfg.SimplexConfig.UseQuic,
+			SlotsPerLeaderWindow:  int64(cfg.SimplexConfig.SlotsPerLeaderWindow),
+			TargetRateMs:          oas.NewOptInt64(int64(cfg.SimplexConfig.TargetRateMs)),
+			FirstBlockTimeoutMs:   oas.NewOptInt64(int64(cfg.SimplexConfig.FirstBlockTimeoutMs)),
+			MaxLeaderWindowDesync: oas.NewOptInt64(int64(cfg.SimplexConfig.MaxLeaderWindowDesync)),
+		}
+	case "SimplexConfigV2":
+		params := oas.NewConsensusConfigNoncriticalParams{}
+		for _, item := range cfg.SimplexConfigV2.NoncriticalParams.Items() {
+			params[fmt.Sprintf("%d", item.Key)] = int64(item.Value)
+		}
+		return oas.NewConsensusConfig{
+			Flags:                int(cfg.SimplexConfigV2.Flags),
+			UseQuic:              cfg.SimplexConfigV2.UseQuic,
+			SlotsPerLeaderWindow: int64(cfg.SimplexConfigV2.SlotsPerLeaderWindow),
+			NoncriticalParams:    oas.NewOptNewConsensusConfigNoncriticalParams(params),
+		}
+	}
+	logger.Error("unsupported NewConsensusConfig format")
+	return oas.NewConsensusConfig{}
 }
 
 func convertCatchainConfig(logger *zap.Logger, cfg tlb.CatchainConfig) oas.BlockchainConfig28 {
