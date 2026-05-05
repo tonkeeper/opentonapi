@@ -9,9 +9,6 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/tonkeeper/tongo/contract/elector"
-	"github.com/tonkeeper/tongo/tvm"
-
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -409,23 +406,12 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		init := acc.Account.Storage.State.AccountActive.StateInit
-		code := init.Code.Value.Value
 		data := init.Data.Value.Value
 
-		configObject := h.configPool.Get().(*tvm.Config)
-		defer h.configPool.Put(configObject)
-		if configObject == nil {
-			return nil, toError(http.StatusInternalServerError, fmt.Errorf("error getting BlockchainConfig from the pool"))
-		}
-
-		emulator, err := tvm.NewEmulator(&code, &data, nil, tvm.WithConfig(configObject))
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		if err := emulator.SetGasLimit(10_000_000); err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		list, err := elector.GetParticipantListExtended(ctx, electorAddr, emulator)
+		// decode the elector contract data directly instead of running participant_list_extended get-method
+		// it returns FunC cons-list of all participants, which the TVM emulator fails
+		// to serialize once the resulting cell-depth exceeds its limit.
+		list, err := parseElectorParticipantList(&data)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
