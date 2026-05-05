@@ -82,6 +82,66 @@ func (t *Trace) SetAdditionalInfo(info *TraceAdditionalInfo) {
 	t.additionalInfo = info
 }
 
+// traceSaved is the on-the-wire shape used to serialize a Trace.
+// It exists because Trace contains an unexported mutex and additionalInfo
+// that cannot be (un)marshaled directly.
+type traceSaved struct {
+	Transaction
+	AccountInterfaces []abi.ContractInterface
+	Children          []*traceSaved
+	AdditionalInfo    *TraceAdditionalInfo
+}
+
+func (t *Trace) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.toSaved())
+}
+
+func (t *Trace) UnmarshalJSON(data []byte) error {
+	var saved traceSaved
+	if err := json.Unmarshal(data, &saved); err != nil {
+		return err
+	}
+	saved.copyInto(t)
+	return nil
+}
+
+func (t *Trace) toSaved() *traceSaved {
+	if t == nil {
+		return nil
+	}
+	result := &traceSaved{
+		Transaction:       t.Transaction,
+		AccountInterfaces: t.AccountInterfaces,
+		AdditionalInfo:    t.AdditionalInfo(),
+	}
+	if len(t.Children) > 0 {
+		result.Children = make([]*traceSaved, len(t.Children))
+		for i, child := range t.Children {
+			result.Children[i] = child.toSaved()
+		}
+	}
+	return result
+}
+
+func (ts *traceSaved) copyInto(t *Trace) {
+	if ts == nil {
+		return
+	}
+	t.Transaction = ts.Transaction
+	t.AccountInterfaces = ts.AccountInterfaces
+	if ts.AdditionalInfo != nil {
+		t.SetAdditionalInfo(ts.AdditionalInfo)
+	}
+	if len(ts.Children) > 0 {
+		t.Children = make([]*Trace, len(ts.Children))
+		for i, child := range ts.Children {
+			childTrace := &Trace{}
+			child.copyInto(childTrace)
+			t.Children[i] = childTrace
+		}
+	}
+}
+
 func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 	type Alias struct {
 		JettonMasters       map[string]string    `json:",omitempty"`
