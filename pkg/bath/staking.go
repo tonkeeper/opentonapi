@@ -337,12 +337,18 @@ var WithdrawLiquidStake = Straw[BubbleWithdrawStake]{
 var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 	CheckFuncs: []bubbleCheck{Is(BubbleJettonBurn{})},
 	Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
-		newAction.Staker = bubble.Info.(BubbleJettonBurn).sender.Address
+		burn := bubble.Info.(BubbleJettonBurn)
+		newAction.Staker = burn.sender.Address
 		newAction.Success = true
 		newAction.Implementation = core.StakingImplementationLiquidTF
-		amount := big.Int(bubble.Info.(BubbleJettonBurn).amount)
-		p := core.PriceNanoTON(amount.Int64())
-		newAction.Amount = &p
+		master := burn.master
+		newAction.Amount = &core.Price{
+			Currency: core.Currency{
+				Type:   core.CurrencyJetton,
+				Jetton: &master,
+			},
+			Amount: big.Int(burn.amount),
+		}
 		return nil
 	},
 	SingleChild: &Straw[BubbleWithdrawStakeRequest]{
