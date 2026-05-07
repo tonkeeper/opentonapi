@@ -73,10 +73,10 @@ func PythOraclePriceUpdateStraw(priceFeedMetaStore PriceFeedMetaStore) Straw[Bub
 		Children: []Straw[BubbleOraclePriceUpdate]{
 			{
 				CheckFuncs: []bubbleCheck{
-					IsTx, Or(
-						HasOperation(abiPythOracle.PythOracleOracleResponseSuccessMsgOp),
-						HasOperation(abiPythOracle.PythOracleErrorResponseMsgOp),
-					),
+					IsTx, //Or(
+					HasOperation(abiPythOracle.PythOracleOracleResponseSuccessMsgOp),
+					//	HasOperation(abiPythOracle.PythOracleErrorResponseMsgOp),
+					//),
 				},
 				Builder: func(newAction *BubbleOraclePriceUpdate, bubble *Bubble) error {
 					if !IsAccount(newAction.ResponseTo)(bubble) {
