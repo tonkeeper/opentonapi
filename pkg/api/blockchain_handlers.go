@@ -13,6 +13,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
+	abiElector "github.com/tonkeeper/tongo/abi-tolk/abiGenerated/elector"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
@@ -408,11 +409,8 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 		init := acc.Account.Storage.State.AccountActive.StateInit
 		data := init.Data.Value.Value
 
-		// decode the elector contract data directly instead of running participant_list_extended get-method
-		// it returns FunC cons-list of all participants, which the TVM emulator fails
-		// to serialize once the resulting cell-depth exceeds its limit.
-		list, err := parseElectorParticipantList(&data)
-		if err != nil {
+		var electorStorage abiElector.ElectorStorage
+		if err = electorStorage.UnmarshalTLB(&data, tlb.NewDecoder()); err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		if config.ConfigParam34 == nil {
@@ -420,47 +418,56 @@ func (h *Handler) GetBlockchainValidators(ctx context.Context) (*oas.Validators,
 		}
 
 		validatorSet := config.ConfigParam34.CurValidators
-		var pubKeys map[tlb.Bits256]struct{}
+		var pubKeys map[string]struct{}
 		var utimeSince uint32
 		switch validatorSet.SumType {
 		case "Validators":
 			utimeSince = validatorSet.Validators.UtimeSince
-			pubKeys = make(map[tlb.Bits256]struct{}, len(validatorSet.Validators.List.Keys()))
+			pubKeys = make(map[string]struct{}, len(validatorSet.Validators.List.Keys()))
 			for _, descr := range validatorSet.Validators.List.Values() {
-				pubKeys[descr.PubKey()] = struct{}{}
+				pubKeys[descr.PubKey().Hex()] = struct{}{}
 			}
 		case "ValidatorsExt":
 			utimeSince = validatorSet.ValidatorsExt.UtimeSince
-			pubKeys = make(map[tlb.Bits256]struct{}, len(validatorSet.ValidatorsExt.List.Keys()))
+			pubKeys = make(map[string]struct{}, len(validatorSet.ValidatorsExt.List.Keys()))
 			for _, descr := range validatorSet.ValidatorsExt.List.Values() {
-				pubKeys[descr.PubKey()] = struct{}{}
+				pubKeys[descr.PubKey().Hex()] = struct{}{}
 			}
 		default:
 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("unknown validator set type %v", validatorSet.SumType))
 		}
-		if list.ElectAt != int64(utimeSince) {
+
+		if !electorStorage.Elect.Exists || electorStorage.Elect.Value.Value == nil {
+			continue
+		}
+		elect := electorStorage.Elect.Value.Value
+		if uint32(elect.ElectAt) != utimeSince {
 			// this election is for the next validator set,
 			// let's take travel back in time to the current validator set
 			continue
 		}
+		electMembers := elect.Members.Items()
 		validators := &oas.Validators{
-			ElectAt:    list.ElectAt,
-			ElectClose: list.ElectClose,
-			MinStake:   list.MinStake,
-			TotalStake: list.TotalStake,
-			Validators: make([]oas.Validator, 0, len(list.Validators)),
+			ElectAt:    int64(elect.ElectAt),
+			ElectClose: int64(elect.ElectClose),
+			MinStake:   int64(elect.MinStake),
+			TotalStake: int64(elect.TotalStake),
+			Validators: make([]oas.Validator, 0, len(electMembers)),
 		}
-		for _, v := range list.Validators {
+		for _, item := range electMembers {
+			pubkey := item.Key
+			v := item.Value
 			// sometimes, participant_list_extended returns validators that are not in the current validator set,
 			// so we need to filter them out.
-			if _, ok := pubKeys[v.Pubkey]; !ok {
+			if _, ok := pubKeys[pubkey.HexString()]; !ok {
 				continue
 			}
+			address := ton.AccountID{Workchain: -1, Address: v.SrcAddr.ToBits()}
 			validators.Validators = append(validators.Validators, oas.Validator{
-				Stake:       v.Stake,
-				MaxFactor:   v.MaxFactor,
-				Address:     v.Address.ToRaw(),
-				AdnlAddress: v.AdnlAddr,
+				Stake:       int64(v.Stake),
+				MaxFactor:   int64(v.MaxFactor),
+				Address:     address.ToRaw(),
+				AdnlAddress: v.AdnlAddr.HexString(),
 			})
 		}
 		return validators, nil
