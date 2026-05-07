@@ -10,6 +10,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
+	abiElector "github.com/tonkeeper/tongo/abi-tolk/abiGenerated/elector"
 	abiFfVault "github.com/tonkeeper/tongo/abi-tolk/abiGenerated/ffVault"
 	"github.com/tonkeeper/tongo/ton"
 )
@@ -33,7 +34,7 @@ func (ds BubbleElectionsDepositStake) ToAction() *Action {
 }
 
 var ElectionsDepositStakeStraw = Straw[BubbleElectionsDepositStake]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ElectorNewStakeMsgOp), IsAccount(config.ElectorAddress())},
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiElector.ElectorNewStakeMsgOp), IsAccount(config.ElectorAddress())},
 	Builder: func(newAction *BubbleElectionsDepositStake, bubble *Bubble) error {
 		bubbleTx := bubble.Info.(BubbleTx)
 		newAction.Amount = bubbleTx.inputAmount
@@ -42,7 +43,7 @@ var ElectionsDepositStakeStraw = Straw[BubbleElectionsDepositStake]{
 	},
 	Children: []Straw[BubbleElectionsDepositStake]{
 		{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ElectorNewStakeConfirmationMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiElector.ElectorNewStakeConfirmationMsgOp)},
 			Builder: func(newAction *BubbleElectionsDepositStake, bubble *Bubble) error {
 				newAction.Success = true
 				return nil
@@ -70,7 +71,7 @@ func (b BubbleElectionsRecoverStake) ToAction() *Action {
 }
 
 var ElectionsRecoverStakeStraw = Straw[BubbleElectionsRecoverStake]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ElectorRecoverStakeRequestMsgOp), IsAccount(config.ElectorAddress())},
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiElector.ElectorRecoverStakeRequestMsgOp), IsAccount(config.ElectorAddress())},
 	Builder: func(newAction *BubbleElectionsRecoverStake, bubble *Bubble) error {
 		bubbleTx := bubble.Info.(BubbleTx)
 		newAction.Staker = bubbleTx.inputFrom.Address
@@ -78,7 +79,7 @@ var ElectionsRecoverStakeStraw = Straw[BubbleElectionsRecoverStake]{
 	},
 	Children: []Straw[BubbleElectionsRecoverStake]{
 		{
-			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ElectorRecoverStakeResponseMsgOp)},
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiElector.ElectorRecoverStakeResponseMsgOp)},
 			Builder: func(newAction *BubbleElectionsRecoverStake, bubble *Bubble) error {
 				newAction.Amount = bubble.Info.(BubbleTx).inputAmount
 				newAction.Success = true
