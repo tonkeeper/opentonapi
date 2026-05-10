@@ -175,6 +175,7 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	for _, currency := range currencies {
 		rates, err = h.convertRates(ctx, rates, wallet.JettonAddress.ToRaw(), currency, todayRates, yesterdayRates, weekRates, monthRates)
 		if err != nil {
+			rates = make(map[string]oas.TokenRates)
 			continue
 		}
 	}
