@@ -59,10 +59,7 @@ func (c *calculator) refresh() {
 	weekAgo := today.AddDate(0, 0, -7).Unix()
 	monthAgo := today.AddDate(0, 0, -30).Unix()
 
-	marketsTonPrice, err := c.source.GetMarketsTonPrice()
-	if err != nil {
-		return
-	}
+	marketsTonPrice, marketErr := c.source.GetMarketsTonPrice()
 	todayRates, err := c.source.GetRates(today.Unix())
 	if err != nil {
 		return
@@ -85,7 +82,9 @@ func (c *calculator) refresh() {
 	c.yesterdayRates = yesterdayRates
 	c.weekRates = weekRates
 	c.monthRates = monthRates
-	c.marketsTonPrice = marketsTonPrice
+	if marketErr != nil {
+		c.marketsTonPrice = marketsTonPrice
+	}
 	c.mu.Unlock()
 }
 
