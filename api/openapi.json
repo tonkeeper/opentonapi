@@ -3128,6 +3128,114 @@
     ],
     "type": "object"
    },
+   "DefiAsset": {
+    "properties": {
+     "amount": {
+      "description": "amount in token units; negative for lending debt",
+      "example": 1000000000,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "nft": {
+      "$ref": "#/components/schemas/DefiNftPreview"
+     },
+     "position": {
+      "description": "current position value in nanoTON",
+      "example": 2000000000,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "provider": {
+      "$ref": "#/components/schemas/DefiProvider"
+     },
+     "type": {
+      "$ref": "#/components/schemas/DefiAssetType"
+     }
+    },
+    "required": [
+     "type",
+     "provider",
+     "amount",
+     "position"
+    ],
+    "type": "object"
+   },
+   "DefiAssetType": {
+    "enum": [
+     "liquid_staking",
+     "liquid_pool",
+     "staking",
+     "lending",
+     "farming"
+    ],
+    "type": "string"
+   },
+   "DefiAssets": {
+    "properties": {
+     "assets": {
+      "items": {
+       "$ref": "#/components/schemas/DefiAsset"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "assets"
+    ],
+    "type": "object"
+   },
+   "DefiNftPreview": {
+    "properties": {
+     "address": {
+      "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
+      "format": "address",
+      "type": "string"
+     },
+     "collection": {
+      "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
+      "format": "address",
+      "type": "string"
+     },
+     "token0": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "token1": {
+      "$ref": "#/components/schemas/JettonPreview"
+     }
+    },
+    "required": [
+     "address",
+     "collection"
+    ],
+    "type": "object"
+   },
+   "DefiProvider": {
+    "properties": {
+     "image": {
+      "example": "https://tonstakers.com/logo.png",
+      "type": "string"
+     },
+     "name": {
+      "example": "Tonstakers",
+      "type": "string"
+     },
+     "url": {
+      "example": "https://app.tonstakers.com/",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "url",
+     "image"
+    ],
+    "type": "object"
+   },
    "DepositStakeAction": {
     "description": "validator's participation in elections",
     "properties": {
@@ -9512,6 +9620,35 @@
     ]
    }
   },
+  "/v2/defi/{account_id}/assets": {
+   "get": {
+    "description": "Get all DeFi assets (liquid staking, liquid pools, staking, lending, farming) for an account",
+    "operationId": "getAccountDefiAssets",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DefiAssets"
+        }
+       }
+      },
+      "description": "defi assets"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "DeFi"
+    ]
+   }
+  },
   "/v2/dns/auctions": {
    "get": {
     "description": "Get all auctions",
@@ -12712,6 +12849,9 @@
   },
   {
    "name": "Purchases"
+  },
+  {
+   "name": "DeFi"
   }
  ]
 }

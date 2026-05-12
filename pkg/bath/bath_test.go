@@ -74,6 +74,10 @@ func (m *mockInfoSource) DedustPools(ctx context.Context, contracts []tongo.Acco
 	return map[tongo.AccountID]core.DedustPool{}, nil
 }
 
+func (m *mockInfoSource) BidaskPools(_ context.Context) ([]tongo.AccountID, error) {
+	return nil, nil
+}
+
 var _ core.InformationSource = &mockInfoSource{}
 
 func TestFindActions(t *testing.T) {

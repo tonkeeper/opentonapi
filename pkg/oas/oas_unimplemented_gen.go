@@ -159,6 +159,15 @@ func (UnimplementedHandler) GetAccount(ctx context.Context, params GetAccountPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountDefiAssets implements getAccountDefiAssets operation.
+//
+// Get all DeFi assets (liquid staking, liquid pools, staking, lending, farming) for an account.
+//
+// GET /v2/defi/{account_id}/assets
+func (UnimplementedHandler) GetAccountDefiAssets(ctx context.Context, params GetAccountDefiAssetsParams) (r *DefiAssets, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountDiff implements getAccountDiff operation.
 //
 // Get account's balance change.
