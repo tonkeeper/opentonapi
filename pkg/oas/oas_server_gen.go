@@ -107,6 +107,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}
 	GetAccount(ctx context.Context, params GetAccountParams) (*Account, error)
+	// GetAccountDefiAssets implements getAccountDefiAssets operation.
+	//
+	// Get all DeFi assets (liquid staking, liquid pools, staking, lending, farming) for an account.
+	//
+	// GET /v2/defi/{account_id}/assets
+	GetAccountDefiAssets(ctx context.Context, params GetAccountDefiAssetsParams) (*DefiAssets, error)
 	// GetAccountDiff implements getAccountDiff operation.
 	//
 	// Get account's balance change.

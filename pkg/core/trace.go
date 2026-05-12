@@ -238,6 +238,7 @@ type InformationSource interface {
 	STONfiPools(ctx context.Context, poolIDs []STONfiPoolID) (map[tongo.AccountID]STONfiPool, error)
 	DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]DedustPool, error)
 	SubscriptionInfos(ctx context.Context, ids []SubscriptionID) (map[tongo.AccountID]SubscriptionInfo, error)
+	BidaskPools(ctx context.Context) ([]tongo.AccountID, error)
 }
 
 func hasInterface(interfacesList []abi.ContractInterface, name abi.ContractInterface) bool {

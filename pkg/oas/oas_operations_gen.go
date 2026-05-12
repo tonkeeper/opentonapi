@@ -22,6 +22,7 @@ const (
 	GaslessEstimateOperation                           OperationName = "GaslessEstimate"
 	GaslessSendOperation                               OperationName = "GaslessSend"
 	GetAccountOperation                                OperationName = "GetAccount"
+	GetAccountDefiAssetsOperation                      OperationName = "GetAccountDefiAssets"
 	GetAccountDiffOperation                            OperationName = "GetAccountDiff"
 	GetAccountDnsExpiringOperation                     OperationName = "GetAccountDnsExpiring"
 	GetAccountEventOperation                           OperationName = "GetAccountEvent"
