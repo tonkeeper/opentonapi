@@ -85,6 +85,7 @@ tags:
       description: Additional documentation
       url: https://docs.tonconsole.com/tonapi/rest-api/extra-currency
   - name: Purchases
+  - name: DeFi
 
 paths:
   /v2/openapi.json:
@@ -1829,6 +1830,24 @@ paths:
                     type: object
                     additionalProperties:
                       $ref: '#/components/schemas/PoolImplementation'
+        'default':
+          $ref: '#/components/responses/Error'
+
+  /v2/defi/{account_id}/assets:
+    get:
+      description: Get all DeFi assets (liquid staking, liquid pools, staking, lending, farming) for an account
+      operationId: getAccountDefiAssets
+      tags:
+        - DeFi
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+      responses:
+        '200':
+          description: defi assets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefiAssets'
         'default':
           $ref: '#/components/responses/Error'
 
@@ -9017,6 +9036,90 @@ components:
             items:
               type: number
               format: double
+    DefiAssetType:
+      type: string
+      enum:
+        - liquid_staking
+        - liquid_pool
+        - staking
+        - lending
+        - farming
+
+    DefiProvider:
+      type: object
+      required:
+        - name
+        - url
+        - image
+      properties:
+        name:
+          type: string
+          example: Tonstakers
+        url:
+          type: string
+          example: https://app.tonstakers.com/
+        image:
+          type: string
+          example: https://tonstakers.com/logo.png
+
+    DefiNftPreview:
+      type: object
+      required:
+        - address
+        - collection
+      properties:
+        address:
+          type: string
+          format: address
+          example: 0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0
+        collection:
+          type: string
+          format: address
+          example: 0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0
+        token0:
+          $ref: '#/components/schemas/JettonPreview'
+        token1:
+          $ref: '#/components/schemas/JettonPreview'
+
+    DefiAsset:
+      type: object
+      required:
+        - type
+        - provider
+        - amount
+        - position
+      properties:
+        type:
+          $ref: '#/components/schemas/DefiAssetType'
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
+        nft:
+          $ref: '#/components/schemas/DefiNftPreview'
+        provider:
+          $ref: '#/components/schemas/DefiProvider'
+        amount:
+          type: integer
+          format: int64
+          description: amount in token units; negative for lending debt
+          example: 1000000000
+          x-js-format: bigint
+        position:
+          type: integer
+          format: int64
+          description: current position value in nanoTON
+          example: 2000000000
+          x-js-format: bigint
+
+    DefiAssets:
+      type: object
+      required:
+        - assets
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefiAsset'
+
   responses:
     Error:
       description: Some error during request processing

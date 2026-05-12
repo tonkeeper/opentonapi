@@ -309,6 +309,7 @@ type InformationSource interface {
 	STONfiPools(ctx context.Context, poolIDs []STONfiPoolID) (map[tongo.AccountID]STONfiPool, error)
 	DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]DedustPool, error)
 	SubscriptionInfos(ctx context.Context, ids []SubscriptionID) (map[tongo.AccountID]SubscriptionInfo, error)
+	BidaskPools(ctx context.Context) ([]tongo.AccountID, error)
 	GetFfVaultPositionDatas(ctx context.Context, positions []tongo.AccountID) (map[tongo.AccountID]VaultPositionData, error)
 	GetFfVaultJettonMasters(ctx context.Context, vaults []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
 	GetPythPriceFeedMeta(id string) (pyth.PriceFeedAttributes, bool)
