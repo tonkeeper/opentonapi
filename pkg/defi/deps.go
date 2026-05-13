@@ -15,6 +15,7 @@ type Deps struct {
 	Executor   Executor
 	Score      Score
 	Logger     *zap.Logger
+	ProxyURL   string
 	JettonMeta func(context.Context, tongo.AccountID) NormalizedJettonMeta
 }
 

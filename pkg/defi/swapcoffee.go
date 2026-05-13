@@ -25,7 +25,7 @@ func collectSwapCoffeePositions(ctx context.Context, d Deps, account tongo.Accou
 	url := fmt.Sprintf("https://backend.swap.coffee/v1/yield/pools?blockchains=ton&with_liquidity_from=%s", addr)
 
 	var resp swapCoffeeResponse
-	if err := fetchJSON(ctx, url, &resp); err != nil {
+	if err := fetchJSON(ctx, d.ProxyURL, url, &resp); err != nil {
 		d.warn("swap.coffee API error", zap.Error(err))
 		return nil
 	}

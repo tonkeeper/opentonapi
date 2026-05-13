@@ -69,10 +69,10 @@ func defiProvider(meta references.DefiProviderMeta) oas.DefiProvider {
 	}
 }
 
-func fetchJSON(ctx context.Context, url string, dst any) error {
+func fetchJSON(ctx context.Context, proxyURL, url string, dst any) error {
 	reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	req, err := http.NewRequestWithContext(reqCtx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(reqCtx, http.MethodGet, proxyURL+url, nil)
 	if err != nil {
 		return err
 	}

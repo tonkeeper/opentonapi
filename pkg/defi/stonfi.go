@@ -58,11 +58,11 @@ func collectStonfiExternalPositions(ctx context.Context, d Deps, account tongo.A
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		poolsErr = fetchJSON(ctx, fmt.Sprintf("https://api.ston.fi/v1/wallets/%s/pools", addr), &poolsResp)
+		poolsErr = fetchJSON(ctx, d.ProxyURL, fmt.Sprintf("https://api.ston.fi/v1/wallets/%s/pools", addr), &poolsResp)
 	}()
 	go func() {
 		defer wg.Done()
-		farmsErr = fetchJSON(ctx, fmt.Sprintf("https://api.ston.fi/v1/wallets/%s/farms", addr), &farmsResp)
+		farmsErr = fetchJSON(ctx, d.ProxyURL, fmt.Sprintf("https://api.ston.fi/v1/wallets/%s/farms", addr), &farmsResp)
 	}()
 	wg.Wait()
 
@@ -184,7 +184,7 @@ func stonfiExternalFarmAssets(ctx context.Context, d Deps, farmsResp stonfiWalle
 func collectStonfiStakingPositions(ctx context.Context, d Deps, account tongo.AccountID, rates map[string]float64) []oas.DefiAsset {
 	addr := account.ToHuman(true, false)
 	var resp stonfiWalletStakesResponse
-	if err := fetchJSON(ctx, fmt.Sprintf("https://api.ston.fi/v1/wallets/%s/stakes", addr), &resp); err != nil {
+	if err := fetchJSON(ctx, d.ProxyURL, fmt.Sprintf("https://api.ston.fi/v1/wallets/%s/stakes", addr), &resp); err != nil {
 		d.warn("stonfi stakes API error", zap.Error(err))
 		return nil
 	}

@@ -11,10 +11,11 @@ import (
 
 func (h *Handler) defiDeps() defi.Deps {
 	return defi.Deps{
-		Storage:  h.storage,
-		Executor: h.executor,
-		Score:    h.score,
-		Logger:   h.logger,
+		Storage:   h.storage,
+		Executor:  h.executor,
+		Score:     h.score,
+		Logger:    h.logger,
+		ProxyURL:  h.proxyURL,
 		JettonMeta: func(ctx context.Context, m tongo.AccountID) defi.NormalizedJettonMeta {
 			x := h.GetJettonNormalizedMetadata(ctx, m)
 			return defi.NormalizedJettonMeta{
