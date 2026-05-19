@@ -11,6 +11,7 @@ import (
 )
 
 func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolInfo, poolStatus abi.GetStakingStatusResult, poolConfig abi.GetParams_WhalesNominatorResult, apy float64, verified bool, nominators int, stake uint64) oas.PoolInfo {
+	netApy := apy * (1.0 - float64(poolConfig.PoolFee)/10000.0)
 	return oas.PoolInfo{
 		Address:           address.ToRaw(),
 		Name:              w.Name + " " + w.Queue,
@@ -18,7 +19,7 @@ func convertStakingWhalesPool(address tongo.AccountID, w references.WhalesPoolIn
 		NominatorsStake:   int64(stake),
 		ValidatorStake:    int64(poolStatus.StakeSent) - int64(stake),
 		Implementation:    oas.PoolImplementationTypeWhales,
-		Apy:               apy,
+		Apy:               netApy,
 		MinStake:          poolConfig.MinStake + poolConfig.DepositFee + poolConfig.ReceiptPrice,
 		CycleEnd:          int64(poolStatus.StakeUntil),
 		CycleStart:        int64(poolStatus.StakeAt),
