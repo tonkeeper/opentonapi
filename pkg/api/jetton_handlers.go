@@ -21,7 +21,7 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID, nil, true, slices.Contains(params.SupportedExtensions, "custom_payload"), params.Offset.Value, params.Offset.Value)
+	wallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, account.ID, nil, true, slices.Contains(params.SupportedExtensions, "custom_payload"), params.Limit.Value, params.Offset.Value)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return &oas.JettonsBalances{}, nil
 	}
