@@ -53,13 +53,20 @@ const (
 	StakingImplementationFfVault  StakingImplementation = "ffvault"
 )
 
-func CalculateAPY(roundExpected, roundBorrowed int64, governanceFee int32) float64 {
+// CalculateAPY computes the annualised net APY of a liquid-staking pool from
+// the contract's total_balance and projected_balance. projected_balance is the
+// pool's TON-under-management at the end of the current round, already net of
+// governance_fee, so the per-round growth of the tsTON→TON rate is simply
+// (projected − total) / total, which we then compound over rounds_per_year.
+func CalculateAPY(totalBalance, projectedBalance int64) float64 {
 	const secondsPerRound = 1 << 16
 	const secondsPerYear = 3600 * 24 * 365
 	roundsPerYear := float64(secondsPerYear) / float64(secondsPerRound)
-	profitPrevRound := float64(roundExpected-roundBorrowed) * (1 - float64(governanceFee)/float64(1<<24))
-	percentPerPrevRound := profitPrevRound / float64(roundBorrowed)
-	apy := (math.Pow(1+percentPerPrevRound, roundsPerYear) - 1) * 50 //50 its /2*100 because only alf of rounds are effective
+	if totalBalance <= 0 {
+		return 0
+	}
+	rRound := float64(projectedBalance-totalBalance) / float64(totalBalance)
+	apy := (math.Pow(1+rRound, roundsPerYear) - 1) * 100
 	if math.IsNaN(apy) {
 		return 0
 	}
