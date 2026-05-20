@@ -8060,6 +8060,88 @@ func (s *InitStateRaw) SetFileHash(val string) {
 	s.FileHash = val
 }
 
+// Ref: #/components/schemas/JettonAssetInfo
+type JettonAssetInfo struct {
+	TokenType    JettonAssetTokenType `json:"token_type"`
+	DefiProvider JettonDefiProvider   `json:"defi_provider"`
+}
+
+// GetTokenType returns the value of TokenType.
+func (s *JettonAssetInfo) GetTokenType() JettonAssetTokenType {
+	return s.TokenType
+}
+
+// GetDefiProvider returns the value of DefiProvider.
+func (s *JettonAssetInfo) GetDefiProvider() JettonDefiProvider {
+	return s.DefiProvider
+}
+
+// SetTokenType sets the value of TokenType.
+func (s *JettonAssetInfo) SetTokenType(val JettonAssetTokenType) {
+	s.TokenType = val
+}
+
+// SetDefiProvider sets the value of DefiProvider.
+func (s *JettonAssetInfo) SetDefiProvider(val JettonDefiProvider) {
+	s.DefiProvider = val
+}
+
+// Ref: #/components/schemas/JettonAssetTokenType
+type JettonAssetTokenType string
+
+const (
+	JettonAssetTokenTypeLiquidStaking JettonAssetTokenType = "liquid_staking"
+	JettonAssetTokenTypeLiquidPool    JettonAssetTokenType = "liquid_pool"
+	JettonAssetTokenTypeYieldToken    JettonAssetTokenType = "yield_token"
+	JettonAssetTokenTypeLendingSupply JettonAssetTokenType = "lending_supply"
+)
+
+// AllValues returns all JettonAssetTokenType values.
+func (JettonAssetTokenType) AllValues() []JettonAssetTokenType {
+	return []JettonAssetTokenType{
+		JettonAssetTokenTypeLiquidStaking,
+		JettonAssetTokenTypeLiquidPool,
+		JettonAssetTokenTypeYieldToken,
+		JettonAssetTokenTypeLendingSupply,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s JettonAssetTokenType) MarshalText() ([]byte, error) {
+	switch s {
+	case JettonAssetTokenTypeLiquidStaking:
+		return []byte(s), nil
+	case JettonAssetTokenTypeLiquidPool:
+		return []byte(s), nil
+	case JettonAssetTokenTypeYieldToken:
+		return []byte(s), nil
+	case JettonAssetTokenTypeLendingSupply:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *JettonAssetTokenType) UnmarshalText(data []byte) error {
+	switch JettonAssetTokenType(data) {
+	case JettonAssetTokenTypeLiquidStaking:
+		*s = JettonAssetTokenTypeLiquidStaking
+		return nil
+	case JettonAssetTokenTypeLiquidPool:
+		*s = JettonAssetTokenTypeLiquidPool
+		return nil
+	case JettonAssetTokenTypeYieldToken:
+		*s = JettonAssetTokenTypeYieldToken
+		return nil
+	case JettonAssetTokenTypeLendingSupply:
+		*s = JettonAssetTokenTypeLendingSupply
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
 	Balance       string               `json:"balance"`
@@ -8353,6 +8435,98 @@ func (s *JettonBurnAction) SetAmount(val string) {
 // SetJetton sets the value of Jetton.
 func (s *JettonBurnAction) SetJetton(val JettonPreview) {
 	s.Jetton = val
+}
+
+// Ref: #/components/schemas/JettonDefiProvider
+type JettonDefiProvider struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Link        string `json:"link"`
+	MiniappLink string `json:"miniapp_link"`
+	Icon        string `json:"icon"`
+	Card        string `json:"card"`
+	Full        string `json:"full"`
+	Tag         string `json:"tag"`
+}
+
+// GetName returns the value of Name.
+func (s *JettonDefiProvider) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *JettonDefiProvider) GetDescription() string {
+	return s.Description
+}
+
+// GetLink returns the value of Link.
+func (s *JettonDefiProvider) GetLink() string {
+	return s.Link
+}
+
+// GetMiniappLink returns the value of MiniappLink.
+func (s *JettonDefiProvider) GetMiniappLink() string {
+	return s.MiniappLink
+}
+
+// GetIcon returns the value of Icon.
+func (s *JettonDefiProvider) GetIcon() string {
+	return s.Icon
+}
+
+// GetCard returns the value of Card.
+func (s *JettonDefiProvider) GetCard() string {
+	return s.Card
+}
+
+// GetFull returns the value of Full.
+func (s *JettonDefiProvider) GetFull() string {
+	return s.Full
+}
+
+// GetTag returns the value of Tag.
+func (s *JettonDefiProvider) GetTag() string {
+	return s.Tag
+}
+
+// SetName sets the value of Name.
+func (s *JettonDefiProvider) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *JettonDefiProvider) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetLink sets the value of Link.
+func (s *JettonDefiProvider) SetLink(val string) {
+	s.Link = val
+}
+
+// SetMiniappLink sets the value of MiniappLink.
+func (s *JettonDefiProvider) SetMiniappLink(val string) {
+	s.MiniappLink = val
+}
+
+// SetIcon sets the value of Icon.
+func (s *JettonDefiProvider) SetIcon(val string) {
+	s.Icon = val
+}
+
+// SetCard sets the value of Card.
+func (s *JettonDefiProvider) SetCard(val string) {
+	s.Card = val
+}
+
+// SetFull sets the value of Full.
+func (s *JettonDefiProvider) SetFull(val string) {
+	s.Full = val
+}
+
+// SetTag sets the value of Tag.
+func (s *JettonDefiProvider) SetTag(val string) {
+	s.Tag = val
 }
 
 // Ref: #/components/schemas/JettonHolders
@@ -8948,6 +9122,7 @@ type JettonPreview struct {
 	Score               int32                  `json:"score"`
 	ScaledUI            OptScaledUI            `json:"scaled_ui"`
 	Description         OptString              `json:"description"`
+	AssetInfo           OptJettonAssetInfo     `json:"asset_info"`
 }
 
 // GetAddress returns the value of Address.
@@ -9000,6 +9175,11 @@ func (s *JettonPreview) GetDescription() OptString {
 	return s.Description
 }
 
+// GetAssetInfo returns the value of AssetInfo.
+func (s *JettonPreview) GetAssetInfo() OptJettonAssetInfo {
+	return s.AssetInfo
+}
+
 // SetAddress sets the value of Address.
 func (s *JettonPreview) SetAddress(val string) {
 	s.Address = val
@@ -9048,6 +9228,11 @@ func (s *JettonPreview) SetScaledUI(val OptScaledUI) {
 // SetDescription sets the value of Description.
 func (s *JettonPreview) SetDescription(val OptString) {
 	s.Description = val
+}
+
+// SetAssetInfo sets the value of AssetInfo.
+func (s *JettonPreview) SetAssetInfo(val OptJettonAssetInfo) {
+	s.AssetInfo = val
 }
 
 // Ref: #/components/schemas/JettonQuantity
@@ -14526,6 +14711,52 @@ func (o OptInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptJettonAssetInfo returns new OptJettonAssetInfo with value set to v.
+func NewOptJettonAssetInfo(v JettonAssetInfo) OptJettonAssetInfo {
+	return OptJettonAssetInfo{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptJettonAssetInfo is optional JettonAssetInfo.
+type OptJettonAssetInfo struct {
+	Value JettonAssetInfo
+	Set   bool
+}
+
+// IsSet returns true if OptJettonAssetInfo was set.
+func (o OptJettonAssetInfo) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptJettonAssetInfo) Reset() {
+	var v JettonAssetInfo
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptJettonAssetInfo) SetTo(v JettonAssetInfo) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptJettonAssetInfo) Get() (v JettonAssetInfo, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptJettonAssetInfo) Or(d JettonAssetInfo) JettonAssetInfo {
 	if v, ok := o.Get(); ok {
 		return v
 	}

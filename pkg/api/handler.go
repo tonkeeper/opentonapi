@@ -54,6 +54,7 @@ type Handler struct {
 	verifierSource verifierSource
 	rewards        *rewards.Service
 	stats          *rewards.Stats
+	publicAPIURL   string
 
 	// parallelTraceProcessing enables parallel trace-to-action conversion.
 	parallelTraceProcessing bool
@@ -99,6 +100,7 @@ type Options struct {
 	score                   scoreSource
 	parallelTraceProcessing bool
 	archiveLiteServers      []config.LiteServer
+	publicAPIURL            string
 }
 
 type Option func(o *Options)
@@ -192,6 +194,12 @@ func WithArchiveLiteServers(s []config.LiteServer) Option {
 	}
 }
 
+func WithPublicAPIURL(publicAPIURL string) Option {
+	return func(o *Options) {
+		o.publicAPIURL = publicAPIURL
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -243,6 +251,9 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	if options.score == nil {
 		options.score = score.NewScore()
 	}
+	if options.publicAPIURL == "" {
+		options.publicAPIURL = defaultPublicAPIURL
+	}
 	tongoVersion, err := GetPackageVersionInt("tongo")
 	if err != nil {
 		slog.Warn("unable to detect tongo version", "err", err)
@@ -271,6 +282,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		score:          options.score,
 		ratesSource:    rates.InitCalculator(options.ratesSource),
 		verifierSource: options.verifier,
+		publicAPIURL:   options.publicAPIURL,
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),

@@ -1,0 +1,1858 @@
+{
+  "0:00576440c4a6f443af2fcef7b27a2277eb0c552e8b898190cce9c3393d17c6e5": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:00f5e19fbe3a0695359a31ec6a25e0662df2f4536c31162506a2419032a6eb2e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:011e4c677529eaac180c20347bdcb0741410c33340bf529dfd10bd519f76a8ff": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:01cb4ab59692e4534f64eecaca0828de026df60f69d9d795ad99681bf3546f8c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:06b609ebd46d170e294651170e077a54865f8ba3ffc9f936893f42b87b2f1cb9": {
+    "token_type": "yield_token",
+    "provider": "affluent"
+  },
+  "0:06ce8fee636dd31652b8a7c3fa5fa5fe5563ecaac4d0ec97b551071fc4038929": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0706d6f329feb86a9876c7d1dcbb189fb99482f5794f0c746c75d204b15fccac": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0780cc375c8f027e079052bc1899a2e34e081e8e5f7b576aac2ddfede0872c6d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:078c4745d03b73be5fa0d68747c019b220d4195b714198d6ca4fe8f17707a3e6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:07f734cabf2b663b56fde44047bc91f04d4c7647f2e13624891bbe59bf17963f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:089cc2f99d422dfff37e4225c0e4e7af6ec3f94c4ad76879559491f25dd9a02e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:096c32634830b5124a1ce62a78272ffdc0f686f0aca80d2baedf3601666e9106": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:09ab47347e2c8fa5b4ced3fe132c22633344e9e589c3b72733351346bafb345f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:09dcc2541b0804963b031aa05c6c828c13ee2872514b9e13ba37e61cbfa3731a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0a3afd7a52078227c20e7d7187bc62218c3d4a5fb5f8fb3db02c1c3d1de8711a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0a56de625120ab2f919d7cc26b32afa87e8c303ab1cc65c72da9abc026471eb1": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0a5756873271b11d7bbf244fc85e0abd1e5f1654b7f56986131ae061f25326b3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0b3158a57c2f30438f626ee81fab142e87f6d369f95bbc4f0025a6c1e9c0459b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0c7fa5d44b376ffca8d4979f3f44e4000f9e65ee694ef4bdec6f823fd161b01b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0ca35672d918b7eae1bf24e0ea59f852b8102a96ebcb87f2aaed059c2a594618": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0cec574ec0e2fc690cd676036f8cce9d2af4fdf259705243ebaac54cf995905f": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:0d2673783e760314f8d36414a9e698242bf4d8fb626002d1f698597ec63a74e0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0d5b1c2a08944dc4664283847cffacd50509764ba50eaee72a053c980821eaca": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0d8ef7de458a05ba73bad3a813474d02caa6cf53c369d9a568d2f99b3cf13804": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0da9a3c5c03e8d9b1eebe45eb1a551f533a9a20dabfcb4e23aa758faca7a427e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0db966f5f042124c7ff8cd79560d24406ac48046fa2d41fa271ee674837a4900": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:0f32789bd5e82194d43d4e72d9282314b18d50278ad0ee9c81ecfbc65b130879": {
+    "token_type": "yield_token",
+    "provider": "midas"
+  },
+  "0:0f43b060a111de28f5439bcaf66ffef7e4c68065a5bc62e5929eb98bdd8ffff2": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:102c7d53108932e26e2b04c48c7903f21f8129758d210a25bd00d5774557631d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:121a0e573827265a526c28cf6d926b4a9163c4dac34a11333148af9a352fa843": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:123e245683bd5e93ae787764ebf22291306f4a3fcbb2dcfcf9e337186af92c83": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:137cf80568a2b8e1e20115ff72a0865ce42c0a600e58a77bd1ebfd82cb590fdf": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:13f5863e87e56bfa8b6ae46b3aea05cd9359935ddb594ef582516dd93b6eb250": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:143435137c445e58509cb8c8530b7df3e860a6afd2d8b1933c26d964576a5ef7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:143dd3e900c35a31f2b07ac304831cf10e7df111d4cf177ff8dbfe9b5f8e2a3c": {
+    "token_type": "liquid_pool",
+    "provider": "fiva"
+  },
+  "0:146d1fae0b0c1d5fbb2d906d5960bc43bcb87041b47e0413721c794ca6f4bfc3": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:15bd84c1bcf53e9e4e2bd345891102dc56b3225543885ef289aded0268395ea3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:163276ca13602aca69b5e5de9dd594f05e93cb5f45dbee1891a408032b904c2e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:18aafb74efed54f55accee5368d566ac24a6c95a4019cf588141a60631dcc4a1": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:196575e19e83460b322548a62a638bcbfa11ea74802e3505c482a30a83e0980a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:19a5c412591fbe6687a004a96596f907dfc40278784fc3d997def10fd3f3b7ee": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:1a937b5cc639a0a6044a3fa29d36f743996a7d2afc2214e94f21163d56fed93d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:1ccbad2a836d910aaf3b03faa060af21a281208c2678e32c617672987655887c": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:1d730dbb80928c224469a2c87b1b4a6a54ab9f0c01342dbbeed1f966e8dc8519": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:1e8a1e0a49b126b284e0a407ad5aa8bef22c2bd6abb705f746b5c84aaf3f31f9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:1edbd3bca7bc0563a788018f813b943eaa141e2e5caf6bcc1c30d6ac5c45b01c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:1fd8b50964c7714801a1969f80eb400df5ba9979533df78bc23971f4e49168fb": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:210b836c544663a205950bcadbfb5567a5c6b348f479d56a9a52417a4982dec9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:220ea7d3212a55f89214cb9fc4e307e830866990fda22de4c9b1ad93d7df4d79": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2212fce3578671c9c4c8577a658a5c444d071dbeb9ce47b9850ef0047be9e342": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:222835be0630004cd9a0959cd3c447f9e64450a7f465f519dd971c3685063236": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:22bc32677191f304df086e6388b81b699f4df9625894bf6bd2004ee2cb6dc63a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:23989f1a26a4704041052074661bb458b9ecff96d584f4564fc7d531d868bff8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:24217a103080d3cb4b56bbd69cc41dfa99049243da43a6208fcc956655f7aba5": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:24c484465e0b36bc3db38eddf7e0c0630f79978361acc846477f3b985ffb6b42": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:2533fe0b63ab0fd503aeaf96867450526b999aea7ab095d7e59a6f66b21abbbc": {
+    "token_type": "liquid_pool",
+    "provider": "storm"
+  },
+  "0:255dad1fb11f3793f1173109aa8e1e0cd0a22f9310cd1a049bb0a6e7dcfdace0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:264d23d1de7bd1e171617ebe1a6c4684b7e1e4500bf65076c6be9657333d81fe": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:26d19039b915a55f3398ecbf1e7b921627a7a305e784bbc1d5b7e6580f042e33": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2746094523ae7f98443878e5aec83c22f0234429446f3ced1ae132ff911f10d8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2827d7a1f0ca0acc4acd13ce8dd6e1f3a7812c92d87939de6d0c46204b999553": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:29010cd6ac740545e7aef76c46fef6961602f7d06110bdf4d971ae19c8b78d7e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:29b3821c5053aac36eb24737c1bbf6b2ebdcecd8d65bf8c2fcfcd82416dc1d88": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:29e08f5e9aa68cb8375917df2c1b558c555e3fa5f1f00501bb67dfd17570e313": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2a2814f58d9d2e6346905a693a72123331043edfb2f7b2e8263994eb1cb48a5b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2a88894f99d0b5b01230300c476d0d3e404fd4faddb136522021abc5d43ac7cf": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2ab634cfcbdbe3b97503691e0780c3d07c9069210a2b24b991ba4f9941b453f9": {
+    "token_type": "liquid_pool",
+    "provider": "storm"
+  },
+  "0:2b5da552efa838a829f3dbb74027da501a8367f3ca447e3c3f08d2e3cb22cc80": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2bb11badb6d6c3ccdaae41713c3a3fc6ec85c3642718eb8c28f1c39dc7fa5255": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2bec7a7b20ae2a3798a6dbaaf3e669a2bb4d1fd3fb248484b5bb932e66a183c6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2c5ca07c5a99aaf67aee95491db76656b87de1876553c9be921cceb6d802edb0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2cc43843a0a3423897703ca4d7bb23aeb65f5b5052619c40c149bc4089252b7d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2d02adec008025873ac3c08f80d963f1f2bbd1f774b6b3833905544e23403940": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2d1e55a6f220b6dbfee573de8b3c8e94f6417066a61fdef650e58b82f67bc698": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2ec81f5a701e33a18972371cc97886689fbd7b9d6d01fa93c7e32d268c4326f3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2f1f5530687432708f17b85e5ab4f575070042f4c0c1daa8c3b80f4966c1ffde": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2fb467bc35ea7f5e772641826bab35a38ddb136b28332f5edbbc7ffc463af2cf": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:2fe97f3415a02a052b990c03ece6e89af7c335e0fc392d6d8cc06923f08f5316": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:323b3389630ceb5cd761424b246e5b61a589a6ea22ff5de5c471a0ee426574bf": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:332fea5a8b86e72c7e528727232956284f40dae55b0d07e15c166b7392b5c8f0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:346022f65d7d90a6c2b0b983a1fcd920c5c3addf5c190d6af4becdb07858909c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:346ba738d27fca7a3c7f5a3d2fa3075e6021581bd5e72dd2cc4478a15dcdbb72": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:352aad6c81c7398db29f5ad61bb916e7fcab7b31f15facfcfb9ad98202c84228": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:355b0696ccc3176576326f67b004cfdf529c43c17a6e6aed1d27b0b097d0ece9": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:3671400c5f8d43810bd53a66d690d6b736876a48a391cc1a5538ca2d50baef70": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:36ea7d5e54e29bcf1650afb848b307fbfe4ca48fc8068726e9ffbc391459b0c8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:36eb4ec4562731f2692fd650a5f6c4134605d090ee9387a6137a4ceedd4094c9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3789fa69b43d4bff15201c356cd6f784cea3a4915023c726841ccc87d1b04bcd": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3848b9a49c1d1a8e9c7101e5a3a80a5638ba968d52882bf34ef4c8eb4090cc60": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:3a6e134a6a3a5746e18cb27121f7c4ce7d28a910b7aaa59b259b7ef7464adff0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3aca125b3798c7d71970f9501ec3c5704429470332a795c72e27528ef4fe24df": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3b8efc058293dd4d62b0647f6dc399e46986afeebd438f37219046ff50f95b20": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3bc223f094531550658cf55aa9e0a8b75edd381305408ac9c46bc7b6bfbf68ea": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3bec2f18b1d2c4382a768f862316ab284d2de85e18e9051eb2efd280288978ba": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3c1706cd4619ab9393145992ba53a10b11451e62f02db5edfa3e89513e91bfc3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3cd38b14918ac277824ecc6bbe278527efb2b28d73c8b41db6e551ed62156d18": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:3e5ffca8ddfcf36c36c9ff46f31562aab51b9914845ad6c26cbde649d58a5588": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:3e890a9e29a67cb417e7e42d13898b1414702d39d5d3572deafd18de94e8a9b9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:403a3b6291fa660e46daec9a6311235782dbc3710be56cfae9b9e0d1bbee1807": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:411406eb89b5dfccc80de4f8dbb003575e83b30425259c90efd03ea9200f2c6e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:412801fcdb34ec0b27cf245c26c26b22453aae2cb0695131e91d2c3c2514dd24": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:428d89057863dc81a973a90222df6ef4bf9c0a52e7ceeb3c507904cf4959063e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:430a2a0dccaa29c1ba31a02f895a1cc890997ee846aebe021b50b16035a288af": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:437c2ea3f5584dc8ebac304f0d687ac9126a8a298c76bed436253a70e329cd94": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:43e4c26805a369bb5170cd93f112e189d0677c7b8fa7bcc427222d70773b0dfa": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:44cc24b01028b31203aa3ebcfb090293dd766b9d2111da9cef990a384e10a817": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:45623c95ec8bc1fc6e14e8674c5750dde46c8cca1cd21449a9072f39f59724dd": {
+    "token_type": "lending_supply",
+    "provider": "morpho"
+  },
+  "0:45f986280f2eae7b42782bebf92ff1d8cf05822e9c1748bb131664fb86bdaea8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4609bbab2b63dd4cb5589344aa673ba6c0f3c8cb4e88e089777e4fbba1057f33": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:460a8c57bbc6bf09d279af5bb68a2594bc90001ef554eea6601267ca4527c17f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:465d9f5d759796ca9c7c124262787257ef972dd1ba649aed18e18a18af734cd1": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:46e891047c2e00fcd0f36b04dc1614d7fd962355da7dc8738630d2c649a25d3f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:46eff703d94677d8d431ef8f821ba70928b490cd7c962a4e1b03a86aee65fd64": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4801407481aed0933f29f9a34f1309c171693904bef7e2096c6da6b1e18e7e3e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:480342a859b658f599be37c55c12af067e126d5b148444a90688fca3ef8d6763": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4815e96d65e03fba6c4ed544dcdff914f62ec49a973d07862164bf409bc55a96": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:483055cb074d76d29124c131d7386760babc33d492af4ff3970b250e7500c9c3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4875976c0068e6ae25986b762e6f3eea627eeacc4d2f037357049d12a49b624b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:48f74234c74954348b593efb79af24525c66b540768fa8895c022e138bce1fde": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:48fda2997125ab601ede0c718914a60a970483779ed66e05ef3bfcc74f52c989": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:48fe84824595bf7caed1531df4dbda8234383c62b2db47926000647b260d2b6a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4914ae0e8ff3d46edaf67f9568c82acd0b88ef1644427f5464c97691c29354a7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4abac170660f18219b922233d2b98e8832932c92f3cb5e1d255151230a6133ff": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4b0e64caba3918bce509e696bbc58863da6e2ba3b63920849a83e0f8156a43a8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4cc9c21a3f717c7fea0e2ce06347c56cd5c67a1a29555b75b660459a4bc92b8e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4d1b3df0873d1d01b5bc49c8a9edbb4fae0f24fc07c0599754372d709644289d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4d459072989d37afb7b671003aaa7102ef302371de88a0496c7fb8e438d32c93": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4d94867121b40643bf1c5e01b755173297c03490b9ffe8133d91a6e21c78560b": {
+    "token_type": "liquid_pool",
+    "provider": "fiva"
+  },
+  "0:4e549ceb196f4e6fcafe98b6f2779f9d87aa373ad55bf2c74d954c2aec22b85a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4f3d44ae8b9e23f61976e4359ce79e68604be39c577c81896849d6f8c413bfa2": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4f55fa6b10673644485b094a6dcbbd042f3f73ef56c34ce81f60b53ec652c88d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4f56b2a31789784d0e605107d163b50bfd3432002a2d8cb9dacdc61b4ba33290": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:4fa38e629c86c55e252df08f31ada90f441d5a5d9fb0ccd3897c885f420776ac": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:505861f3cdd8a61bde130a392afe7a13360aaf0bc672d90dcc1c68a3002cad34": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:51019a8a85594a051ab18fdec04fa3f334bc6fa259d8402405d81d98053d9abd": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:51386f6fe838b8062f061d0c3bc9a65586a856260923d14b18e770cc96adbd47": {
+    "token_type": "liquid_pool",
+    "provider": "fiva"
+  },
+  "0:52eea2f3c4eb0f2335518fa86303934cbc0d75a23eaa4b7a1636a08a274e2d19": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:536eef90e6c3928691177c4500abd94bdfbf05a20d8375571e9bc99e6cd343fe": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:53876c17ab7dcd7fd35e9a953657f95e0715200ec2226a7783084e112e13d0ef": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:53cc3272120a179bcf049154dc8b2c9905f41823ef0e7ce10366985f1da41ca1": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5404ae9a17ca7d00ce9214465cecc47848d65e21f32fc32d26f6f080252f6887": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5426b0251ddbcb9c1b53e4fc7f0b983b9ce16de9e7a415bdfdc780290a267334": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:55b17b77fd2b5329c48532544e6aafea34105b4b461b5ba0b9ee21ac1a10d7c9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:55be697ecdeb9b0c2b3670807b2b752d23f5788c10f3deea6e16055d576a214a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:561caa44c7e9755450f02c27e2f302a4a8ce08dfca54af4800509b492eacb1d3": {
+    "token_type": "lending_supply",
+    "provider": "morpho"
+  },
+  "0:56b00772020fbc7ecdc6fa6f9e50109766e55a3a5745e7eb42309049cf1406ee": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:56bd0450e1be5a1361065bf36b0f121e123b2f48a0cedea47ea1ad8de7c61e86": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:56f5e805e4e407d61a20ad94c83e3aaefa0854be28c633f658aca4c679f8c5e7": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:571126b96a1b3b4486bca9b9ce94c5e9d7f5a9f75cf0914ea93c906be30173f7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:575b43e160d52133ae2608e1fc8c458410ecdc0f00f9a1ee97fed69b7ef103f8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:58b33d4721075aa7c69c099649b0d9724b1e2b8b2f48a9f342eba6bc3565398a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5953f645025f3f9c00aa909fc697a7ca132009d2e36231cd9ba2bce6ac5d8a33": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:598fddb7000577fd39d8a2e40ed2203319da11cea44dd76599056fc58ed7aed1": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5a07691584edd56108060d163082154092993a91114682c9b4e34723e58df3e4": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5a69d22d41e031840819ea5735360f8fe8c1353494be4e0c9606b691d2ce777d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5b46607213a02eec4061be961e41f69a6bfdb4ccb56b2a7ae5d38d25b42eff1d": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:5b753fa24276a135a5c917b9e2ba952470405008fde62cb906daea3e598255ce": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5c541e9ec3ffa954f5a92ae3e60888c991d42954c4cb1faef5145875aa2800ea": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5c6e5ce45d9a4f1cb9da83abde4f7556c204bcf9ad81a6a7c2fd7ebb71de4fe6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5cc49f4dc3bce30b9696d463f83042424440e7777d7ff5acdc25a4d6f662aa05": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:5fd3451cf047d73d00bb6e91c9bbefe6f05d16ac8a8ff2b04591092fe50d8dd6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:60393cf8e4149348ab26608b52ee070aa8f2b300fa6c99a0b3582c6bab928415": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:60a09fbcf8668454ac2666542c1c5a2bafd052be14d6f508004a4526b99f13cb": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:60b8050c12cc1b5ae3d1eb004bbdcd3c22ffa9a5f906942920440648aa31c8fd": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:60d90c3b931b173d682c76eead08aab5b614f68b386deabbbd0fb693ad96be87": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:60eec8ebdb3a27dd58795446f999ad657fc7a50b8864c2c7c3a3a7ae593ac100": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:61038295a0d3e55b5f173684f2e1c2b1d0afb0d30a0be7ea7c2dba55e40ea6e6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:61591d9c667c1c4c74646cd19e1580ce7f40561853111d901748db3cff1c518c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:618b7dbad45d30f48df0a8bbf700cb86181e94f86efaebaacf3270c02c77d46f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:626b1ac2087c6dc1a8c67a8984b84afafbcf4e379b0aeae934e943ed68b0c0a4": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:62b5a2cf0308bd33d0dccc36fcf82a5ca3660dd7c23636ee250d6dc986fcee7b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:6307fd932dda4e8618f6e45fe062633a7cc6fc85b237af1f8403883f00bafd3b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:64216a0ead5819dca7d1719fc912cfa6673665a1c5fcf7338ca5b2ce65f12f80": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:6487b31ce35d564d8174a34f3932dc09a58a6f1a164e301a61848173129ce554": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:667820303d9269568e3929a196ed23c9fa7177f22032733e3066df28ea70cf76": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:66fef679034303abd71e585c9374f78b6e0546b1b9964b172c5eaa76d0287ded": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:6714ef6f4c813c5f6d2def295cf2d2e0aed8016872a27fe2e361e58f5345efc9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:68c174edc434d230425bac821c63322f49767d5791d6d8ea368925b4721533a1": {
+    "token_type": "yield_token",
+    "provider": "affluent"
+  },
+  "0:69d075a22c67acae20bfd19d8c57656a4d439ed296836c77d7c069d3edc3c4ce": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:6ab0398f73afa5c94b6a8e8e8bc61dda9112a725c33263007b9c03e45c23077b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:6b796ac1325eefd278d5f97bf8b8f11a2b19d364acebba562ba2dabebb73280d": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:6c7b17c2c7eff55b96fedf4191cad51d02e3cf527d664a2115c7691d0dd5ea07": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:6d431f2ef057acdd5c04794877b2e2e2f0a519357d316836203fa58d199928f3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:6dff0ea13658e5c178ae5b511667c4315efd7ee9583213793550b4f58882903e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:6e7029193ba9087c1b13e42b12bb676c7c09374e8d576766078d6e8ea814f73b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:6fdaeba606c1bc3a203092a6277396db25b37a1662611c35cf57bfa2a37f0b88": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7039bf7546faabb51839869ae2a1b608b6880920a54bce484f987c668a592eab": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:71220c69aae0b295bc6f14609f2780f4e77db53b642afe9187394e68f0e07f4f": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:7122479addb6945cbb4f56e55a48cb162240b94b422ddce70cf0c798a4f9e811": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:71f0c69337ccf4bff74c3ac49948766f4261989c124754b81f486defb38aa8e3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:73488b620b5be90d411fb437960f28e032eb5fe8223399ed7a8339fd88d96896": {
+    "token_type": "yield_token",
+    "provider": "affluent"
+  },
+  "0:7356b62460f1f1f03fc73df41a726d7138d6b85d247197cdbabc7931fe568fd8": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:737919fa6fabd6183cbe70b4ad9bc346d98b58e3ec2d97b787ad38385ab439ab": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:73b9c0e8dc70c8c781e0e23909e1dff580bb68f05ef48fe2bc1c911ee639267f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:741f242223b323af9529fdd89414797772cc28ed72794e0fdb83b8b827c786cb": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:747a695b8f3584332fde906da1821480a9e85f87f8ff258a3bb2f3c93fdbb00c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:761978f36f542e4bd47fbce17a0651b019bdc836358e6f0969d57cfa08f8b347": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:775ec721d0aaba839ceb886dd0043a712cdfa8780b3e459d405339eb779ad73e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7764c4dbaf1f08f865d13865711bb25b57557e55a50865d6204738e02ada10e2": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:78a826a245c197c4ba9f1cee99bac5b65cd134a9f9535f562cc76f967e9f35db": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:78e563bf4a5e42944e4fa93248c46e7c74e4fdfcb2734ed0947976ee4bb0af0f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7908c264990ea542919b387578fc67d317e90a1f1a68269559f2570d92016a84": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7a324158c9bd907c53a7db10f874242bee1a789edf090da61fcf0e733dee4865": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7bce154e40a91fa0cb67194e1ffee7f47fa1e681c1c98fabd9f8d4f21e1b1a3c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7c021a9207aa53427b3d5ea9e9d33d8a719c9b79a54b2f41abc50496180f10d4": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7c6f5f7635d63cd8612224fc95a4d4031867e6bf0a0fa72f1d56f5f1bab2abd7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7cd677b3fd8ca010a9e6b919a4e7bb985c5f62a7c9eb306faa8b15c5145db245": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7d9aaad98abc559bb1d17150574693fb07256cafe795b493e18b2c865a3e5693": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7e40371766f6a08a64773ea4272c98446b99a35fb617442139864eb5a2ec422a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7ea173907368192bbe731acdd4b37eb59a51f6429f786d578e126d85d96f4b28": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7ea45dda99fb9c723aee5d07b67e5c3038f0ec9b05bb0547feb4f8f8da132bfe": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:7ed81eaced650a6386f279738bdbd12ff9e62510f818af462d88daeae3653a36": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:807f5385691ac6f80ba38f1e47c721fdd97bae8576b224ad0ecefb82d537ca8f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:811cbc2816e8e03878089b99ed2e79c52f5e88197af8a71497d59f8f5d6f16cb": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:818658a3919fb6d3f572c53d1bf919bc80baf2ac70d60abae33580803f2d5b1a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:819dc9679d6c848910026820d09096be884460bb6c521d73da0bc43375fae0ed": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:823d0ad8a54f392f6deaf516847f39179f86ee79fbe6f4a036321a6303c99581": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:826ba8c0fd5ce8422efa7001e6ba6a097d96e0955b58f832fe93cf9ff61def50": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:82b093867547521aad1a99b245812a6d7477c33e469094a94b20a4eab5ace185": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:83bc587c4939ff85343af37f7f2d51ae470798d0b5cbc9825a4a3c076cc4d961": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:84868f284afcd59de33eab700b57d18c3a8473946370ac6b6ae29db1dd29c89c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:84ffa4debca1298fc393cf7ad9b750f96d1e9f10d41b48dd9b6d6d23cf16d618": {
+    "token_type": "lending_supply",
+    "provider": "farmix"
+  },
+  "0:85f5ae847427c46f2fd75d26ac0e4fa58efd0799acc4a39619b67a37fb1a6871": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8685f2dc5ae493f40ae3911f6086c3f17e768e624ab856814376fc8d36ab13f2": {
+    "token_type": "liquid_pool",
+    "provider": "fiva"
+  },
+  "0:869da75b331a9c583ef1bac0f86c27e51d755b6155d239c69bf1b8e40a55ddd9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8716240cfd34d22222a150299648de1a3d24eac49e154811320c5699e22cf2ab": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8761549f49c607260d268eed5374b37bd29eab4d3025745afb82341aa71c80a8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:87d1d921f7c42020595901bfb7d4db3b79feeadb56425bbc3208cc142be6de91": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:87f8f3416eab395a2e41d65891d555b3fd55b1a60e899a25227be973a201236b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:89259cd8186ad2449417346cff15d20d8880e6cec8b1facfe7c995a6108f06f1": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8a35a6241b16630192066450acf01bccd95d182eed9e0910c11b1af5eb7ffef9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8a35e6e59d27a81254936d31ce30ea54ac30afd2de00015f978658b8a8fb3563": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8aec7fd5dc2b6bf3f680ee2fae12845759e22cbe02ed9e81bde4f570a12aad9b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8b35e81df959bb101c84e97ed7e561037f0e1c44bb36f72615aeec1a09bf8df3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8c803144d0991212788e529ccc377d13e71783294f50053e9a527d45a27fb474": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8d636010dd90d8c0902ac7f9f397d8bd5e177f131ee2cca24ce894f15d19ceea": {
+    "token_type": "liquid_pool",
+    "provider": "storm"
+  },
+  "0:8d6e462c504771cd0c5daf474fa9079bc1813fa138a27f008df69ba4ba13c93d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8d706e070987445e1c734d0517dca927f090bae5922af58b7df3e17e960ebc7e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8dce155de40b426e5a40852adb6e5196873a995cf8ba654d29a0b581739360fe": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8e3ff46c456a4dd79822e1d13f21ab2d4c0bdf17eaafcb96a9ccf50ad7136ee2": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8f10d1384c0731fef39afc934a2604e6615d0c13309bd6bb7cc9c573a70e490c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:8fc02b852fb7fc8dae5349597c5e6f7d37a2bccf1fe32808d61c6672e9708803": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:90b2d4830a9a6e877335ddd50e1ba90d86c9f785d1bb598aa98ffa9ee1c6cd1b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:928581071a6d030d27ed616a84d2979f2914a18e7ac99baf98d74466a19622f5": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:948673a596fc6d2c3123dfff64d3231e4d0e16bfaac506d5ebdb09f32b3b9c65": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:94c468a64c6cec794e4c104f0550ecfe99b21736f8dc3b42bafb41897db38644": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:953d5e34ad08a4cc01a2db8160b83437b613ad6981cbf92be9df08ec7c6c7c8f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:95aaea1482ffb450984391a70ea669da972c9d5a1bdfc76655b8e8d0fd710525": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:967ed420dfc9fa3ccb9c8201c0689f500b17825c7ba7e7b62716592c88877c30": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:96feae62d22102c30d9c7b2c14e65b8c67a78ad5419b76c6595ec2c881f9d40e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9726eef35014082ddcedd67233cff3610df559f85c8476771c1436033d1680a9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:972fc5b4bf9f393a3cc4476454203212e220d11c268dc7b8d03078e82ce26b1c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:97d2045aab88b70217da5c9b2425d7647e43353aba69891da813bbfb179c0ca0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:97f65cacdf6dff440f664d0718bdd20aff5432c5ec143064c4c8e30f15bbfd43": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:98ac7350eecb80d1f1d690912e2ed5e541e2efff1a722670103f97ed2407f473": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9966a42de07d8f216260b4d4f5522d91f55892964cc6777900f1ce7c6666f897": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:99f2c12f90cd66168aff8d6c7d186a7cf950a7f7d083e283ff44aa86ad3a3f9b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9bba05c2c358f5d58a0f10bd7b2c0cf58948d75f8e5a79daeb23f22c7c259bfa": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9be109c3d18d14d6f271f1c311831aef109c2f02062f504726af26ba707f0292": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:9c6661936b08439bc43891fa14d5634591f9558d34141ea5d16cdfb4aa5de38d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9cc40087c798c6ec92b9845e970cad0422b552f60a7cae4d6aeabf681828ae10": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9d0965af9c19bdf28a0c33648ab6ec87369b00c2a4c2e42216203ccd34293db4": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9d352502ddb51d31ff4b03f52f9691ca01da12b828d5f4cd9ebc8cc510babc01": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9d64cfc184bd0f5c74ff33fd6466521da633c8c82d39fd2a73fbb138b2205095": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9db7a5b6d345f034758bee897605cbf0336e8eed80b4b39f19ea88e8a196fae6": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:9df7c61ddc58fb8c7f663a6cb0ddeec03d742bd35210b04d6130cce99a0b2563": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9e9647331753a8585d4854dc94fed6fca626684b0763eb92c56d8d67d5e8df4f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:9f62b0195052f01615075af53adcf4b4141221e4278f584868e93d930e0a06a2": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a00ded07ab1d132f0b8da264547c63cb70a92330ea68c47069781fe654e7d52c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a0ce8efcf87f10cc16a711cf3595292bd2ccfcfbe6b0059e7273176147201970": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a1ad624d870adacd173061953be12d0342ea892ba153e34c64eee28d2d59a367": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a1ae5422f914e8fa7e6be398e7a24156531d6114130d13870137065445e524e5": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a1d298f5166dda3388e25ebe30001abe6e822a707ccad386aac51d60c7108d2e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a1d92fb606164f65c41a1d3e2baa54691243ba1b83d55304c22ae2ad39e6c0f5": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a1f0e6b32cbe55ec8bee34087ca3d8a001920c731e8c67770f958fe60e57731f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a2629d169234bff66a0b2bef8ddfdf5b2d2fef29a4b938866dd8a75c52449a84": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a27541b3f81ae967f13196a54a1ea49c8159a834dc3917018611ff382c443290": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a4390b4875c8fc3cbc98e9b5608ec53b7c328c77c09683f48e418a3cc2f0d933": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a4a4bd4f943a7116bc366f3d98ee849a620ea47052ecebd927339fd84c842b4b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a4d8f81843388810c409fe7f85fa62936c1e31f5f58e86f07d04b3707beef014": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a4ead18f945a10ff54e06498ee8ae95f489cf96a82609f2cb6f5e2ec5ed3a679": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a563c418394650ff3841a426cfd65271ffba9f51622402230f5531d2aeed1cee": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a655d5a84a17d52f04a3b3a31ac36515e53daa58c47516ab2964e1adf230f4fa": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a672b5ca903ab36063ec08ada1c6ede8da7fa0e2e499f99c1c43fe6c7ac0424d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a6d0f0adf9634c582853e0c68c7882739a0e9ba08c0b3e36b70711993fc8a385": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a6e22c7b0ace44da0b57050c19103b8a48cf98eb526adf01cc098fe247d1958c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a6f76cc50642defea7050e9ed606f23a245483b26e166c33ef67bc4d77b9cf2f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a840de786c068e84180053680aab58cf185e21f65b70872bddbf342b87ccb6ee": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a8f64da27683f4278d97c4640c47b77e07c99ff40de2a7d1fb8754a5d086be6c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a9720c0c584069ccd7bb4c2be364fa6365f18c6849773261d4654215ee0e69bc": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a99515d274de7ba8fc299e5e509f09542268f92a4268d8cab7aa583c32c8fca3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:a9eb53ecc9ba0100ab02bd0bcebbad6ed4c9ca0dcc4e2437658119220841aae7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:aaaa08a6d133285b7fd435e50ae66c868b450986b7c5c32f39594352d12206cc": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ab962a5b1300617d6b251912a447fb173bd6759d09c57f1b1fab2b36f78bcc72": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ab9d7bda5f91c06fc3cf737acfed24b63080a65db1b5e95400d503a24c047ed5": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:ac07aa3b3d3620dd6455840ddee6aecb5cadaf36a7b3ecc03e00b59d3fbcd8b6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ac80a2b49a7eea637d0113c00264095f5c9ef0e4326ad2bf485f8f6c5a0fb3fa": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:accc7c2c81066000c505afbdb07cd1bf2929a98e5160eb8668772054ceb28d06": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ae16ec95830a1f53b222f5f7d2b52c7d65b5d45a7e4f366e82790ef141c758db": {
+    "token_type": "lending_supply",
+    "provider": "morpho"
+  },
+  "0:ae22566b00fe45ad88064798be0c68c0fae518a0ec699023485f37fe1fa34e3a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:aea78c710ae94270dc263a870cf47b4360f53cc5ed38e3db502e9e9afb904b11": {
+    "token_type": "liquid_pool",
+    "provider": "storm"
+  },
+  "0:b0512736aab639ae7f417c5046f404401de3d352f2130e5f7b503d333ab796cc": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:b05d4fc78ce824166d2bbf89597ae8dfca89fe69c7719f2b55a706411cacf00a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b128154a66ec5d5d5cb71607af942589274e67735b24886604567b921e9685ed": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b1c33fdb081afbd7704b0cf899524c7e63344fcbeb08f05e914ec1a65f0a46e6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b1e98fc6a5645a0bf3b24b28319d171dbf2e990ece7dcea29ededda6cdc39f74": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b34da94250aea5a12cd934f53f4f4aef9f756c5a4778cab084e4a7b440189852": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b3583ebdb8b1954d5b162911133c9678e4ee63822ecb0fcf3f0c9db5013189e0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b3f7338a08fda98c2fa1b9d05e0eece9f581c8973994bf55169dd73886987a10": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b58bb81c478f005a4ea738cc6e61d5e76627aaa41b96314c7fa2289a53ff8054": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b58e1cde51a2aaf1e4141d0e67406bdb3ec639f9289190898aa084d4d87907a9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b5d6df22493a8b909191a02c377c4af792949864551e0f3721f78dd72ae76621": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b73ba6a2613b7bafc88b3cd0af4333ecfbcda25d94e43d519bbdd69948f487b7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b7c2b09e3d538906b734ef1092594310bc853e0401ff834ef79d456739840afe": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b8588d30b2bcc197c88593541fb5261a7a0ecbf6f9d715b832b4c258195df296": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b85aaf809c5ab2e367ec456751a56c676bffa487d44de6e25f3d8d0365ae3008": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:b9651f6ed026969b8216a13cf6401e3454f900f785e930a635333f2a7a9661bc": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ba0a49bd1059591a042a8a9dc896f64590287c7d8ffe3f7f55f69b90c1ee13fd": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ba48c956ef43c8039c614e97b121b905a33cfe3353028c92f78e81c42aff5824": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ba5dd453b7d6c74483e8174c5c55c416c9267ee2f5cdcb42494268c152820f58": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ba76a0de409f12a91f5a30982f9f5d3b6c385b055e107a767b2a5923b0c3ccec": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:baca0e2834e29a63df89c571af01f3d6c905f85ba529211fb840016f72999785": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:bace166d17381305b4d0e1b1b58f9161e5b590013b6238c7490003bdf3f8f544": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:bbc9af7193e79d1fac61bbbe3064aa3d2f068a2329b567f426f7b0a31d7cd1f6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:bcbe7327f9b279bd6bc655a46b4dac0f516bac577e4c80f1aad12a7b700c2854": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:bd9f3f2dc720566a2bc64b0026eff70e64c6c0679afffa7a92e786a69daf0c57": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:bda447e330ab90747f342209d5d30fcb7414be5f0a4a27de70e1fe24edf8cb29": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:be8e55fcdc36198125915b9abf5ee1cb5961503e9db11a673c042a1e59c90aa5": {
+    "token_type": "lending_supply",
+    "provider": "farmix"
+  },
+  "0:bec38faeafe1df44fe83df3cbbb340cdca0919a4f0663dddd5a444c226dd205d": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:bfd78ff0c4bde0fad54d117a6b672c1fe35e16613555f9d71f390c50a70be9ab": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c0f2073436da955e0aea3b31ffd602c56e428584a1bd8dae72d634a05c4aa728": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c1659a7c097904894ed984a6fb320f7b3821904722a287a2ae80a8523259964c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c1cab1c1333480d03bc0f8ff234f0640c4dde6859d84b541ffffcc0743d9f9cd": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:c1e4cbd6632271079c0a16729bfafaa227679c1e4a95fad55249d2d0fe26c958": {
+    "token_type": "lending_supply",
+    "provider": "morpho"
+  },
+  "0:c1f1c9be985f735671f6883b5eb400eaa5b5c07e66fa06eed6da2582cb10c7f0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c378ec213eeeb22629d6111f4b2a102cf9d5e45f3b4f268ef2280ff67f3e69f2": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:c4b885146902e0d915789e7544c00434e2c3402b50c88ba7450676fe298ab120": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c4ef41209c4c5f374d6cbd077e0e91747e9cfd8cda2aed16a10694c21a06a0cf": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c61a6f7cfb7aa514b7f02e5844a1a9009e81f322d13ba4aba4f9af5334323543": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c62109b9f1a606ce8ecc516de9514cbdd6ba97911152456bda8bdeaccc9cdcde": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c65b47be241f0586a8dabc3c2e48a9653badba4fbf1350dcfe0b22b003f83c3d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c67eeaeb33f3051f08fe758b2350c8272043c93d4970e9fb2fe061cc5b892f09": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c6b28df056c97839f8900a0fa0f51822676c4745b1a58cc692ba2f5e5fb7966c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c91ca29a7d0ac3627d8125d9b54327aabc8f08f1ec568b294b30f826ab0a47db": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:c93782f9ed6ff4e51adc5219d28480a2d23d366829059e142e80ad3341fd0b2f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ca055e7e1eadb80f2fba95d3e26599fa175b747bde15ab0f7e6673783ddd0d41": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:cac7ce85414c5e955ed230e7cb03803052d3218302ef1ca50a0e232fa695dcff": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cc0bde15530bb99334852670eeb1fbe2538ac0010f33bb6d609d5729985c1926": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cc1e5f5f4d2a0f9b3e9cce54510a7185f96340e16002e5568c350c6470db1229": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cc7851ae723caaebf56330fa675602bc7d3f38c2361d251c8319f58a7736ddf8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cd2aa33f6e50da30c7c49bfe8ed6769f8f5e19ee3fd93062b9a86acd1c0d91c6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cd36cd4a5112b34b2ca0351c066e57f203574c4772503806db747dac421c57a7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cd99cc31a56763315eb22d03936563c918959e5a53d6847cfe7ac0e00763a15e": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:cdcbb8b7fa55c014d5e17a5d52906dc47edbdd0d654d350db8156565facaf55e": {
+    "token_type": "liquid_pool",
+    "provider": "fiva"
+  },
+  "0:ce946e47e21083a27757c591084836a7a7195e8b23e5daaf3f378e8c5da5a87b": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cef03baaae0db5a365927afccb52c0e497a231f6fdf8bb871846bfc9d7d5cd79": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cefef6cb206d1bff2afb930081d16617ccbcdc9cc0fbaf0dc94ea32fd35357e6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:cf9768364a983b6756f41f7c9db1d2ddc5a2adb7009710022adcf8c0fe15589a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d10073d51b383af4c37570844a93290f5794ade708e1a277f0faa3b320ebdf63": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d14e7eb2d5382f0ad6659b09a76a56bf20aa8fffb0b9e686a06d51994f723acf": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d1567d0f44278b8205bb32cc39a803ba6f72d074597ff1ffc6f412298a281d58": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d16a72e09460e24b99bea0770447a64aaa9556924987324af216e9e37085f668": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d1a195c87249e527b19c9d90f1befdf7119da9272328de02a42ce1cff6bea038": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d1fe581ed8fcb75ce6d6c9a05515706c0ac46a2020cb31468c2fb3a7c86aad1e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d2ea000c97c225f3f1a6517f3942d2580c3b4d7286b212fb8a15143fbc383d26": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d3ec7a894e3bf341cdc1f57ae12e0df6fdc26da6b651f7e81ba0b7435564b1f1": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:d4e49a4a76f4ea3d390bda3d539082c1be6d64d5b712fe6a0fdc1596b8f73adf": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d515eea9b567531649960b3755e6ce02855eb8d66a6ba50a234a9ed448284d58": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d602d2722d91f652451074c4497602c22a9cd52e78c86564182fa4d8aaa0dc5d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d64cfce1b9d183dc483066c3686c737489918e2dfbb163d9f094baf9737b38ea": {
+    "token_type": "lending_supply",
+    "provider": "morpho"
+  },
+  "0:d6e64d73911ed2404c2b89ce1aa6848a9616ccce30610beb0b1715393f1c51f3": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:d7219cb469b9736b1f05002eea3a70688d69389c6996867c6351621f7f042a62": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d77a1054c6f7eeb114b2e835fbd1acc5f1525f5f852ae87e291f47cf5e589139": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d79ad6edd7e5923f4d2d4a1e8de851fee255fb2db9eb8ce442966b66b99aa0e1": {
+    "token_type": "yield_token",
+    "provider": "affluent"
+  },
+  "0:d7a0c722a125acdeeb673382dfbf774a747f6dbab491ab6d2a85c6e6bf15c305": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d7d1680492ff6158b000a2f0bdcef4229814c82f3471d100a9eb5d2f568b6690": {
+    "token_type": "liquid_pool",
+    "provider": "fiva"
+  },
+  "0:d7ddf6fe9f14b3fbc6aaf80c8abe2168fed5a6a5ef53d45103762ab637039e43": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d8062dbd75ac1d0b70b6d4e2789eb4e9aa0830f99da210374151535b47c545be": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d8fcc74abc89115098d840e1bed329d67c4a9cf03ab022329a9dd87bef9f30b2": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d968da032cf79fc6f1f0a48a51bd32ea3c2920944a63d08fe28ad6459f8d9617": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d9dbf9c4afe07c198669100d52e73cade276c0d5733f2bed587a973b6239f7c1": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:d9e6d508d47a8ee2b14c4f48bf26c6a39a63bf8a6bd48b5cfb08523d8ef29782": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:d9fe29d36e25fedb9847fbe11010c9419cf90626991a5a877c653be85daf7b7c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:dacaea937930943b921d18c34da7ed31d95c5ec17948b2246554b2c6422b2747": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:db4111b08bd08a9e8ddd1690a7db77049497ffeb2271c6ebfab6be8ec1186201": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:db7e36ea5fb0396ca4ed73361067f709857a8ca9ee2146fafaa13a08cc4c1aae": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:dc9b4e9196b7ae32eae6fb28a4f566cbea423ad7b07becead2445fd98e809816": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:dca508f32e65fc53c528ec3239778514e370793aa1a419c7b3acc95ce4d20939": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:dd334308007372e99d8fe9718beb8194c0545f5dd1f101cb04f46bff6e91f13b": {
+    "token_type": "lending_supply",
+    "provider": "morpho"
+  },
+  "0:dd53724d9d1f9fb2c98997a44bbdcb9df976735b6d943841c78e315d24ab8bde": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ddb7434c1fce3e0259b70cf55324856d74144118742bb4758d93474fd9b018c1": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ddd2b5ef4fcf189ea238ac8df1ed9115c881bdbc9f4fef27a19415af959b7d8e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:de8f383cc73ac4b3c61ddeeaff5eb78c8cfd14421f06d6d2b64e5e56741c22e8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:df2807a89cb6f0f7244847e632a8c4dee6cee7262006a7c3699d696b092040d4": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:dfe3ebec6b983ea36afa844c64d9ce9276401c5b4349302bffd4fa7af22c1f69": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e033c70f1a3b095ef7762d75c5a79d9d5622217006a058c122777e12bd9b8241": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e0758b505a8d8dcb7c6eb70782b36aba3899cb3ead13aca77cce9ba220604e83": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e1f47a08fd7ac061ebaf5192eb947d8119f60abc5e09cffcfaef39331bbffbb9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e2c779c33c90a2783e397d080ffa293f619c9e10139ad84dc82f49af8e63903c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e3023f867385b882bebfb2f797eb2b0f8fb56fc7261411eb74ab2a45d6afdd0d": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e30a086db6fda2c3a272d5d66137674ac011ceb70d94f6d4c439f82fa48d56b5": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e36639a374e7e323bfa33c2fe9423561e26a41052d0d89a5b33d10b62d94b8ec": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e5898916f91ca8d0210fa53873c5b1d3f7b362bbd04e1cbc2276ca1f0a3e90bf": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e5c5fff5a2d846813662871a77099b29a20a9cb4af0511b5480c06bd3664daef": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e622c0599f66fbc8c910ecae60f98ca4ba8372d7d714c0ab3ede0061dc36b9f8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e698e9da5c9235a0be1cec75a71c7754f713c825779690d47ac4a8479bc7de42": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e7429eb99d5eef5fa3115654088e6598a048e0d76923f0af095d035b85eb2ef6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e75145ca97f24d3eed997e6f896a6eb45552d14affece241f98297546a643f1e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:e90a662e9c26e7c4c9248f194227f9648eda99ecd635ca1e2c434dbd4d5b093c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ea63bf8646b4f748915ba11bebe0028aca7dede2e9e7fc9eaca1bf84fda41077": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ea8318adfd02ec9503305b2f54b88e7a076703e63b6d4507ca4b2011d57e5a61": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:eb4a2e22c0a126187bbddb07238455fc66e6e28d328430c3758519f7971b1c3f": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:ec23137a9131cd4f3916f8a0c016839deee2bc215fea870f30479364607d4687": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ec353180ddd45dec159718cbee2b44142addc2e293fe3106e6c8de9719314f71": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:ec3de3aebbae9eeed59a8173ba4e7f151593045740a541bef3381e92116fd528": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ed9c8f6eecf948bbdd52f429434b5a7a9130e0af8bdc50039485decd2039277a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:edee2a0c9cdcefb25e9ae85958f775b7f0a19102c72d68a68857ff8beaaa8e12": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ee7a3728c5c7aec8f683139f87429c8a882976807883ddd0d00eb9eebc598a36": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:eec39fbc89d1503e50067faf12aa29ef77ab84c19858a99e67b513f9479c2ae3": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:eec8d5379f59a40b857d1c534d4d4a15bc50578572586f13d9de593d9c360603": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ef264a0d5d60a1267f7a43aac6a16ba3c38b40278d4ba324a5d77a20b75d8597": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ef7130c7d1c3f249b4a82ddbfa6c9227dea46bb278108d1185a5c134c3e061b4": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ef9f92792723506c614979bb954ec77dd2d2d8a413a42cc380065e75436bee86": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:f07615675b04ded8d2c6cc3dcb3eecc5e1d9a44de078f1ce6925ad7f4f859d8f": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f09f3de26f131bb0c0485f7f0c5b01b34849168915f57b0ddcd71744aa6e7541": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f0a1cca931ad2119cdb54ae5a0d6052f670cca9cc456546e6d952092c7045a40": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f0e8e58ce18f88941a0f26e38e3214d69c912850bf480080e99862a3a5480911": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f2506ecdeeaf23c674ba8d3ed816a7b9e13ae8890305ee66c74214d0a7c5c8d6": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f26a93829fdf8448a4ed3cce22a7c92433be18fb668e63cf048a96c5b27fffaa": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:f2afd43c4956220499d8ba94e4d7764c601fe2458dd00c57e97c22120805b151": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f31252d6637d108ade00b5262fcf45902f5db3f0c3ad9ef7ecde435548d44d7c": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:f3e2f5d22627690894660250c525aee062da749d55d720bd856fdab195de23c0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f417fc37e424d65314d646379fa15fb8d342910368d7e755f87b3220994518ff": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f41859ca65eb815da2a6a7aa6be4c5b8e8779daf6224aaef061014722e1238a9": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f44a2d90fdf95635d2efe9781d9dbb2324e7c91d7f2bffd718a4da8d4ad5700c": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f4a94a10fb1845eab31120c23aa1d54a00fc4054e129b84a9fe9b7605b0f0dc7": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:f4ac580c68073db0ff8decc64b67952e426091d8355e37f78def8ac693cc38e8": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f55cf45a8f9a6d1a13d87072ffdde6f30c55aec86f4a6db804a99e75a5a88e2e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f59654d202fcbac8d7420af84d0acb2520f0ea6833d054350779d94e51b43137": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f622d21a090c33197310b4e13dabac1b90a941e1a27c6b2ca81fdce0b6086257": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f6837b54886beaa9ea6feec4ec9830a11494f7a011b93038759d672dd65b3c5c": {
+    "token_type": "yield_token",
+    "provider": "fiva"
+  },
+  "0:f69fbe5cb0f2923eb14133e940e682e12666af0bcb9ce431b2020e1204d75cee": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f6b234d5b9f1b4368f0efaa0fd9e0e0961fb43e2167616e9a8bc549208325b3a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f70630a3c6e7fc9aee64bf16a355b7be2256b549c6599408b4de84bb94c98026": {
+    "token_type": "liquid_pool",
+    "provider": "fiva"
+  },
+  "0:f717b131feec418f112e6fc160783a186144886c0515c9e8426ff25288254bdf": {
+    "token_type": "yield_token",
+    "provider": "affluent"
+  },
+  "0:f80e945388f516c0a9ff9f4617113a3b45638362ac1f7bf69aac0eb7b3e03b6a": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f8151a9bb527424f4065eced2dfa79cb5992161fd3f7201d6617423f9e363199": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f8d6aea2bc09ed90d3bfff2e7b49b95958b73a1896907506dfada5a1143a7665": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f8f6e758e697ddcf36b0d1435b967963b1dd4177af8c03800a51533f9f45656b": {
+    "token_type": "liquid_pool",
+    "provider": "settle"
+  },
+  "0:f93b8ab3266570b8a0c87c372e33a1c8edf51fd403a8960176a223c6caaaff59": {
+    "token_type": "yield_token",
+    "provider": "affluent"
+  },
+  "0:f94283917d8a0986bdcea357ae4ee0bcd7c7045e1ea0b6d2a8e1ed3b881d646e": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:f9c36886d61552248c0e53034c1ba31ebf10a0a8c068c249e9baf4ad331c4f38": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:fa81049609ac8787416f5274d79697e2cc85a2abb51e138818bd7198b4484860": {
+    "token_type": "lending_supply",
+    "provider": "farmix"
+  },
+  "0:fac22d4b395b0459cc249c339025be29fee5003f5f07f4b6ab6356078acb96f7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:fb14eeb8c59cce9a4f139d524c708c2a9f6186e7f6b3a3a2b7d7e2480d491321": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:fb8a7d055a36b8a9fe5c36628240392cc5586af0159addd26dcf920d81ddd3c7": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:fcbf027f6f5fc5756e6e27113633588c42b37944199a2d3a9db40d6657c12489": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:fdb422e8dc3bc6b183a7324f1ef7ea31e95a30f0491999ce08e6526f0edc2fed": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:fe93f1252b9c620eb19a4fc9c89a4daeb5fc80a765c50155ce5661ba5a39a2b0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:fe98ffbb073774c5d9e463e953afc851fbf32d4eb366349a0f328772716ca930": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ff67ee2a9b982222070213309f8a8d6aeac8f3cf088cb265087e31a5bb919676": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ff92674512c11a813a50b683acc6e3d0789193674c9d335f25bf7a66d3eedffd": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ffc13f4c1aad2bf72a97842797894bcd45647e622a6ea0af4787af4fddd213b0": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  },
+  "0:ffdd8b8af44aa45cd3ac374bf3e417b26352453d946763fda0f2586ef97e2846": {
+    "token_type": "liquid_pool",
+    "provider": "dedust"
+  }
+}

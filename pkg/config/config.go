@@ -28,6 +28,7 @@ type Config struct {
 	TonConnect struct {
 		Secret string `env:"TON_CONNECT_SECRET"`
 	}
+	PublicAPIURL string `env:"PUBLIC_API_URL" envDefault:"https://tonapi.io"`
 }
 
 type accountsList []tongo.AccountID

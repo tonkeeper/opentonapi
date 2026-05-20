@@ -144,7 +144,7 @@ func (h *Handler) convertJettonOperation(ctx context.Context, op core.JettonOper
 	return operation, nil
 }
 
-func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWallet, currencies []string, scaledUiLt *int64) (oas.JettonBalance, error) {
+func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWallet, currencies []string, scaledUiLt *int64, assetInfo *oas.JettonAssetInfo) (oas.JettonBalance, error) {
 	// the latest scaled ui parameters for jetton master if scaledUiLt == nil
 	todayRates, yesterdayRates, weekRates, monthRates, _ := h.getRates()
 	for idx, currency := range currencies {
@@ -211,6 +211,9 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	}
 	score, _ := h.score.GetJettonScore(wallet.JettonAddress)
 	jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, score, scaledUiParams)
+	if assetInfo != nil {
+		jettonBalance.Jetton.AssetInfo.SetTo(*assetInfo)
+	}
 
 	return jettonBalance, nil
 }

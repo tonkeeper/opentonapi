@@ -12,6 +12,7 @@ import (
 	"github.com/tonkeeper/tongo/config"
 	"go.uber.org/zap"
 
+	"github.com/tonkeeper/opentonapi/pkg/defi"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/opentonapi/pkg/pusher/sse"
@@ -145,6 +146,7 @@ func NewServer(log *zap.Logger, handler *Handler, opts ...ServerOption) (*Server
 
 	websocketHandler := websocket.Handler(log, options.txSource, options.traceSource, options.memPool, options.blockHeadersSource)
 	mux.Handle("/v2/websocket", wrapAsync(LongLivedConnection, true, chainMiddlewares(websocketHandler, asyncMiddlewares...)))
+	mux.Handle("/v2/assets/defi/", defi.AssetsHandler())
 	mux.Handle("/", ogenServer)
 
 	serv := Server{

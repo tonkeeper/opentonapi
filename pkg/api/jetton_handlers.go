@@ -10,6 +10,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/defi"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
@@ -31,8 +32,17 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	var balances = oas.JettonsBalances{
 		Balances: make([]oas.JettonBalance, 0, len(wallets)),
 	}
+	var assetInfos map[tongo.AccountID]defi.AssetInfo
+	if slices.Contains(params.SupportedExtensions, "defi") {
+		masters := make([]tongo.AccountID, 0, len(wallets))
+		for _, wallet := range wallets {
+			masters = append(masters, wallet.JettonAddress)
+		}
+		assetInfos = defi.AssetInfos(ctx, h.storage, h.logger, masters)
+	}
 	for _, wallet := range wallets {
-		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies, nil)
+		assetInfo, ok := assetInfos[wallet.JettonAddress]
+		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies, nil, h.optJettonAssetInfo(assetInfo, ok))
 		if err != nil {
 			h.logger.Warn(fmt.Sprintf("Failed to convert jetton balance for wallet %v", wallet.JettonAddress.ToRaw()), zap.Error(err))
 			continue
@@ -61,7 +71,12 @@ func (h *Handler) GetAccountJettonBalance(ctx context.Context, params oas.GetAcc
 	if len(wallets) == 0 {
 		return nil, toError(http.StatusNotFound, fmt.Errorf("account %v has no jetton wallet %v", account.ID, jettonAccount.ID))
 	}
-	jettonBalance, err := h.convertJettonBalance(ctx, wallets[0], params.Currencies, nil)
+	var assetInfos map[tongo.AccountID]defi.AssetInfo
+	if slices.Contains(params.SupportedExtensions, "defi") {
+		assetInfos = defi.AssetInfos(ctx, h.storage, h.logger, []tongo.AccountID{wallets[0].JettonAddress})
+	}
+	assetInfo, ok := assetInfos[wallets[0].JettonAddress]
+	jettonBalance, err := h.convertJettonBalance(ctx, wallets[0], params.Currencies, nil, h.optJettonAssetInfo(assetInfo, ok))
 	if err != nil {
 		return nil, err
 	}
