@@ -1,0 +1,112 @@
+{
+  "affluent": {
+    "card": "/v2/assets/defi/affluent_card.webp",
+    "description": "Decentralized, permissionless lending protocol on TON",
+    "full": "/v2/assets/defi/affluent_full.webp",
+    "icon": "/v2/assets/defi/affluent_icon.webp",
+    "link": "https://affluent.org/",
+    "miniapp_link": "https://t.me/AffluentAppBot",
+    "name": "Affluent",
+    "tag": "factorial"
+  },
+  "dedust": {
+    "card": "/v2/assets/defi/dedust_card.webp",
+    "description": "Decentralized exchange on TON",
+    "full": "/v2/assets/defi/dedust_full.webp",
+    "icon": "/v2/assets/defi/dedust_icon.webp",
+    "link": "https://dedust.io/",
+    "miniapp_link": "https://t.me/dedustBot",
+    "name": "DeDust.io",
+    "tag": "dedust"
+  },
+  "farmix": {
+    "card": "/v2/assets/defi/farmix_card.webp",
+    "description": "Leveraged yield farming protocol",
+    "full": "/v2/assets/defi/farmix_full.webp",
+    "icon": "/v2/assets/defi/farmix_icon.webp",
+    "link": "https://app.farmix.tg/",
+    "miniapp_link": "https://t.me/FarmixTonbot",
+    "name": "Farmix",
+    "tag": "farmix"
+  },
+  "fiva": {
+    "card": "/v2/assets/defi/fiva_card.webp",
+    "description": "Yield Tokenization Protocol",
+    "full": "/v2/assets/defi/fiva_full.webp",
+    "icon": "/v2/assets/defi/fiva_icon.webp",
+    "link": "https://www.thefiva.com/",
+    "miniapp_link": "https://t.me/fiva_yield_bot",
+    "name": "Fiva",
+    "tag": "fiva"
+  },
+  "midas": {
+    "card": "/v2/assets/defi/midas_card.webp",
+    "description": "Platform for composable on-chain investment products",
+    "full": "/v2/assets/defi/midas_full.webp",
+    "icon": "/v2/assets/defi/midas_icon.webp",
+    "link": "https://midas.app/",
+    "miniapp_link": null,
+    "name": "Midas",
+    "tag": "re7_labs"
+  },
+  "morpho": {
+    "card": "/v2/assets/defi/morpho_card.webp",
+    "description": "Earn up to 15% yield on your crypto",
+    "full": "/v2/assets/defi/morpho_full.webp",
+    "icon": "/v2/assets/defi/morpho_icon.webp",
+    "link": "https://lite.morpho.org/tac/earn/",
+    "miniapp_link": "https://t.me/MorphoOrgBot",
+    "name": "Morpho",
+    "tag": "morpho"
+  },
+  "settle": {
+    "card": "/v2/assets/defi/settle_card.webp",
+    "description": "TON Liquidity Pool Index Fund",
+    "full": "/v2/assets/defi/settle_full.webp",
+    "icon": "/v2/assets/defi/settle_icon.webp",
+    "link": "https://settleton.finance/",
+    "miniapp_link": "https://t.me/settleton_bot",
+    "name": "SettleTON",
+    "tag": "settle"
+  },
+  "stonfi": {
+    "card": "/v2/assets/defi/stonfi_card.webp",
+    "description": "Decentralized exchange on TON",
+    "full": "/v2/assets/defi/stonfi_full.webp",
+    "icon": "/v2/assets/defi/stonfi_icon.webp",
+    "link": "https://app.ston.fi/",
+    "miniapp_link": "https://t.me/ston_fi",
+    "name": "STON.fi",
+    "tag": "stonfi"
+  },
+  "storm": {
+    "card": "/v2/assets/defi/storm_card.webp",
+    "description": "Decentralized exchange for Crypto, Stock, Forex and Commodities trading with leverage",
+    "full": "/v2/assets/defi/storm_full.webp",
+    "icon": "/v2/assets/defi/storm_icon.webp",
+    "link": "https://app.storm.tg/",
+    "miniapp_link": "https://t.me/StormTradeBot",
+    "name": "Storm Trade",
+    "tag": "storm"
+  },
+  "ethena": {
+    "card": "/v2/assets/defi/ethena_card.png",
+    "description": "Synthetic dollar protocol",
+    "full": "/v2/assets/defi/ethena_full.png",
+    "icon": "/v2/assets/defi/ethena_icon.png",
+    "link": "https://ethena.fi/",
+    "miniapp_link": null,
+    "name": "Ethena",
+    "tag": "ethena"
+  },
+  "tonstakers": {
+    "card": "",
+    "description": "Liquid staking protocol on TON",
+    "full": "",
+    "icon": "",
+    "link": "https://tonstakers.com/",
+    "miniapp_link": null,
+    "name": "Tonstakers",
+    "tag": "tonstakers"
+  }
+}

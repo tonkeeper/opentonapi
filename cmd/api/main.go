@@ -85,6 +85,7 @@ func main() {
 		api.WithSpamFilter(spamFilter),
 		api.WithTonConnectSecret(cfg.TonConnect.Secret),
 		api.WithArchiveLiteServers(archiveLiteServers),
+		api.WithPublicAPIURL(cfg.PublicAPIURL),
 	)
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))

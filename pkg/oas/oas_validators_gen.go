@@ -3599,6 +3599,44 @@ func (s *GetWalletsByPublicKeyBulkReq) Validate() error {
 	return nil
 }
 
+func (s *JettonAssetInfo) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.TokenType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "token_type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s JettonAssetTokenType) Validate() error {
+	switch s {
+	case "liquid_staking":
+		return nil
+	case "liquid_pool":
+		return nil
+	case "yield_token":
+		return nil
+	case "lending_supply":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *JettonBalance) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3856,6 +3894,24 @@ func (s *JettonPreview) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "verification",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.AssetInfo.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "asset_info",
 			Error: err,
 		})
 	}

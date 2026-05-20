@@ -3486,7 +3486,7 @@ components:
         type: array
         items:
           type: string
-        example: [ "custom_payload" ]
+        example: [ "custom_payload", "defi" ]
     currencyQuery:
       in: query
       name: currency
@@ -6044,6 +6044,61 @@ components:
           $ref: '#/components/schemas/ScaledUI'
         description:
           type: string
+        asset_info:
+          $ref: '#/components/schemas/JettonAssetInfo'
+    JettonAssetTokenType:
+      type: string
+      enum:
+        - liquid_staking
+        - liquid_pool
+        - yield_token
+        - lending_supply
+    JettonAssetInfo:
+      type: object
+      required:
+        - token_type
+        - defi_provider
+      properties:
+        token_type:
+          $ref: '#/components/schemas/JettonAssetTokenType'
+        defi_provider:
+          $ref: '#/components/schemas/JettonDefiProvider'
+    JettonDefiProvider:
+      type: object
+      required:
+        - name
+        - description
+        - link
+        - miniapp_link
+        - icon
+        - card
+        - full
+        - tag
+      properties:
+        name:
+          type: string
+          example: Morpho
+        description:
+          type: string
+          example: Earn up to 15% yield on your crypto
+        link:
+          type: string
+          example: https://lite.morpho.org/tac/earn/
+        miniapp_link:
+          type: string
+          example: https://t.me/MorphoOrgBot
+        icon:
+          type: string
+          example: https://dton.io/media/raw_data_icons/ac08f0d6-bb96-4ce5-8a42-fb71a13e4cf4.webp
+        card:
+          type: string
+          example: https://dton.io/media/raw_data_cards/7e332b53-aad4-4842-8bb2-e5eba797a49d.webp
+        full:
+          type: string
+          example: https://dton.io/media/raw_data_full/7b0897a5-4829-4eb3-92e1-5e6892161b76.webp
+        tag:
+          type: string
+          example: morpho
     ScaledUI:
       type: object
       required:

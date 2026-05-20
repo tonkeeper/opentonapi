@@ -352,7 +352,8 @@
     "required": false,
     "schema": {
      "example": [
-      "custom_payload"
+      "custom_payload",
+      "defi"
      ],
      "items": {
       "type": "string"
@@ -3885,6 +3886,30 @@
     ],
     "type": "object"
    },
+   "JettonAssetInfo": {
+    "properties": {
+     "defi_provider": {
+      "$ref": "#/components/schemas/JettonDefiProvider"
+     },
+     "token_type": {
+      "$ref": "#/components/schemas/JettonAssetTokenType"
+     }
+    },
+    "required": [
+     "token_type",
+     "defi_provider"
+    ],
+    "type": "object"
+   },
+   "JettonAssetTokenType": {
+    "enum": [
+     "liquid_staking",
+     "liquid_pool",
+     "yield_token",
+     "lending_supply"
+    ],
+    "type": "string"
+   },
    "JettonBalance": {
     "properties": {
      "balance": {
@@ -4038,6 +4063,53 @@
      "jetton",
      "sender",
      "senders_wallet"
+    ],
+    "type": "object"
+   },
+   "JettonDefiProvider": {
+    "properties": {
+     "card": {
+      "example": "https://dton.io/media/raw_data_cards/7e332b53-aad4-4842-8bb2-e5eba797a49d.webp",
+      "type": "string"
+     },
+     "description": {
+      "example": "Earn up to 15% yield on your crypto",
+      "type": "string"
+     },
+     "full": {
+      "example": "https://dton.io/media/raw_data_full/7b0897a5-4829-4eb3-92e1-5e6892161b76.webp",
+      "type": "string"
+     },
+     "icon": {
+      "example": "https://dton.io/media/raw_data_icons/ac08f0d6-bb96-4ce5-8a42-fb71a13e4cf4.webp",
+      "type": "string"
+     },
+     "link": {
+      "example": "https://lite.morpho.org/tac/earn/",
+      "type": "string"
+     },
+     "miniapp_link": {
+      "example": "https://t.me/MorphoOrgBot",
+      "type": "string"
+     },
+     "name": {
+      "example": "Morpho",
+      "type": "string"
+     },
+     "tag": {
+      "example": "morpho",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "description",
+     "link",
+     "miniapp_link",
+     "icon",
+     "card",
+     "full",
+     "tag"
     ],
     "type": "object"
    },
@@ -4347,6 +4419,9 @@
       "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
       "format": "address",
       "type": "string"
+     },
+     "asset_info": {
+      "$ref": "#/components/schemas/JettonAssetInfo"
      },
      "custom_payload_api_uri": {
       "type": "string"
