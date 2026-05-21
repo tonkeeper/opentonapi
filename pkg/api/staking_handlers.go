@@ -172,6 +172,9 @@ func (h *Handler) GetStakingPools(ctx context.Context, params oas.GetStakingPool
 	for _, p := range liquidPools {
 		info, _ := h.addressBook.GetAddressInfoByAddress(p.Address)
 		p.Name = info.Name
+		if p.Address == references.TonstakersAccountPool {
+			p.APY = h.stats.GetAPY(tonstakersAPYMul)
+		}
 		result.Pools = append(result.Pools, convertLiquidStaking(p, cycleStart, cycleEnd))
 	}
 	slices.SortFunc(result.Pools, func(a, b oas.PoolInfo) int {
