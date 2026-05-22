@@ -5169,6 +5169,241 @@ func (s *DecodedRawMessageMessage) SetDecodedBody(val jx.Raw) {
 	s.DecodedBody = val
 }
 
+// Ref: #/components/schemas/DefiAsset
+type DefiAsset struct {
+	Type     DefiAssetType     `json:"type"`
+	Jetton   OptJettonPreview  `json:"jetton"`
+	Nft      OptDefiNftPreview `json:"nft"`
+	Provider DefiProvider      `json:"provider"`
+	// Amount in token units; negative for lending debt.
+	Amount int64 `json:"amount"`
+	// Current position value in nanoTON.
+	Position int64 `json:"position"`
+}
+
+// GetType returns the value of Type.
+func (s *DefiAsset) GetType() DefiAssetType {
+	return s.Type
+}
+
+// GetJetton returns the value of Jetton.
+func (s *DefiAsset) GetJetton() OptJettonPreview {
+	return s.Jetton
+}
+
+// GetNft returns the value of Nft.
+func (s *DefiAsset) GetNft() OptDefiNftPreview {
+	return s.Nft
+}
+
+// GetProvider returns the value of Provider.
+func (s *DefiAsset) GetProvider() DefiProvider {
+	return s.Provider
+}
+
+// GetAmount returns the value of Amount.
+func (s *DefiAsset) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetPosition returns the value of Position.
+func (s *DefiAsset) GetPosition() int64 {
+	return s.Position
+}
+
+// SetType sets the value of Type.
+func (s *DefiAsset) SetType(val DefiAssetType) {
+	s.Type = val
+}
+
+// SetJetton sets the value of Jetton.
+func (s *DefiAsset) SetJetton(val OptJettonPreview) {
+	s.Jetton = val
+}
+
+// SetNft sets the value of Nft.
+func (s *DefiAsset) SetNft(val OptDefiNftPreview) {
+	s.Nft = val
+}
+
+// SetProvider sets the value of Provider.
+func (s *DefiAsset) SetProvider(val DefiProvider) {
+	s.Provider = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *DefiAsset) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetPosition sets the value of Position.
+func (s *DefiAsset) SetPosition(val int64) {
+	s.Position = val
+}
+
+// Ref: #/components/schemas/DefiAssetType
+type DefiAssetType string
+
+const (
+	DefiAssetTypeLiquidStaking DefiAssetType = "liquid_staking"
+	DefiAssetTypeLiquidPool    DefiAssetType = "liquid_pool"
+	DefiAssetTypeStaking       DefiAssetType = "staking"
+	DefiAssetTypeLending       DefiAssetType = "lending"
+	DefiAssetTypeFarming       DefiAssetType = "farming"
+)
+
+// AllValues returns all DefiAssetType values.
+func (DefiAssetType) AllValues() []DefiAssetType {
+	return []DefiAssetType{
+		DefiAssetTypeLiquidStaking,
+		DefiAssetTypeLiquidPool,
+		DefiAssetTypeStaking,
+		DefiAssetTypeLending,
+		DefiAssetTypeFarming,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DefiAssetType) MarshalText() ([]byte, error) {
+	switch s {
+	case DefiAssetTypeLiquidStaking:
+		return []byte(s), nil
+	case DefiAssetTypeLiquidPool:
+		return []byte(s), nil
+	case DefiAssetTypeStaking:
+		return []byte(s), nil
+	case DefiAssetTypeLending:
+		return []byte(s), nil
+	case DefiAssetTypeFarming:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DefiAssetType) UnmarshalText(data []byte) error {
+	switch DefiAssetType(data) {
+	case DefiAssetTypeLiquidStaking:
+		*s = DefiAssetTypeLiquidStaking
+		return nil
+	case DefiAssetTypeLiquidPool:
+		*s = DefiAssetTypeLiquidPool
+		return nil
+	case DefiAssetTypeStaking:
+		*s = DefiAssetTypeStaking
+		return nil
+	case DefiAssetTypeLending:
+		*s = DefiAssetTypeLending
+		return nil
+	case DefiAssetTypeFarming:
+		*s = DefiAssetTypeFarming
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DefiAssets
+type DefiAssets struct {
+	Assets []DefiAsset `json:"assets"`
+}
+
+// GetAssets returns the value of Assets.
+func (s *DefiAssets) GetAssets() []DefiAsset {
+	return s.Assets
+}
+
+// SetAssets sets the value of Assets.
+func (s *DefiAssets) SetAssets(val []DefiAsset) {
+	s.Assets = val
+}
+
+// Ref: #/components/schemas/DefiNftPreview
+type DefiNftPreview struct {
+	Address    string           `json:"address"`
+	Collection string           `json:"collection"`
+	Token0     OptJettonPreview `json:"token0"`
+	Token1     OptJettonPreview `json:"token1"`
+}
+
+// GetAddress returns the value of Address.
+func (s *DefiNftPreview) GetAddress() string {
+	return s.Address
+}
+
+// GetCollection returns the value of Collection.
+func (s *DefiNftPreview) GetCollection() string {
+	return s.Collection
+}
+
+// GetToken0 returns the value of Token0.
+func (s *DefiNftPreview) GetToken0() OptJettonPreview {
+	return s.Token0
+}
+
+// GetToken1 returns the value of Token1.
+func (s *DefiNftPreview) GetToken1() OptJettonPreview {
+	return s.Token1
+}
+
+// SetAddress sets the value of Address.
+func (s *DefiNftPreview) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetCollection sets the value of Collection.
+func (s *DefiNftPreview) SetCollection(val string) {
+	s.Collection = val
+}
+
+// SetToken0 sets the value of Token0.
+func (s *DefiNftPreview) SetToken0(val OptJettonPreview) {
+	s.Token0 = val
+}
+
+// SetToken1 sets the value of Token1.
+func (s *DefiNftPreview) SetToken1(val OptJettonPreview) {
+	s.Token1 = val
+}
+
+// Ref: #/components/schemas/DefiProvider
+type DefiProvider struct {
+	Name  string `json:"name"`
+	URL   string `json:"url"`
+	Image string `json:"image"`
+}
+
+// GetName returns the value of Name.
+func (s *DefiProvider) GetName() string {
+	return s.Name
+}
+
+// GetURL returns the value of URL.
+func (s *DefiProvider) GetURL() string {
+	return s.URL
+}
+
+// GetImage returns the value of Image.
+func (s *DefiProvider) GetImage() string {
+	return s.Image
+}
+
+// SetName sets the value of Name.
+func (s *DefiProvider) SetName(val string) {
+	s.Name = val
+}
+
+// SetURL sets the value of URL.
+func (s *DefiProvider) SetURL(val string) {
+	s.URL = val
+}
+
+// SetImage sets the value of Image.
+func (s *DefiProvider) SetImage(val string) {
+	s.Image = val
+}
+
 // Validator's participation in elections.
 // Ref: #/components/schemas/DepositStakeAction
 type DepositStakeAction struct {
@@ -13468,6 +13703,52 @@ func (o OptDecodedMessageExtInMsgDecodedWalletV5) Get() (v DecodedMessageExtInMs
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDecodedMessageExtInMsgDecodedWalletV5) Or(d DecodedMessageExtInMsgDecodedWalletV5) DecodedMessageExtInMsgDecodedWalletV5 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDefiNftPreview returns new OptDefiNftPreview with value set to v.
+func NewOptDefiNftPreview(v DefiNftPreview) OptDefiNftPreview {
+	return OptDefiNftPreview{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDefiNftPreview is optional DefiNftPreview.
+type OptDefiNftPreview struct {
+	Value DefiNftPreview
+	Set   bool
+}
+
+// IsSet returns true if OptDefiNftPreview was set.
+func (o OptDefiNftPreview) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDefiNftPreview) Reset() {
+	var v DefiNftPreview
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDefiNftPreview) SetTo(v DefiNftPreview) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDefiNftPreview) Get() (v DefiNftPreview, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDefiNftPreview) Or(d DefiNftPreview) DefiNftPreview {
 	if v, ok := o.Get(); ok {
 		return v
 	}

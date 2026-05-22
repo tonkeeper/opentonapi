@@ -63,6 +63,8 @@ type Handler struct {
 	ctxToDetails ctxToDetails
 	tongoVersion int
 
+	proxyURL string
+
 	// mempoolEmulateIgnoreAccounts, we don't track pending transactions for this list of accounts.
 	mempoolEmulateIgnoreAccounts map[tongo.AccountID]struct{}
 
@@ -99,6 +101,7 @@ type Options struct {
 	score                   scoreSource
 	parallelTraceProcessing bool
 	archiveLiteServers      []config.LiteServer
+	proxyURL                string
 }
 
 type Option func(o *Options)
@@ -192,6 +195,12 @@ func WithArchiveLiteServers(s []config.LiteServer) Option {
 	}
 }
 
+func WithProxyURL(baseURL string) Option {
+	return func(o *Options) {
+		o.proxyURL = baseURL
+	}
+}
+
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -269,6 +278,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		ctxToDetails:   options.ctxToDetails,
 		gasless:        options.gasless,
 		score:          options.score,
+		proxyURL:       options.proxyURL,
 		ratesSource:    rates.InitCalculator(options.ratesSource),
 		verifierSource: options.verifier,
 		metaCache: metadataCache{
