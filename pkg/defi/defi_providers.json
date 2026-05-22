@@ -9,6 +9,36 @@
     "name": "Affluent",
     "tag": "factorial"
   },
+  "bemo": {
+    "card": "/v2/assets/defi/bemo_card.webp",
+    "description": "Liquid staking protocol on TON",
+    "full": "/v2/assets/defi/bemo_full.webp",
+    "icon": "/v2/assets/defi/bemo_icon.webp",
+    "link": "https://app.bemo.fi/",
+    "miniapp_link": "https://t.me/bemo_finance_bot",
+    "name": "Bemo",
+    "tag": "bemo"
+  },
+  "bidask": {
+    "card": "/v2/assets/defi/bidask_card.webp",
+    "description": "Innovative DEX on TON blockchain providing fast and secure crypto asset trading",
+    "full": "/v2/assets/defi/bidask_full.webp",
+    "icon": "/v2/assets/defi/bidask_icon.webp",
+    "link": "https://bidask.finance/",
+    "miniapp_link": "https://t.me/bidask_protocol_bot",
+    "name": "Bidask",
+    "tag": "bidask"
+  },
+  "coffin": {
+    "card": "/v2/assets/defi/coffin_card.webp",
+    "description": "Community tool, a DeFi Platform powered by EVAA Lending Smart contracts",
+    "full": "/v2/assets/defi/coffin_full.webp",
+    "icon": "/v2/assets/defi/coffin_icon.webp",
+    "link": "https://coffin.meme/",
+    "miniapp_link": "https://t.me/MemeCoffin_Bot",
+    "name": "Coffin Meme",
+    "tag": "coffin"
+  },
   "dedust": {
     "card": "/v2/assets/defi/dedust_card.webp",
     "description": "Decentralized exchange on TON",
@@ -18,6 +48,26 @@
     "miniapp_link": "https://t.me/dedustBot",
     "name": "DeDust.io",
     "tag": "dedust"
+  },
+  "ethena": {
+    "card": "/v2/assets/defi/ethena_card.webp",
+    "description": "Synthetic dollar protocol",
+    "full": "/v2/assets/defi/ethena_full.webp",
+    "icon": "/v2/assets/defi/ethena_icon.webp",
+    "link": "https://ethena.fi/",
+    "miniapp_link": null,
+    "name": "Ethena",
+    "tag": "ethena"
+  },
+  "evaa": {
+    "card": "/v2/assets/defi/evaa_card.webp",
+    "description": "Leading lending protocol on TON blockchain",
+    "full": "/v2/assets/defi/evaa_full.webp",
+    "icon": "/v2/assets/defi/evaa_icon.webp",
+    "link": "https://app.evaa.finance/",
+    "miniapp_link": "https://t.me/EvaaAppBot",
+    "name": "EVAA Protocol",
+    "tag": "evaa"
   },
   "farmix": {
     "card": "/v2/assets/defi/farmix_card.webp",
@@ -39,15 +89,45 @@
     "name": "Fiva",
     "tag": "fiva"
   },
-  "midas": {
-    "card": "/v2/assets/defi/midas_card.webp",
-    "description": "Platform for composable on-chain investment products",
-    "full": "/v2/assets/defi/midas_full.webp",
-    "icon": "/v2/assets/defi/midas_icon.webp",
-    "link": "https://midas.app/",
+  "getgems": {
+    "card": "/v2/assets/defi/getgems_card.webp",
+    "description": "TON NFT Marketplace",
+    "full": "/v2/assets/defi/getgems_full.webp",
+    "icon": "/v2/assets/defi/getgems_icon.webp",
+    "link": "https://getgems.io/",
     "miniapp_link": null,
-    "name": "Midas",
-    "tag": "re7_labs"
+    "name": "Getgems",
+    "tag": "getgems"
+  },
+  "hipo": {
+    "card": "/v2/assets/defi/hipo_card.webp",
+    "description": "Liquid staking protocol on TON",
+    "full": "/v2/assets/defi/hipo_full.webp",
+    "icon": "/v2/assets/defi/hipo_icon.webp",
+    "link": "https://app.hipo.finance/",
+    "miniapp_link": "https://t.me/HipoFinanceBot",
+    "name": "Hipo Finance",
+    "tag": "hipo"
+  },
+  "jvault": {
+    "card": "/v2/assets/defi/jvault_card.webp",
+    "description": "Protocol for staking pools, NFT staking, and DAO management",
+    "full": "/v2/assets/defi/jvault_full.webp",
+    "icon": "/v2/assets/defi/jvault_icon.webp",
+    "link": "https://jvault.xyz/",
+    "miniapp_link": "https://t.me/JVaultBot",
+    "name": "JVault",
+    "tag": "jvault"
+  },
+  "kton": {
+    "card": "/v2/assets/defi/kton_card.webp",
+    "description": "KTON, The Liquid Staking Token of TON",
+    "full": "/v2/assets/defi/kton_full.webp",
+    "icon": "/v2/assets/defi/kton_icon.webp",
+    "link": "https://kton.io/",
+    "miniapp_link": "https://t.me/ktonio_bot",
+    "name": "KTON",
+    "tag": "kton"
   },
   "morpho": {
     "card": "/v2/assets/defi/morpho_card.webp",
@@ -59,6 +139,16 @@
     "name": "Morpho",
     "tag": "morpho"
   },
+  "re7_labs": {
+    "card": "/v2/assets/defi/re7_labs_card.webp",
+    "description": "Platform for composable on-chain investment products",
+    "full": "/v2/assets/defi/re7_labs_full.webp",
+    "icon": "/v2/assets/defi/re7_labs_icon.webp",
+    "link": "https://midas.app/",
+    "miniapp_link": null,
+    "name": "Midas",
+    "tag": "re7_labs"
+  },
   "settle": {
     "card": "/v2/assets/defi/settle_card.webp",
     "description": "TON Liquidity Pool Index Fund",
@@ -68,6 +158,16 @@
     "miniapp_link": "https://t.me/settleton_bot",
     "name": "SettleTON",
     "tag": "settle"
+  },
+  "stakee": {
+    "card": "/v2/assets/defi/stakee_card.webp",
+    "description": "TON staking",
+    "full": "/v2/assets/defi/stakee_full.webp",
+    "icon": "/v2/assets/defi/stakee_icon.webp",
+    "link": "https://app.stakee.org/",
+    "miniapp_link": "https://t.me/StakeeBot",
+    "name": "Stakee",
+    "tag": "stakee"
   },
   "stonfi": {
     "card": "/v2/assets/defi/stonfi_card.webp",
@@ -89,24 +189,94 @@
     "name": "Storm Trade",
     "tag": "storm"
   },
-  "ethena": {
-    "card": "/v2/assets/defi/ethena_card.png",
-    "description": "Synthetic dollar protocol",
-    "full": "/v2/assets/defi/ethena_full.png",
-    "icon": "/v2/assets/defi/ethena_icon.png",
-    "link": "https://ethena.fi/",
+  "swapcoffee": {
+    "card": "/v2/assets/defi/swapcoffee_card.webp",
+    "description": "Token staking on DEX aggregator on TON",
+    "full": "/v2/assets/defi/swapcoffee_full.webp",
+    "icon": "/v2/assets/defi/swapcoffee_icon.webp",
+    "link": "https://swap.coffee/",
+    "miniapp_link": "https://t.me/swapcoffee",
+    "name": "swap.coffee",
+    "tag": "swapcoffee"
+  },
+  "thusd": {
+    "card": "/v2/assets/defi/thusd_card.webp",
+    "description": "Stablecoin backed by blue-chip assets such as USDT, built for Telegram users",
+    "full": "/v2/assets/defi/thusd_full.webp",
+    "icon": "/v2/assets/defi/thusd_icon.webp",
+    "link": "https://app.tgusd.io/",
+    "miniapp_link": "https://t.me/tgusd_official_bot",
+    "name": "tgUSD",
+    "tag": "thusd"
+  },
+  "ton": {
+    "card": "/v2/assets/defi/ton_card.webp",
+    "description": "The Open Network",
+    "full": "/v2/assets/defi/ton_full.webp",
+    "icon": "/v2/assets/defi/ton_icon.webp",
+    "link": "https://ton.org/",
     "miniapp_link": null,
-    "name": "Ethena",
-    "tag": "ethena"
+    "name": "TON",
+    "tag": "ton"
+  },
+  "tonco": {
+    "card": "/v2/assets/defi/tonco_card.webp",
+    "description": "Decentralized exchange on TON that introduces concentrated liquidity.",
+    "full": "/v2/assets/defi/tonco_full.webp",
+    "icon": "/v2/assets/defi/tonco_icon.webp",
+    "link": "https://app.tonco.io/",
+    "miniapp_link": "https://t.me/tonco_dex_bot",
+    "name": "TONCO",
+    "tag": "tonco"
+  },
+  "tonraffles": {
+    "card": "/v2/assets/defi/tonraffles_card.webp",
+    "description": "TON Grow Community",
+    "full": "/v2/assets/defi/tonraffles_full.webp",
+    "icon": "/v2/assets/defi/tonraffles_icon.webp",
+    "link": "https://tonraffles.app/",
+    "miniapp_link": "https://t.me/tonraffle_bot",
+    "name": "Ton Raffles",
+    "tag": "tonraffles"
   },
   "tonstakers": {
-    "card": "",
+    "card": "/v2/assets/defi/tonstakers_card.webp",
     "description": "Liquid staking protocol on TON",
-    "full": "",
-    "icon": "",
+    "full": "/v2/assets/defi/tonstakers_full.webp",
+    "icon": "/v2/assets/defi/tonstakers_icon.webp",
     "link": "https://tonstakers.com/",
-    "miniapp_link": null,
+    "miniapp_link": "https://t.me/tonstakers_bot",
     "name": "Tonstakers",
     "tag": "tonstakers"
+  },
+  "utonics": {
+    "card": "/v2/assets/defi/utonics_card.webp",
+    "description": "TON Restaking Protocol",
+    "full": "/v2/assets/defi/utonics_full.webp",
+    "icon": "/v2/assets/defi/utonics_icon.webp",
+    "link": "https://utonic.org/home",
+    "miniapp_link": null,
+    "name": "uTonics",
+    "tag": "utonics"
+  },
+  "whales": {
+    "card": "/v2/assets/defi/whales_card.webp",
+    "description": "Open source decentralized staking TON",
+    "full": "/v2/assets/defi/whales_full.webp",
+    "icon": "/v2/assets/defi/whales_icon.webp",
+    "link": "https://tonwhales.com/",
+    "miniapp_link": null,
+    "name": "TON Whales",
+    "tag": "whales"
+  },
+  "x1000": {
+    "card": "/v2/assets/defi/x1000_card.webp",
+    "description": "Fully on-chain trading terminal",
+    "full": "/v2/assets/defi/x1000_full.webp",
+    "icon": "/v2/assets/defi/x1000_icon.webp",
+    "link": "https://x1000.finance/",
+    "miniapp_link": null,
+    "name": "x1000",
+    "tag": "x1000"
   }
 }

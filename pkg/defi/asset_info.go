@@ -44,7 +44,10 @@ type jettonAssetDumpItem struct {
 	Provider  string    `json:"provider"`
 }
 
-const stonfiProviderID = "stonfi"
+const (
+	stonfiProviderID = "stonfi"
+	dedustProviderID = "dedust"
+)
 
 type JettonMasterSource interface {
 	GetJettonMastersByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.JettonMaster, error)
@@ -95,6 +98,15 @@ var stonfiPoolCodeHashes = map[string]bool{
 	mustBase64Hash("cf5d0b99fa704e7cf2c9d50a8ff8b8bc7ce0b8a74e414b9c279ac544e7aade05"): true,
 }
 
+var dedustPoolCodeHashes = map[string]bool{
+	// DeDust pool, e.g. https://dedust.io/pools/0:00576440c4a6f443af2fcef7b27a2277eb0c552e8b898190cce9c3393d17c6e5
+	mustBase64Hash("778f0d3fe6482c50888970df5e787f40f3a4ab282170c035a5920877058c99d3"): true,
+	// DeDust pool, e.g. https://dedust.io/pools/0:011e4c677529eaac180c20347bdcb0741410c33340bf529dfd10bd519f76a8ff
+	mustBase64Hash("1275095b6da3911292406f4f4386f9e780099b854c6dee9ee2895ddce70927c1"): true,
+	// DeDust pool, e.g. https://dedust.io/pools/0:0706d6f329feb86a9876c7d1dcbb189fb99482f5794f0c746c75d204b15fccac
+	mustBase64Hash("c0f9d14fbc8e14f0d72cba2214165eee35836ab174130912baf9dbfa43ead562"): true,
+}
+
 func parseJettonAssetDump(data []byte, providers map[string]Provider) map[tongo.AccountID]AssetInfo {
 	raw := g.MustParseJson[map[tongo.AccountID]jettonAssetDumpItem](data)
 	return g.MapMapValues(raw, func(item jettonAssetDumpItem) AssetInfo {
@@ -141,6 +153,20 @@ func stonfiPoolAssetInfo(admin *tongo.AccountID, codeHash string) (AssetInfo, bo
 	}, true
 }
 
+func dedustPoolAssetInfo(codeHash string) (AssetInfo, bool) {
+	if !dedustPoolCodeHashes[codeHash] {
+		return AssetInfo{}, false
+	}
+	provider, ok := jettonDefiProviders[dedustProviderID]
+	if !ok {
+		return AssetInfo{}, false
+	}
+	return AssetInfo{
+		TokenType:    TokenTypeLiquidPool,
+		DefiProvider: provider,
+	}, true
+}
+
 func mustBase64Hash(hexHash string) string {
 	b, err := hex.DecodeString(hexHash)
 	if err != nil {
@@ -178,6 +204,11 @@ func AssetInfos(ctx context.Context, source JettonMasterSource, logger *zap.Logg
 		stonfiInfo, stonfiOk := stonfiPoolAssetInfo(master.Admin, master.CodeHash)
 		if stonfiOk {
 			result[master.Address] = stonfiInfo
+			continue
+		}
+		dedustInfo, dedustOk := dedustPoolAssetInfo(master.CodeHash)
+		if dedustOk {
+			result[master.Address] = dedustInfo
 		}
 	}
 	return result
