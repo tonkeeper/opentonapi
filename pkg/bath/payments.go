@@ -2,11 +2,14 @@ package bath
 
 import (
 	"errors"
+	"math/big"
+
 	"github.com/google/uuid"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"math/big"
+	abiXtr "github.com/tonkeeper/tongo/abi-tolk/abiGenerated/xtr"
+	"github.com/tonkeeper/tongo/tlb"
 )
 
 type BubbleInvoicePayment struct {
@@ -97,5 +100,110 @@ var InvoicePaymentStrawJetton = Straw[BubbleInvoicePayment]{
 		newAction.Recipient = jettonTx.recipient.Address
 		newAction.Success = jettonTx.success
 		return nil
+	},
+}
+
+type BubbleDepositXTR struct {
+	Recipient    tongo.AccountID
+	JettonMaster tongo.AccountID
+	Amount       big.Int
+	Success      bool
+}
+
+func (b BubbleDepositXTR) ToAction() (action *Action) {
+	return &Action{
+		DepositXTR: &DepositXTRAction{
+			Recipient:    b.Recipient,
+			JettonMaster: b.JettonMaster,
+			Amount:       b.Amount,
+		},
+		Success: b.Success,
+		Type:    DepositXTR,
+	}
+}
+
+var XTRDepositAction = Straw[BubbleDepositXTR]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiXtr.XtrUpdatePaymentMsgOp)},
+	Builder: func(newAction *BubbleDepositXTR, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.JettonMaster = tx.account.Address
+		return nil
+	},
+	SingleChild: &Straw[BubbleDepositXTR]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiXtr.XtrUpdateContractAndProcessMessageMsgOp)},
+		SingleChild: &Straw[BubbleDepositXTR]{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiXtr.XtrUpdateUserMsgOp)},
+			SingleChild: &Straw[BubbleDepositXTR]{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiXtr.XtrUpdateContractAndProcessMessageMsgOp), func(bubble *Bubble) bool {
+					tx := bubble.Info.(BubbleTx)
+					body, ok := tx.decodedBody.Value.(*abiXtr.UpdateContractAndProcessMessage)
+					if !ok {
+						return false
+					}
+					var innerBody abiXtr.CommitXTR
+					if err := innerBody.UnmarshalTLB(body.Payload.CopyCell(), nil); err != nil {
+						return false
+					}
+					return true
+				}},
+				Builder: func(newAction *BubbleDepositXTR, bubble *Bubble) error {
+					tx := bubble.Info.(BubbleTx)
+					body := tx.decodedBody.Value.(*abiXtr.UpdateContractAndProcessMessage)
+					var innerBody abiXtr.CommitXTR
+					tlb.Unmarshal(&body.Payload, &innerBody)
+					amount := new(big.Int).SetUint64(uint64(innerBody.Amount))
+					newAction.Amount = *amount
+					newAction.Recipient = tx.account.Address
+					return nil
+				},
+				SingleChild: &Straw[BubbleDepositXTR]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xd53276db)},
+					Builder: func(newAction *BubbleDepositXTR, bubble *Bubble) error {
+						newAction.Success = true
+						return nil
+					},
+				},
+			},
+		},
+	},
+}
+
+type BubbleWithdrawXTR struct {
+	User         tongo.AccountID
+	JettonMaster tongo.AccountID
+	Amount       big.Int
+	Success      bool
+}
+
+func (b BubbleWithdrawXTR) ToAction() (action *Action) {
+	return &Action{
+		WithdrawXTR: &WithdrawXTRAction{
+			User:         b.User,
+			JettonMaster: b.JettonMaster,
+			Amount:       b.Amount,
+		},
+		Success: b.Success,
+		Type:    WithdrawXTR,
+	}
+}
+
+var XTRWithdrawAction = Straw[BubbleWithdrawXTR]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp)},
+	Builder: func(newAction *BubbleWithdrawXTR, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		body := tx.decodedBody.Value.(abi.JettonBurnMsgBody)
+		newAction.Amount = big.Int(body.Amount)
+		newAction.User = tx.account.Address
+		return nil
+	},
+	SingleChild: &Straw[BubbleWithdrawXTR]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x7bdd97de), HasInterface(abi.XtrMaster)},
+		SingleChild: &Straw[BubbleWithdrawXTR]{
+			CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xd53276db)},
+			Builder: func(newAction *BubbleWithdrawXTR, bubble *Bubble) error {
+				newAction.Success = true
+				return nil
+			},
+		},
 	},
 }

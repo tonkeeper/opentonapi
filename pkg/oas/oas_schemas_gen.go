@@ -740,6 +740,8 @@ type Action struct {
 	WithdrawTokenStakeRequest OptWithdrawTokenStakeRequestAction `json:"WithdrawTokenStakeRequest"`
 	LiquidityDeposit          OptLiquidityDepositAction          `json:"LiquidityDeposit"`
 	OracleRequest             OptOracleRequestAction             `json:"OracleRequest"`
+	WithdrawXTR               OptWithdrawXTRAction               `json:"WithdrawXTR"`
+	DepositXTR                OptDepositXTRAction                `json:"DepositXTR"`
 	SimplePreview             ActionSimplePreview                `json:"simple_preview"`
 	BaseTransactions          []string                           `json:"base_transactions"`
 }
@@ -897,6 +899,16 @@ func (s *Action) GetLiquidityDeposit() OptLiquidityDepositAction {
 // GetOracleRequest returns the value of OracleRequest.
 func (s *Action) GetOracleRequest() OptOracleRequestAction {
 	return s.OracleRequest
+}
+
+// GetWithdrawXTR returns the value of WithdrawXTR.
+func (s *Action) GetWithdrawXTR() OptWithdrawXTRAction {
+	return s.WithdrawXTR
+}
+
+// GetDepositXTR returns the value of DepositXTR.
+func (s *Action) GetDepositXTR() OptDepositXTRAction {
+	return s.DepositXTR
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -1062,6 +1074,16 @@ func (s *Action) SetLiquidityDeposit(val OptLiquidityDepositAction) {
 // SetOracleRequest sets the value of OracleRequest.
 func (s *Action) SetOracleRequest(val OptOracleRequestAction) {
 	s.OracleRequest = val
+}
+
+// SetWithdrawXTR sets the value of WithdrawXTR.
+func (s *Action) SetWithdrawXTR(val OptWithdrawXTRAction) {
+	s.WithdrawXTR = val
+}
+
+// SetDepositXTR sets the value of DepositXTR.
+func (s *Action) SetDepositXTR(val OptDepositXTRAction) {
+	s.DepositXTR = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1301,6 +1323,8 @@ const (
 	ActionTypeWithdrawTokenStakeRequest ActionType = "WithdrawTokenStakeRequest"
 	ActionTypeLiquidityDeposit          ActionType = "LiquidityDeposit"
 	ActionTypeOracleRequest             ActionType = "OracleRequest"
+	ActionTypeDepositXTR                ActionType = "DepositXTR"
+	ActionTypeWithdrawXTR               ActionType = "WithdrawXTR"
 	ActionTypeUnknown                   ActionType = "Unknown"
 )
 
@@ -1336,6 +1360,8 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeWithdrawTokenStakeRequest,
 		ActionTypeLiquidityDeposit,
 		ActionTypeOracleRequest,
+		ActionTypeDepositXTR,
+		ActionTypeWithdrawXTR,
 		ActionTypeUnknown,
 	}
 }
@@ -1400,6 +1426,10 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeLiquidityDeposit:
 		return []byte(s), nil
 	case ActionTypeOracleRequest:
+		return []byte(s), nil
+	case ActionTypeDepositXTR:
+		return []byte(s), nil
+	case ActionTypeWithdrawXTR:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1497,6 +1527,12 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeOracleRequest:
 		*s = ActionTypeOracleRequest
+		return nil
+	case ActionTypeDepositXTR:
+		*s = ActionTypeDepositXTR
+		return nil
+	case ActionTypeWithdrawXTR:
+		*s = ActionTypeWithdrawXTR
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -5265,6 +5301,32 @@ func (s *DepositTokenStakeAction) SetProtocol(val Protocol) {
 // SetStakeMeta sets the value of StakeMeta.
 func (s *DepositTokenStakeAction) SetStakeMeta(val OptPrice) {
 	s.StakeMeta = val
+}
+
+// Ref: #/components/schemas/DepositXTRAction
+type DepositXTRAction struct {
+	Recipient AccountAddress `json:"recipient"`
+	Amount    string         `json:"amount"`
+}
+
+// GetRecipient returns the value of Recipient.
+func (s *DepositXTRAction) GetRecipient() AccountAddress {
+	return s.Recipient
+}
+
+// GetAmount returns the value of Amount.
+func (s *DepositXTRAction) GetAmount() string {
+	return s.Amount
+}
+
+// SetRecipient sets the value of Recipient.
+func (s *DepositXTRAction) SetRecipient(val AccountAddress) {
+	s.Recipient = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *DepositXTRAction) SetAmount(val string) {
+	s.Amount = val
 }
 
 // Ref: #/components/schemas/DnsExpiring
@@ -13751,6 +13813,52 @@ func (o OptDepositTokenStakeAction) Or(d DepositTokenStakeAction) DepositTokenSt
 	return d
 }
 
+// NewOptDepositXTRAction returns new OptDepositXTRAction with value set to v.
+func NewOptDepositXTRAction(v DepositXTRAction) OptDepositXTRAction {
+	return OptDepositXTRAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDepositXTRAction is optional DepositXTRAction.
+type OptDepositXTRAction struct {
+	Value DepositXTRAction
+	Set   bool
+}
+
+// IsSet returns true if OptDepositXTRAction was set.
+func (o OptDepositXTRAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDepositXTRAction) Reset() {
+	var v DepositXTRAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDepositXTRAction) SetTo(v DepositXTRAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDepositXTRAction) Get() (v DepositXTRAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDepositXTRAction) Or(d DepositXTRAction) DepositXTRAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDomainRenewAction returns new OptDomainRenewAction with value set to v.
 func NewOptDomainRenewAction(v DomainRenewAction) OptDomainRenewAction {
 	return OptDomainRenewAction{
@@ -17028,6 +17136,52 @@ func (o OptWithdrawTokenStakeRequestAction) Get() (v WithdrawTokenStakeRequestAc
 
 // Or returns value if set, or given parameter if does not.
 func (o OptWithdrawTokenStakeRequestAction) Or(d WithdrawTokenStakeRequestAction) WithdrawTokenStakeRequestAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWithdrawXTRAction returns new OptWithdrawXTRAction with value set to v.
+func NewOptWithdrawXTRAction(v WithdrawXTRAction) OptWithdrawXTRAction {
+	return OptWithdrawXTRAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWithdrawXTRAction is optional WithdrawXTRAction.
+type OptWithdrawXTRAction struct {
+	Value WithdrawXTRAction
+	Set   bool
+}
+
+// IsSet returns true if OptWithdrawXTRAction was set.
+func (o OptWithdrawXTRAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWithdrawXTRAction) Reset() {
+	var v WithdrawXTRAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWithdrawXTRAction) SetTo(v WithdrawXTRAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWithdrawXTRAction) Get() (v WithdrawXTRAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWithdrawXTRAction) Or(d WithdrawXTRAction) WithdrawXTRAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -21677,6 +21831,32 @@ func (s *WithdrawTokenStakeRequestAction) SetProtocol(val Protocol) {
 // SetStakeMeta sets the value of StakeMeta.
 func (s *WithdrawTokenStakeRequestAction) SetStakeMeta(val OptPrice) {
 	s.StakeMeta = val
+}
+
+// Ref: #/components/schemas/WithdrawXTRAction
+type WithdrawXTRAction struct {
+	User   AccountAddress `json:"user"`
+	Amount string         `json:"amount"`
+}
+
+// GetUser returns the value of User.
+func (s *WithdrawXTRAction) GetUser() AccountAddress {
+	return s.User
+}
+
+// GetAmount returns the value of Amount.
+func (s *WithdrawXTRAction) GetAmount() string {
+	return s.Amount
+}
+
+// SetUser sets the value of User.
+func (s *WithdrawXTRAction) SetUser(val AccountAddress) {
+	s.User = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *WithdrawXTRAction) SetAmount(val string) {
+	s.Amount = val
 }
 
 // Ref: #/components/schemas/WorkchainDescr

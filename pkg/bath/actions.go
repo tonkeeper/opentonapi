@@ -50,6 +50,8 @@ const (
 	SetSignatureAllowed       ActionType = "SetSignatureAllowed"
 	LiquidityDeposit          ActionType = "LiquidityDeposit"
 	OracleRequest             ActionType = "OracleRequest"
+	DepositXTR                ActionType = "DepositXTR"
+	WithdrawXTR               ActionType = "WithdrawXTR"
 	Unknown                   ActionType = "Unknown"
 )
 
@@ -105,6 +107,8 @@ type (
 		SetSignatureAllowed       *SetSignatureAllowedAction       `json:",omitempty"`
 		LiquidityDepositAction    *LiquidityDepositAction          `json:",omitempty"`
 		OracleRequest             *OracleRequestAction             `json:",omitempty"`
+		DepositXTR                *DepositXTRAction                `json:",omitempty"`
+		WithdrawXTR               *WithdrawXTRAction               `json:",omitempty"`
 		Success                   bool
 		Type                      ActionType
 		Error                     *string `json:",omitempty"`
@@ -305,6 +309,18 @@ type (
 		Oracle     tongo.AccountID
 		ResponseTo tongo.AccountID
 		PriceFeeds []OraclePriceFeedInfo
+	}
+
+	DepositXTRAction struct {
+		Recipient    tongo.AccountID
+		JettonMaster tongo.AccountID
+		Amount       big.Int
+	}
+
+	WithdrawXTRAction struct {
+		User         tongo.AccountID
+		JettonMaster tongo.AccountID
+		Amount       big.Int
 	}
 )
 

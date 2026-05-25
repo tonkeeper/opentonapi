@@ -1175,6 +1175,9 @@
      "DepositTokenStake": {
       "$ref": "#/components/schemas/DepositTokenStakeAction"
      },
+     "DepositXTR": {
+      "$ref": "#/components/schemas/DepositXTRAction"
+     },
      "DomainRenew": {
       "$ref": "#/components/schemas/DomainRenewAction"
      },
@@ -1247,6 +1250,9 @@
      "WithdrawTokenStakeRequest": {
       "$ref": "#/components/schemas/WithdrawTokenStakeRequestAction"
      },
+     "WithdrawXTR": {
+      "$ref": "#/components/schemas/WithdrawXTRAction"
+     },
      "base_transactions": {
       "items": {
        "description": "transaction hash",
@@ -1297,6 +1303,8 @@
        "WithdrawTokenStakeRequest",
        "LiquidityDeposit",
        "OracleRequest",
+       "DepositXTR",
+       "WithdrawXTR",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -3205,6 +3213,23 @@
     "required": [
      "staker",
      "protocol"
+    ],
+    "type": "object"
+   },
+   "DepositXTRAction": {
+    "properties": {
+     "amount": {
+      "example": "123000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "recipient",
+     "amount"
     ],
     "type": "object"
    },
@@ -7862,6 +7887,23 @@
     "required": [
      "staker",
      "protocol"
+    ],
+    "type": "object"
+   },
+   "WithdrawXTRAction": {
+    "properties": {
+     "amount": {
+      "example": "123000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "user": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "user",
+     "amount"
     ],
     "type": "object"
    },

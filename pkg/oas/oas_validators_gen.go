@@ -785,6 +785,10 @@ func (s ActionType) Validate() error {
 		return nil
 	case "OracleRequest":
 		return nil
+	case "DepositXTR":
+		return nil
+	case "WithdrawXTR":
+		return nil
 	case "Unknown":
 		return nil
 	default:

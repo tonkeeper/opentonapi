@@ -6554,6 +6554,8 @@ components:
             - WithdrawTokenStakeRequest
             - LiquidityDeposit
             - OracleRequest
+            - DepositXTR
+            - WithdrawXTR
             - Unknown
         status:
           type: string
@@ -6619,6 +6621,10 @@ components:
           $ref: '#/components/schemas/LiquidityDepositAction'
         OracleRequest:
           $ref: '#/components/schemas/OracleRequestAction'
+        WithdrawXTR:
+          $ref: '#/components/schemas/WithdrawXTRAction'
+        DepositXTR:
+          $ref: '#/components/schemas/DepositXTRAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6682,6 +6688,30 @@ components:
           type: number
           format: double
           example: 5.24
+    DepositXTRAction:
+      type: object
+      required:
+        - recipient
+        - amount
+      properties:
+        recipient:
+          $ref: '#/components/schemas/AccountAddress'
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "123000000000"
+    WithdrawXTRAction:
+      type: object
+      required:
+        - user
+        - amount
+      properties:
+        user:
+          $ref: '#/components/schemas/AccountAddress'
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "123000000000"
     ExtraCurrencies:
       type: object
       required:
