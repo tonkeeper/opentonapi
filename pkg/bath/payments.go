@@ -150,7 +150,7 @@ var XTRDepositAction = Straw[BubbleDepositXTR]{
 					tx := bubble.Info.(BubbleTx)
 					body := tx.decodedBody.Value.(*abiXtr.UpdateContractAndProcessMessage)
 					var innerBody abiXtr.CommitXTR
-					tlb.Unmarshal(&body.Payload, &innerBody)
+					tlb.Unmarshal(body.Payload.CopyCell(), &innerBody)
 					amount := new(big.Int).SetUint64(uint64(innerBody.Amount))
 					newAction.Amount = *amount
 					newAction.Recipient = tx.account.Address
