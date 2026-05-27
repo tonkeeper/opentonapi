@@ -3167,6 +3167,127 @@
     ],
     "type": "object"
    },
+   "DefiAsset": {
+    "properties": {
+     "amount": {
+      "description": "amount in minimal units of the locked asset",
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "asset_address": {
+      "format": "address",
+      "type": "string"
+     },
+     "asset_type": {
+      "$ref": "#/components/schemas/DefiAssetAssetType"
+     },
+     "defi_provider": {
+      "$ref": "#/components/schemas/DefiProvider"
+     },
+     "locked_asset": {
+      "$ref": "#/components/schemas/DefiLockedAsset"
+     },
+     "pool_address": {
+      "format": "address",
+      "type": "string"
+     }
+    },
+    "required": [
+     "asset_type",
+     "amount",
+     "defi_provider",
+     "locked_asset"
+    ],
+    "type": "object"
+   },
+   "DefiAssetAssetType": {
+    "enum": [
+     "staking",
+     "lending_supply",
+     "lending_borrow",
+     "liquid_staking",
+     "liquid_pool",
+     "yield_token"
+    ],
+    "type": "string"
+   },
+   "DefiAssets": {
+    "properties": {
+     "assets": {
+      "items": {
+       "$ref": "#/components/schemas/DefiAsset"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "assets"
+    ],
+    "type": "object"
+   },
+   "DefiLockedAsset": {
+    "properties": {
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "type": {
+      "description": "native TON or jetton asset",
+      "enum": [
+       "native",
+       "jetton"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "DefiProvider": {
+    "properties": {
+     "card": {
+      "type": "string"
+     },
+     "description": {
+      "example": "Earn up to 15% yield on your crypto",
+      "type": "string"
+     },
+     "full": {
+      "type": "string"
+     },
+     "icon": {
+      "type": "string"
+     },
+     "link": {
+      "example": "https://lite.morpho.org/tac/earn/",
+      "type": "string"
+     },
+     "miniapp_link": {
+      "example": "https://t.me/MorphoOrgBot",
+      "type": "string"
+     },
+     "name": {
+      "example": "Morpho",
+      "type": "string"
+     },
+     "tag": {
+      "example": "morpho",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "description",
+     "link",
+     "icon",
+     "card",
+     "full",
+     "tag"
+    ],
+    "type": "object"
+   },
    "DepositStakeAction": {
     "description": "validator's participation in elections",
     "properties": {
@@ -3914,10 +4035,10 @@
    "JettonAssetInfo": {
     "properties": {
      "defi_provider": {
-      "$ref": "#/components/schemas/JettonDefiProvider"
+      "$ref": "#/components/schemas/DefiProvider"
      },
      "token_type": {
-      "$ref": "#/components/schemas/JettonAssetTokenType"
+      "$ref": "#/components/schemas/DefiAssetAssetType"
      }
     },
     "required": [
@@ -3925,15 +4046,6 @@
      "defi_provider"
     ],
     "type": "object"
-   },
-   "JettonAssetTokenType": {
-    "enum": [
-     "liquid_staking",
-     "liquid_pool",
-     "yield_token",
-     "lending_supply"
-    ],
-    "type": "string"
    },
    "JettonBalance": {
     "properties": {
@@ -4088,53 +4200,6 @@
      "jetton",
      "sender",
      "senders_wallet"
-    ],
-    "type": "object"
-   },
-   "JettonDefiProvider": {
-    "properties": {
-     "card": {
-      "example": "https://dton.io/media/raw_data_cards/7e332b53-aad4-4842-8bb2-e5eba797a49d.webp",
-      "type": "string"
-     },
-     "description": {
-      "example": "Earn up to 15% yield on your crypto",
-      "type": "string"
-     },
-     "full": {
-      "example": "https://dton.io/media/raw_data_full/7b0897a5-4829-4eb3-92e1-5e6892161b76.webp",
-      "type": "string"
-     },
-     "icon": {
-      "example": "https://dton.io/media/raw_data_icons/ac08f0d6-bb96-4ce5-8a42-fb71a13e4cf4.webp",
-      "type": "string"
-     },
-     "link": {
-      "example": "https://lite.morpho.org/tac/earn/",
-      "type": "string"
-     },
-     "miniapp_link": {
-      "example": "https://t.me/MorphoOrgBot",
-      "type": "string"
-     },
-     "name": {
-      "example": "Morpho",
-      "type": "string"
-     },
-     "tag": {
-      "example": "morpho",
-      "type": "string"
-     }
-    },
-    "required": [
-     "name",
-     "description",
-     "link",
-     "miniapp_link",
-     "icon",
-     "card",
-     "full",
-     "tag"
     ],
     "type": "object"
    },
@@ -8081,6 +8146,35 @@
        }
       },
       "description": "account"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
+  "/v2/accounts/{account_id}/defi/assets": {
+   "get": {
+    "description": "Return DeFi assets locked in custom smart contracts: currently returns TON Whales staking and EVAA lending positions.\n",
+    "operationId": "getAccountDefiAssets",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DefiAssets"
+        }
+       }
+      },
+      "description": "account's DeFi assets"
      },
      "default": {
       "$ref": "#/components/responses/Error"

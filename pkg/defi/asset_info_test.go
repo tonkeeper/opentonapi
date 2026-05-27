@@ -48,7 +48,7 @@ func TestJettonAssetInfoDeDustLiquidPoolMaster(t *testing.T) {
 
 func assertSTONFiLiquidPoolAssetInfo(t *testing.T, info AssetInfo) {
 	t.Helper()
-	if info.TokenType != TokenTypeLiquidPool {
+	if info.TokenType != AssetTypeLiquidPool {
 		t.Fatalf("unexpected token type: got %q", info.TokenType)
 	}
 	if info.DefiProvider.Tag != stonfiProviderID {
@@ -61,7 +61,7 @@ func assertSTONFiLiquidPoolAssetInfo(t *testing.T, info AssetInfo) {
 
 func assertDeDustLiquidPoolAssetInfo(t *testing.T, info AssetInfo) {
 	t.Helper()
-	if info.TokenType != TokenTypeLiquidPool {
+	if info.TokenType != AssetTypeLiquidPool {
 		t.Fatalf("unexpected token type: got %q", info.TokenType)
 	}
 	if info.DefiProvider.Tag != dedustProviderID {

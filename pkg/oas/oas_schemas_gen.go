@@ -5205,6 +5205,323 @@ func (s *DecodedRawMessageMessage) SetDecodedBody(val jx.Raw) {
 	s.DecodedBody = val
 }
 
+// Ref: #/components/schemas/DefiAsset
+type DefiAsset struct {
+	AssetType DefiAssetAssetType `json:"asset_type"`
+	// Amount in minimal units of the locked asset.
+	Amount       string          `json:"amount"`
+	PoolAddress  OptString       `json:"pool_address"`
+	AssetAddress OptString       `json:"asset_address"`
+	DefiProvider DefiProvider    `json:"defi_provider"`
+	LockedAsset  DefiLockedAsset `json:"locked_asset"`
+}
+
+// GetAssetType returns the value of AssetType.
+func (s *DefiAsset) GetAssetType() DefiAssetAssetType {
+	return s.AssetType
+}
+
+// GetAmount returns the value of Amount.
+func (s *DefiAsset) GetAmount() string {
+	return s.Amount
+}
+
+// GetPoolAddress returns the value of PoolAddress.
+func (s *DefiAsset) GetPoolAddress() OptString {
+	return s.PoolAddress
+}
+
+// GetAssetAddress returns the value of AssetAddress.
+func (s *DefiAsset) GetAssetAddress() OptString {
+	return s.AssetAddress
+}
+
+// GetDefiProvider returns the value of DefiProvider.
+func (s *DefiAsset) GetDefiProvider() DefiProvider {
+	return s.DefiProvider
+}
+
+// GetLockedAsset returns the value of LockedAsset.
+func (s *DefiAsset) GetLockedAsset() DefiLockedAsset {
+	return s.LockedAsset
+}
+
+// SetAssetType sets the value of AssetType.
+func (s *DefiAsset) SetAssetType(val DefiAssetAssetType) {
+	s.AssetType = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *DefiAsset) SetAmount(val string) {
+	s.Amount = val
+}
+
+// SetPoolAddress sets the value of PoolAddress.
+func (s *DefiAsset) SetPoolAddress(val OptString) {
+	s.PoolAddress = val
+}
+
+// SetAssetAddress sets the value of AssetAddress.
+func (s *DefiAsset) SetAssetAddress(val OptString) {
+	s.AssetAddress = val
+}
+
+// SetDefiProvider sets the value of DefiProvider.
+func (s *DefiAsset) SetDefiProvider(val DefiProvider) {
+	s.DefiProvider = val
+}
+
+// SetLockedAsset sets the value of LockedAsset.
+func (s *DefiAsset) SetLockedAsset(val DefiLockedAsset) {
+	s.LockedAsset = val
+}
+
+// Ref: #/components/schemas/DefiAssetAssetType
+type DefiAssetAssetType string
+
+const (
+	DefiAssetAssetTypeStaking       DefiAssetAssetType = "staking"
+	DefiAssetAssetTypeLendingSupply DefiAssetAssetType = "lending_supply"
+	DefiAssetAssetTypeLendingBorrow DefiAssetAssetType = "lending_borrow"
+	DefiAssetAssetTypeLiquidStaking DefiAssetAssetType = "liquid_staking"
+	DefiAssetAssetTypeLiquidPool    DefiAssetAssetType = "liquid_pool"
+	DefiAssetAssetTypeYieldToken    DefiAssetAssetType = "yield_token"
+)
+
+// AllValues returns all DefiAssetAssetType values.
+func (DefiAssetAssetType) AllValues() []DefiAssetAssetType {
+	return []DefiAssetAssetType{
+		DefiAssetAssetTypeStaking,
+		DefiAssetAssetTypeLendingSupply,
+		DefiAssetAssetTypeLendingBorrow,
+		DefiAssetAssetTypeLiquidStaking,
+		DefiAssetAssetTypeLiquidPool,
+		DefiAssetAssetTypeYieldToken,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DefiAssetAssetType) MarshalText() ([]byte, error) {
+	switch s {
+	case DefiAssetAssetTypeStaking:
+		return []byte(s), nil
+	case DefiAssetAssetTypeLendingSupply:
+		return []byte(s), nil
+	case DefiAssetAssetTypeLendingBorrow:
+		return []byte(s), nil
+	case DefiAssetAssetTypeLiquidStaking:
+		return []byte(s), nil
+	case DefiAssetAssetTypeLiquidPool:
+		return []byte(s), nil
+	case DefiAssetAssetTypeYieldToken:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DefiAssetAssetType) UnmarshalText(data []byte) error {
+	switch DefiAssetAssetType(data) {
+	case DefiAssetAssetTypeStaking:
+		*s = DefiAssetAssetTypeStaking
+		return nil
+	case DefiAssetAssetTypeLendingSupply:
+		*s = DefiAssetAssetTypeLendingSupply
+		return nil
+	case DefiAssetAssetTypeLendingBorrow:
+		*s = DefiAssetAssetTypeLendingBorrow
+		return nil
+	case DefiAssetAssetTypeLiquidStaking:
+		*s = DefiAssetAssetTypeLiquidStaking
+		return nil
+	case DefiAssetAssetTypeLiquidPool:
+		*s = DefiAssetAssetTypeLiquidPool
+		return nil
+	case DefiAssetAssetTypeYieldToken:
+		*s = DefiAssetAssetTypeYieldToken
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DefiAssets
+type DefiAssets struct {
+	Assets []DefiAsset `json:"assets"`
+}
+
+// GetAssets returns the value of Assets.
+func (s *DefiAssets) GetAssets() []DefiAsset {
+	return s.Assets
+}
+
+// SetAssets sets the value of Assets.
+func (s *DefiAssets) SetAssets(val []DefiAsset) {
+	s.Assets = val
+}
+
+// Ref: #/components/schemas/DefiLockedAsset
+type DefiLockedAsset struct {
+	// Native TON or jetton asset.
+	Type   DefiLockedAssetType `json:"type"`
+	Jetton OptJettonPreview    `json:"jetton"`
+}
+
+// GetType returns the value of Type.
+func (s *DefiLockedAsset) GetType() DefiLockedAssetType {
+	return s.Type
+}
+
+// GetJetton returns the value of Jetton.
+func (s *DefiLockedAsset) GetJetton() OptJettonPreview {
+	return s.Jetton
+}
+
+// SetType sets the value of Type.
+func (s *DefiLockedAsset) SetType(val DefiLockedAssetType) {
+	s.Type = val
+}
+
+// SetJetton sets the value of Jetton.
+func (s *DefiLockedAsset) SetJetton(val OptJettonPreview) {
+	s.Jetton = val
+}
+
+// Native TON or jetton asset.
+type DefiLockedAssetType string
+
+const (
+	DefiLockedAssetTypeNative DefiLockedAssetType = "native"
+	DefiLockedAssetTypeJetton DefiLockedAssetType = "jetton"
+)
+
+// AllValues returns all DefiLockedAssetType values.
+func (DefiLockedAssetType) AllValues() []DefiLockedAssetType {
+	return []DefiLockedAssetType{
+		DefiLockedAssetTypeNative,
+		DefiLockedAssetTypeJetton,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DefiLockedAssetType) MarshalText() ([]byte, error) {
+	switch s {
+	case DefiLockedAssetTypeNative:
+		return []byte(s), nil
+	case DefiLockedAssetTypeJetton:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DefiLockedAssetType) UnmarshalText(data []byte) error {
+	switch DefiLockedAssetType(data) {
+	case DefiLockedAssetTypeNative:
+		*s = DefiLockedAssetTypeNative
+		return nil
+	case DefiLockedAssetTypeJetton:
+		*s = DefiLockedAssetTypeJetton
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DefiProvider
+type DefiProvider struct {
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Link        string    `json:"link"`
+	MiniappLink OptString `json:"miniapp_link"`
+	Icon        string    `json:"icon"`
+	Card        string    `json:"card"`
+	Full        string    `json:"full"`
+	Tag         string    `json:"tag"`
+}
+
+// GetName returns the value of Name.
+func (s *DefiProvider) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *DefiProvider) GetDescription() string {
+	return s.Description
+}
+
+// GetLink returns the value of Link.
+func (s *DefiProvider) GetLink() string {
+	return s.Link
+}
+
+// GetMiniappLink returns the value of MiniappLink.
+func (s *DefiProvider) GetMiniappLink() OptString {
+	return s.MiniappLink
+}
+
+// GetIcon returns the value of Icon.
+func (s *DefiProvider) GetIcon() string {
+	return s.Icon
+}
+
+// GetCard returns the value of Card.
+func (s *DefiProvider) GetCard() string {
+	return s.Card
+}
+
+// GetFull returns the value of Full.
+func (s *DefiProvider) GetFull() string {
+	return s.Full
+}
+
+// GetTag returns the value of Tag.
+func (s *DefiProvider) GetTag() string {
+	return s.Tag
+}
+
+// SetName sets the value of Name.
+func (s *DefiProvider) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *DefiProvider) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetLink sets the value of Link.
+func (s *DefiProvider) SetLink(val string) {
+	s.Link = val
+}
+
+// SetMiniappLink sets the value of MiniappLink.
+func (s *DefiProvider) SetMiniappLink(val OptString) {
+	s.MiniappLink = val
+}
+
+// SetIcon sets the value of Icon.
+func (s *DefiProvider) SetIcon(val string) {
+	s.Icon = val
+}
+
+// SetCard sets the value of Card.
+func (s *DefiProvider) SetCard(val string) {
+	s.Card = val
+}
+
+// SetFull sets the value of Full.
+func (s *DefiProvider) SetFull(val string) {
+	s.Full = val
+}
+
+// SetTag sets the value of Tag.
+func (s *DefiProvider) SetTag(val string) {
+	s.Tag = val
+}
+
 // Validator's participation in elections.
 // Ref: #/components/schemas/DepositStakeAction
 type DepositStakeAction struct {
@@ -8124,84 +8441,28 @@ func (s *InitStateRaw) SetFileHash(val string) {
 
 // Ref: #/components/schemas/JettonAssetInfo
 type JettonAssetInfo struct {
-	TokenType    JettonAssetTokenType `json:"token_type"`
-	DefiProvider JettonDefiProvider   `json:"defi_provider"`
+	TokenType    DefiAssetAssetType `json:"token_type"`
+	DefiProvider DefiProvider       `json:"defi_provider"`
 }
 
 // GetTokenType returns the value of TokenType.
-func (s *JettonAssetInfo) GetTokenType() JettonAssetTokenType {
+func (s *JettonAssetInfo) GetTokenType() DefiAssetAssetType {
 	return s.TokenType
 }
 
 // GetDefiProvider returns the value of DefiProvider.
-func (s *JettonAssetInfo) GetDefiProvider() JettonDefiProvider {
+func (s *JettonAssetInfo) GetDefiProvider() DefiProvider {
 	return s.DefiProvider
 }
 
 // SetTokenType sets the value of TokenType.
-func (s *JettonAssetInfo) SetTokenType(val JettonAssetTokenType) {
+func (s *JettonAssetInfo) SetTokenType(val DefiAssetAssetType) {
 	s.TokenType = val
 }
 
 // SetDefiProvider sets the value of DefiProvider.
-func (s *JettonAssetInfo) SetDefiProvider(val JettonDefiProvider) {
+func (s *JettonAssetInfo) SetDefiProvider(val DefiProvider) {
 	s.DefiProvider = val
-}
-
-// Ref: #/components/schemas/JettonAssetTokenType
-type JettonAssetTokenType string
-
-const (
-	JettonAssetTokenTypeLiquidStaking JettonAssetTokenType = "liquid_staking"
-	JettonAssetTokenTypeLiquidPool    JettonAssetTokenType = "liquid_pool"
-	JettonAssetTokenTypeYieldToken    JettonAssetTokenType = "yield_token"
-	JettonAssetTokenTypeLendingSupply JettonAssetTokenType = "lending_supply"
-)
-
-// AllValues returns all JettonAssetTokenType values.
-func (JettonAssetTokenType) AllValues() []JettonAssetTokenType {
-	return []JettonAssetTokenType{
-		JettonAssetTokenTypeLiquidStaking,
-		JettonAssetTokenTypeLiquidPool,
-		JettonAssetTokenTypeYieldToken,
-		JettonAssetTokenTypeLendingSupply,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s JettonAssetTokenType) MarshalText() ([]byte, error) {
-	switch s {
-	case JettonAssetTokenTypeLiquidStaking:
-		return []byte(s), nil
-	case JettonAssetTokenTypeLiquidPool:
-		return []byte(s), nil
-	case JettonAssetTokenTypeYieldToken:
-		return []byte(s), nil
-	case JettonAssetTokenTypeLendingSupply:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *JettonAssetTokenType) UnmarshalText(data []byte) error {
-	switch JettonAssetTokenType(data) {
-	case JettonAssetTokenTypeLiquidStaking:
-		*s = JettonAssetTokenTypeLiquidStaking
-		return nil
-	case JettonAssetTokenTypeLiquidPool:
-		*s = JettonAssetTokenTypeLiquidPool
-		return nil
-	case JettonAssetTokenTypeYieldToken:
-		*s = JettonAssetTokenTypeYieldToken
-		return nil
-	case JettonAssetTokenTypeLendingSupply:
-		*s = JettonAssetTokenTypeLendingSupply
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 // Ref: #/components/schemas/JettonBalance
@@ -8497,98 +8758,6 @@ func (s *JettonBurnAction) SetAmount(val string) {
 // SetJetton sets the value of Jetton.
 func (s *JettonBurnAction) SetJetton(val JettonPreview) {
 	s.Jetton = val
-}
-
-// Ref: #/components/schemas/JettonDefiProvider
-type JettonDefiProvider struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Link        string `json:"link"`
-	MiniappLink string `json:"miniapp_link"`
-	Icon        string `json:"icon"`
-	Card        string `json:"card"`
-	Full        string `json:"full"`
-	Tag         string `json:"tag"`
-}
-
-// GetName returns the value of Name.
-func (s *JettonDefiProvider) GetName() string {
-	return s.Name
-}
-
-// GetDescription returns the value of Description.
-func (s *JettonDefiProvider) GetDescription() string {
-	return s.Description
-}
-
-// GetLink returns the value of Link.
-func (s *JettonDefiProvider) GetLink() string {
-	return s.Link
-}
-
-// GetMiniappLink returns the value of MiniappLink.
-func (s *JettonDefiProvider) GetMiniappLink() string {
-	return s.MiniappLink
-}
-
-// GetIcon returns the value of Icon.
-func (s *JettonDefiProvider) GetIcon() string {
-	return s.Icon
-}
-
-// GetCard returns the value of Card.
-func (s *JettonDefiProvider) GetCard() string {
-	return s.Card
-}
-
-// GetFull returns the value of Full.
-func (s *JettonDefiProvider) GetFull() string {
-	return s.Full
-}
-
-// GetTag returns the value of Tag.
-func (s *JettonDefiProvider) GetTag() string {
-	return s.Tag
-}
-
-// SetName sets the value of Name.
-func (s *JettonDefiProvider) SetName(val string) {
-	s.Name = val
-}
-
-// SetDescription sets the value of Description.
-func (s *JettonDefiProvider) SetDescription(val string) {
-	s.Description = val
-}
-
-// SetLink sets the value of Link.
-func (s *JettonDefiProvider) SetLink(val string) {
-	s.Link = val
-}
-
-// SetMiniappLink sets the value of MiniappLink.
-func (s *JettonDefiProvider) SetMiniappLink(val string) {
-	s.MiniappLink = val
-}
-
-// SetIcon sets the value of Icon.
-func (s *JettonDefiProvider) SetIcon(val string) {
-	s.Icon = val
-}
-
-// SetCard sets the value of Card.
-func (s *JettonDefiProvider) SetCard(val string) {
-	s.Card = val
-}
-
-// SetFull sets the value of Full.
-func (s *JettonDefiProvider) SetFull(val string) {
-	s.Full = val
-}
-
-// SetTag sets the value of Tag.
-func (s *JettonDefiProvider) SetTag(val string) {
-	s.Tag = val
 }
 
 // Ref: #/components/schemas/JettonHolders

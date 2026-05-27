@@ -107,6 +107,13 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}
 	GetAccount(ctx context.Context, params GetAccountParams) (*Account, error)
+	// GetAccountDefiAssets implements getAccountDefiAssets operation.
+	//
+	// Return DeFi assets locked in custom smart contracts: currently returns TON Whales staking and EVAA
+	// lending positions.
+	//
+	// GET /v2/accounts/{account_id}/defi/assets
+	GetAccountDefiAssets(ctx context.Context, params GetAccountDefiAssetsParams) (*DefiAssets, error)
 	// GetAccountDiff implements getAccountDiff operation.
 	//
 	// Get account's balance change.

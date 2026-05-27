@@ -252,7 +252,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		options.score = score.NewScore()
 	}
 	if options.publicAPIURL == "" {
-		options.publicAPIURL = defaultPublicAPIURL
+		options.publicAPIURL = "https://tonapi.io"
 	}
 	tongoVersion, err := GetPackageVersionInt("tongo")
 	if err != nil {
