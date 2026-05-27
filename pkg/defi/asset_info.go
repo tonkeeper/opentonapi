@@ -14,15 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type TokenType string
-
-const (
-	TokenTypeLiquidStaking TokenType = "liquid_staking"
-	TokenTypeLiquidPool    TokenType = "liquid_pool"
-	TokenTypeYieldToken    TokenType = "yield_token"
-	TokenTypeLendingSupply TokenType = "lending_supply"
-)
-
 type Provider struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -35,12 +26,12 @@ type Provider struct {
 }
 
 type AssetInfo struct {
-	TokenType    TokenType
+	TokenType    AssetType
 	DefiProvider Provider
 }
 
 type jettonAssetDumpItem struct {
-	TokenType TokenType `json:"token_type"`
+	TokenType AssetType `json:"token_type"`
 	Provider  string    `json:"provider"`
 }
 
@@ -61,25 +52,9 @@ var jettonProvidersDump []byte
 
 var jettonAssetDumpInfos map[tongo.AccountID]AssetInfo
 var jettonDefiProviders map[string]Provider
-var jettonAssetAddressInfos map[tongo.AccountID]AssetInfo
 
 func init() {
 	jettonDefiProviders = g.MustParseJson[map[string]Provider](jettonProvidersDump)
-	// these are hand-picked unlike defi_masters_mapping.json that is collected semi-automatically
-	jettonAssetAddressInfos = map[tongo.AccountID]AssetInfo{
-		tongo.MustParseAddress("0:edc50aa4808450411e615a5ad0c6224cb4bc23477ac460d5016c472f3c3c02b3").ID: {
-			TokenType:    TokenTypeYieldToken,
-			DefiProvider: g.MustGet(jettonDefiProviders, "affluent"),
-		},
-		tongo.MustParseAddress("0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d").ID: {
-			TokenType:    TokenTypeLiquidStaking,
-			DefiProvider: g.MustGet(jettonDefiProviders, "ethena"),
-		},
-		tongo.MustParseAddress("0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000").ID: {
-			TokenType:    TokenTypeLiquidStaking,
-			DefiProvider: g.MustGet(jettonDefiProviders, "tonstakers"),
-		},
-	}
 	jettonAssetDumpInfos = parseJettonAssetDump(jettonAssetDump, jettonDefiProviders)
 }
 
@@ -114,7 +89,7 @@ func parseJettonAssetDump(data []byte, providers map[string]Provider) map[tongo.
 		if !ok {
 			panic("unknown defi provider: " + item.Provider)
 		}
-		if !validTokenType(item.TokenType) {
+		if !validAssetType(item.TokenType) {
 			panic("unknown defi token type: " + string(item.TokenType))
 		}
 		return AssetInfo{
@@ -124,9 +99,9 @@ func parseJettonAssetDump(data []byte, providers map[string]Provider) map[tongo.
 	})
 }
 
-func validTokenType(tokenType TokenType) bool {
+func validAssetType(tokenType AssetType) bool {
 	switch tokenType {
-	case TokenTypeLiquidStaking, TokenTypeLiquidPool, TokenTypeYieldToken, TokenTypeLendingSupply:
+	case AssetTypeLiquidStaking, AssetTypeLiquidPool, AssetTypeYieldToken, AssetTypeLendingSupply, AssetTypeLendingBorrow:
 		return true
 	default:
 		return false
@@ -148,7 +123,7 @@ func stonfiPoolAssetInfo(admin *tongo.AccountID, codeHash string) (AssetInfo, bo
 		return AssetInfo{}, false
 	}
 	return AssetInfo{
-		TokenType:    TokenTypeLiquidPool,
+		TokenType:    AssetTypeLiquidPool,
 		DefiProvider: provider,
 	}, true
 }
@@ -162,9 +137,14 @@ func dedustPoolAssetInfo(codeHash string) (AssetInfo, bool) {
 		return AssetInfo{}, false
 	}
 	return AssetInfo{
-		TokenType:    TokenTypeLiquidPool,
+		TokenType:    AssetTypeLiquidPool,
 		DefiProvider: provider,
 	}, true
+}
+
+func GetProvider(tag string) (Provider, bool) {
+	p, ok := jettonDefiProviders[tag]
+	return p, ok
 }
 
 func mustBase64Hash(hexHash string) string {
@@ -184,8 +164,6 @@ func AssetInfos(ctx context.Context, source JettonMasterSource, logger *zap.Logg
 	unresolved := make([]tongo.AccountID, 0, len(masters))
 	for _, master := range masters {
 		if info, ok := jettonAssetDumpInfos[master]; ok {
-			result[master] = info
-		} else if info, ok := jettonAssetAddressInfos[master]; ok {
 			result[master] = info
 		} else {
 			unresolved = append(unresolved, master)

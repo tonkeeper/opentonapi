@@ -159,6 +159,16 @@ func (UnimplementedHandler) GetAccount(ctx context.Context, params GetAccountPar
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountDefiAssets implements getAccountDefiAssets operation.
+//
+// Return DeFi assets locked in custom smart contracts: currently returns TON Whales staking and EVAA
+// lending positions.
+//
+// GET /v2/accounts/{account_id}/defi/assets
+func (UnimplementedHandler) GetAccountDefiAssets(ctx context.Context, params GetAccountDefiAssetsParams) (r *DefiAssets, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountDiff implements getAccountDiff operation.
 //
 // Get account's balance change.

@@ -125,6 +125,13 @@ type Invoker interface {
 	//
 	// GET /v2/accounts/{account_id}
 	GetAccount(ctx context.Context, params GetAccountParams) (*Account, error)
+	// GetAccountDefiAssets invokes getAccountDefiAssets operation.
+	//
+	// Return DeFi assets locked in custom smart contracts: currently returns TON Whales staking and EVAA
+	// lending positions.
+	//
+	// GET /v2/accounts/{account_id}/defi/assets
+	GetAccountDefiAssets(ctx context.Context, params GetAccountDefiAssetsParams) (*DefiAssets, error)
 	// GetAccountDiff invokes getAccountDiff operation.
 	//
 	// Get account's balance change.
@@ -2410,6 +2417,100 @@ func (c *Client) sendGetAccount(ctx context.Context, params GetAccountParams) (r
 
 	stage = "DecodeResponse"
 	result, err := decodeGetAccountResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAccountDefiAssets invokes getAccountDefiAssets operation.
+//
+// Return DeFi assets locked in custom smart contracts: currently returns TON Whales staking and EVAA
+// lending positions.
+//
+// GET /v2/accounts/{account_id}/defi/assets
+func (c *Client) GetAccountDefiAssets(ctx context.Context, params GetAccountDefiAssetsParams) (*DefiAssets, error) {
+	res, err := c.sendGetAccountDefiAssets(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetAccountDefiAssets(ctx context.Context, params GetAccountDefiAssetsParams) (res *DefiAssets, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAccountDefiAssets"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v2/accounts/{account_id}/defi/assets"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetAccountDefiAssetsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v2/accounts/"
+	{
+		// Encode "account_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.AccountID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/defi/assets"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAccountDefiAssetsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
