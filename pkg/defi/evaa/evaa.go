@@ -12,12 +12,12 @@ import (
 	"go.uber.org/zap"
 )
 
-type pool struct {
+type poolInfo struct {
 	id   ton.AccountID
 	name string
 }
 
-var pools = []pool{
+var pools = []poolInfo{
 	{id: ton.MustParseAccountID("0:BCAD466A47FA565750729565253CD073CA24D856804499090C2100D95C809F9E"), name: "EVAA Main Pool"},
 	{id: ton.MustParseAccountID("0:489595F65115A45C24A0DD0176309654FB00B95E40682F0C3E85D5A4D86DFB25"), name: "EVAA LP Pool"},
 	{id: ton.MustParseAccountID("0:0D511552DDF8413BD6E2BE2837E22C89422F7B16131BA62BE8D5A504012D8661"), name: "EVAA Alts Pool"},
@@ -85,7 +85,7 @@ func Assets(ctx context.Context, executor abiEvaa.Executor, logger *zap.Logger, 
 					zap.String("asset_id", position.Key.HexString()))
 				continue
 			}
-			asset, ok := poolAsset(ctx, executor, logger, provider, p, userAssetID, jettonMaster, position.Key, position.Value)
+			asset, ok := poolAsset(provider, p, userAssetID, jettonMaster, position.Value)
 			if ok {
 				result = append(result, asset)
 			}
@@ -94,36 +94,29 @@ func Assets(ctx context.Context, executor abiEvaa.Executor, logger *zap.Logger, 
 	return result
 }
 
-func poolAsset(ctx context.Context, executor abiEvaa.Executor, logger *zap.Logger, provider defi.Provider, p pool, userAssetID ton.AccountID, jettonMaster *ton.AccountID, assetID tlb.Bits256, principalValue tlb.Int64) (defi.Asset, bool) {
-
-	rates, err := abiEvaa.GetAssetSbRate(ctx, executor, p.id, tlb.Int257(assetID.ToUint()))
-	if err != nil {
-		logger.Warn("failed to get evaa asset rates",
-			zap.String("pool", p.id.ToRaw()),
-			zap.String("asset_id", new(big.Int).SetBytes(assetID[:]).String()),
-			zap.Error(err))
+func poolAsset(
+	provider defi.Provider,
+	pool poolInfo,
+	userAssetID ton.AccountID,
+	jettonMaster *ton.AccountID,
+	principalValue tlb.Int64,
+) (defi.Asset, bool) {
+	principal := big.NewInt(int64(principalValue))
+	if principal.Sign() == 0 {
 		return defi.Asset{}, false
 	}
-
-	principal := big.NewInt(int64(principalValue))
 	assetType := defi.AssetTypeLendingSupply
-	rate := big.Int(rates.SRate)
 	if principal.Sign() < 0 {
 		assetType = defi.AssetTypeLendingBorrow
-		rate = big.Int(rates.BRate)
 		principal.Abs(principal)
 	}
-	amount := new(big.Int).Div(new(big.Int).Mul(principal, &rate), big.NewInt(1e12))
-	if amount.Sign() == 0 {
-		return defi.Asset{}, false
-	}
 
-	provider.Name = p.name
-	poolID := p.id
+	provider.Name = pool.name
+	poolID := pool.id
 	assetAddress := userAssetID
 	return defi.Asset{
 		Type:         assetType,
-		Amount:       amount.String(),
+		Amount:       principal.String(),
 		PoolAddress:  &poolID,
 		AssetAddress: &assetAddress,
 		Provider:     provider,
