@@ -18,7 +18,7 @@ func (s *LiteStorage) DedustPools(ctx context.Context, poolIDs []tongo.AccountID
 		if result, ok := value.(abi.GetAssets_DedustResult); ok {
 			pools[poolID] = core.DedustPool{
 				Asset0: DedustAssetToCurrency(result.Asset0),
-				Asset1: DedustAssetToCurrency(result.Asset0),
+				Asset1: DedustAssetToCurrency(result.Asset1),
 			}
 		}
 	}

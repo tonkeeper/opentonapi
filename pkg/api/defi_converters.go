@@ -31,8 +31,8 @@ func (h *Handler) GetAccountDefiAssets(ctx context.Context, params oas.GetAccoun
 
 func (h *Handler) convertDefiAsset(ctx context.Context, asset defi.Asset) oas.DefiAsset {
 	result := oas.DefiAsset{
-		AssetType:    convertDefiAssetType(asset.Type),
-		Amount:       asset.Amount,
+		Type:         convertDefiAssetType(asset.Type),
+		Amount:       asset.LockedAsset.Amount.String(),
 		DefiProvider: h.convertDefiProvider(asset.Provider),
 		LockedAsset:  h.convertDefiLockedAsset(ctx, asset.LockedAsset),
 	}
@@ -45,16 +45,16 @@ func (h *Handler) convertDefiAsset(ctx context.Context, asset defi.Asset) oas.De
 	return result
 }
 
-var defi2oasMap = map[defi.AssetType]oas.DefiAssetAssetType{
-	defi.AssetTypeStaking:       oas.DefiAssetAssetTypeStaking,
-	defi.AssetTypeLiquidStaking: oas.DefiAssetAssetTypeLiquidStaking,
-	defi.AssetTypeLiquidPool:    oas.DefiAssetAssetTypeLiquidPool,
-	defi.AssetTypeYieldToken:    oas.DefiAssetAssetTypeYieldToken,
-	defi.AssetTypeLendingSupply: oas.DefiAssetAssetTypeLendingSupply,
-	defi.AssetTypeLendingBorrow: oas.DefiAssetAssetTypeLendingBorrow,
+var defi2oasMap = map[defi.AssetType]oas.DefiAssetType{
+	defi.AssetTypeStaking:       oas.DefiAssetTypeStaking,
+	defi.AssetTypeLiquidStaking: oas.DefiAssetTypeLiquidStaking,
+	defi.AssetTypeLiquidPool:    oas.DefiAssetTypeLiquidPool,
+	defi.AssetTypeYieldToken:    oas.DefiAssetTypeYieldToken,
+	defi.AssetTypeLendingSupply: oas.DefiAssetTypeLendingSupply,
+	defi.AssetTypeLendingBorrow: oas.DefiAssetTypeLendingBorrow,
 }
 
-func convertDefiAssetType(assetType defi.AssetType) oas.DefiAssetAssetType {
+func convertDefiAssetType(assetType defi.AssetType) oas.DefiAssetType {
 	if oasType, ok := defi2oasMap[assetType]; ok {
 		return oasType
 	}
@@ -80,19 +80,22 @@ func (h *Handler) convertDefiJettonPreview(ctx context.Context, master ton.Accou
 	return jettonPreview(master, meta, score, nil)
 }
 
-func (h *Handler) optJettonAssetInfo(info defi.AssetInfo, ok bool) *oas.JettonAssetInfo {
+func (h *Handler) optJettonAssetInfo(ctx context.Context, info defi.AssetInfo, ok bool) *oas.JettonAssetInfo {
 	if !ok {
 		return nil
 	}
-	converted := h.convertJettonAssetInfo(info)
-	return &converted
-}
-
-func (h *Handler) convertJettonAssetInfo(info defi.AssetInfo) oas.JettonAssetInfo {
-	return oas.JettonAssetInfo{
+	result := oas.JettonAssetInfo{
 		TokenType:    convertDefiAssetType(info.TokenType),
 		DefiProvider: h.convertDefiProvider(info.DefiProvider),
 	}
+	if info.LiquidityPool != nil {
+		result.PoolAssets = oas.NewOptDefiLiquidPoolAssets(oas.DefiLiquidPoolAssets{
+			Asset0: h.convertDefiLockedAsset(ctx, info.LiquidityPool.Asset0),
+			Asset1: h.convertDefiLockedAsset(ctx, info.LiquidityPool.Asset1),
+		})
+	}
+	converted := result
+	return &converted
 }
 
 func (h *Handler) convertDefiProvider(provider defi.Provider) oas.DefiProvider {

@@ -37,3 +37,10 @@ func PriceNanoGram(amount int64) Price {
 		Amount:   *big.NewInt(amount),
 	}
 }
+
+func NewCurrencyJetton(master *tongo.AccountID) Currency {
+	return Currency{
+		Type:   CurrencyJetton,
+		Jetton: master,
+	}
+}

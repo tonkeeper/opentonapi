@@ -2372,13 +2372,13 @@ func (s *DefiAsset) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.AssetType.Validate(); err != nil {
+		if err := s.Type.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "asset_type",
+			Name:  "type",
 			Error: err,
 		})
 	}
@@ -2399,7 +2399,7 @@ func (s *DefiAsset) Validate() error {
 	return nil
 }
 
-func (s DefiAssetAssetType) Validate() error {
+func (s DefiAssetType) Validate() error {
 	switch s {
 	case "staking":
 		return nil
@@ -2449,6 +2449,40 @@ func (s *DefiAssets) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "assets",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *DefiLiquidPoolAssets) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Asset0.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "asset0",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Asset1.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "asset1",
 			Error: err,
 		})
 	}
@@ -3788,6 +3822,42 @@ func (s *JettonAssetInfo) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if value, ok := s.Type.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.PoolAssets.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "pool_assets",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -3826,6 +3896,24 @@ func (s *JettonBalance) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "jetton",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.DefiAsset.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "defi_asset",
 			Error: err,
 		})
 	}
@@ -4051,24 +4139,6 @@ func (s *JettonPreview) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "verification",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if value, ok := s.AssetInfo.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "asset_info",
 			Error: err,
 		})
 	}

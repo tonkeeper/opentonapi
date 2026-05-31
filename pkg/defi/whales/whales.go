@@ -1,11 +1,9 @@
-// Package whales resolves an account's TON Whales staking positions into
-// defi.Asset values, independent of the API schema.
 package whales
 
 import (
 	"context"
 	"fmt"
-	"strconv"
+	"math/big"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/defi"
@@ -14,12 +12,10 @@ import (
 	"go.uber.org/zap"
 )
 
-// PoolsSource provides the whales pools an account participates in.
 type PoolsSource interface {
 	GetParticipatingInWhalesPools(ctx context.Context, id ton.AccountID) ([]core.Nominator, error)
 }
 
-// Assets returns the TON Whales staking positions of an account.
 func Assets(ctx context.Context, source PoolsSource, logger *zap.Logger, accountID ton.AccountID) []defi.Asset {
 	whalesPools, err := source.GetParticipatingInWhalesPools(ctx, accountID)
 	if err != nil {
@@ -38,9 +34,11 @@ func Assets(ctx context.Context, source PoolsSource, logger *zap.Logger, account
 		pool := w.Pool
 		asset := defi.Asset{
 			Type:        defi.AssetTypeStaking,
-			Amount:      strconv.FormatInt(w.MemberBalance, 10),
 			PoolAddress: &pool,
-			LockedAsset: defi.LockedAsset{Type: defi.LockedAssetTypeNative},
+			LockedAsset: defi.LockedAsset{
+				Type:   defi.LockedAssetTypeNative,
+				Amount: *big.NewInt(w.MemberBalance),
+			},
 		}
 		if providerOk {
 			p := provider

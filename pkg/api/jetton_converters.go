@@ -212,7 +212,7 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	score, _ := h.score.GetJettonScore(wallet.JettonAddress)
 	jettonBalance.Jetton = jettonPreview(wallet.JettonAddress, normalizedMetadata, score, scaledUiParams)
 	if assetInfo != nil {
-		jettonBalance.Jetton.AssetInfo.SetTo(*assetInfo)
+		jettonBalance.DefiAsset.SetTo(*assetInfo)
 	}
 
 	return jettonBalance, nil

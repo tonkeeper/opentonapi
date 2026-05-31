@@ -14077,8 +14077,8 @@ func (s *DefiAsset) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *DefiAsset) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("asset_type")
-		s.AssetType.Encode(e)
+		e.FieldStart("type")
+		s.Type.Encode(e)
 	}
 	{
 		e.FieldStart("amount")
@@ -14107,7 +14107,7 @@ func (s *DefiAsset) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfDefiAsset = [6]string{
-	0: "asset_type",
+	0: "type",
 	1: "amount",
 	2: "pool_address",
 	3: "asset_address",
@@ -14124,15 +14124,15 @@ func (s *DefiAsset) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "asset_type":
+		case "type":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				if err := s.AssetType.Decode(d); err != nil {
+				if err := s.Type.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"asset_type\"")
+				return errors.Wrap(err, "decode field \"type\"")
 			}
 		case "amount":
 			requiredBitSet[0] |= 1 << 1
@@ -14242,50 +14242,50 @@ func (s *DefiAsset) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes DefiAssetAssetType as json.
-func (s DefiAssetAssetType) Encode(e *jx.Encoder) {
+// Encode encodes DefiAssetType as json.
+func (s DefiAssetType) Encode(e *jx.Encoder) {
 	e.Str(string(s))
 }
 
-// Decode decodes DefiAssetAssetType from json.
-func (s *DefiAssetAssetType) Decode(d *jx.Decoder) error {
+// Decode decodes DefiAssetType from json.
+func (s *DefiAssetType) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode DefiAssetAssetType to nil")
+		return errors.New("invalid: unable to decode DefiAssetType to nil")
 	}
 	v, err := d.StrBytes()
 	if err != nil {
 		return err
 	}
 	// Try to use constant string.
-	switch DefiAssetAssetType(v) {
-	case DefiAssetAssetTypeStaking:
-		*s = DefiAssetAssetTypeStaking
-	case DefiAssetAssetTypeLendingSupply:
-		*s = DefiAssetAssetTypeLendingSupply
-	case DefiAssetAssetTypeLendingBorrow:
-		*s = DefiAssetAssetTypeLendingBorrow
-	case DefiAssetAssetTypeLiquidStaking:
-		*s = DefiAssetAssetTypeLiquidStaking
-	case DefiAssetAssetTypeLiquidPool:
-		*s = DefiAssetAssetTypeLiquidPool
-	case DefiAssetAssetTypeYieldToken:
-		*s = DefiAssetAssetTypeYieldToken
+	switch DefiAssetType(v) {
+	case DefiAssetTypeStaking:
+		*s = DefiAssetTypeStaking
+	case DefiAssetTypeLendingSupply:
+		*s = DefiAssetTypeLendingSupply
+	case DefiAssetTypeLendingBorrow:
+		*s = DefiAssetTypeLendingBorrow
+	case DefiAssetTypeLiquidStaking:
+		*s = DefiAssetTypeLiquidStaking
+	case DefiAssetTypeLiquidPool:
+		*s = DefiAssetTypeLiquidPool
+	case DefiAssetTypeYieldToken:
+		*s = DefiAssetTypeYieldToken
 	default:
-		*s = DefiAssetAssetType(v)
+		*s = DefiAssetType(v)
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s DefiAssetAssetType) MarshalJSON() ([]byte, error) {
+func (s DefiAssetType) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DefiAssetAssetType) UnmarshalJSON(data []byte) error {
+func (s *DefiAssetType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -14392,6 +14392,115 @@ func (s *DefiAssets) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DefiAssets) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DefiLiquidPoolAssets) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DefiLiquidPoolAssets) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("asset0")
+		s.Asset0.Encode(e)
+	}
+	{
+		e.FieldStart("asset1")
+		s.Asset1.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfDefiLiquidPoolAssets = [2]string{
+	0: "asset0",
+	1: "asset1",
+}
+
+// Decode decodes DefiLiquidPoolAssets from json.
+func (s *DefiLiquidPoolAssets) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DefiLiquidPoolAssets to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "asset0":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Asset0.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"asset0\"")
+			}
+		case "asset1":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Asset1.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"asset1\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DefiLiquidPoolAssets")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDefiLiquidPoolAssets) {
+					name = jsonFieldsNameOfDefiLiquidPoolAssets[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DefiLiquidPoolAssets) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DefiLiquidPoolAssets) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -25130,14 +25239,28 @@ func (s *JettonAssetInfo) encodeFields(e *jx.Encoder) {
 		s.TokenType.Encode(e)
 	}
 	{
+		if s.Type.Set {
+			e.FieldStart("type")
+			s.Type.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("defi_provider")
 		s.DefiProvider.Encode(e)
 	}
+	{
+		if s.PoolAssets.Set {
+			e.FieldStart("pool_assets")
+			s.PoolAssets.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfJettonAssetInfo = [2]string{
+var jsonFieldsNameOfJettonAssetInfo = [4]string{
 	0: "token_type",
-	1: "defi_provider",
+	1: "type",
+	2: "defi_provider",
+	3: "pool_assets",
 }
 
 // Decode decodes JettonAssetInfo from json.
@@ -25159,8 +25282,18 @@ func (s *JettonAssetInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"token_type\"")
 			}
+		case "type":
+			if err := func() error {
+				s.Type.Reset()
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
 		case "defi_provider":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.DefiProvider.Decode(d); err != nil {
 					return err
@@ -25168,6 +25301,16 @@ func (s *JettonAssetInfo) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"defi_provider\"")
+			}
+		case "pool_assets":
+			if err := func() error {
+				s.PoolAssets.Reset()
+				if err := s.PoolAssets.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool_assets\"")
 			}
 		default:
 			return d.Skip()
@@ -25179,7 +25322,7 @@ func (s *JettonAssetInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -25253,6 +25396,12 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 		s.Jetton.Encode(e)
 	}
 	{
+		if s.DefiAsset.Set {
+			e.FieldStart("defi_asset")
+			s.DefiAsset.Encode(e)
+		}
+	}
+	{
 		if s.Extensions != nil {
 			e.FieldStart("extensions")
 			e.ArrStart()
@@ -25270,13 +25419,14 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonBalance = [6]string{
+var jsonFieldsNameOfJettonBalance = [7]string{
 	0: "balance",
 	1: "price",
 	2: "wallet_address",
 	3: "jetton",
-	4: "extensions",
-	5: "lock",
+	4: "defi_asset",
+	5: "extensions",
+	6: "lock",
 }
 
 // Decode decodes JettonBalance from json.
@@ -25329,6 +25479,16 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"jetton\"")
+			}
+		case "defi_asset":
+			if err := func() error {
+				s.DefiAsset.Reset()
+				if err := s.DefiAsset.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"defi_asset\"")
 			}
 		case "extensions":
 			if err := func() error {
@@ -27571,26 +27731,19 @@ func (s *JettonPreview) encodeFields(e *jx.Encoder) {
 			s.Description.Encode(e)
 		}
 	}
-	{
-		if s.AssetInfo.Set {
-			e.FieldStart("asset_info")
-			s.AssetInfo.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfJettonPreview = [11]string{
-	0:  "address",
-	1:  "name",
-	2:  "symbol",
-	3:  "decimals",
-	4:  "image",
-	5:  "verification",
-	6:  "custom_payload_api_uri",
-	7:  "score",
-	8:  "scaled_ui",
-	9:  "description",
-	10: "asset_info",
+var jsonFieldsNameOfJettonPreview = [10]string{
+	0: "address",
+	1: "name",
+	2: "symbol",
+	3: "decimals",
+	4: "image",
+	5: "verification",
+	6: "custom_payload_api_uri",
+	7: "score",
+	8: "scaled_ui",
+	9: "description",
 }
 
 // Decode decodes JettonPreview from json.
@@ -27713,16 +27866,6 @@ func (s *JettonPreview) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
-			}
-		case "asset_info":
-			if err := func() error {
-				s.AssetInfo.Reset()
-				if err := s.AssetInfo.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"asset_info\"")
 			}
 		default:
 			return d.Skip()
@@ -35897,6 +36040,72 @@ func (s OptDecodedMessageExtInMsgDecodedWalletV5) MarshalJSON() ([]byte, error) 
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptDecodedMessageExtInMsgDecodedWalletV5) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DefiAssetType as json.
+func (o OptDefiAssetType) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes DefiAssetType from json.
+func (o *OptDefiAssetType) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptDefiAssetType to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptDefiAssetType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptDefiAssetType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DefiLiquidPoolAssets as json.
+func (o OptDefiLiquidPoolAssets) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes DefiLiquidPoolAssets from json.
+func (o *OptDefiLiquidPoolAssets) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptDefiLiquidPoolAssets to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptDefiLiquidPoolAssets) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptDefiLiquidPoolAssets) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
