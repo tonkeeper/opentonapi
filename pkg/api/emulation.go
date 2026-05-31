@@ -447,7 +447,7 @@ func EmulatedTreeToTrace(
 func getAdditionalInfoStonfi(ctx context.Context, sharedExecutor *shardsAccountExecutor, additionalInfo *core.TraceAdditionalInfo, token0, token1 tlb.MsgAddress) {
 	t0, err0 := ton.AccountIDFromTlb(token0)
 	t1, err1 := ton.AccountIDFromTlb(token1)
-	if err1 != nil || err0 != nil {
+	if err1 != nil || err0 != nil || t0 == nil || t1 == nil {
 		return
 	}
 	additionalInfo.STONfiPool = &core.STONfiPool{
@@ -461,6 +461,9 @@ func getAdditionalInfoStonfi(ctx context.Context, sharedExecutor *shardsAccountE
 		}
 		data := value.(abi.GetWalletDataResult)
 		master, _ := ton.AccountIDFromTlb(data.Jetton)
+		if master == nil {
+			continue
+		}
 		additionalInfo.SetJettonMaster(accountID, *master)
 	}
 }
