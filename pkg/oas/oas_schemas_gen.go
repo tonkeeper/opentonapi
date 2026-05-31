@@ -5207,7 +5207,7 @@ func (s *DecodedRawMessageMessage) SetDecodedBody(val jx.Raw) {
 
 // Ref: #/components/schemas/DefiAsset
 type DefiAsset struct {
-	AssetType DefiAssetAssetType `json:"asset_type"`
+	Type DefiAssetType `json:"type"`
 	// Amount in minimal units of the locked asset.
 	Amount       string          `json:"amount"`
 	PoolAddress  OptString       `json:"pool_address"`
@@ -5216,9 +5216,9 @@ type DefiAsset struct {
 	LockedAsset  DefiLockedAsset `json:"locked_asset"`
 }
 
-// GetAssetType returns the value of AssetType.
-func (s *DefiAsset) GetAssetType() DefiAssetAssetType {
-	return s.AssetType
+// GetType returns the value of Type.
+func (s *DefiAsset) GetType() DefiAssetType {
+	return s.Type
 }
 
 // GetAmount returns the value of Amount.
@@ -5246,9 +5246,9 @@ func (s *DefiAsset) GetLockedAsset() DefiLockedAsset {
 	return s.LockedAsset
 }
 
-// SetAssetType sets the value of AssetType.
-func (s *DefiAsset) SetAssetType(val DefiAssetAssetType) {
-	s.AssetType = val
+// SetType sets the value of Type.
+func (s *DefiAsset) SetType(val DefiAssetType) {
+	s.Type = val
 }
 
 // SetAmount sets the value of Amount.
@@ -5276,44 +5276,44 @@ func (s *DefiAsset) SetLockedAsset(val DefiLockedAsset) {
 	s.LockedAsset = val
 }
 
-// Ref: #/components/schemas/DefiAssetAssetType
-type DefiAssetAssetType string
+// Ref: #/components/schemas/DefiAssetType
+type DefiAssetType string
 
 const (
-	DefiAssetAssetTypeStaking       DefiAssetAssetType = "staking"
-	DefiAssetAssetTypeLendingSupply DefiAssetAssetType = "lending_supply"
-	DefiAssetAssetTypeLendingBorrow DefiAssetAssetType = "lending_borrow"
-	DefiAssetAssetTypeLiquidStaking DefiAssetAssetType = "liquid_staking"
-	DefiAssetAssetTypeLiquidPool    DefiAssetAssetType = "liquid_pool"
-	DefiAssetAssetTypeYieldToken    DefiAssetAssetType = "yield_token"
+	DefiAssetTypeStaking       DefiAssetType = "staking"
+	DefiAssetTypeLendingSupply DefiAssetType = "lending_supply"
+	DefiAssetTypeLendingBorrow DefiAssetType = "lending_borrow"
+	DefiAssetTypeLiquidStaking DefiAssetType = "liquid_staking"
+	DefiAssetTypeLiquidPool    DefiAssetType = "liquid_pool"
+	DefiAssetTypeYieldToken    DefiAssetType = "yield_token"
 )
 
-// AllValues returns all DefiAssetAssetType values.
-func (DefiAssetAssetType) AllValues() []DefiAssetAssetType {
-	return []DefiAssetAssetType{
-		DefiAssetAssetTypeStaking,
-		DefiAssetAssetTypeLendingSupply,
-		DefiAssetAssetTypeLendingBorrow,
-		DefiAssetAssetTypeLiquidStaking,
-		DefiAssetAssetTypeLiquidPool,
-		DefiAssetAssetTypeYieldToken,
+// AllValues returns all DefiAssetType values.
+func (DefiAssetType) AllValues() []DefiAssetType {
+	return []DefiAssetType{
+		DefiAssetTypeStaking,
+		DefiAssetTypeLendingSupply,
+		DefiAssetTypeLendingBorrow,
+		DefiAssetTypeLiquidStaking,
+		DefiAssetTypeLiquidPool,
+		DefiAssetTypeYieldToken,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s DefiAssetAssetType) MarshalText() ([]byte, error) {
+func (s DefiAssetType) MarshalText() ([]byte, error) {
 	switch s {
-	case DefiAssetAssetTypeStaking:
+	case DefiAssetTypeStaking:
 		return []byte(s), nil
-	case DefiAssetAssetTypeLendingSupply:
+	case DefiAssetTypeLendingSupply:
 		return []byte(s), nil
-	case DefiAssetAssetTypeLendingBorrow:
+	case DefiAssetTypeLendingBorrow:
 		return []byte(s), nil
-	case DefiAssetAssetTypeLiquidStaking:
+	case DefiAssetTypeLiquidStaking:
 		return []byte(s), nil
-	case DefiAssetAssetTypeLiquidPool:
+	case DefiAssetTypeLiquidPool:
 		return []byte(s), nil
-	case DefiAssetAssetTypeYieldToken:
+	case DefiAssetTypeYieldToken:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -5321,25 +5321,25 @@ func (s DefiAssetAssetType) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *DefiAssetAssetType) UnmarshalText(data []byte) error {
-	switch DefiAssetAssetType(data) {
-	case DefiAssetAssetTypeStaking:
-		*s = DefiAssetAssetTypeStaking
+func (s *DefiAssetType) UnmarshalText(data []byte) error {
+	switch DefiAssetType(data) {
+	case DefiAssetTypeStaking:
+		*s = DefiAssetTypeStaking
 		return nil
-	case DefiAssetAssetTypeLendingSupply:
-		*s = DefiAssetAssetTypeLendingSupply
+	case DefiAssetTypeLendingSupply:
+		*s = DefiAssetTypeLendingSupply
 		return nil
-	case DefiAssetAssetTypeLendingBorrow:
-		*s = DefiAssetAssetTypeLendingBorrow
+	case DefiAssetTypeLendingBorrow:
+		*s = DefiAssetTypeLendingBorrow
 		return nil
-	case DefiAssetAssetTypeLiquidStaking:
-		*s = DefiAssetAssetTypeLiquidStaking
+	case DefiAssetTypeLiquidStaking:
+		*s = DefiAssetTypeLiquidStaking
 		return nil
-	case DefiAssetAssetTypeLiquidPool:
-		*s = DefiAssetAssetTypeLiquidPool
+	case DefiAssetTypeLiquidPool:
+		*s = DefiAssetTypeLiquidPool
 		return nil
-	case DefiAssetAssetTypeYieldToken:
-		*s = DefiAssetAssetTypeYieldToken
+	case DefiAssetTypeYieldToken:
+		*s = DefiAssetTypeYieldToken
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -5359,6 +5359,32 @@ func (s *DefiAssets) GetAssets() []DefiAsset {
 // SetAssets sets the value of Assets.
 func (s *DefiAssets) SetAssets(val []DefiAsset) {
 	s.Assets = val
+}
+
+// Ref: #/components/schemas/DefiLiquidPoolAssets
+type DefiLiquidPoolAssets struct {
+	Asset0 DefiLockedAsset `json:"asset0"`
+	Asset1 DefiLockedAsset `json:"asset1"`
+}
+
+// GetAsset0 returns the value of Asset0.
+func (s *DefiLiquidPoolAssets) GetAsset0() DefiLockedAsset {
+	return s.Asset0
+}
+
+// GetAsset1 returns the value of Asset1.
+func (s *DefiLiquidPoolAssets) GetAsset1() DefiLockedAsset {
+	return s.Asset1
+}
+
+// SetAsset0 sets the value of Asset0.
+func (s *DefiLiquidPoolAssets) SetAsset0(val DefiLockedAsset) {
+	s.Asset0 = val
+}
+
+// SetAsset1 sets the value of Asset1.
+func (s *DefiLiquidPoolAssets) SetAsset1(val DefiLockedAsset) {
+	s.Asset1 = val
 }
 
 // Ref: #/components/schemas/DefiLockedAsset
@@ -8455,13 +8481,20 @@ func (s *InitStateRaw) SetFileHash(val string) {
 
 // Ref: #/components/schemas/JettonAssetInfo
 type JettonAssetInfo struct {
-	TokenType    DefiAssetAssetType `json:"token_type"`
-	DefiProvider DefiProvider       `json:"defi_provider"`
+	TokenType    DefiAssetType           `json:"token_type"`
+	Type         OptDefiAssetType        `json:"type"`
+	DefiProvider DefiProvider            `json:"defi_provider"`
+	PoolAssets   OptDefiLiquidPoolAssets `json:"pool_assets"`
 }
 
 // GetTokenType returns the value of TokenType.
-func (s *JettonAssetInfo) GetTokenType() DefiAssetAssetType {
+func (s *JettonAssetInfo) GetTokenType() DefiAssetType {
 	return s.TokenType
+}
+
+// GetType returns the value of Type.
+func (s *JettonAssetInfo) GetType() OptDefiAssetType {
+	return s.Type
 }
 
 // GetDefiProvider returns the value of DefiProvider.
@@ -8469,14 +8502,29 @@ func (s *JettonAssetInfo) GetDefiProvider() DefiProvider {
 	return s.DefiProvider
 }
 
+// GetPoolAssets returns the value of PoolAssets.
+func (s *JettonAssetInfo) GetPoolAssets() OptDefiLiquidPoolAssets {
+	return s.PoolAssets
+}
+
 // SetTokenType sets the value of TokenType.
-func (s *JettonAssetInfo) SetTokenType(val DefiAssetAssetType) {
+func (s *JettonAssetInfo) SetTokenType(val DefiAssetType) {
 	s.TokenType = val
+}
+
+// SetType sets the value of Type.
+func (s *JettonAssetInfo) SetType(val OptDefiAssetType) {
+	s.Type = val
 }
 
 // SetDefiProvider sets the value of DefiProvider.
 func (s *JettonAssetInfo) SetDefiProvider(val DefiProvider) {
 	s.DefiProvider = val
+}
+
+// SetPoolAssets sets the value of PoolAssets.
+func (s *JettonAssetInfo) SetPoolAssets(val OptDefiLiquidPoolAssets) {
+	s.PoolAssets = val
 }
 
 // Ref: #/components/schemas/JettonBalance
@@ -8485,6 +8533,7 @@ type JettonBalance struct {
 	Price         OptTokenRates        `json:"price"`
 	WalletAddress AccountAddress       `json:"wallet_address"`
 	Jetton        JettonPreview        `json:"jetton"`
+	DefiAsset     OptJettonAssetInfo   `json:"defi_asset"`
 	Extensions    []string             `json:"extensions"`
 	Lock          OptJettonBalanceLock `json:"lock"`
 }
@@ -8507,6 +8556,11 @@ func (s *JettonBalance) GetWalletAddress() AccountAddress {
 // GetJetton returns the value of Jetton.
 func (s *JettonBalance) GetJetton() JettonPreview {
 	return s.Jetton
+}
+
+// GetDefiAsset returns the value of DefiAsset.
+func (s *JettonBalance) GetDefiAsset() OptJettonAssetInfo {
+	return s.DefiAsset
 }
 
 // GetExtensions returns the value of Extensions.
@@ -8537,6 +8591,11 @@ func (s *JettonBalance) SetWalletAddress(val AccountAddress) {
 // SetJetton sets the value of Jetton.
 func (s *JettonBalance) SetJetton(val JettonPreview) {
 	s.Jetton = val
+}
+
+// SetDefiAsset sets the value of DefiAsset.
+func (s *JettonBalance) SetDefiAsset(val OptJettonAssetInfo) {
+	s.DefiAsset = val
 }
 
 // SetExtensions sets the value of Extensions.
@@ -9395,7 +9454,6 @@ type JettonPreview struct {
 	Score               int32                  `json:"score"`
 	ScaledUI            OptScaledUI            `json:"scaled_ui"`
 	Description         OptString              `json:"description"`
-	AssetInfo           OptJettonAssetInfo     `json:"asset_info"`
 }
 
 // GetAddress returns the value of Address.
@@ -9448,11 +9506,6 @@ func (s *JettonPreview) GetDescription() OptString {
 	return s.Description
 }
 
-// GetAssetInfo returns the value of AssetInfo.
-func (s *JettonPreview) GetAssetInfo() OptJettonAssetInfo {
-	return s.AssetInfo
-}
-
 // SetAddress sets the value of Address.
 func (s *JettonPreview) SetAddress(val string) {
 	s.Address = val
@@ -9501,11 +9554,6 @@ func (s *JettonPreview) SetScaledUI(val OptScaledUI) {
 // SetDescription sets the value of Description.
 func (s *JettonPreview) SetDescription(val OptString) {
 	s.Description = val
-}
-
-// SetAssetInfo sets the value of AssetInfo.
-func (s *JettonPreview) SetAssetInfo(val OptJettonAssetInfo) {
-	s.AssetInfo = val
 }
 
 // Ref: #/components/schemas/JettonQuantity
@@ -14230,6 +14278,98 @@ func (o OptDecodedMessageExtInMsgDecodedWalletV5) Get() (v DecodedMessageExtInMs
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDecodedMessageExtInMsgDecodedWalletV5) Or(d DecodedMessageExtInMsgDecodedWalletV5) DecodedMessageExtInMsgDecodedWalletV5 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDefiAssetType returns new OptDefiAssetType with value set to v.
+func NewOptDefiAssetType(v DefiAssetType) OptDefiAssetType {
+	return OptDefiAssetType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDefiAssetType is optional DefiAssetType.
+type OptDefiAssetType struct {
+	Value DefiAssetType
+	Set   bool
+}
+
+// IsSet returns true if OptDefiAssetType was set.
+func (o OptDefiAssetType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDefiAssetType) Reset() {
+	var v DefiAssetType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDefiAssetType) SetTo(v DefiAssetType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDefiAssetType) Get() (v DefiAssetType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDefiAssetType) Or(d DefiAssetType) DefiAssetType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDefiLiquidPoolAssets returns new OptDefiLiquidPoolAssets with value set to v.
+func NewOptDefiLiquidPoolAssets(v DefiLiquidPoolAssets) OptDefiLiquidPoolAssets {
+	return OptDefiLiquidPoolAssets{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDefiLiquidPoolAssets is optional DefiLiquidPoolAssets.
+type OptDefiLiquidPoolAssets struct {
+	Value DefiLiquidPoolAssets
+	Set   bool
+}
+
+// IsSet returns true if OptDefiLiquidPoolAssets was set.
+func (o OptDefiLiquidPoolAssets) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDefiLiquidPoolAssets) Reset() {
+	var v DefiLiquidPoolAssets
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDefiLiquidPoolAssets) SetTo(v DefiLiquidPoolAssets) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDefiLiquidPoolAssets) Get() (v DefiLiquidPoolAssets, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDefiLiquidPoolAssets) Or(d DefiLiquidPoolAssets) DefiLiquidPoolAssets {
 	if v, ok := o.Get(); ok {
 		return v
 	}

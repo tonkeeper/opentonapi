@@ -42,7 +42,7 @@ func (h *Handler) GetAccountJettonsBalances(ctx context.Context, params oas.GetA
 	}
 	for _, wallet := range wallets {
 		assetInfo, ok := assetInfos[wallet.JettonAddress]
-		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies, nil, h.optJettonAssetInfo(assetInfo, ok))
+		jettonBalance, err := h.convertJettonBalance(ctx, wallet, params.Currencies, nil, h.optJettonAssetInfo(ctx, assetInfo, ok))
 		if err != nil {
 			h.logger.Warn(fmt.Sprintf("Failed to convert jetton balance for wallet %v", wallet.JettonAddress.ToRaw()), zap.Error(err))
 			continue
@@ -76,7 +76,7 @@ func (h *Handler) GetAccountJettonBalance(ctx context.Context, params oas.GetAcc
 		assetInfos = defi.AssetInfos(ctx, h.storage, h.logger, []tongo.AccountID{wallets[0].JettonAddress})
 	}
 	assetInfo, ok := assetInfos[wallets[0].JettonAddress]
-	jettonBalance, err := h.convertJettonBalance(ctx, wallets[0], params.Currencies, nil, h.optJettonAssetInfo(assetInfo, ok))
+	jettonBalance, err := h.convertJettonBalance(ctx, wallets[0], params.Currencies, nil, h.optJettonAssetInfo(ctx, assetInfo, ok))
 	if err != nil {
 		return nil, err
 	}

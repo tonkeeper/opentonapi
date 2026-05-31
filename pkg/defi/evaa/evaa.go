@@ -117,21 +117,21 @@ func poolAsset(
 	assetAddress := userAssetID
 	return defi.Asset{
 		Type:         assetType,
-		Amount:       principal.String(),
 		PoolAddress:  &poolID,
 		AssetAddress: &assetAddress,
 		Provider:     provider,
-		LockedAsset:  lockedAsset(jettonMaster),
+		LockedAsset:  lockedAsset(jettonMaster, *principal),
 	}, true
 }
 
-func lockedAsset(jettonMaster *ton.AccountID) defi.LockedAsset {
+func lockedAsset(jettonMaster *ton.AccountID, amount big.Int) defi.LockedAsset {
 	if jettonMaster == nil {
 		return defi.LockedAsset{Type: defi.LockedAssetTypeNative}
 	}
 	return defi.LockedAsset{
 		Type:         defi.LockedAssetTypeJetton,
 		JettonMaster: jettonMaster,
+		Amount:       amount,
 	}
 }
 

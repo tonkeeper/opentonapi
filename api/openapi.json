@@ -3179,9 +3179,6 @@
       "format": "address",
       "type": "string"
      },
-     "asset_type": {
-      "$ref": "#/components/schemas/DefiAssetAssetType"
-     },
      "defi_provider": {
       "$ref": "#/components/schemas/DefiProvider"
      },
@@ -3191,17 +3188,20 @@
      "pool_address": {
       "format": "address",
       "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/DefiAssetType"
      }
     },
     "required": [
-     "asset_type",
+     "type",
      "amount",
      "defi_provider",
      "locked_asset"
     ],
     "type": "object"
    },
-   "DefiAssetAssetType": {
+   "DefiAssetType": {
     "enum": [
      "staking",
      "lending_supply",
@@ -3223,6 +3223,21 @@
     },
     "required": [
      "assets"
+    ],
+    "type": "object"
+   },
+   "DefiLiquidPoolAssets": {
+    "properties": {
+     "asset0": {
+      "$ref": "#/components/schemas/DefiLockedAsset"
+     },
+     "asset1": {
+      "$ref": "#/components/schemas/DefiLockedAsset"
+     }
+    },
+    "required": [
+     "asset0",
+     "asset1"
     ],
     "type": "object"
    },
@@ -4037,8 +4052,14 @@
      "defi_provider": {
       "$ref": "#/components/schemas/DefiProvider"
      },
+     "pool_assets": {
+      "$ref": "#/components/schemas/DefiLiquidPoolAssets"
+     },
      "token_type": {
-      "$ref": "#/components/schemas/DefiAssetAssetType"
+      "$ref": "#/components/schemas/DefiAssetType"
+     },
+     "type": {
+      "$ref": "#/components/schemas/DefiAssetType"
      }
     },
     "required": [
@@ -4053,6 +4074,9 @@
       "example": "597968399",
       "type": "string",
       "x-js-format": "bigint"
+     },
+     "defi_asset": {
+      "$ref": "#/components/schemas/JettonAssetInfo"
      },
      "extensions": {
       "example": [
@@ -4521,9 +4545,6 @@
       "example": "0:0BB5A9F69043EEBDDA5AD2E946EB953242BD8F603FE795D90698CEEC6BFC60A0",
       "format": "address",
       "type": "string"
-     },
-     "asset_info": {
-      "$ref": "#/components/schemas/JettonAssetInfo"
      },
      "custom_payload_api_uri": {
       "type": "string"
