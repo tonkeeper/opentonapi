@@ -47,6 +47,7 @@ type AsyncMiddleware func(AsyncHandler) AsyncHandler
 type ServerOptions struct {
 	ogenMiddlewares    []oas.Middleware
 	asyncMiddlewares   []AsyncMiddleware
+	httpMiddleware     func(http.Handler) http.Handler
 	txSource           sources.TransactionSource
 	blockHeadersSource sources.BlockHeadersSource
 	blockSource        sources.BlockSource
@@ -66,6 +67,12 @@ func WithOgenMiddleware(m ...oas.Middleware) ServerOption {
 func WithAsyncMiddleware(m ...AsyncMiddleware) ServerOption {
 	return func(options *ServerOptions) {
 		options.asyncMiddlewares = m
+	}
+}
+
+func WithHTTPMiddleware(m func(http.Handler) http.Handler) ServerOption {
+	return func(options *ServerOptions) {
+		options.httpMiddleware = m
 	}
 }
 
@@ -149,12 +156,17 @@ func NewServer(log *zap.Logger, handler *Handler, opts ...ServerOption) (*Server
 	mux.Handle("/v2/assets/defi/", defi.AssetsHandler())
 	mux.Handle("/", ogenServer)
 
+	var h http.Handler = mux
+	if options.httpMiddleware != nil {
+		h = options.httpMiddleware(mux)
+	}
+
 	serv := Server{
 		logger:           log,
 		mux:              mux,
 		asyncMiddlewares: asyncMiddlewares,
 		httpServer: &http.Server{
-			Handler: mux,
+			Handler: h,
 		},
 	}
 	return &serv, nil
