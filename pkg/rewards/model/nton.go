@@ -5,19 +5,19 @@ import (
 	"math/big"
 )
 
-// NTon represents a value in Nano TON (1 TON = 1e9 NTon).
+// NanoGram represents a value in Nano TON (1 TON = 1e9 NanoGram).
 // It wraps *big.Int and serializes to JSON as a quoted string
 // to preserve precision for consumers.
-type NTon struct{ *big.Int }
+type NanoGram struct{ *big.Int }
 
-func (n NTon) MarshalJSON() ([]byte, error) {
+func (n NanoGram) MarshalJSON() ([]byte, error) {
 	if n.Int == nil {
 		return []byte("null"), nil
 	}
 	return json.Marshal(n.Int.String())
 }
 
-func (n NTon) String() string {
+func (n NanoGram) String() string {
 	if n.Int == nil {
 		return "null"
 	}

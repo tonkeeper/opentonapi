@@ -443,7 +443,7 @@ type Invoker interface {
 	GetLibraryByHash(ctx context.Context, params GetLibraryByHashParams) (*BlockchainLibrary, error)
 	// GetMarketsRates invokes getMarketsRates operation.
 	//
-	// Get the TON price from markets.
+	// Get the GRAM price from markets.
 	//
 	// GET /v2/rates/markets
 	GetMarketsRates(ctx context.Context) (*GetMarketsRatesOK, error)
@@ -8232,7 +8232,7 @@ func (c *Client) sendGetLibraryByHash(ctx context.Context, params GetLibraryByHa
 
 // GetMarketsRates invokes getMarketsRates operation.
 //
-// Get the TON price from markets.
+// Get the GRAM price from markets.
 //
 // GET /v2/rates/markets
 func (c *Client) GetMarketsRates(ctx context.Context) (*GetMarketsRatesOK, error) {

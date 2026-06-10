@@ -82,14 +82,14 @@
     }
    },
    "currenciesQuery": {
-    "description": "accept ton and all possible fiat currencies, separated by commas",
+    "description": "accept gram and all possible fiat currencies, separated by commas",
     "explode": false,
     "in": "query",
     "name": "currencies",
     "required": false,
     "schema": {
      "example": [
-      "ton",
+      "gram",
       "usd",
       "rub"
      ],
@@ -933,7 +933,7 @@
       "type": "string"
      },
      "extra": {
-      "description": "Net TON change for this account not explained by actions, in nanotons: extra = final_balance - initial_balance - sum(explicit TON changes from actions). extra \u003c 0 - implicit fee, extra \u003e 0 - refund. For UI display only\n",
+      "description": "Net Gram change for this account not explained by actions, in nanograms: extra = final_balance - initial_balance - sum(explicit Gram changes from actions). extra \u003c 0 - implicit fee, extra \u003e 0 - refund. For UI display only\n",
       "example": 3,
       "format": "int64",
       "type": "integer",
@@ -1380,15 +1380,15 @@
       "type": "string"
      },
      "description": {
-      "example": "Transferring 5 Ton",
+      "example": "Transferring 5 Gram",
       "type": "string"
      },
      "name": {
-      "example": "Ton Transfer",
+      "example": "Gram Transfer",
       "type": "string"
      },
      "value": {
-      "example": "5 Ton",
+      "example": "5 Gram",
       "type": "string"
      },
      "value_image": {
@@ -2045,7 +2045,7 @@
       "type": "object"
      },
      "14": {
-      "description": "The reward in nanoTons for block creation in the TON blockchain.",
+      "description": "The reward in nanoGram for block creation in the TON blockchain.",
       "properties": {
        "basechain_block_fee": {
         "format": "int64",
@@ -2441,7 +2441,7 @@
       "type": "string"
      },
      "40": {
-      "description": "The configuration for punishment for improper behavior (non-validation). In the absence of the parameter, the default fine size is 101 TON",
+      "description": "The configuration for punishment for improper behavior (non-validation). In the absence of the parameter, the default fine size is 101 Gram",
       "properties": {
        "misbehaviour_punishment_config": {
         "$ref": "#/components/schemas/MisbehaviourPunishmentConfig"
@@ -3232,7 +3232,7 @@
       "$ref": "#/components/schemas/JettonPreview"
      },
      "type": {
-      "description": "native TON or jetton asset",
+      "description": "native Gram or jetton asset",
       "enum": [
        "native",
        "jetton"
@@ -4152,7 +4152,13 @@
       "format": "int64",
       "type": "integer"
      },
+     "minter_min_gram_for_storage": {
+      "format": "int64",
+      "type": "integer"
+     },
      "minter_min_tons_for_storage": {
+      "deprecated": true,
+      "description": "this field will gone after Sept. 2026, use wallet_min_gram_for_storage instead",
       "format": "int64",
       "type": "integer"
      },
@@ -4160,7 +4166,13 @@
       "format": "int64",
       "type": "integer"
      },
+     "wallet_min_gram_for_storage": {
+      "format": "int64",
+      "type": "integer"
+     },
      "wallet_min_tons_for_storage": {
+      "deprecated": true,
+      "description": "this field will gone after Sept. 2026, use wallet_min_gram_for_storage instead",
       "format": "int64",
       "type": "integer"
      }
@@ -4168,9 +4180,9 @@
     "required": [
      "bridge_burn_fee",
      "bridge_mint_fee",
-     "wallet_min_tons_for_storage",
+     "wallet_min_gram_for_storage",
      "wallet_gas_consumption",
-     "minter_min_tons_for_storage",
+     "minter_min_gram_for_storage",
      "discover_gas_consumption"
     ],
     "type": "object"
@@ -4347,7 +4359,7 @@
       "type": "string"
      },
      "description": {
-      "example": "Wrapped Toncoin",
+      "example": "Wrapped GRAM",
       "type": "string"
      },
      "image": {
@@ -4594,6 +4606,18 @@
       "example": "stonfi",
       "type": "string"
      },
+     "gram_in": {
+      "example": 1000000000,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "gram_out": {
+      "example": 2000000000,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
      "jetton_master_in": {
       "$ref": "#/components/schemas/JettonPreview"
      },
@@ -4604,12 +4628,16 @@
       "$ref": "#/components/schemas/AccountAddress"
      },
      "ton_in": {
+      "deprecated": true,
+      "description": "this field will gone after Sept. 2026, use gram_in instead",
       "example": 1000000000,
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
      },
      "ton_out": {
+      "deprecated": true,
+      "description": "this field will gone after Sept. 2026, use gram_out instead",
       "example": 2000000000,
       "format": "int64",
       "type": "integer",
@@ -5679,7 +5707,7 @@
    "OraclePriceFeed": {
     "properties": {
      "display_symbol": {
-      "example": "TON/USD",
+      "example": "GRAM/USD",
       "type": "string"
      },
      "id": {
@@ -5745,7 +5773,7 @@
    "PoolImplementation": {
     "properties": {
      "description": {
-      "example": "Oldest pool with minimal staking amount 50 TON",
+      "example": "Oldest pool with minimal staking amount 50 Gram",
       "type": "string"
      },
      "name": {
@@ -5899,7 +5927,7 @@
       "type": "string"
      },
      "token_name": {
-      "example": "TON",
+      "example": "GRAM",
       "type": "string"
      },
      "value": {
@@ -6146,7 +6174,7 @@
       "type": "array"
      },
      "total_stake": {
-      "description": "Time series of total stake in TON as [timestamp_ms, stake] pairs",
+      "description": "Time series of total stake in Gram as [timestamp_ms, stake] pairs",
       "items": {
        "items": {
         "format": "double",
@@ -6166,6 +6194,13 @@
    "Risk": {
     "description": "Conservative upper bound on assets this wallet may lose if the emulated message is sent and the counterparty behaves maliciously. Values may exceed current balances (e.g. already-authorized future receipts). For UI display only.\n",
     "properties": {
+     "gram": {
+      "description": "Maximum Gram amount that may leave the wallet in the worst case, in nanogram.",
+      "example": 500,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
      "jettons": {
       "description": "Jetton positions that may be debited from the wallet in the worst case.",
       "items": {
@@ -6181,26 +6216,27 @@
       "type": "array"
      },
      "ton": {
-      "description": "Maximum TON amount that may leave the wallet in the worst case, in nanotons.",
+      "deprecated": true,
+      "description": "this field will gone after Sept. 2026, use gram instead",
       "example": 500,
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
      },
      "total_equivalent": {
-      "description": "Estimated equivalent of all assets at risk (TON, jettons, NFTs) in the selected currency from currencyQuery (e.g. USD). Approximate, best-effort UI value.\n",
+      "description": "Estimated equivalent of all assets at risk (Gram, jettons, NFTs) in the selected currency from currencyQuery (e.g. USD). Approximate, best-effort UI value.\n",
       "format": "float",
       "type": "number"
      },
      "transfer_all_remaining_balance": {
-      "description": "True if the message semantics allow sweeping all current and future remaining TON balance of the wallet (e.g. “send all” / drain patterns).\n",
+      "description": "True if the message semantics allow sweeping all current and future remaining Gram balance of the wallet (e.g. “send all” / drain patterns).\n",
       "example": true,
       "type": "boolean"
      }
     },
     "required": [
      "transfer_all_remaining_balance",
-     "ton",
+     "gram",
      "jettons",
      "nfts"
     ],
@@ -6550,6 +6586,13 @@
      "executor": {
       "$ref": "#/components/schemas/AccountAddress"
      },
+     "gram_attached": {
+      "description": "amount in nanotons",
+      "example": 123456789,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
      "operation": {
       "example": "NftTransfer or 0x35d95a12",
       "type": "string"
@@ -6561,6 +6604,7 @@
       "$ref": "#/components/schemas/Refund"
      },
      "ton_attached": {
+      "deprecated": true,
       "description": "amount in nanotons",
       "example": 123456789,
       "format": "int64",
@@ -6571,7 +6615,7 @@
     "required": [
      "executor",
      "contract",
-     "ton_attached",
+     "gram_attached",
      "operation"
     ],
     "type": "object"
@@ -6833,7 +6877,7 @@
        "type": "string"
       },
       "example": {
-       "TON": "-1.28%"
+       "GRAM": "-1.28%"
       },
       "type": "object"
      },
@@ -6842,7 +6886,7 @@
        "type": "string"
       },
       "example": {
-       "TON": "-0.56%"
+       "GRAM": "-0.56%"
       },
       "type": "object"
      },
@@ -6851,7 +6895,7 @@
        "type": "string"
       },
       "example": {
-       "TON": "-2.74%"
+       "GRAM": "-2.74%"
       },
       "type": "object"
      },
@@ -6860,7 +6904,7 @@
        "type": "number"
       },
       "example": {
-       "TON": 1.3710752873163712
+       "GRAM": 1.3710752873163712
       },
       "type": "object"
      }
@@ -7591,6 +7635,12 @@
       "type": "integer",
       "x-js-format": "bigint"
      },
+     "gram": {
+      "example": 80,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
      "jettons": {
       "items": {
        "properties": {
@@ -7624,6 +7674,8 @@
       "type": "array"
      },
      "ton": {
+      "deprecated": true,
+      "description": "this field will gone after Sept. 2026, use gram instead",
       "example": 80,
       "format": "int64",
       "type": "integer",
@@ -7632,7 +7684,7 @@
     },
     "required": [
      "account",
-     "ton",
+     "gram",
      "fees"
     ],
     "type": "object"
@@ -8850,7 +8902,7 @@
       "$ref": "#/components/parameters/offsetQuery"
      },
      {
-      "description": "Selling nft items in ton implemented usually via transfer items to special selling account. This option enables including items which owned not directly.",
+      "description": "Selling nft items in TON implemented usually via transfer items to special selling account. This option enables including items which owned not directly.",
       "in": "query",
       "name": "indirect_ownership",
       "required": false,
@@ -11999,14 +12051,14 @@
     "operationId": "getRates",
     "parameters": [
      {
-      "description": "accept ton and jetton master addresses, separated by commas",
+      "description": "accept gram and jetton master addresses, separated by commas",
       "explode": false,
       "in": "query",
       "name": "tokens",
       "required": true,
       "schema": {
        "example": [
-        "ton"
+        "gram"
        ],
        "items": {
         "format": "address",
@@ -12017,14 +12069,14 @@
       }
      },
      {
-      "description": "accept ton and all possible fiat currencies, separated by commas",
+      "description": "accept gram and all possible fiat currencies, separated by commas",
       "explode": false,
       "in": "query",
       "name": "currencies",
       "required": true,
       "schema": {
        "example": [
-        "ton",
+        "gram",
         "usd",
         "rub"
        ],
@@ -12156,7 +12208,7 @@
   },
   "/v2/rates/markets": {
    "get": {
-    "description": "Get the TON price from markets",
+    "description": "Get the GRAM price from markets",
     "operationId": "getMarketsRates",
     "responses": {
      "200": {

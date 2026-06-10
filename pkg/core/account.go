@@ -13,7 +13,7 @@ import (
 type Account struct {
 	AccountAddress      ton.AccountID
 	Status              tlb.AccountStatus
-	TonBalance          int64
+	GramBalance         int64
 	ExtraBalances       ExtraCurrencies
 	LastTransactionLt   uint64
 	LastTransactionHash ton.Bits256
@@ -56,7 +56,7 @@ type Contract struct {
 }
 
 type AccountStat struct {
-	TonBalance    int64
+	GramBalance   int64
 	AccountID     ton.AccountID
 	NftsCount     int32
 	JettonsCount  int32

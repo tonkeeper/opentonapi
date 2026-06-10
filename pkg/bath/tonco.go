@@ -80,7 +80,7 @@ var ToncoDepositLiquiditySingleStraw = Straw[BubbleLiquidityDeposit]{
 			newAction.Tokens = append(newAction.Tokens, core.VaultDepositInfo{
 				Price: core.Price{
 					Currency: core.Currency{
-						Type: core.CurrencyTON,
+						Type: core.CurrencyNative,
 					},
 					Amount: big.Int(jettonTx.amount),
 				},
@@ -167,7 +167,7 @@ var ToncoDepositLiquidityBothStraw = Straw[BubbleLiquidityDeposit]{
 					newAction.Tokens = append(newAction.Tokens, core.VaultDepositInfo{
 						Price: core.Price{
 							Currency: core.Currency{
-								Type: core.CurrencyTON,
+								Type: core.CurrencyNative,
 							},
 							Amount: big.Int(jettonTx.amount),
 						},
@@ -227,8 +227,8 @@ var ToncoDepositLiquidityWithRefundStraw = Straw[BubbleLiquidityDeposit]{
 					tx := bubble.Info.(BubbleJettonTransfer)
 					amount := big.Int(tx.amount)
 					for i, token := range newAction.Tokens {
-						if (token.Price.Currency.Type == core.CurrencyTON && !tx.isWrappedTon) ||
-							(token.Price.Currency.Type != core.CurrencyTON && *token.Price.Currency.Jetton != tx.master) {
+						if (token.Price.Currency.Type == core.CurrencyNative && !tx.isWrappedTon) ||
+							(token.Price.Currency.Type != core.CurrencyNative && *token.Price.Currency.Jetton != tx.master) {
 							continue
 						}
 
@@ -244,8 +244,8 @@ var ToncoDepositLiquidityWithRefundStraw = Straw[BubbleLiquidityDeposit]{
 					tx := bubble.Info.(BubbleJettonTransfer)
 					amount := big.Int(tx.amount)
 					for i, token := range newAction.Tokens {
-						if (token.Price.Currency.Type == core.CurrencyTON && !tx.isWrappedTon) ||
-							(token.Price.Currency.Type != core.CurrencyTON && *token.Price.Currency.Jetton != tx.master) {
+						if (token.Price.Currency.Type == core.CurrencyNative && !tx.isWrappedTon) ||
+							(token.Price.Currency.Type != core.CurrencyNative && *token.Price.Currency.Jetton != tx.master) {
 							continue
 						}
 

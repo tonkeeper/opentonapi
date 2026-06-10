@@ -168,7 +168,7 @@ var MoocxLiquidityDepositNativeStraw = Straw[BubbleLiquidityDeposit]{
 		depositTon := core.VaultDepositInfo{
 			Price: core.Price{
 				Currency: core.Currency{
-					Type: core.CurrencyTON,
+					Type: core.CurrencyNative,
 				},
 				Amount: *tonAmount,
 			},

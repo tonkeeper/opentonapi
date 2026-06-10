@@ -28,6 +28,7 @@ var pools = []poolInfo{
 // https://github.com/evaafi/evaa-go-sdk/blob/a9acf74075f5400eec330c7837769b075dd79aac/config/config.go
 var assets = map[tlb.Bits256]*ton.AccountID{
 	assetID("TON"):                 nil,
+	assetID("GRAM"):                nil,
 	assetID("USDT"):                mustAccountIDptr("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs"),
 	assetID("jUSDT"):               mustAccountIDptr("EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA"),
 	assetID("jUSDC"):               mustAccountIDptr("EQB-MPwrd1G6WKNkLz_VnV6WqBDd142KMQv-g1O-8QUA3728"),

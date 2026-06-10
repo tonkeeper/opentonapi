@@ -2,6 +2,7 @@ package litestorage
 
 import (
 	"context"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -27,7 +28,7 @@ func (s *LiteStorage) DedustPools(ctx context.Context, poolIDs []tongo.AccountID
 func DedustAssetToCurrency(asset abi.DedustAsset) core.Currency {
 	switch asset.SumType {
 	case "Native":
-		return core.Currency{Type: core.CurrencyTON}
+		return core.Currency{Type: core.CurrencyNative}
 	case "Jetton":
 		addr := tongo.NewAccountId(int32(asset.Jetton.WorkchainId), asset.Jetton.Address)
 		return core.Currency{Type: core.CurrencyJetton, Jetton: addr}

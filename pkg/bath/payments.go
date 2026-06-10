@@ -43,7 +43,7 @@ var InvoicePaymentStrawNative = Straw[BubbleInvoicePayment]{
 		}
 		newAction.InvoiceID = id
 		price := core.Price{
-			Currency: core.Currency{Type: core.CurrencyTON},
+			Currency: core.Currency{Type: core.CurrencyNative},
 			Amount:   *big.NewInt(tx.inputAmount),
 		}
 		for c, am := range tx.inputExtraAmount {

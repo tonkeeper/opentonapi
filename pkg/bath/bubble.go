@@ -109,7 +109,7 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 			Accounts: map[tongo.AccountID]*AccountValueFlow{
 				// TODO: add extra currency
 				trace.Account: {
-					Ton: inputAmount,
+					Gram: inputAmount,
 				},
 			},
 		},
@@ -134,7 +134,7 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 			// We want to include ihr_fee into msg.Value
 			if !c.InMsg.IhrDisabled {
 				aggregatedFee -= c.InMsg.IhrFee
-				b.ValueFlow.Accounts[trace.Account].Ton -= c.InMsg.IhrFee
+				b.ValueFlow.Accounts[trace.Account].Gram -= c.InMsg.IhrFee
 			}
 		}
 
@@ -163,7 +163,7 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 	case btx.account.Is(abi.WalletV4R1) || btx.account.Is(abi.WalletV4R2):
 		appendExtendedActionsV4(&b, trace.Hash)
 	}
-	b.ValueFlow.Accounts[trace.Account].Ton -= aggregatedFee
+	b.ValueFlow.Accounts[trace.Account].Gram -= aggregatedFee
 	b.ValueFlow.Accounts[trace.Account].Fees = aggregatedFee
 	return &b
 }

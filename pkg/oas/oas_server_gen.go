@@ -425,7 +425,7 @@ type Handler interface {
 	GetLibraryByHash(ctx context.Context, params GetLibraryByHashParams) (*BlockchainLibrary, error)
 	// GetMarketsRates implements getMarketsRates operation.
 	//
-	// Get the TON price from markets.
+	// Get the GRAM price from markets.
 	//
 	// GET /v2/rates/markets
 	GetMarketsRates(ctx context.Context) (*GetMarketsRatesOK, error)

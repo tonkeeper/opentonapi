@@ -137,7 +137,7 @@ func (m Mock) GetRates(date int64) (map[string]float64, error) {
 }
 
 func (m Mock) GetMarketsTonPrice() ([]Market, error) {
-	return m.GetCurrentMarketsTonPrice()
+	return m.GetCurrentMarketsGramPrice()
 }
 
 // GetRatesChart cannot be used to request charts for jettons in the open source version

@@ -43,7 +43,7 @@ func TestConvertToAccount(t *testing.T) {
 			want: &Account{
 				AccountAddress:    tongo.MustParseAccountID("EQDendoireMDFMufOUzkqNpFIay83GnjV2tgGMbA64wA3siV"),
 				Status:            tlb.AccountActive,
-				TonBalance:        989109352,
+				GramBalance:       989109352,
 				ExtraBalances:     nil,
 				LastTransactionLt: 31236013000006,
 				Storage: StorageInfo{

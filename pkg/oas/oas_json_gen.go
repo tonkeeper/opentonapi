@@ -25646,16 +25646,28 @@ func (s *JettonBridgePrices) encodeFields(e *jx.Encoder) {
 		e.Int64(s.BridgeMintFee)
 	}
 	{
-		e.FieldStart("wallet_min_tons_for_storage")
-		e.Int64(s.WalletMinTonsForStorage)
+		if s.WalletMinTonsForStorage.Set {
+			e.FieldStart("wallet_min_tons_for_storage")
+			s.WalletMinTonsForStorage.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("wallet_min_gram_for_storage")
+		e.Int64(s.WalletMinGramForStorage)
 	}
 	{
 		e.FieldStart("wallet_gas_consumption")
 		e.Int64(s.WalletGasConsumption)
 	}
 	{
-		e.FieldStart("minter_min_tons_for_storage")
-		e.Int64(s.MinterMinTonsForStorage)
+		if s.MinterMinTonsForStorage.Set {
+			e.FieldStart("minter_min_tons_for_storage")
+			s.MinterMinTonsForStorage.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("minter_min_gram_for_storage")
+		e.Int64(s.MinterMinGramForStorage)
 	}
 	{
 		e.FieldStart("discover_gas_consumption")
@@ -25663,13 +25675,15 @@ func (s *JettonBridgePrices) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonBridgePrices = [6]string{
+var jsonFieldsNameOfJettonBridgePrices = [8]string{
 	0: "bridge_burn_fee",
 	1: "bridge_mint_fee",
 	2: "wallet_min_tons_for_storage",
-	3: "wallet_gas_consumption",
-	4: "minter_min_tons_for_storage",
-	5: "discover_gas_consumption",
+	3: "wallet_min_gram_for_storage",
+	4: "wallet_gas_consumption",
+	5: "minter_min_tons_for_storage",
+	6: "minter_min_gram_for_storage",
+	7: "discover_gas_consumption",
 }
 
 // Decode decodes JettonBridgePrices from json.
@@ -25706,19 +25720,29 @@ func (s *JettonBridgePrices) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"bridge_mint_fee\"")
 			}
 		case "wallet_min_tons_for_storage":
-			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Int64()
-				s.WalletMinTonsForStorage = int64(v)
-				if err != nil {
+				s.WalletMinTonsForStorage.Reset()
+				if err := s.WalletMinTonsForStorage.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"wallet_min_tons_for_storage\"")
 			}
-		case "wallet_gas_consumption":
+		case "wallet_min_gram_for_storage":
 			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.WalletMinGramForStorage = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"wallet_min_gram_for_storage\"")
+			}
+		case "wallet_gas_consumption":
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int64()
 				s.WalletGasConsumption = int64(v)
@@ -25730,19 +25754,29 @@ func (s *JettonBridgePrices) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"wallet_gas_consumption\"")
 			}
 		case "minter_min_tons_for_storage":
-			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.Int64()
-				s.MinterMinTonsForStorage = int64(v)
-				if err != nil {
+				s.MinterMinTonsForStorage.Reset()
+				if err := s.MinterMinTonsForStorage.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"minter_min_tons_for_storage\"")
 			}
+		case "minter_min_gram_for_storage":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int64()
+				s.MinterMinGramForStorage = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"minter_min_gram_for_storage\"")
+			}
 		case "discover_gas_consumption":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int64()
 				s.DiscoverGasConsumption = int64(v)
@@ -25763,7 +25797,7 @@ func (s *JettonBridgePrices) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111111,
+		0b11011011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -27799,6 +27833,18 @@ func (s *JettonSwapAction) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.GramIn.Set {
+			e.FieldStart("gram_in")
+			s.GramIn.Encode(e)
+		}
+	}
+	{
+		if s.GramOut.Set {
+			e.FieldStart("gram_out")
+			s.GramOut.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("user_wallet")
 		s.UserWallet.Encode(e)
 	}
@@ -27820,16 +27866,18 @@ func (s *JettonSwapAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonSwapAction = [9]string{
-	0: "dex",
-	1: "amount_in",
-	2: "amount_out",
-	3: "ton_in",
-	4: "ton_out",
-	5: "user_wallet",
-	6: "router",
-	7: "jetton_master_in",
-	8: "jetton_master_out",
+var jsonFieldsNameOfJettonSwapAction = [11]string{
+	0:  "dex",
+	1:  "amount_in",
+	2:  "amount_out",
+	3:  "ton_in",
+	4:  "ton_out",
+	5:  "gram_in",
+	6:  "gram_out",
+	7:  "user_wallet",
+	8:  "router",
+	9:  "jetton_master_in",
+	10: "jetton_master_out",
 }
 
 // Decode decodes JettonSwapAction from json.
@@ -27897,8 +27945,28 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"ton_out\"")
 			}
+		case "gram_in":
+			if err := func() error {
+				s.GramIn.Reset()
+				if err := s.GramIn.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gram_in\"")
+			}
+		case "gram_out":
+			if err := func() error {
+				s.GramOut.Reset()
+				if err := s.GramOut.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gram_out\"")
+			}
 		case "user_wallet":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.UserWallet.Decode(d); err != nil {
 					return err
@@ -27908,7 +27976,7 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"user_wallet\"")
 			}
 		case "router":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.Router.Decode(d); err != nil {
 					return err
@@ -27947,8 +28015,8 @@ func (s *JettonSwapAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b01100111,
-		0b00000000,
+		0b10000111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -40178,8 +40246,14 @@ func (s *Risk) encodeFields(e *jx.Encoder) {
 		e.Bool(s.TransferAllRemainingBalance)
 	}
 	{
-		e.FieldStart("ton")
-		e.Int64(s.Ton)
+		if s.Ton.Set {
+			e.FieldStart("ton")
+			s.Ton.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("gram")
+		e.Int64(s.Gram)
 	}
 	{
 		e.FieldStart("jettons")
@@ -40205,12 +40279,13 @@ func (s *Risk) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfRisk = [5]string{
+var jsonFieldsNameOfRisk = [6]string{
 	0: "transfer_all_remaining_balance",
 	1: "ton",
-	2: "jettons",
-	3: "nfts",
-	4: "total_equivalent",
+	2: "gram",
+	3: "jettons",
+	4: "nfts",
+	5: "total_equivalent",
 }
 
 // Decode decodes Risk from json.
@@ -40235,19 +40310,29 @@ func (s *Risk) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"transfer_all_remaining_balance\"")
 			}
 		case "ton":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int64()
-				s.Ton = int64(v)
-				if err != nil {
+				s.Ton.Reset()
+				if err := s.Ton.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"ton\"")
 			}
-		case "jettons":
+		case "gram":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.Gram = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gram\"")
+			}
+		case "jettons":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				s.Jettons = make([]JettonQuantity, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -40265,7 +40350,7 @@ func (s *Risk) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"jettons\"")
 			}
 		case "nfts":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				s.Nfts = make([]NftItem, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -40302,7 +40387,7 @@ func (s *Risk) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -42329,8 +42414,14 @@ func (s *SmartContractAction) encodeFields(e *jx.Encoder) {
 		s.Contract.Encode(e)
 	}
 	{
-		e.FieldStart("ton_attached")
-		e.Int64(s.TonAttached)
+		if s.TonAttached.Set {
+			e.FieldStart("ton_attached")
+			s.TonAttached.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("gram_attached")
+		e.Int64(s.GramAttached)
 	}
 	{
 		e.FieldStart("operation")
@@ -42350,13 +42441,14 @@ func (s *SmartContractAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSmartContractAction = [6]string{
+var jsonFieldsNameOfSmartContractAction = [7]string{
 	0: "executor",
 	1: "contract",
 	2: "ton_attached",
-	3: "operation",
-	4: "payload",
-	5: "refund",
+	3: "gram_attached",
+	4: "operation",
+	5: "payload",
+	6: "refund",
 }
 
 // Decode decodes SmartContractAction from json.
@@ -42389,19 +42481,29 @@ func (s *SmartContractAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"contract\"")
 			}
 		case "ton_attached":
-			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Int64()
-				s.TonAttached = int64(v)
-				if err != nil {
+				s.TonAttached.Reset()
+				if err := s.TonAttached.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"ton_attached\"")
 			}
-		case "operation":
+		case "gram_attached":
 			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.GramAttached = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gram_attached\"")
+			}
+		case "operation":
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.Operation = string(v)
@@ -42442,7 +42544,7 @@ func (s *SmartContractAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -47919,8 +48021,14 @@ func (s *ValueFlow) encodeFields(e *jx.Encoder) {
 		s.Account.Encode(e)
 	}
 	{
-		e.FieldStart("ton")
-		e.Int64(s.Ton)
+		if s.Ton.Set {
+			e.FieldStart("ton")
+			s.Ton.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("gram")
+		e.Int64(s.Gram)
 	}
 	{
 		e.FieldStart("fees")
@@ -47938,11 +48046,12 @@ func (s *ValueFlow) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfValueFlow = [4]string{
+var jsonFieldsNameOfValueFlow = [5]string{
 	0: "account",
 	1: "ton",
-	2: "fees",
-	3: "jettons",
+	2: "gram",
+	3: "fees",
+	4: "jettons",
 }
 
 // Decode decodes ValueFlow from json.
@@ -47965,19 +48074,29 @@ func (s *ValueFlow) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"account\"")
 			}
 		case "ton":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int64()
-				s.Ton = int64(v)
-				if err != nil {
+				s.Ton.Reset()
+				if err := s.Ton.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"ton\"")
 			}
-		case "fees":
+		case "gram":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.Gram = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gram\"")
+			}
+		case "fees":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int64()
 				s.Fees = int64(v)
@@ -48015,7 +48134,7 @@ func (s *ValueFlow) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

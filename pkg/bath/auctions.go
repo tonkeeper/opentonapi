@@ -35,7 +35,7 @@ func (a AuctionBidBubble) ToAction() *Action {
 		AuctionBid: &AuctionBidAction{
 			Type: a.Type,
 			Amount: core.Price{
-				Currency: core.Currency{Type: core.CurrencyTON},
+				Currency: core.Currency{Type: core.CurrencyNative},
 				Amount:   *big.NewInt(a.Amount),
 			},
 			Nft:        a.Nft,

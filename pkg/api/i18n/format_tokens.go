@@ -9,9 +9,9 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 )
 
-// FormatTONs represents the given amount of nanoTONs in TONs and formats it according to the scheme (# ### or #.##)
-func FormatTONs(amount int64) string {
-	return FormatTokens(*big.NewInt(amount), 9, "TON", nil)
+// FormatGrams represents the given amount of nanoTONs in TONs and formats it according to the scheme (# ### or #.##)
+func FormatGrams(amount int64) string {
+	return FormatTokens(*big.NewInt(amount), 9, "Gram", nil)
 }
 
 // FormatTokens translates the value in indivisible units into a user-friendly form taking into account

@@ -3784,8 +3784,10 @@
          "bridge_burn_fee": 1000000000,
          "bridge_mint_fee": 1000000000,
          "wallet_min_tons_for_storage": 8000000,
+         "wallet_min_gram_for_storage": 8000000,
          "wallet_gas_consumption": 15000000,
          "minter_min_tons_for_storage": 100000000,
+         "minter_min_gram_for_storage": 100000000,
          "discover_gas_consumption": 10000000
        }
      }

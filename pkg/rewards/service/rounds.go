@@ -294,8 +294,8 @@ func (s *Service) FetchRoundRewards(ctx context.Context, query model.RoundReward
 		RoundEnd:     time.Unix(int64(until), 0).UTC(),
 		StartBlock:   startBoundary.AfterBlock.Seqno,
 		EndBlock:     endBoundary.BeforeBlock.Seqno,
-		TotalBonuses: &model.NTon{Int: bonuses},
-		TotalStake:   &model.NTon{Int: electionTotalStake},
+		TotalBonuses: &model.NanoGram{Int: bonuses},
+		TotalStake:   &model.NanoGram{Int: electionTotalStake},
 		Validators:   validatorRewards,
 	}
 	out.PrevElectionID = &startBoundary.BeforeElectionID //fetchPrevElectionIDForBlock(ctx, client, startBlock)

@@ -64,7 +64,7 @@ func convertLiquidStaking(p core.LiquidPool, cycleStart, cycleEnd uint32) oas.Po
 		TotalAmount:        p.TotalAmount,
 		Implementation:     oas.PoolImplementationTypeLiquidTF,
 		Apy:                p.APY,
-		MinStake:           int64(ton.OneTON),
+		MinStake:           int64(ton.OneGRAM),
 		Verified:           p.VerifiedSources,
 		CurrentNominators:  p.TotalStakers,
 		MaxNominators:      -1,

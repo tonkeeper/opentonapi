@@ -17,7 +17,7 @@ import (
 type Risk struct {
 	// According to https://docs.ton.org/develop/smart-contracts/messages#message-modes
 	TransferAllRemainingBalance bool
-	Ton                         uint64
+	Gram                        uint64
 	// Jettons are not normalized and have to be post-processed with respect to Jetton masters' decimals.
 	Jettons map[tongo.AccountID]big.Int
 	Nfts    []tongo.AccountID
@@ -63,7 +63,7 @@ func ExtractRiskFromMessage(m abi.MessageRelaxed, risk Risk, mode byte) (Risk, e
 	if err != nil {
 		return Risk{}, err
 	}
-	risk.Ton += tonValue
+	risk.Gram += tonValue
 	msgBody := m.MessageInternal.Body.Value.Value
 	switch x := msgBody.(type) {
 	case abi.NftTransferMsgBody:

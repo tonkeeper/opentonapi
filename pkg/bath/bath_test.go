@@ -1267,7 +1267,7 @@ func TestFindActions(t *testing.T) {
 				})
 				accountFlow := accountValueFlow{
 					Account: accountID.String(),
-					Ton:     flow.Ton,
+					Ton:     flow.Gram,
 					Fee:     flow.Fees,
 					Jettons: jettons,
 				}

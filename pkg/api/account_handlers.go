@@ -187,7 +187,7 @@ func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq
 	for _, i := range ids {
 		account := results[i]
 		if currencyPrice != 0 {
-			convertedAmount := float64(account.Balance/int64(ton.OneTON)) / currencyPrice
+			convertedAmount := float64(account.Balance/int64(ton.OneGRAM)) / currencyPrice
 			currenciesBalance := map[string]jx.Raw{currency: jx.Raw(fmt.Sprintf("%f", convertedAmount))}
 			account.CurrenciesBalance.SetTo(currenciesBalance)
 		}
@@ -757,7 +757,7 @@ func (h *Handler) convertSubscriptionsV2(ctx context.Context, sub core.Subscript
 		res.Metadata.SetEncryptedBinary(fmt.Sprintf("%x", sub.Metadata))
 	}
 	res.PaymentPerPeriod = h.convertPrice(ctx, core.Price{
-		Currency: core.Currency{Type: core.CurrencyTON},
+		Currency: core.Currency{Type: core.CurrencyNative},
 		Amount:   *big.NewInt(sub.PaymentPerPeriod),
 	})
 	return res
@@ -782,7 +782,7 @@ func (h *Handler) convertSubscriptionsV1(ctx context.Context, sub core.Subscript
 		res.Status = oas.SubscriptionStatusActive
 	}
 	res.PaymentPerPeriod = h.convertPrice(ctx, core.Price{
-		Currency: core.Currency{Type: core.CurrencyTON},
+		Currency: core.Currency{Type: core.CurrencyNative},
 		Amount:   *big.NewInt(sub.Amount),
 	})
 	return res

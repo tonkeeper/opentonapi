@@ -827,7 +827,7 @@ paths:
         - in: query
           name: indirect_ownership
           required: false
-          description: "Selling nft items in ton implemented usually via transfer items to special selling account. This option enables including items which owned not directly."
+          description: "Selling nft items in TON implemented usually via transfer items to special selling account. This option enables including items which owned not directly."
           schema:
             type: boolean
             default: false
@@ -1883,7 +1883,7 @@ paths:
       parameters:
         - in: query
           name: tokens
-          description: accept ton and jetton master addresses, separated by commas
+          description: accept gram and jetton master addresses, separated by commas
           required: true
           explode: false
           schema:
@@ -1892,10 +1892,10 @@ paths:
             items:
               type: string
               format: address
-            example: [ "ton" ]
+            example: [ "gram" ]
         - in: query
           name: currencies
-          description: accept ton and all possible fiat currencies, separated by commas
+          description: accept gram and all possible fiat currencies, separated by commas
           required: true
           explode: false
           schema:
@@ -1903,7 +1903,7 @@ paths:
             maxItems: 50
             items:
               type: string
-            example: [ "ton","usd","rub" ]
+            example: [ "gram","usd","rub" ]
       responses:
         '200':
           description: tokens rates
@@ -1981,7 +1981,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/rates/markets:
     get:
-      description: Get the TON price from markets
+      description: Get the GRAM price from markets
       operationId: getMarketsRates
       tags:
         - Rates
@@ -3487,14 +3487,14 @@ components:
     currenciesQuery:
       in: query
       name: currencies
-      description: accept ton and all possible fiat currencies, separated by commas
+      description: accept gram and all possible fiat currencies, separated by commas
       required: false
       explode: false
       schema:
         type: array
         items:
           type: string
-        example: [ "ton", "usd", "rub" ]
+        example: [ "gram", "usd", "rub" ]
     supportedExtensions:
       in: query
       name: supported_extensions
@@ -4865,9 +4865,9 @@ components:
       required:
         - bridge_burn_fee
         - bridge_mint_fee
-        - wallet_min_tons_for_storage
+        - wallet_min_gram_for_storage
         - wallet_gas_consumption
-        - minter_min_tons_for_storage
+        - minter_min_gram_for_storage
         - discover_gas_consumption
       properties:
         bridge_burn_fee:
@@ -4879,10 +4879,20 @@ components:
         wallet_min_tons_for_storage:
           type: integer
           format: int64
+          deprecated: true
+          description: this field will gone after Sept. 2026, use wallet_min_gram_for_storage instead
+        wallet_min_gram_for_storage:
+          type: integer
+          format: int64
         wallet_gas_consumption:
           type: integer
           format: int64
         minter_min_tons_for_storage:
+          type: integer
+          format: int64
+          deprecated: true
+          description: this field will gone after Sept. 2026, use wallet_min_gram_for_storage instead
+        minter_min_gram_for_storage:
           type: integer
           format: int64
         discover_gas_consumption:
@@ -5589,7 +5599,7 @@ components:
               format: int64
         "14":
           type: object
-          description: The reward in nanoTons for block creation in the TON blockchain.
+          description: The reward in nanoGram for block creation in the TON blockchain.
           required:
             - masterchain_block_fee
             - basechain_block_fee
@@ -5876,7 +5886,7 @@ components:
           $ref: '#/components/schemas/ValidatorsSet'
         "40":
           type: object
-          description: The configuration for punishment for improper behavior (non-validation). In the absence of the parameter, the default fine size is 101 TON
+          description: The configuration for punishment for improper behavior (non-validation). In the absence of the parameter, the default fine size is 101 Gram
           required:
             - misbehaviour_punishment_config
           properties:
@@ -6177,7 +6187,7 @@ components:
           example: 9
         token_name:
           type: string
-          example: TON
+          example: GRAM
         verification:
           $ref: '#/components/schemas/TrustType'
         image:
@@ -6450,12 +6460,19 @@ components:
       type: object
       required:
         - account
-        - ton
+        - gram
         - fees
       properties:
         account:
           $ref: '#/components/schemas/AccountAddress'
         ton:
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 80
+          deprecated: true
+          description: "this field will gone after Sept. 2026, use gram instead"
+        gram:
           type: integer
           format: int64
           x-js-format: bigint
@@ -6659,7 +6676,7 @@ components:
           example: e62df6c8b4a85fe1a67f1c4d1f1e1d4335c04d1d7e2c50e0d7da7ad911f2d4
         display_symbol:
           type: string
-          example: TON/USD
+          example: GRAM/USD
         rate:
           type: number
           format: double
@@ -6747,7 +6764,7 @@ components:
       required:
         - executor
         - contract
-        - ton_attached
+        - gram_attached
         - operation
       properties:
         executor:
@@ -6755,6 +6772,13 @@ components:
         contract:
           $ref: '#/components/schemas/AccountAddress'
         ton_attached:
+          type: integer
+          description: amount in nanotons
+          format: int64
+          example: 123456789
+          x-js-format: bigint
+          deprecated: true
+        gram_attached:
           type: integer
           description: amount in nanotons
           format: int64
@@ -7197,7 +7221,21 @@ components:
           example: 1000000000
           format: int64
           x-js-format: bigint
+          deprecated: true
+          description: this field will gone after Sept. 2026, use gram_in instead
         ton_out:
+          type: integer
+          example: 2000000000
+          format: int64
+          x-js-format: bigint
+          deprecated: true
+          description: this field will gone after Sept. 2026, use gram_out instead
+        gram_in:
+          type: integer
+          example: 1000000000
+          format: int64
+          x-js-format: bigint
+        gram_out:
           type: integer
           example: 2000000000
           format: int64
@@ -7283,16 +7321,16 @@ components:
       properties:
         name:
           type: string
-          example: "Ton Transfer"
+          example: "Gram Transfer"
         description:
           type: string
-          example: "Transferring 5 Ton"
+          example: "Transferring 5 Gram"
         action_image:
           type: string
           description: a link to an image for this particular action.
         value:
           type: string
-          example: "5 Ton"
+          example: "5 Gram"
         value_image:
           type: string
           description: a link to an image that depicts this action's asset.
@@ -7350,8 +7388,8 @@ components:
           x-js-format: bigint
           example: 3
           description: >
-            Net TON change for this account not explained by actions, in nanotons:
-            extra = final_balance - initial_balance - sum(explicit TON changes from actions).
+            Net Gram change for this account not explained by actions, in nanograms:
+            extra = final_balance - initial_balance - sum(explicit Gram changes from actions).
             extra < 0 - implicit fee, extra > 0 - refund. For UI display only
         progress:
           type: number
@@ -7740,14 +7778,14 @@ components:
         (e.g. already-authorized future receipts). For UI display only.
       required:
         - transfer_all_remaining_balance
-        - ton
+        - gram
         - jettons
         - nfts
       properties:
         transfer_all_remaining_balance:
           type: boolean
           description: >
-            True if the message semantics allow sweeping all current and future remaining TON
+            True if the message semantics allow sweeping all current and future remaining Gram
             balance of the wallet (e.g. “send all” / drain patterns).
           example: true
         ton:
@@ -7755,7 +7793,14 @@ components:
           format: int64
           x-js-format: bigint
           example: 500
-          description: Maximum TON amount that may leave the wallet in the worst case, in nanotons.
+          deprecated: true
+          description: this field will gone after Sept. 2026, use gram instead
+        gram:
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 500
+          description: Maximum Gram amount that may leave the wallet in the worst case, in nanogram.
         jettons:
           type: array
           description: Jetton positions that may be debited from the wallet in the worst case.
@@ -7770,7 +7815,7 @@ components:
           type: number
           format: float
           description: >
-            Estimated equivalent of all assets at risk (TON, jettons, NFTs) in the selected
+            Estimated equivalent of all assets at risk (Gram, jettons, NFTs) in the selected
             currency from currencyQuery (e.g. USD). Approximate, best-effort UI value.
     JettonQuantity:
       type: object
@@ -7994,7 +8039,7 @@ components:
           description: this field currently returns a cached image URL (e.g., "https://cache.tonapi.io/images/jetton.jpg"). In the future, this will be replaced with the original URL from the metadata. The cached image is already available in the `preview` field of `JettonInfo` and will remain there.
         description:
           type: string
-          example: Wrapped Toncoin
+          example: Wrapped GRAM
         social:
           type: array
           items:
@@ -8174,7 +8219,7 @@ components:
       properties:
         type:
           type: string
-          description: native TON or jetton asset
+          description: native Gram or jetton asset
           enum:
             - native
             - jetton
@@ -8347,7 +8392,7 @@ components:
           example: TON Whales
         description:
           type: string
-          example: "Oldest pool with minimal staking amount 50 TON"
+          example: "Oldest pool with minimal staking amount 50 Gram"
         url:
           type: string
           example: "https://tonvalidators.org/"
@@ -8570,25 +8615,25 @@ components:
           additionalProperties:
             type: number
           example:
-            TON: 1.3710752873163712
+            GRAM: 1.3710752873163712
         diff_24h:
           type: object
           additionalProperties:
             type: string
           example:
-            TON: "-1.28%"
+            GRAM: "-1.28%"
         diff_7d:
           type: object
           additionalProperties:
             type: string
           example:
-            TON: "-2.74%"
+            GRAM: "-2.74%"
         diff_30d:
           type: object
           additionalProperties:
             type: string
           example:
-            TON: "-0.56%"
+            GRAM: "-0.56%"
     MarketTonRates:
       type: object
       required:
@@ -9160,7 +9205,7 @@ components:
               format: double
         total_stake:
           type: array
-          description: Time series of total stake in TON as [timestamp_ms, stake] pairs
+          description: Time series of total stake in Gram as [timestamp_ms, stake] pairs
           items:
             type: array
             items:

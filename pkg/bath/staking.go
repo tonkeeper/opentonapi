@@ -116,7 +116,7 @@ var DepositTFStakeStraw = Straw[BubbleDepositStake]{
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address
 		newAction.Staker = tx.inputFrom.Address
-		newAction.Amount = core.PriceNanoTON(tx.inputAmount)
+		newAction.Amount = core.PriceNanoGram(tx.inputAmount)
 		newAction.Success = tx.success
 		newAction.Implementation = core.StakingImplementationTF
 		return nil
@@ -163,7 +163,7 @@ var WithdrawTFStakeRequestStraw = Straw[BubbleWithdrawStakeRequest]{
 	Children: []Straw[BubbleWithdrawStakeRequest]{
 		{
 			Optional:   true,
-			CheckFuncs: []bubbleCheck{IsTx, AmountInterval(0, int64(ton.OneTON))},
+			CheckFuncs: []bubbleCheck{IsTx, AmountInterval(0, int64(ton.OneGRAM))},
 		},
 	},
 }
@@ -199,7 +199,7 @@ var WithdrawStakeImmediatelyStraw = Straw[BubbleWithdrawStake]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleWithdrawStake]{
-		CheckFuncs: []bubbleCheck{IsTx, AmountInterval(int64(ton.OneTON), 1<<63-1)},
+		CheckFuncs: []bubbleCheck{IsTx, AmountInterval(int64(ton.OneGRAM), 1<<63-1)},
 		Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
 			newAction.Amount += bubble.Info.(BubbleTx).inputAmount
 			return nil
@@ -305,7 +305,7 @@ var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address
 		newAction.Staker = tx.inputFrom.Address
-		newAction.Amount = core.PriceNanoTON(max(tx.inputAmount-int64(ton.OneTON), 0))
+		newAction.Amount = core.PriceNanoGram(max(tx.inputAmount-int64(ton.OneGRAM), 0))
 		newAction.Success = tx.success
 		newAction.Implementation = core.StakingImplementationLiquidTF
 		return nil

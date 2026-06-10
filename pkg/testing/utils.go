@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -18,5 +17,5 @@ func CompareResults(t *testing.T, results any, filenamePrefix string) {
 	require.Nil(t, err)
 	expected, err := os.ReadFile(fmt.Sprintf("testdata/%v.json", filenamePrefix))
 	require.Nil(t, err)
-	require.True(t, bytes.Equal(bs, expected))
+	require.Equal(t, string(expected), string(bs))
 }
