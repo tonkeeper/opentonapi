@@ -97,7 +97,7 @@ func recursiveMerge(bubble *Bubble, s Merger, idx int) bool {
 func (l *ActionsList) Extra(account tongo.AccountID) int64 {
 	extra := int64(0)
 	if flow, ok := l.ValueFlow.Accounts[account]; ok {
-		extra += flow.Ton
+		extra += flow.Gram
 	}
 	for _, action := range l.Actions {
 		extra -= action.ContributeToExtra(account)

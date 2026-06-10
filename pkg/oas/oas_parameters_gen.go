@@ -3064,7 +3064,7 @@ type GetAccountJettonBalanceParams struct {
 	AccountID string
 	// Jetton ID.
 	JettonID string
-	// Accept ton and all possible fiat currencies, separated by commas.
+	// Accept gram and all possible fiat currencies, separated by commas.
 	Currencies []string `json:",omitempty"`
 	// Comma separated list supported extensions.
 	SupportedExtensions []string `json:",omitempty"`
@@ -3733,7 +3733,7 @@ func decodeGetAccountJettonHistoryByIDParams(args [2]string, argsEscaped bool, r
 type GetAccountJettonsBalancesParams struct {
 	// Account ID.
 	AccountID string
-	// Accept ton and all possible fiat currencies, separated by commas.
+	// Accept gram and all possible fiat currencies, separated by commas.
 	Currencies []string `json:",omitempty"`
 	// Comma separated list supported extensions.
 	SupportedExtensions []string `json:",omitempty"`
@@ -4557,7 +4557,7 @@ type GetAccountNftItemsParams struct {
 	Collection OptString `json:",omitempty,omitzero"`
 	Limit      OptInt    `json:",omitempty,omitzero"`
 	Offset     OptInt    `json:",omitempty,omitzero"`
-	// Selling nft items in ton implemented usually via transfer items to special selling account. This
+	// Selling nft items in TON implemented usually via transfer items to special selling account. This
 	// option enables including items which owned not directly.
 	IndirectOwnership OptBool `json:",omitempty,omitzero"`
 }
@@ -9705,9 +9705,9 @@ func decodeGetPurchaseHistoryParams(args [1]string, argsEscaped bool, r *http.Re
 
 // GetRatesParams is parameters of getRates operation.
 type GetRatesParams struct {
-	// Accept ton and jetton master addresses, separated by commas.
+	// Accept gram and jetton master addresses, separated by commas.
 	Tokens []string `json:",omitempty"`
-	// Accept ton and all possible fiat currencies, separated by commas.
+	// Accept gram and all possible fiat currencies, separated by commas.
 	Currencies []string `json:",omitempty"`
 }
 

@@ -48,7 +48,7 @@ other = "Перевод NFT"
 
 [poolImplementationDescription]
 hash = "sha1-6865607e146fc7e6ec44550c3888b35b97ac0638"
-other = "Минимальный депозит {{.Deposit}} ТОН"
+other = "Минимальный депозит {{.Deposit}} GRAM"
 
 [smartContractExecMessage]
 hash = "sha1-4257ab338895db2ef6e518d8e20bde3815249bd5"
@@ -66,7 +66,7 @@ other = "Отмена подписки"
 hash = "sha1-ccd58bbee3ee9b94b2eed9be103e81926ceb4f3a"
 other = "Создание подписки с отложенным платежом"
 
-[tonTransferAction]
+[gramTransferAction]
 hash = "sha1-033820aa9bbe4761f0c6829bb7e2830892920316"
 other = "Перевод {{.Value}}"
 

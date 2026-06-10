@@ -25,7 +25,7 @@ func (b BubbleSubscription) ToAction() (action *Action) {
 			WithdrawTo:   b.WithdrawTo,
 			Price: core.Price{
 				Currency: core.Currency{
-					Type: core.CurrencyTON,
+					Type: core.CurrencyNative,
 				},
 				Amount: *big.NewInt(b.Amount)},
 			First: b.First,

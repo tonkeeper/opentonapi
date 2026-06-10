@@ -244,7 +244,7 @@ func (s *LiteStorage) GetContract(ctx context.Context, id tongo.AccountID) (*cor
 		return nil, err
 	}
 	return &core.Contract{
-		Balance:           account.TonBalance,
+		Balance:           account.GramBalance,
 		Status:            account.Status,
 		Code:              account.Code,
 		Data:              account.Data,

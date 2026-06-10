@@ -281,7 +281,7 @@ var StonfiLiquidityDepositSingle = Straw[BubbleLiquidityDeposit]{
 			newAction.Tokens = append(newAction.Tokens, core.VaultDepositInfo{
 				Price: core.Price{
 					Currency: core.Currency{
-						Type: core.CurrencyTON,
+						Type: core.CurrencyNative,
 					},
 					Amount: big.Int(jettonTx.amount),
 				},
@@ -384,7 +384,7 @@ var StonfiLiquidityDepositBoth = Straw[BubbleLiquidityDeposit]{
 					newAction.Tokens = append(newAction.Tokens, core.VaultDepositInfo{
 						Price: core.Price{
 							Currency: core.Currency{
-								Type: core.CurrencyTON,
+								Type: core.CurrencyNative,
 							},
 							Amount: big.Int(jettonTx.amount),
 						},

@@ -313,8 +313,8 @@ type AccountEvent struct {
 	Lt     int64 `json:"lt"`
 	// Event trace is not finished yet. Transactions still happening.
 	InProgress bool `json:"in_progress"`
-	// Net TON change for this account not explained by actions, in nanotons: extra = final_balance -
-	// initial_balance - sum(explicit TON changes from actions). extra < 0 - implicit fee, extra > 0 -
+	// Net Gram change for this account not explained by actions, in nanograms: extra = final_balance -
+	// initial_balance - sum(explicit Gram changes from actions). extra < 0 - implicit fee, extra > 0 -
 	// refund. For UI display only.
 	Extra int64 `json:"extra"`
 	// Event completion ratio in [0,1].
@@ -2766,7 +2766,7 @@ type BlockchainConfig struct {
 	R12 OptBlockchainConfig12 `json:"12"`
 	// The cost of filing complaints about incorrect operation of validators.
 	R13 OptBlockchainConfig13 `json:"13"`
-	// The reward in nanoTons for block creation in the TON blockchain.
+	// The reward in nanoGram for block creation in the TON blockchain.
 	R14 OptBlockchainConfig14 `json:"14"`
 	// The reward in nanoTons for block creation in the TON blockchain.
 	R15 OptBlockchainConfig15 `json:"15"`
@@ -2808,7 +2808,7 @@ type BlockchainConfig struct {
 	R36 OptValidatorsSet      `json:"36"`
 	R37 OptValidatorsSet      `json:"37"`
 	// The configuration for punishment for improper behavior (non-validation). In the absence of the
-	// parameter, the default fine size is 101 TON.
+	// parameter, the default fine size is 101 Gram.
 	R40 OptBlockchainConfig40 `json:"40"`
 	// The size limits and some other characteristics of accounts and messages.
 	R43 OptBlockchainConfig43 `json:"43"`
@@ -3385,7 +3385,7 @@ func (s *BlockchainConfig13) SetCellPrice(val int64) {
 	s.CellPrice = val
 }
 
-// The reward in nanoTons for block creation in the TON blockchain.
+// The reward in nanoGram for block creation in the TON blockchain.
 type BlockchainConfig14 struct {
 	MasterchainBlockFee int64 `json:"masterchain_block_fee"`
 	BasechainBlockFee   int64 `json:"basechain_block_fee"`
@@ -3960,7 +3960,7 @@ func (s *BlockchainConfig31) SetFundamentalSmcAddr(val []string) {
 }
 
 // The configuration for punishment for improper behavior (non-validation). In the absence of the
-// parameter, the default fine size is 101 TON.
+// parameter, the default fine size is 101 Gram.
 type BlockchainConfig40 struct {
 	MisbehaviourPunishmentConfig MisbehaviourPunishmentConfig `json:"misbehaviour_punishment_config"`
 }
@@ -5363,7 +5363,7 @@ func (s *DefiAssets) SetAssets(val []DefiAsset) {
 
 // Ref: #/components/schemas/DefiLockedAsset
 type DefiLockedAsset struct {
-	// Native TON or jetton asset.
+	// Native Gram or jetton asset.
 	Type   DefiLockedAssetType `json:"type"`
 	Jetton OptJettonPreview    `json:"jetton"`
 }
@@ -5388,7 +5388,7 @@ func (s *DefiLockedAsset) SetJetton(val OptJettonPreview) {
 	s.Jetton = val
 }
 
-// Native TON or jetton asset.
+// Native Gram or jetton asset.
 type DefiLockedAssetType string
 
 const (
@@ -8643,12 +8643,20 @@ func (s *JettonBridgeParams) SetPrices(val OptJettonBridgePrices) {
 
 // Ref: #/components/schemas/JettonBridgePrices
 type JettonBridgePrices struct {
-	BridgeBurnFee           int64 `json:"bridge_burn_fee"`
-	BridgeMintFee           int64 `json:"bridge_mint_fee"`
-	WalletMinTonsForStorage int64 `json:"wallet_min_tons_for_storage"`
-	WalletGasConsumption    int64 `json:"wallet_gas_consumption"`
-	MinterMinTonsForStorage int64 `json:"minter_min_tons_for_storage"`
-	DiscoverGasConsumption  int64 `json:"discover_gas_consumption"`
+	BridgeBurnFee int64 `json:"bridge_burn_fee"`
+	BridgeMintFee int64 `json:"bridge_mint_fee"`
+	// This field will gone after Sept. 2026, use wallet_min_gram_for_storage instead.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	WalletMinTonsForStorage OptInt64 `json:"wallet_min_tons_for_storage"`
+	WalletMinGramForStorage int64    `json:"wallet_min_gram_for_storage"`
+	WalletGasConsumption    int64    `json:"wallet_gas_consumption"`
+	// This field will gone after Sept. 2026, use wallet_min_gram_for_storage instead.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	MinterMinTonsForStorage OptInt64 `json:"minter_min_tons_for_storage"`
+	MinterMinGramForStorage int64    `json:"minter_min_gram_for_storage"`
+	DiscoverGasConsumption  int64    `json:"discover_gas_consumption"`
 }
 
 // GetBridgeBurnFee returns the value of BridgeBurnFee.
@@ -8662,8 +8670,13 @@ func (s *JettonBridgePrices) GetBridgeMintFee() int64 {
 }
 
 // GetWalletMinTonsForStorage returns the value of WalletMinTonsForStorage.
-func (s *JettonBridgePrices) GetWalletMinTonsForStorage() int64 {
+func (s *JettonBridgePrices) GetWalletMinTonsForStorage() OptInt64 {
 	return s.WalletMinTonsForStorage
+}
+
+// GetWalletMinGramForStorage returns the value of WalletMinGramForStorage.
+func (s *JettonBridgePrices) GetWalletMinGramForStorage() int64 {
+	return s.WalletMinGramForStorage
 }
 
 // GetWalletGasConsumption returns the value of WalletGasConsumption.
@@ -8672,8 +8685,13 @@ func (s *JettonBridgePrices) GetWalletGasConsumption() int64 {
 }
 
 // GetMinterMinTonsForStorage returns the value of MinterMinTonsForStorage.
-func (s *JettonBridgePrices) GetMinterMinTonsForStorage() int64 {
+func (s *JettonBridgePrices) GetMinterMinTonsForStorage() OptInt64 {
 	return s.MinterMinTonsForStorage
+}
+
+// GetMinterMinGramForStorage returns the value of MinterMinGramForStorage.
+func (s *JettonBridgePrices) GetMinterMinGramForStorage() int64 {
+	return s.MinterMinGramForStorage
 }
 
 // GetDiscoverGasConsumption returns the value of DiscoverGasConsumption.
@@ -8692,8 +8710,13 @@ func (s *JettonBridgePrices) SetBridgeMintFee(val int64) {
 }
 
 // SetWalletMinTonsForStorage sets the value of WalletMinTonsForStorage.
-func (s *JettonBridgePrices) SetWalletMinTonsForStorage(val int64) {
+func (s *JettonBridgePrices) SetWalletMinTonsForStorage(val OptInt64) {
 	s.WalletMinTonsForStorage = val
+}
+
+// SetWalletMinGramForStorage sets the value of WalletMinGramForStorage.
+func (s *JettonBridgePrices) SetWalletMinGramForStorage(val int64) {
+	s.WalletMinGramForStorage = val
 }
 
 // SetWalletGasConsumption sets the value of WalletGasConsumption.
@@ -8702,8 +8725,13 @@ func (s *JettonBridgePrices) SetWalletGasConsumption(val int64) {
 }
 
 // SetMinterMinTonsForStorage sets the value of MinterMinTonsForStorage.
-func (s *JettonBridgePrices) SetMinterMinTonsForStorage(val int64) {
+func (s *JettonBridgePrices) SetMinterMinTonsForStorage(val OptInt64) {
 	s.MinterMinTonsForStorage = val
+}
+
+// SetMinterMinGramForStorage sets the value of MinterMinGramForStorage.
+func (s *JettonBridgePrices) SetMinterMinGramForStorage(val int64) {
+	s.MinterMinGramForStorage = val
 }
 
 // SetDiscoverGasConsumption sets the value of DiscoverGasConsumption.
@@ -9505,11 +9533,19 @@ func (s *JettonQuantity) SetJetton(val JettonPreview) {
 
 // Ref: #/components/schemas/JettonSwapAction
 type JettonSwapAction struct {
-	Dex             string           `json:"dex"`
-	AmountIn        string           `json:"amount_in"`
-	AmountOut       string           `json:"amount_out"`
-	TonIn           OptInt64         `json:"ton_in"`
+	Dex       string `json:"dex"`
+	AmountIn  string `json:"amount_in"`
+	AmountOut string `json:"amount_out"`
+	// This field will gone after Sept. 2026, use gram_in instead.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	TonIn OptInt64 `json:"ton_in"`
+	// This field will gone after Sept. 2026, use gram_out instead.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	TonOut          OptInt64         `json:"ton_out"`
+	GramIn          OptInt64         `json:"gram_in"`
+	GramOut         OptInt64         `json:"gram_out"`
 	UserWallet      AccountAddress   `json:"user_wallet"`
 	Router          AccountAddress   `json:"router"`
 	JettonMasterIn  OptJettonPreview `json:"jetton_master_in"`
@@ -9539,6 +9575,16 @@ func (s *JettonSwapAction) GetTonIn() OptInt64 {
 // GetTonOut returns the value of TonOut.
 func (s *JettonSwapAction) GetTonOut() OptInt64 {
 	return s.TonOut
+}
+
+// GetGramIn returns the value of GramIn.
+func (s *JettonSwapAction) GetGramIn() OptInt64 {
+	return s.GramIn
+}
+
+// GetGramOut returns the value of GramOut.
+func (s *JettonSwapAction) GetGramOut() OptInt64 {
+	return s.GramOut
 }
 
 // GetUserWallet returns the value of UserWallet.
@@ -9584,6 +9630,16 @@ func (s *JettonSwapAction) SetTonIn(val OptInt64) {
 // SetTonOut sets the value of TonOut.
 func (s *JettonSwapAction) SetTonOut(val OptInt64) {
 	s.TonOut = val
+}
+
+// SetGramIn sets the value of GramIn.
+func (s *JettonSwapAction) SetGramIn(val OptInt64) {
+	s.GramIn = val
+}
+
+// SetGramOut sets the value of GramOut.
+func (s *JettonSwapAction) SetGramOut(val OptInt64) {
+	s.GramOut = val
 }
 
 // SetUserWallet sets the value of UserWallet.
@@ -18365,7 +18421,7 @@ func (s *RemoveExtensionAction) SetExtension(val string) {
 type RewardsStats struct {
 	// Time series of APY values as [timestamp_ms, apy] pairs.
 	Apy [][]float64 `json:"apy"`
-	// Time series of total stake in TON as [timestamp_ms, stake] pairs.
+	// Time series of total stake in Gram as [timestamp_ms, stake] pairs.
 	TotalStake [][]float64 `json:"total_stake"`
 }
 
@@ -18394,16 +18450,20 @@ func (s *RewardsStats) SetTotalStake(val [][]float64) {
 // future receipts). For UI display only.
 // Ref: #/components/schemas/Risk
 type Risk struct {
-	// True if the message semantics allow sweeping all current and future remaining TON balance of the
+	// True if the message semantics allow sweeping all current and future remaining Gram balance of the
 	// wallet (e.g. “send all” / drain patterns).
 	TransferAllRemainingBalance bool `json:"transfer_all_remaining_balance"`
-	// Maximum TON amount that may leave the wallet in the worst case, in nanotons.
-	Ton int64 `json:"ton"`
+	// This field will gone after Sept. 2026, use gram instead.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	Ton OptInt64 `json:"ton"`
+	// Maximum Gram amount that may leave the wallet in the worst case, in nanogram.
+	Gram int64 `json:"gram"`
 	// Jetton positions that may be debited from the wallet in the worst case.
 	Jettons []JettonQuantity `json:"jettons"`
 	// NFT items that may be transferred out of the wallet in the worst case.
 	Nfts []NftItem `json:"nfts"`
-	// Estimated equivalent of all assets at risk (TON, jettons, NFTs) in the selected currency from
+	// Estimated equivalent of all assets at risk (Gram, jettons, NFTs) in the selected currency from
 	// currencyQuery (e.g. USD). Approximate, best-effort UI value.
 	TotalEquivalent OptFloat32 `json:"total_equivalent"`
 }
@@ -18414,8 +18474,13 @@ func (s *Risk) GetTransferAllRemainingBalance() bool {
 }
 
 // GetTon returns the value of Ton.
-func (s *Risk) GetTon() int64 {
+func (s *Risk) GetTon() OptInt64 {
 	return s.Ton
+}
+
+// GetGram returns the value of Gram.
+func (s *Risk) GetGram() int64 {
+	return s.Gram
 }
 
 // GetJettons returns the value of Jettons.
@@ -18439,8 +18504,13 @@ func (s *Risk) SetTransferAllRemainingBalance(val bool) {
 }
 
 // SetTon sets the value of Ton.
-func (s *Risk) SetTon(val int64) {
+func (s *Risk) SetTon(val OptInt64) {
 	s.Ton = val
+}
+
+// SetGram sets the value of Gram.
+func (s *Risk) SetGram(val int64) {
+	s.Gram = val
 }
 
 // SetJettons sets the value of Jettons.
@@ -19114,10 +19184,14 @@ type SmartContractAction struct {
 	Executor AccountAddress `json:"executor"`
 	Contract AccountAddress `json:"contract"`
 	// Amount in nanotons.
-	TonAttached int64     `json:"ton_attached"`
-	Operation   string    `json:"operation"`
-	Payload     OptString `json:"payload"`
-	Refund      OptRefund `json:"refund"`
+	//
+	// Deprecated: schema marks this property as deprecated.
+	TonAttached OptInt64 `json:"ton_attached"`
+	// Amount in nanotons.
+	GramAttached int64     `json:"gram_attached"`
+	Operation    string    `json:"operation"`
+	Payload      OptString `json:"payload"`
+	Refund       OptRefund `json:"refund"`
 }
 
 // GetExecutor returns the value of Executor.
@@ -19131,8 +19205,13 @@ func (s *SmartContractAction) GetContract() AccountAddress {
 }
 
 // GetTonAttached returns the value of TonAttached.
-func (s *SmartContractAction) GetTonAttached() int64 {
+func (s *SmartContractAction) GetTonAttached() OptInt64 {
 	return s.TonAttached
+}
+
+// GetGramAttached returns the value of GramAttached.
+func (s *SmartContractAction) GetGramAttached() int64 {
+	return s.GramAttached
 }
 
 // GetOperation returns the value of Operation.
@@ -19161,8 +19240,13 @@ func (s *SmartContractAction) SetContract(val AccountAddress) {
 }
 
 // SetTonAttached sets the value of TonAttached.
-func (s *SmartContractAction) SetTonAttached(val int64) {
+func (s *SmartContractAction) SetTonAttached(val OptInt64) {
 	s.TonAttached = val
+}
+
+// SetGramAttached sets the value of GramAttached.
+func (s *SmartContractAction) SetGramAttached(val int64) {
+	s.GramAttached = val
 }
 
 // SetOperation sets the value of Operation.
@@ -21362,8 +21446,12 @@ func (s *ValidatorsSetListItem) SetAdnlAddr(val OptString) {
 
 // Ref: #/components/schemas/ValueFlow
 type ValueFlow struct {
-	Account AccountAddress         `json:"account"`
-	Ton     int64                  `json:"ton"`
+	Account AccountAddress `json:"account"`
+	// This field will gone after Sept. 2026, use gram instead.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	Ton     OptInt64               `json:"ton"`
+	Gram    int64                  `json:"gram"`
 	Fees    int64                  `json:"fees"`
 	Jettons []ValueFlowJettonsItem `json:"jettons"`
 }
@@ -21374,8 +21462,13 @@ func (s *ValueFlow) GetAccount() AccountAddress {
 }
 
 // GetTon returns the value of Ton.
-func (s *ValueFlow) GetTon() int64 {
+func (s *ValueFlow) GetTon() OptInt64 {
 	return s.Ton
+}
+
+// GetGram returns the value of Gram.
+func (s *ValueFlow) GetGram() int64 {
+	return s.Gram
 }
 
 // GetFees returns the value of Fees.
@@ -21394,8 +21487,13 @@ func (s *ValueFlow) SetAccount(val AccountAddress) {
 }
 
 // SetTon sets the value of Ton.
-func (s *ValueFlow) SetTon(val int64) {
+func (s *ValueFlow) SetTon(val OptInt64) {
 	s.Ton = val
+}
+
+// SetGram sets the value of Gram.
+func (s *ValueFlow) SetGram(val int64) {
+	s.Gram = val
 }
 
 // SetFees sets the value of Fees.

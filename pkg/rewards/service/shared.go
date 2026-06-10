@@ -218,9 +218,9 @@ func computeValidatorRewards(ctx context.Context, pinned LiteClient, rows []vali
 			validatorRewards[i] = model.ValidatorReward{
 				Rank:           i + 1,
 				Pubkey:         fmt.Sprintf("%x", row.descr.PubKey()),
-				EffectiveStake: &model.NTon{Int: row.trueStake},
+				EffectiveStake: &model.NanoGram{Int: row.trueStake},
 				Weight:         validatorWeight(row.trueStake, totalTrueStake),
-				Reward:         &model.NTon{Int: row.reward},
+				Reward:         &model.NanoGram{Int: row.reward},
 				Pool:           row.pool,
 			}
 
@@ -242,7 +242,7 @@ func computeValidatorRewards(ctx context.Context, pinned LiteClient, rows []vali
 			}
 
 			totalStake := new(big.Int).Add(row.trueStake, credit)
-			validatorRewards[i].TotalStake = &model.NTon{Int: totalStake}
+			validatorRewards[i].TotalStake = &model.NanoGram{Int: totalStake}
 
 			if info.pd == nil || info.poolType != poolTypeNominatorV10 {
 				return nil
@@ -250,8 +250,8 @@ func computeValidatorRewards(ctx context.Context, pinned LiteClient, rows []vali
 
 			// Nominator Pool: extract metadata and compute per-nominator rewards.
 			meta := computeNominatorPoolMeta(info.pd)
-			validatorRewards[i].ValidatorStake = &model.NTon{Int: meta.validatorStake}
-			validatorRewards[i].NominatorsStake = &model.NTon{Int: meta.nominatorsStake}
+			validatorRewards[i].ValidatorStake = &model.NanoGram{Int: meta.validatorStake}
+			validatorRewards[i].NominatorsStake = &model.NanoGram{Int: meta.nominatorsStake}
 			validatorRewards[i].ValidatorRewardShare = meta.validatorRewardShare
 			validatorRewards[i].NominatorsCount = meta.nominatorsCount
 
@@ -294,9 +294,9 @@ func computeValidatorRewards(ctx context.Context, pinned LiteClient, rows []vali
 				validatorRewards[i].Nominators = append(validatorRewards[i].Nominators, model.NominatorReward{
 					Address:        addr.ToHuman(true, false),
 					Weight:         utils.InaccurateDivFloat(nominatorStake, nominatorsTotalStake),
-					Reward:         &model.NTon{Int: nominatorReward},
-					EffectiveStake: &model.NTon{Int: nominatorEffectiveStake},
-					Stake:          &model.NTon{Int: nominatorStake},
+					Reward:         &model.NanoGram{Int: nominatorReward},
+					EffectiveStake: &model.NanoGram{Int: nominatorEffectiveStake},
+					Stake:          &model.NanoGram{Int: nominatorStake},
 				})
 			}
 

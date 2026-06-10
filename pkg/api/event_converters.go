@@ -78,10 +78,10 @@ func convertTrace(t *core.Trace, book addressBook) oas.Trace {
 }
 
 func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddress tongo.AccountID, currency *string) (oas.Risk, error) {
-	if int64(risk.Ton) < 0 {
+	if int64(risk.Gram) < 0 {
 		return oas.Risk{}, fmt.Errorf("ivalid ton amount")
 	}
-	total := float64(risk.Ton) / 1e9
+	total := float64(risk.Gram) / 1e9
 	var curPrice float64
 	var todayRates map[string]float64
 	var err error
@@ -101,15 +101,19 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		if err != nil {
 			return oas.Risk{}, err
 		}
-		if a != nil && a.TonBalance > int64(risk.Ton) {
-			total = float64(a.TonBalance) / 1e9
+		if a != nil && a.GramBalance > int64(risk.Gram) {
+			total = float64(a.GramBalance) / 1e9
 		}
 	}
 	oasRisk := oas.Risk{
 		TransferAllRemainingBalance: risk.TransferAllRemainingBalance,
-		Ton:                         int64(risk.Ton),
-		Jettons:                     nil,
-		Nfts:                        nil,
+		Ton: oas.OptInt64{
+			Value: int64(risk.Gram),
+			Set:   true,
+		},
+		Gram:    int64(risk.Gram),
+		Jettons: nil,
+		Nfts:    nil,
 	}
 	for jetton, quantity := range risk.Jettons {
 		jettonWallets, err := h.storage.GetJettonWalletsByOwnerAddress(ctx, walletAddress, &jetton, false, true, 0, 0)
@@ -199,12 +203,12 @@ func (h *Handler) convertActionTonTransfer(t *bath.TonTransferAction, acceptLang
 			Origin: t.Refund.Origin,
 		})
 	}
-	value := i18n.FormatTONs(t.Amount)
+	value := i18n.FormatGrams(t.Amount)
 	simplePreview := oas.ActionSimplePreview{
-		Name: "Ton Transfer",
+		Name: "Gram Transfer",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
-				ID:    "tonTransferAction",
+				ID:    "gramTransferAction",
 				Other: "Transferring {{.Value}}",
 			},
 			TemplateData: i18n.Template{
@@ -389,8 +393,8 @@ func (h *Handler) formatPrice(ctx context.Context, amount core.Price, eventLt in
 	if err != nil {
 		return "", oas.OptPrice{}, err
 	}
-	if amount.Currency.Type == core.CurrencyTON {
-		return i18n.FormatTONs(amount.Amount.Int64()), oas.NewOptPrice(p), nil
+	if amount.Currency.Type == core.CurrencyNative {
+		return i18n.FormatGrams(amount.Amount.Int64()), oas.NewOptPrice(p), nil
 	}
 	return i18n.FormatTokens(amount.Amount, int32(p.Decimals), p.TokenName, scaledUiParams), oas.NewOptPrice(p), nil
 }
@@ -401,7 +405,7 @@ func (h *Handler) convertDepositStake(ctx context.Context, d *bath.DepositStakeA
 		return oas.OptDepositStakeAction{}, oas.ActionSimplePreview{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
 	}
 	tonAmount := int64(0)
-	if d.Amount.Currency.Type == core.CurrencyTON {
+	if d.Amount.Currency.Type == core.CurrencyNative {
 		tonAmount = d.Amount.Amount.Int64()
 	}
 	var action oas.OptDepositStakeAction
@@ -438,7 +442,7 @@ func (h *Handler) convertWithdrawStakeRequest(ctx context.Context, d *bath.Withd
 		if err != nil {
 			return oas.OptWithdrawStakeRequestAction{}, oas.ActionSimplePreview{}, fmt.Errorf("failed to get scaled UI parameters: %w", err)
 		}
-		if d.Amount.Currency.Type == core.CurrencyTON {
+		if d.Amount.Currency.Type == core.CurrencyNative {
 			tonAmount = oas.NewOptInt64(d.Amount.Amount.Int64())
 		}
 	}
@@ -479,10 +483,10 @@ func (h *Handler) convertWithdrawStake(d *bath.WithdrawStakeAction, acceptLangua
 				ID:    "withdrawStakeAction",
 				Other: "Withdraw {{.Value}} from staking pool",
 			},
-			TemplateData: i18n.Template{"Value": i18n.FormatTONs(d.Amount)},
+			TemplateData: i18n.Template{"Value": i18n.FormatGrams(d.Amount)},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &d.Staker, &d.Pool),
-		Value:    oas.NewOptString(i18n.FormatTONs(d.Amount)),
+		Value:    oas.NewOptString(i18n.FormatGrams(d.Amount)),
 	}
 	return action, simplePreview
 }
@@ -935,7 +939,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Buyer:       convertAccountAddress(a.NftPurchase.Buyer, h.addressBook),
 		})
 	case bath.ElectionsDepositStake:
-		value := i18n.FormatTONs(a.ElectionsDepositStake.Amount)
+		value := i18n.FormatGrams(a.ElectionsDepositStake.Amount)
 		action.ElectionsDepositStake.SetTo(oas.ElectionsDepositStakeAction{
 			Amount: a.ElectionsDepositStake.Amount,
 			Staker: convertAccountAddress(a.ElectionsDepositStake.Staker, h.addressBook),
@@ -955,7 +959,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			Accounts: distinctAccounts(viewer, h.addressBook, &a.ElectionsDepositStake.Elector, &a.ElectionsDepositStake.Staker),
 		}
 	case bath.ElectionsRecoverStake:
-		value := i18n.FormatTONs(a.ElectionsRecoverStake.Amount)
+		value := i18n.FormatGrams(a.ElectionsRecoverStake.Amount)
 		action.ElectionsRecoverStake.SetTo(oas.ElectionsRecoverStakeAction{
 			Amount: a.ElectionsRecoverStake.Amount,
 			Staker: convertAccountAddress(a.ElectionsRecoverStake.Staker, h.addressBook),
@@ -984,7 +988,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		simplePreviewData := i18n.Template{}
 		if a.JettonSwap.In.IsTon {
 			swapAction.TonIn = oas.NewOptInt64(a.JettonSwap.In.Amount.Int64())
-			simplePreviewData["AmountIn"] = i18n.FormatTONs(a.JettonSwap.In.Amount.Int64())
+			simplePreviewData["AmountIn"] = i18n.FormatGrams(a.JettonSwap.In.Amount.Int64())
 		} else {
 			scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, a.JettonSwap.In.JettonMaster, &eventLt)
 			if err != nil {
@@ -999,7 +1003,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		}
 		if a.JettonSwap.Out.IsTon {
 			swapAction.TonOut = oas.NewOptInt64(a.JettonSwap.Out.Amount.Int64())
-			simplePreviewData["AmountOut"] = i18n.FormatTONs(a.JettonSwap.Out.Amount.Int64())
+			simplePreviewData["AmountOut"] = i18n.FormatGrams(a.JettonSwap.Out.Amount.Int64())
 		} else {
 			scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, a.JettonSwap.Out.JettonMaster, &eventLt)
 			if err != nil {
@@ -1081,11 +1085,12 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			op = "JettonAdminAction"
 		}
 		contractAction := oas.SmartContractAction{
-			Executor:    convertAccountAddress(a.SmartContractExec.Executor, h.addressBook),
-			Contract:    convertAccountAddress(a.SmartContractExec.Contract, h.addressBook),
-			TonAttached: a.SmartContractExec.TonAttached,
-			Operation:   op,
-			Refund:      oas.OptRefund{},
+			Executor:     convertAccountAddress(a.SmartContractExec.Executor, h.addressBook),
+			Contract:     convertAccountAddress(a.SmartContractExec.Contract, h.addressBook),
+			TonAttached:  oas.OptInt64{Set: true, Value: a.SmartContractExec.TonAttached},
+			GramAttached: a.SmartContractExec.TonAttached,
+			Operation:    op,
+			Refund:       oas.OptRefund{},
 		}
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Smart Contract Execution",
@@ -1153,8 +1158,12 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 func convertAccountValueFlow(accountID tongo.AccountID, flow *bath.AccountValueFlow, book addressBook, previews map[tongo.AccountID]oas.JettonPreview) oas.ValueFlow {
 	valueFlow := oas.ValueFlow{
 		Account: convertAccountAddress(accountID, book),
-		Ton:     flow.Ton,
-		Fees:    flow.Fees,
+		Ton: oas.OptInt64{
+			Value: int64(flow.Gram),
+			Set:   true,
+		},
+		Gram: int64(flow.Gram),
+		Fees: flow.Fees,
 	}
 	for jettonMaster, quantity := range flow.Jettons {
 		valueFlow.Jettons = append(valueFlow.Jettons, oas.ValueFlowJettonsItem{
@@ -1460,7 +1469,7 @@ func (h *Handler) convertGasRelayAction(t *bath.GasRelayAction, acceptLanguage s
 			},
 		}),
 		Accounts: distinctAccounts(viewer, h.addressBook, &t.Relayer, &t.Target),
-		Value:    oas.NewOptString(i18n.FormatTONs(t.Amount)),
+		Value:    oas.NewOptString(i18n.FormatGrams(t.Amount)),
 	}
 	return action, simplePreview
 }

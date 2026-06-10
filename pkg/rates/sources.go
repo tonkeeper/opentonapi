@@ -34,12 +34,12 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		slpTokens  = "slp_tokens"
 	)
 
-	// Fetch market prices and calculate the median TON/USD rate
-	marketTonPrices, err := m.GetCurrentMarketsTonPrice()
+	// Fetch market prices and calculate the median GRAM/USD rate
+	marketGramPrices, err := m.GetCurrentMarketsGramPrice()
 	if err != nil {
 		return map[string]float64{}, err
 	}
-	medianTonPrice, err := getMedianPrice(marketTonPrices)
+	medianGramPrice, err := getMedianPrice(marketGramPrices)
 	if err != nil {
 		return map[string]float64{}, err
 	}
@@ -55,13 +55,13 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	}
 
 	// Retry helper to run a task up to 3 times with backoff
-	retry := func(label string, tonPrice float64, pools map[ton.AccountID]float64,
+	retry := func(label string, gramPrice float64, pools map[ton.AccountID]float64,
 		task func(float64, map[ton.AccountID]float64) (map[ton.AccountID]float64, error),
 	) (map[ton.AccountID]float64, error) {
 		var err error
 		var result map[ton.AccountID]float64
 		for attempt := 1; attempt <= 3; attempt++ {
-			result, err = task(tonPrice, pools)
+			result, err = task(gramPrice, pools)
 			if err == nil {
 				return result, nil
 			}
@@ -91,7 +91,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		{USDe, m.getUsdEPrice},
 	}
 	for _, pf := range priceFetchers {
-		result, err := retry(pf.label, medianTonPrice, pools, pf.fetch)
+		result, err := retry(pf.label, medianGramPrice, pools, pf.fetch)
 		if err != nil || result == nil {
 			continue
 		}
@@ -104,24 +104,27 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	pools = m.getJettonPricesFromDex(pools)
 
 	// Fetch and merge SLP tokens price
-	if slpPrices, err := retry(slpTokens, medianTonPrice, pools, m.getSlpTokensPrice); err == nil {
+	if slpPrices, err := retry(slpTokens, medianGramPrice, pools, m.getSlpTokensPrice); err == nil {
 		for account, price := range slpPrices {
 			pools[account] = price
 		}
 	}
 
 	// Fetch and merge affluent vaults' prices
-	if vaultsPrices, err := retry(affVaults, medianTonPrice, pools, m.getAffVaultsPrices); err == nil {
+	if vaultsPrices, err := retry(affVaults, medianGramPrice, pools, m.getAffVaultsPrices); err == nil {
 		for account, price := range vaultsPrices {
 			pools[account] = price
 		}
 	}
 
 	// Compose final result map with fiat and jetton prices
-	rates := map[string]float64{"TON": 1}
+	rates := map[string]float64{
+		"TON":  1,
+		"GRAM": 1,
+	}
 	// Add additional coins prices that absence in market rates
 	additionalPrices := map[string]float64{"TRX": 1 / medianTrxPrice}
-	for currency, price := range getFiatPrices(medianTonPrice, additionalPrices) {
+	for currency, price := range getFiatPrices(medianGramPrice, additionalPrices) {
 		rates[currency] = price
 	}
 	for accountID, price := range pools {
@@ -131,7 +134,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	return rates, nil
 }
 
-// getMedianPrice computes the median TON price from available market data
+// getMedianPrice computes the median Gram price from available market data
 func getMedianPrice(markets []Market) (float64, error) {
 	// Extract the USD prices from the market data
 	var prices []float64
@@ -385,7 +388,7 @@ func (m *Mock) getSlpTokensPrice(tonPrice float64, pools map[ton.AccountID]float
 		if err != nil || multiplier == 0 {
 			continue
 		}
-		val := float64(multiplier) / float64(ton.OneTON)
+		val := float64(multiplier) / float64(ton.OneGRAM)
 
 		switch slpType {
 		case references.JUsdtSlpType:

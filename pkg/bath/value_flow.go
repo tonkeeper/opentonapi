@@ -12,7 +12,7 @@ var (
 
 // AccountValueFlow contains a change of assets for a particular account.
 type AccountValueFlow struct {
-	Ton     int64
+	Gram    int64
 	Fees    int64
 	Jettons map[tongo.AccountID]big.Int
 	NFTs    [2]int // 0 - added, 1 - removed
@@ -31,19 +31,19 @@ func newValueFlow() *ValueFlow {
 
 func (flow *ValueFlow) AddTons(accountID tongo.AccountID, amount int64) {
 	if accountFlow, ok := flow.Accounts[accountID]; ok {
-		accountFlow.Ton += amount
+		accountFlow.Gram += amount
 		return
 	}
-	flow.Accounts[accountID] = &AccountValueFlow{Ton: amount}
+	flow.Accounts[accountID] = &AccountValueFlow{Gram: amount}
 }
 
 func (flow *ValueFlow) AddFee(accountID tongo.AccountID, amount int64) {
 	if accountFlow, ok := flow.Accounts[accountID]; ok {
 		accountFlow.Fees += amount
-		accountFlow.Ton -= amount
+		accountFlow.Gram -= amount
 		return
 	}
-	flow.Accounts[accountID] = &AccountValueFlow{Fees: amount, Ton: -amount}
+	flow.Accounts[accountID] = &AccountValueFlow{Fees: amount, Gram: -amount}
 }
 func (flow *ValueFlow) SubJettons(accountID tongo.AccountID, jettonMaster tongo.AccountID, value big.Int) {
 	var negative big.Int
@@ -74,7 +74,7 @@ func (flow *ValueFlow) Merge(other *ValueFlow) {
 		if _, ok := flow.Accounts[accountID]; !ok {
 			flow.Accounts[accountID] = &AccountValueFlow{}
 		}
-		flow.Accounts[accountID].Ton += af.Ton
+		flow.Accounts[accountID].Gram += af.Gram
 		flow.Accounts[accountID].Fees += af.Fees
 		flow.Accounts[accountID].NFTs[0] += af.NFTs[0]
 		flow.Accounts[accountID].NFTs[1] += af.NFTs[1]

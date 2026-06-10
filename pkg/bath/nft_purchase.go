@@ -25,7 +25,7 @@ func (b BubbleNftPurchase) ToAction() *Action {
 			Seller:      b.Seller,
 			AuctionType: b.AuctionType,
 			Price: core.Price{
-				Currency: core.Currency{Type: core.CurrencyTON},
+				Currency: core.Currency{Type: core.CurrencyNative},
 				Amount:   *big.NewInt(b.Price),
 			},
 		},

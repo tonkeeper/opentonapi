@@ -175,10 +175,10 @@ func (s *Service) FetchPerBlockRewards(ctx context.Context, seqno *uint32, unixt
 			Time:  blockTime.UTC(),
 		},
 		ElectionID:            int64(roundSince),
-		PrevBlockTotalBonuses: &model.NTon{Int: prevBlockBonuses},
-		CurrBlockTotalBonuses: &model.NTon{Int: currBlockBonuses},
-		ElectorBalance:        &model.NTon{Int: electorBalance},
-		RewardPerBlock:        &model.NTon{Int: rewardPerBlock},
+		PrevBlockTotalBonuses: &model.NanoGram{Int: prevBlockBonuses},
+		CurrBlockTotalBonuses: &model.NanoGram{Int: currBlockBonuses},
+		ElectorBalance:        &model.NanoGram{Int: electorBalance},
+		RewardPerBlock:        &model.NanoGram{Int: rewardPerBlock},
 	}
 	if roundStartBlock > 0 {
 		prevID, err := fetchPrevElectionIDForBlock(ctx, client, roundStartBlock)
@@ -201,7 +201,7 @@ func (s *Service) FetchPerBlockRewards(ctx context.Context, seqno *uint32, unixt
 	// Build validator rows.
 	rows, totalTrueStake := buildValidatorRows(rd.conf, rd.pools)
 	log.Printf("active validators: %d", len(rows))
-	out.TotalStake = &model.NTon{Int: totalTrueStake}
+	out.TotalStake = &model.NanoGram{Int: totalTrueStake}
 	log.Printf("total true stake (active validators): %.2f TON", new(big.Float).Quo(new(big.Float).SetInt(totalTrueStake), big.NewFloat(1e9)))
 
 	out.Validators = computeValidatorRewards(ctx, pinned, rows, totalTrueStake, rewardPerBlock, shallow)

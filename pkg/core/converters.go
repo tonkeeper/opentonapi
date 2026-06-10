@@ -436,7 +436,7 @@ func ConvertToAccount(accountId tongo.AccountID, shardAccount tlb.ShardAccount) 
 		}
 	}
 	balance := acc.Account.Storage.Balance
-	res.TonBalance = int64(balance.Grams)
+	res.GramBalance = int64(balance.Grams)
 	res.ExtraBalances = extractExtraCurrencies(balance.Other)
 	res.LastTransactionLt = shardAccount.LastTransLt
 	res.LastTransactionHash = tongo.Bits256(shardAccount.LastTransHash)

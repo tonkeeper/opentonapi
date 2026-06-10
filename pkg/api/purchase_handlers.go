@@ -5,13 +5,14 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/hex"
+	"net/http"
+
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/toncrypto"
-	"net/http"
 )
 
 func (h *Handler) GetPurchaseHistory(ctx context.Context, params oas.GetPurchaseHistoryParams) (r *oas.AccountPurchases, _ error) {
@@ -116,14 +117,14 @@ func convertInvoiceOpenMetadata(params encryptionParameters, data []byte) (oas.M
 
 func (h *Handler) convertPrice(ctx context.Context, price core.Price) oas.Price {
 	switch price.Currency.Type {
-	case core.CurrencyTON:
+	case core.CurrencyNative:
 		return oas.Price{
 			CurrencyType: oas.CurrencyTypeNative,
 			Value:        price.Amount.String(),
 			Decimals:     9,
-			TokenName:    "TON",
+			TokenName:    "Gram",
 			Verification: oas.TrustTypeWhitelist,
-			Image:        references.TonSymbol,
+			Image:        references.GramSymbol,
 		}
 	case core.CurrencyExtra:
 		meta := references.GetExtraCurrencyMeta(*price.Currency.CurrencyID)

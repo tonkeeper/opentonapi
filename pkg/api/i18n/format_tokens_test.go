@@ -17,60 +17,60 @@ func TestFormatTONs(t *testing.T) {
 	}{
 		{
 			amount: 0,
-			want:   "0 TON",
+			want:   "0 Gram",
 		},
 		{
 			amount: -1_000_000_000,
-			want:   "-1 TON",
+			want:   "-1 Gram",
 		},
 		{
 			amount: 33000_144_000_000,
-			want:   "33 000 TON",
+			want:   "33 000 Gram",
 		},
 		{
 			amount: 33000_544_000_000,
-			want:   "33 000 TON",
+			want:   "33 000 Gram",
 		},
 		{
 			amount: 33000_944_000_000,
-			want:   "33 000 TON",
+			want:   "33 000 Gram",
 		},
 		{
 			amount: 1_249_000_000,
-			want:   "1.24 TON",
+			want:   "1.24 Gram",
 		},
 		{
 			amount: 1_241_000_000,
-			want:   "1.24 TON",
+			want:   "1.24 Gram",
 		},
 		{
 			amount: 143_945,
-			want:   "0.000143 TON",
+			want:   "0.000143 Gram",
 		},
 		{
 			amount: 143_145,
-			want:   "0.000143 TON",
+			want:   "0.000143 Gram",
 		},
 		{
 			amount: -33000_000_000_000,
-			want:   "-33 000 TON",
+			want:   "-33 000 Gram",
 		},
 		{
 			amount: 1_000_000_000,
-			want:   "1 TON",
+			want:   "1 Gram",
 		},
 		{
 			amount: 1_000_000,
-			want:   "0.001 TON",
+			want:   "0.001 Gram",
 		},
 		{
 			amount: 566_450_533_222_111,
-			want:   "566 450 TON",
+			want:   "566 450 Gram",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FormatTONs(tt.amount)
+			got := FormatGrams(tt.amount)
 			require.Equal(t, tt.want, got)
 		})
 	}
