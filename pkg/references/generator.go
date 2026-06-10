@@ -8,6 +8,7 @@ import (
 	"go/format"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -79,6 +80,9 @@ func getStonfiRouters() string {
 	}
 
 	var mapValues strings.Builder
+	sort.Slice(r.RouterList, func(i, j int) bool {
+		return r.RouterList[i].Address < r.RouterList[j].Address
+	})
 	for _, router := range r.RouterList {
 		mapValues.WriteString(fmt.Sprintf(MapItem, router.Address))
 	}
