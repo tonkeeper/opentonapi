@@ -5,7 +5,6 @@ go 1.25.0
 require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/Code-Hex/go-generics-cache v1.5.1
-	github.com/Narasimha1997/ratelimiter v1.1.1
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/cespare/xxhash/v2 v2.3.0
@@ -14,7 +13,6 @@ require (
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.2.0
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/websocket v1.5.3
 	github.com/graph-gophers/dataloader/v7 v7.1.3
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/nicksnyder/go-i18n/v2 v2.6.1
