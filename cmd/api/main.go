@@ -13,7 +13,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/opentonapi/pkg/config"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
-	"github.com/tonkeeper/opentonapi/pkg/pusher/sources"
 	"github.com/tonkeeper/opentonapi/pkg/pyth"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
@@ -72,13 +71,7 @@ func main() {
 	if err != nil {
 		log.Fatal("storage init", zap.Error(err))
 	}
-	// mempool receives a copy of any payload that goes through our API method /v2/blockchain/message
-	mempool := sources.NewMemPool(log)
-	mempoolCh := mempool.Run(context.TODO())
-
-	msgSender, err := blockchain.NewMsgSender(log, cfg.App.LiteServers, map[string]chan<- blockchain.ExtInMsgCopy{
-		"mempool": mempoolCh,
-	})
+	msgSender, err := blockchain.NewMsgSender(log, cfg.App.LiteServers, map[string]chan<- blockchain.ExtInMsgCopy{})
 	if err != nil {
 		log.Fatal("failed to create msg sender", zap.Error(err))
 	}
@@ -96,23 +89,12 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}
-	source := sources.NewBlockchainSource(log, client)
-	pusherBlockCh := source.Run(context.TODO())
-
-	tracer := sources.NewTracer(log, storage, source)
-	go tracer.Run(context.TODO())
-
 	idx := indexer.New(log, client)
 	go idx.Run(context.TODO(), []chan indexer.IDandBlock{
-		pusherBlockCh,
 		storageBlockCh,
 	})
 
-	server, err := api.NewServer(log, h,
-		api.WithTransactionSource(source),
-		api.WithBlockHeadersSource(source),
-		api.WithTraceSource(tracer),
-		api.WithMemPool(mempool))
+	server, err := api.NewServer(log, h)
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}

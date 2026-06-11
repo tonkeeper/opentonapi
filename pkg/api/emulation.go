@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"math/big"
 	"sync"
@@ -51,7 +50,7 @@ var (
 	})
 )
 
-func (h *Handler) RunEmulation(ctx context.Context, msgCh <-chan blockchain.ExtInMsgCopy, emulationCh chan<- blockchain.ExtInMsgCopy) {
+func (h *Handler) RunEmulation(ctx context.Context, msgCh <-chan blockchain.ExtInMsgCopy) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -63,7 +62,7 @@ func (h *Handler) RunEmulation(ctx context.Context, msgCh <-chan blockchain.ExtI
 				defer cancel()
 
 				// TODO: find a way to emulate when tonapi receives a batch of messages in a single request to SendBlockchainMessage endpoint.
-				_, err := h.addToMempool(ctx, msgCopy.Payload, nil, emulationCh)
+				_, err := h.addToMempool(ctx, msgCopy.Payload, nil)
 				if err != nil {
 					sentry.Send("addToMempool", sentry.SentryInfoData{"payload": msgCopy.Payload}, sentry.LevelError)
 				}
@@ -94,7 +93,7 @@ func (h *Handler) isEmulationAllowed(accountID ton.AccountID, state tlb.ShardAcc
 	return true, nil
 }
 
-func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount, emulationCh chan<- blockchain.ExtInMsgCopy) (map[tongo.AccountID]tlb.ShardAccount, error) {
+func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccount map[tongo.AccountID]tlb.ShardAccount) (map[tongo.AccountID]tlb.ShardAccount, error) {
 	if shardAccount == nil {
 		shardAccount = map[tongo.AccountID]tlb.ShardAccount{}
 	}
@@ -176,12 +175,6 @@ func (h *Handler) addToMempool(ctx context.Context, bytesBoc []byte, shardAccoun
 		}
 		newMemHashes = append(newMemHashes, ton.Bits256(hash)) // it's important to make it last
 		h.mempoolEmulate.accountsTraces.Set(account, newMemHashes, cache.WithExpiration(time.Second*time.Duration(ttl)))
-	}
-	emulationCh <- blockchain.ExtInMsgCopy{
-		MsgBoc:   base64.StdEncoding.EncodeToString(bytesBoc),
-		Details:  h.ctxToDetails(ctx),
-		Payload:  bytesBoc,
-		Accounts: accounts,
 	}
 	return newShardAccount, nil
 }
