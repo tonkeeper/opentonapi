@@ -1981,7 +1981,7 @@ paths:
           $ref: '#/components/responses/Error'
   /v2/rates/markets:
     get:
-      description: Get the GRAM price from markets
+      description: Get the Gram price from markets
       operationId: getMarketsRates
       tags:
         - Rates
@@ -5612,7 +5612,7 @@ components:
               format: int64
         "15":
           type: object
-          description: The reward in nanoTons for block creation in the TON blockchain.
+          description: The reward in nanograms for block creation in the TON blockchain.
           required:
             - validators_elected_for
             - elections_start_before
@@ -6187,7 +6187,7 @@ components:
           example: 9
         token_name:
           type: string
-          example: GRAM
+          example: Gram
         verification:
           $ref: '#/components/schemas/TrustType'
         image:
@@ -6639,7 +6639,7 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         amount:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
@@ -6773,14 +6773,14 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         ton_attached:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
           deprecated: true
         gram_attached:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
@@ -8039,7 +8039,7 @@ components:
           description: this field currently returns a cached image URL (e.g., "https://cache.tonapi.io/images/jetton.jpg"). In the future, this will be replaced with the original URL from the metadata. The cached image is already available in the `preview` field of `JettonInfo` and will remain there.
         description:
           type: string
-          example: Wrapped GRAM
+          example: Wrapped Gram
         social:
           type: array
           items:
@@ -8928,19 +8928,19 @@ components:
           example: 1772658824
         elector_balance:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
         total_stake:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
         reward_per_block:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
@@ -9031,19 +9031,19 @@ components:
           example: 0.15
         reward:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
         effective_stake:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
         stake:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
@@ -9061,7 +9061,7 @@ components:
           example: "e33f0e53552f951e0a27c8e5a461a1bd65975af369a2c85a06e51f7fbb8ae667"
         effective_stake:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
@@ -9072,7 +9072,7 @@ components:
           example: 0.004648
         reward:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
@@ -9094,13 +9094,13 @@ components:
           type: string
         validator_stake:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
         nominators_stake:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
@@ -9175,13 +9175,13 @@ components:
           description: Last masterchain block of the round.
         total_bonuses:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
         total_stake:
           type: integer
-          description: amount in nanotons
+          description: amount in nanograms
           format: int64
           example: 123456789
           x-js-format: bigint
