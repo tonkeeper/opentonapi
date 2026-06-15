@@ -2063,7 +2063,7 @@
       "type": "object"
      },
      "15": {
-      "description": "The reward in nanoTons for block creation in the TON blockchain.",
+      "description": "The reward in nanograms for block creation in the TON blockchain.",
       "properties": {
        "elections_end_before": {
         "example": 8192,
@@ -4359,7 +4359,7 @@
       "type": "string"
      },
      "description": {
-      "example": "Wrapped GRAM",
+      "example": "Wrapped Gram",
       "type": "string"
      },
      "image": {
@@ -5622,21 +5622,21 @@
       "type": "string"
      },
      "effective_stake": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
      },
      "reward": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
      },
      "stake": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -5927,7 +5927,7 @@
       "type": "string"
      },
      "token_name": {
-      "example": "GRAM",
+      "example": "Gram",
       "type": "string"
      },
      "value": {
@@ -6325,14 +6325,14 @@
       "type": "integer"
      },
      "total_bonuses": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
      },
      "total_stake": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -6587,7 +6587,7 @@
       "$ref": "#/components/schemas/AccountAddress"
      },
      "gram_attached": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -6605,7 +6605,7 @@
      },
      "ton_attached": {
       "deprecated": true,
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -6914,7 +6914,7 @@
    "TonTransferAction": {
     "properties": {
      "amount": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -7362,7 +7362,7 @@
    "ValidatorRewardEntry": {
     "properties": {
      "effective_stake": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -7379,7 +7379,7 @@
       "type": "integer"
      },
      "nominators_stake": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -7414,7 +7414,7 @@
       "type": "integer"
      },
      "reward": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -7437,7 +7437,7 @@
       "type": "number"
      },
      "validator_stake": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -7511,7 +7511,7 @@
       "type": "integer"
      },
      "elector_balance": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -7536,14 +7536,14 @@
       "type": "integer"
      },
      "reward_per_block": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
       "x-js-format": "bigint"
      },
      "total_stake": {
-      "description": "amount in nanotons",
+      "description": "amount in nanograms",
       "example": 123456789,
       "format": "int64",
       "type": "integer",
@@ -12208,7 +12208,7 @@
   },
   "/v2/rates/markets": {
    "get": {
-    "description": "Get the GRAM price from markets",
+    "description": "Get the Gram price from markets",
     "operationId": "getMarketsRates",
     "responses": {
      "200": {

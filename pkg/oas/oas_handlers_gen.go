@@ -10554,7 +10554,7 @@ func (s *Server) handleGetLibraryByHashRequest(args [1]string, argsEscaped bool,
 
 // handleGetMarketsRatesRequest handles getMarketsRates operation.
 //
-// Get the GRAM price from markets.
+// Get the Gram price from markets.
 //
 // GET /v2/rates/markets
 func (s *Server) handleGetMarketsRatesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

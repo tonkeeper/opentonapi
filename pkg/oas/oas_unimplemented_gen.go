@@ -627,7 +627,7 @@ func (UnimplementedHandler) GetLibraryByHash(ctx context.Context, params GetLibr
 
 // GetMarketsRates implements getMarketsRates operation.
 //
-// Get the GRAM price from markets.
+// Get the Gram price from markets.
 //
 // GET /v2/rates/markets
 func (UnimplementedHandler) GetMarketsRates(ctx context.Context) (r *GetMarketsRatesOK, _ error) {

@@ -2768,7 +2768,7 @@ type BlockchainConfig struct {
 	R13 OptBlockchainConfig13 `json:"13"`
 	// The reward in nanoGram for block creation in the TON blockchain.
 	R14 OptBlockchainConfig14 `json:"14"`
-	// The reward in nanoTons for block creation in the TON blockchain.
+	// The reward in nanograms for block creation in the TON blockchain.
 	R15 OptBlockchainConfig15 `json:"15"`
 	// The limits on the number of validators in the TON blockchain.
 	R16 OptBlockchainConfig16 `json:"16"`
@@ -3411,7 +3411,7 @@ func (s *BlockchainConfig14) SetBasechainBlockFee(val int64) {
 	s.BasechainBlockFee = val
 }
 
-// The reward in nanoTons for block creation in the TON blockchain.
+// The reward in nanograms for block creation in the TON blockchain.
 type BlockchainConfig15 struct {
 	ValidatorsElectedFor int64 `json:"validators_elected_for"`
 	ElectionsStartBefore int64 `json:"elections_start_before"`
@@ -11588,11 +11588,11 @@ type NominatorRewardEntry struct {
 	Address string `json:"address"`
 	// Nominator's share of total nominators' deposit (0–1).
 	Weight float64 `json:"weight"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	Reward int64 `json:"reward"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	EffectiveStake int64 `json:"effective_stake"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	Stake int64 `json:"stake"`
 }
 
@@ -18596,9 +18596,9 @@ type RoundRewardsResponse struct {
 	StartBlock uint32 `json:"start_block"`
 	// Last masterchain block of the round.
 	EndBlock uint32 `json:"end_block"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	TotalBonuses int64 `json:"total_bonuses"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	TotalStake int64                  `json:"total_stake"`
 	Validators []ValidatorRewardEntry `json:"validators"`
 	Error      OptString              `json:"error"`
@@ -19183,11 +19183,11 @@ func (s *SizeLimitsConfig) SetMaxAccStateBits(val OptInt64) {
 type SmartContractAction struct {
 	Executor AccountAddress `json:"executor"`
 	Contract AccountAddress `json:"contract"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	TonAttached OptInt64 `json:"ton_attached"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	GramAttached int64     `json:"gram_attached"`
 	Operation    string    `json:"operation"`
 	Payload      OptString `json:"payload"`
@@ -19969,7 +19969,7 @@ func (s *TonConnectProofReqProofDomain) SetValue(val string) {
 type TonTransferAction struct {
 	Sender    AccountAddress `json:"sender"`
 	Recipient AccountAddress `json:"recipient"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	Amount           int64               `json:"amount"`
 	Comment          OptString           `json:"comment"`
 	EncryptedComment OptEncryptedComment `json:"encrypted_comment"`
@@ -20926,11 +20926,11 @@ type ValidatorRewardEntry struct {
 	Rank int `json:"rank"`
 	// Validator's public key (hex-encoded Ed25519).
 	PublicKey string `json:"public_key"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	EffectiveStake int64 `json:"effective_stake"`
 	// Fraction of total effective stake (0–1).
 	Weight float64 `json:"weight"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	Reward int64 `json:"reward"`
 	// Pool smart contract address (bounceable, base64url).
 	Pool OptString `json:"pool"`
@@ -20938,9 +20938,9 @@ type ValidatorRewardEntry struct {
 	PoolType         OptValidatorRewardEntryPoolType `json:"pool_type"`
 	OwnerAddress     OptString                       `json:"owner_address"`
 	ValidatorAddress OptString                       `json:"validator_address"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	ValidatorStake OptInt64 `json:"validator_stake"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	NominatorsStake OptInt64 `json:"nominators_stake"`
 	// Total funds deposited by the pool: effective_stake + credit (leftover balance kept in the elector
 	// contract after election).
@@ -21229,11 +21229,11 @@ type ValidatorsResponse struct {
 	// Election ID of the round immediately after this one. Omitted when the current round is not yet
 	// finished (next round not known).
 	NextElectionID OptInt64 `json:"next_election_id"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	ElectorBalance int64 `json:"elector_balance"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	TotalStake int64 `json:"total_stake"`
-	// Amount in nanotons.
+	// Amount in nanograms.
 	RewardPerBlock int64                  `json:"reward_per_block"`
 	Validators     []ValidatorRewardEntry `json:"validators"`
 }
