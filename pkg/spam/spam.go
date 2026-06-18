@@ -56,7 +56,7 @@ func (f Filter) JettonTrust(address tongo.AccountID, symbol, name, image string)
 	return core.TrustNone
 }
 
-func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, description, image string) core.TrustType {
+func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, name, description, image string) core.TrustType {
 	return core.TrustNone
 }
 

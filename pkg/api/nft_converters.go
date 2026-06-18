@@ -40,13 +40,16 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			Price:   h.convertPrice(ctx, item.Sale.Price),
 		}))
 	}
-	var image, description string
+	var image, description, name string
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)
 		}
 		if descriptionI, prs := item.Metadata["description"]; prs {
 			description, _ = descriptionI.(string)
+		}
+		if nameI, prs := item.Metadata["name"]; prs {
+			name, _ = nameI.(string)
 		}
 	}
 	if item.CollectionAddress != nil {
@@ -80,7 +83,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
 	} else {
-		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, description, image)
+		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, name, description, image)
 		if nftTrust == core.TrustNone && trustType != "" {
 			nftTrust = trustType
 		}
