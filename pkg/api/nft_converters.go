@@ -41,6 +41,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		}))
 	}
 	var image, description, name string
+	var collectionName, collectionDescription string
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)
@@ -55,6 +56,8 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if item.CollectionAddress != nil {
 		collectionAddr := *item.CollectionAddress
 		cInfo, _ := metaCache.getCollectionMeta(ctx, collectionAddr)
+		collectionName = cInfo.Name
+		collectionDescription = cInfo.Description
 		if cc, prs := book.GetCollectionInfoByAddress(collectionAddr); prs {
 			for _, approver := range cc.Approvers {
 				nftItem.ApprovedBy = append(nftItem.ApprovedBy, oas.NftApprovedByItem(approver))
@@ -83,7 +86,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
 	} else {
-		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, name, description, image)
+		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, name, description, image, collectionName, collectionDescription)
 		if nftTrust == core.TrustNone && trustType != "" {
 			nftTrust = trustType
 		}
