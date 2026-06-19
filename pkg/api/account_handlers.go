@@ -118,6 +118,13 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 	} else {
 		res = convertToAccount(rawAccount, nil, h.state, h.spamFilter)
 	}
+	if !res.IsScam.Value && isNftCollection(rawAccount) {
+		if meta, ok := h.metaCache.getCollectionMeta(ctx, account.ID); ok {
+			if h.spamFilter.HasBlacklistedComment(meta.Name, meta.Description) {
+				res.IsScam = oas.NewOptBool(true)
+			}
+		}
+	}
 	if strings.HasSuffix(params.AccountID, ".ton") {
 		trust := h.spamFilter.TonDomainTrust(params.AccountID)
 		if trust == core.TrustBlacklist {
@@ -224,7 +231,7 @@ func (h *Handler) GetBlockchainAccountTransactions(ctx context.Context, params o
 		return nil, err
 	}
 	for i, tx := range txs {
-		result.Transactions[i] = convertTransaction(*tx, accountObject.Interfaces, h.addressBook)
+		result.Transactions[i] = h.convertTransaction(*tx, accountObject.Interfaces, h.addressBook)
 	}
 	return &result, nil
 }

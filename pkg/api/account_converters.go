@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"math/big"
+	"slices"
 	"sort"
 
 	imgGenerator "github.com/tonkeeper/opentonapi/pkg/image"
@@ -88,6 +89,10 @@ func convertExtraCurrencies(extraBalances core.ExtraCurrencies) []oas.ExtraCurre
 		res = append(res, cur)
 	}
 	return res
+}
+
+func isNftCollection(account *core.Account) bool {
+	return slices.Contains(account.Interfaces, abi.NftCollection)
 }
 
 func convertToAccount(account *core.Account, ab *addressbook.KnownAddress, state chainState, spamFilter SpamFilter) oas.Account {

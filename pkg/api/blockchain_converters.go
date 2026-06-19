@@ -130,7 +130,7 @@ func convertReducedBlock(block core.ReducedBlock) oas.ReducedBlock {
 	return converted
 }
 
-func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInterface, book addressBook) oas.Transaction {
+func (h *Handler) convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInterface, book addressBook) oas.Transaction {
 	tx := oas.Transaction{
 		Hash:            t.Hash.Hex(),
 		Lt:              int64(t.Lt),
@@ -148,6 +148,10 @@ func convertTransaction(t core.Transaction, accountInterfaces []abi.ContractInte
 		Aborted:         t.Aborted,
 		Destroyed:       t.Destroyed,
 		Raw:             hex.EncodeToString(t.Raw),
+	}
+	// A transaction originated from a blacklisted (scam) account is itself scam.
+	if t.InMsg != nil && t.InMsg.Source != nil && h.spamFilter.AccountTrust(*t.InMsg.Source) == core.TrustBlacklist {
+		tx.Account.IsScam = true
 	}
 	if t.PrevTransLt != 0 {
 		tx.PrevTransLt.Value = int64(t.PrevTransLt)

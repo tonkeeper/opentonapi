@@ -143,7 +143,7 @@ func (h *Handler) GetNftCollections(ctx context.Context, params oas.GetNftCollec
 	}
 	var collectionsRes oas.NftCollections
 	for _, collection := range collections {
-		col := convertNftCollection(collection, h.addressBook)
+		col := h.convertNftCollection(collection, h.addressBook)
 		collectionsRes.NftCollections = append(collectionsRes.NftCollections, col)
 	}
 	return &collectionsRes, nil
@@ -161,7 +161,7 @@ func (h *Handler) GetNftCollection(ctx context.Context, params oas.GetNftCollect
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	col := convertNftCollection(collection, h.addressBook)
+	col := h.convertNftCollection(collection, h.addressBook)
 	return &col, nil
 }
 
@@ -249,7 +249,7 @@ func (h *Handler) GetNftCollectionItemsByAddresses(ctx context.Context, request 
 	}
 	var result oas.NftCollections
 	for _, i := range collections {
-		result.NftCollections = append(result.NftCollections, convertNftCollection(i, h.addressBook))
+		result.NftCollections = append(result.NftCollections, h.convertNftCollection(i, h.addressBook))
 	}
 	return &result, nil
 }

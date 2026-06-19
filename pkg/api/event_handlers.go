@@ -197,7 +197,7 @@ func (h *Handler) GetTrace(ctx context.Context, params oas.GetTraceParams) (*oas
 			trace = traceEmulated
 		}
 	}
-	convertedTrace := convertTrace(trace, h.addressBook)
+	convertedTrace := h.convertTrace(trace, h.addressBook)
 	if emulated {
 		setRecursiveEmulated(&convertedTrace)
 	}
@@ -658,7 +658,7 @@ func (h *Handler) EmulateMessageToTrace(ctx context.Context, request *oas.Emulat
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
 
-	t := convertTrace(trace, h.addressBook)
+	t := h.convertTrace(trace, h.addressBook)
 	return &t, nil
 }
 
@@ -802,7 +802,7 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	} else {
 		savedEmulatedTraces.WithLabelValues("restored").Inc()
 	}
-	t := convertTrace(trace, h.addressBook)
+	t := h.convertTrace(trace, h.addressBook)
 	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(*walletAddress), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("account: %s FindActions err: %w", walletAddress.ToRaw(), err))

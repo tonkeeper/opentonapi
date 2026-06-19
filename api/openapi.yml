@@ -7701,6 +7701,7 @@ components:
         - next_item_index
         - raw_collection_content
         - approved_by
+        - trust
       properties:
         address:
           type: string
@@ -7725,6 +7726,8 @@ components:
             $ref: '#/components/schemas/ImagePreview'
         approved_by:
           $ref: '#/components/schemas/NftApprovedBy'
+        trust:
+          $ref: '#/components/schemas/TrustType'
     NftCollections:
       type: object
       required:

@@ -28,6 +28,7 @@ var StonfiWhitelistVaults = map[tongo.AccountID]struct{}{
 	tongo.MustParseAddress("EQBQ_UBQvR9ryUjKDwijtoiyyga2Wl-yJm6Y8gl0k-HDh_5x").ID: {},
 	tongo.MustParseAddress("EQBSNX_5mSikBVttWhIaIb0f8jJU7fL6kvyyFVppd7dWRO6M").ID: {},
 	tongo.MustParseAddress("EQBZj7nhXNhB4O9rRCn4qGS82DZaPUPlyM2k6ZrbvQ1j3Ge7").ID: {},
+	tongo.MustParseAddress("EQBd9vfWfn6MOqBYEEYFeyFqliOYln1znFklfp8B02zlS_Lq").ID: {},
 	tongo.MustParseAddress("EQBigMnbY4NU1uwdvzertV5mv_yI7282R-ffW7XZFWPEVRDG").ID: {},
 	tongo.MustParseAddress("EQBjK_kjY5R_DoyTRff109VzFrSlKFCC_gOOWIMtyEvCcv2J").ID: {},
 	tongo.MustParseAddress("EQBjM7B2PKa82IPKrUFbMFaKeQDFGTMRnrvY1TmptC7Kxz7B").ID: {},

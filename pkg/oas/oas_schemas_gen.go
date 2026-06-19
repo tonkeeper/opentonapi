@@ -10955,6 +10955,7 @@ type NftCollection struct {
 	Metadata             OptNftCollectionMetadata `json:"metadata"`
 	Previews             []ImagePreview           `json:"previews"`
 	ApprovedBy           NftApprovedBy            `json:"approved_by"`
+	Trust                TrustType                `json:"trust"`
 }
 
 // GetAddress returns the value of Address.
@@ -10992,6 +10993,11 @@ func (s *NftCollection) GetApprovedBy() NftApprovedBy {
 	return s.ApprovedBy
 }
 
+// GetTrust returns the value of Trust.
+func (s *NftCollection) GetTrust() TrustType {
+	return s.Trust
+}
+
 // SetAddress sets the value of Address.
 func (s *NftCollection) SetAddress(val string) {
 	s.Address = val
@@ -11025,6 +11031,11 @@ func (s *NftCollection) SetPreviews(val []ImagePreview) {
 // SetApprovedBy sets the value of ApprovedBy.
 func (s *NftCollection) SetApprovedBy(val NftApprovedBy) {
 	s.ApprovedBy = val
+}
+
+// SetTrust sets the value of Trust.
+func (s *NftCollection) SetTrust(val TrustType) {
+	s.Trust = val
 }
 
 type NftCollectionMetadata map[string]jx.Raw

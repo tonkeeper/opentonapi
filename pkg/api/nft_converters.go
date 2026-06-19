@@ -106,30 +106,44 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	return nftItem
 }
 
-func convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
+func (h *Handler) convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
 	nftCollection := oas.NftCollection{
 		Address:              collection.Address.ToRaw(),
 		NextItemIndex:        int64(collection.NextItemIndex),
 		RawCollectionContent: fmt.Sprintf("%x", collection.CollectionContent[:]),
 		Owner:                convertOptAccountAddress(collection.OwnerAddress, book),
 	}
-	if len(collection.Metadata) == 0 {
-		return nftCollection
-	}
-	metadata := make(map[string]jx.Raw)
-	image := references.Placeholder
-	for k, v := range collection.Metadata {
-		if k == "image" {
-			if img, ok := v.(string); ok && img != "" {
-				image = img
-			}
+	var image, description, name string
+	if len(collection.Metadata) != 0 {
+		if v, ok := collection.Metadata["image"]; ok {
+			image, _ = v.(string)
 		}
-		if raw, err := json.Marshal(v); err == nil {
-			metadata[k] = raw
+		if v, ok := collection.Metadata["description"]; ok {
+			description, _ = v.(string)
+		}
+		if v, ok := collection.Metadata["name"]; ok {
+			name, _ = v.(string)
 		}
 	}
 	if known, ok := book.GetCollectionInfoByAddress(collection.Address); ok {
 		nftCollection.ApprovedBy = append(nftCollection.ApprovedBy, known.Approvers...)
+	}
+	if len(nftCollection.ApprovedBy) != 0 {
+		nftCollection.Trust = oas.TrustType(core.TrustWhitelist)
+	} else {
+		nftCollection.Trust = oas.TrustType(h.spamFilter.NftTrust(collection.Address, nil, name, description, image, "", ""))
+	}
+	if len(collection.Metadata) == 0 {
+		return nftCollection
+	}
+	metadata := make(map[string]jx.Raw)
+	if image == "" {
+		image = references.Placeholder
+	}
+	for k, v := range collection.Metadata {
+		if raw, err := json.Marshal(v); err == nil {
+			metadata[k] = raw
+		}
 	}
 	nftCollection.Metadata.SetTo(metadata)
 	for _, size := range []int{5, 100, 500, 1500} {
