@@ -58,11 +58,28 @@ func distinctAccounts(skip *tongo.AccountID, book addressBook, accounts ...*tong
 	return result
 }
 
-func convertTrace(t *core.Trace, book addressBook) oas.Trace {
+func (h *Handler) convertTrace(t *core.Trace, book addressBook) oas.Trace {
+	// A trace that originated from a blacklisted (scam) account is scam in its
+	// entirety: the flag is set on the root transaction and propagated to every
+	// transaction in the tree.
+	originTrust := h.spamFilter.AccountTrust(t.Transaction.Account)
+	return h.convertTraceEx(t, book, originTrust)
+}
+
+func (h *Handler) convertTraceEx(t *core.Trace, book addressBook, trust core.TrustType) oas.Trace {
 	trace := oas.Trace{
-		Transaction: convertTransaction(t.Transaction, t.AccountInterfaces, book),
+		Transaction: h.convertTransaction(t.Transaction, t.AccountInterfaces, book),
 		Interfaces:  g.ToStrings(t.AccountInterfaces),
 		Emulated:    oas.OptBool{Set: true, Value: t.Emulated},
+	}
+	// trust is inherited from an ancestor; convertTransaction may also have flagged
+	// this transaction on its own (e.g. its direct sender is blacklisted).
+	if trust == core.TrustBlacklist {
+		trace.Transaction.Account.IsScam = true
+	}
+	childTrust := trust
+	if trace.Transaction.Account.IsScam {
+		childTrust = core.TrustBlacklist
 	}
 
 	sort.Slice(t.Children, func(i, j int) bool {
@@ -72,7 +89,7 @@ func convertTrace(t *core.Trace, book addressBook) oas.Trace {
 		return t.Children[i].InMsg.CreatedLt < t.Children[j].InMsg.CreatedLt
 	})
 	for _, c := range t.Children {
-		trace.Children = append(trace.Children, convertTrace(c, book))
+		trace.Children = append(trace.Children, h.convertTraceEx(c, book, childTrust))
 	}
 	return trace
 }

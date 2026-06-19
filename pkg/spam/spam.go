@@ -2,6 +2,8 @@ package spam
 
 import (
 	"context"
+	"net/url"
+	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -9,6 +11,31 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
 )
+
+// blacklistedImageHosts lists domains that, when hosting an NFT image, mark the
+// NFT (or collection) as scam.
+var blacklistedImageHosts = []string{
+	"cloudmetrics.cyou",
+}
+
+// imageHostBlacklisted reports whether the given image URL is hosted under one
+// of the blacklisted domains (the host itself or any of its subdomains).
+func imageHostBlacklisted(image string) bool {
+	u, err := url.Parse(strings.TrimSpace(image))
+	if err != nil {
+		return false
+	}
+	host := strings.ToLower(u.Hostname())
+	if host == "" {
+		return false
+	}
+	for _, blacklisted := range blacklistedImageHosts {
+		if host == blacklisted || strings.HasSuffix(host, "."+blacklisted) {
+			return true
+		}
+	}
+	return false
+}
 
 type Filter struct {
 	Rules rules.Rules
@@ -57,11 +84,18 @@ func (f Filter) JettonTrust(address tongo.AccountID, symbol, name, image string)
 }
 
 func (f Filter) NftTrust(address tongo.AccountID, collection *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType {
+	if imageHostBlacklisted(image) {
+		return core.TrustBlacklist
+	}
 	return core.TrustNone
 }
 
 func (f Filter) AccountTrust(address tongo.AccountID) core.TrustType {
 	return core.TrustNone
+}
+
+func (f Filter) HasBlacklistedComment(values ...string) bool {
+	return false
 }
 
 func (f Filter) TonDomainTrust(domain string) core.TrustType {

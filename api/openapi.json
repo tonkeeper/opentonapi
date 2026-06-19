@@ -5353,13 +5353,17 @@
      "raw_collection_content": {
       "format": "cell",
       "type": "string"
+     },
+     "trust": {
+      "$ref": "#/components/schemas/TrustType"
      }
     },
     "required": [
      "address",
      "next_item_index",
      "raw_collection_content",
-     "approved_by"
+     "approved_by",
+     "trust"
     ],
     "type": "object"
    },
