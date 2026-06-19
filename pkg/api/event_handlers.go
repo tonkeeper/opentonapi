@@ -42,6 +42,11 @@ var (
 		Name: "tonapi_send_message_counter",
 		Help: "The total number of messages received by /v2/blockchain/message endpoint",
 	})
+	sendMessageDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "tonapi_send_message_duration",
+		Help:    "Duration of /v2/blockchain/message requests by error reason",
+		Buckets: prometheus.DefBuckets,
+	}, []string{"error_reason"})
 	savedEmulatedTraces = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "saved_emulated_traces",
 	}, []string{"status"})
@@ -71,10 +76,18 @@ func decodeMessage(s string) (*decodedMessage, error) {
 }
 
 func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBlockchainMessageReq) error {
+	start := time.Now()
+	errorReason := "none"
+	defer func() {
+		sendMessageDuration.WithLabelValues(errorReason).Observe(time.Since(start).Seconds())
+	}()
+
 	if h.msgSender == nil {
+		errorReason = "msg_sender_not_configured"
 		return toError(http.StatusBadRequest, fmt.Errorf("msg sender is not configured"))
 	}
 	if !request.Boc.IsSet() && len(request.Batch) == 0 {
+		errorReason = "boc_not_found"
 		return toError(http.StatusBadRequest, fmt.Errorf("boc not found"))
 	}
 	var meta map[string]string
@@ -84,10 +97,12 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 	if request.Boc.IsSet() {
 		m, err := decodeMessage(request.Boc.Value)
 		if err != nil {
+			errorReason = "invalid_boc"
 			return err
 		}
 		checksum := sha256.Sum256(m.payload)
 		if _, prs := h.blacklistedBocCache.Get(checksum); prs {
+			errorReason = "duplicate_message"
 			return toError(http.StatusBadRequest, fmt.Errorf("duplicate message"))
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
@@ -100,9 +115,11 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 		if err := h.msgSender.SendMessage(ctx, msgCopy); err != nil {
 			if strings.Contains(err.Error(), "cannot apply external message to current state") {
 				h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
+				errorReason = "cannot_apply_external_message"
 				return toError(http.StatusNotAcceptable, err)
 			}
 			sentry.Send("sending message", sentry.SentryInfoData{"payload": request.Boc}, sentry.LevelError)
+			errorReason = "send_message_error"
 			return toError(http.StatusInternalServerError, err)
 		}
 		h.blacklistedBocCache.Set(checksum, struct{}{}, cache.WithExpiration(time.Minute))
@@ -112,6 +129,7 @@ func (h *Handler) SendBlockchainMessage(ctx context.Context, request *oas.SendBl
 	for _, msgBoc := range request.Batch {
 		m, err := decodeMessage(msgBoc)
 		if err != nil {
+			errorReason = "invalid_boc"
 			return err
 		}
 		msgCopy := blockchain.ExtInMsgCopy{
