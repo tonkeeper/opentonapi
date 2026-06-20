@@ -45,7 +45,7 @@ func (m mockSpamFilter) TonDomainTrust(domain string) core.TrustType {
 	return core.TrustNone
 }
 
-func (m mockSpamFilter) NftTrust(address tongo.AccountID, collection *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType {
+func (m mockSpamFilter) NftTrust(address tongo.AccountID, collection, owner *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType {
 	return core.TrustNone
 }
 
