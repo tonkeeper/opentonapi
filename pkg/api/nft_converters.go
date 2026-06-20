@@ -86,7 +86,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
 	} else {
-		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, name, description, image, collectionName, collectionDescription)
+		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, item.OwnerAddress, name, description, image, collectionName, collectionDescription)
 		if nftTrust == core.TrustNone && trustType != "" {
 			nftTrust = trustType
 		}
@@ -131,7 +131,7 @@ func (h *Handler) convertNftCollection(collection core.NftCollection, book addre
 	if len(nftCollection.ApprovedBy) != 0 {
 		nftCollection.Trust = oas.TrustType(core.TrustWhitelist)
 	} else {
-		nftCollection.Trust = oas.TrustType(h.spamFilter.NftTrust(collection.Address, nil, name, description, image, "", ""))
+		nftCollection.Trust = oas.TrustType(h.spamFilter.NftTrust(collection.Address, nil, collection.OwnerAddress, name, description, image, "", ""))
 	}
 	if len(collection.Metadata) == 0 {
 		return nftCollection

@@ -208,7 +208,7 @@ type SpamFilter interface {
 	AccountTrust(address tongo.AccountID) core.TrustType
 	HasBlacklistedComment(values ...string) bool
 	TonDomainTrust(domain string) core.TrustType
-	NftTrust(address tongo.AccountID, collection *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType
+	NftTrust(address tongo.AccountID, collection, owner *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType
 	GetNftsScamData(ctx context.Context, addresses []ton.AccountID) (map[ton.AccountID]core.TrustType, error)
 }
 

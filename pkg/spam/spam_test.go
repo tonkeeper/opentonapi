@@ -24,7 +24,7 @@ func TestNftTrustBlacklistedImageHost(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := f.NftTrust(ton.AccountID{}, nil, "name", "description", tt.image, "", "")
+			got := f.NftTrust(ton.AccountID{}, nil, nil, "name", "description", tt.image, "", "")
 			if got != tt.want {
 				t.Fatalf("NftTrust(image=%q) = %q, want %q", tt.image, got, tt.want)
 			}
