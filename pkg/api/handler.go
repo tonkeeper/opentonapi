@@ -284,7 +284,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		verifierSource: options.verifier,
 		publicAPIURL:   options.publicAPIURL,
 		metaCache: metadataCache{
-			collectionsCache: cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "nft_metadata_cache"),
+			collectionsCache: cache.NewLRUCache[tongo.AccountID, collectionMeta](10000, "nft_metadata_cache"),
 			jettonsCache:     cache.NewLRUCache[tongo.AccountID, tep64.Metadata](10000, "jetton_metadata_cache"),
 			storage:          options.storage,
 		},

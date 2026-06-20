@@ -208,7 +208,7 @@ type SpamFilter interface {
 	AccountTrust(address tongo.AccountID) core.TrustType
 	HasBlacklistedComment(values ...string) bool
 	TonDomainTrust(domain string) core.TrustType
-	NftTrust(address tongo.AccountID, collection, owner *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType
+	NftTrust(address tongo.AccountID, collection, owner, collectionOwner *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType
 	GetNftsScamData(ctx context.Context, addresses []ton.AccountID) (map[ton.AccountID]core.TrustType, error)
 }
 
@@ -216,8 +216,16 @@ type verifierSource interface {
 	GetAccountSource(accountID ton.AccountID) (verifier.Source, error)
 }
 
+// collectionMeta bundles a collection's metadata with its owner address so the
+// owner is available to callers without an extra storage lookup. The owner is
+// already returned by the same query that fetches the metadata.
+type collectionMeta struct {
+	tep64.Metadata
+	Owner *tongo.AccountID
+}
+
 type metadataCache struct {
-	collectionsCache cache.Cache[tongo.AccountID, tep64.Metadata]
+	collectionsCache cache.Cache[tongo.AccountID, collectionMeta]
 	jettonsCache     cache.Cache[tongo.AccountID, tep64.Metadata]
 	storage          interface {
 		GetJettonMasterMetadata(ctx context.Context, master tongo.AccountID) (tep64.Metadata, error)

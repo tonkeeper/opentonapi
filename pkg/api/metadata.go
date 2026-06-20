@@ -10,16 +10,19 @@ import (
 	"github.com/tonkeeper/tongo/tep64"
 )
 
-func (mc *metadataCache) getCollectionMeta(ctx context.Context, a tongo.AccountID) (tep64.Metadata, bool) {
+func (mc *metadataCache) getCollectionMeta(ctx context.Context, a tongo.AccountID) (collectionMeta, bool) {
 	m, ok := mc.collectionsCache.Get(a)
 	if ok {
 		return m, ok
 	}
 	collection, err := mc.storage.GetNftCollectionByCollectionAddress(ctx, a)
 	if err != nil {
-		return tep64.Metadata{}, false
+		return collectionMeta{}, false
 	}
-	m = metaMapToStruct(collection.Metadata)
+	m = collectionMeta{
+		Metadata: metaMapToStruct(collection.Metadata),
+		Owner:    collection.OwnerAddress,
+	}
 	mc.collectionsCache.Set(a, m, cache.WithExpiration(time.Minute*10))
 	return m, ok
 }
