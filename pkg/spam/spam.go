@@ -83,7 +83,7 @@ func (f Filter) JettonTrust(address tongo.AccountID, symbol, name, image string)
 	return core.TrustNone
 }
 
-func (f Filter) NftTrust(address tongo.AccountID, collection, owner *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType {
+func (f Filter) NftTrust(address tongo.AccountID, collection, owner, collectionOwner *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType {
 	if imageHostBlacklisted(image) {
 		return core.TrustBlacklist
 	}
