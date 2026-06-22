@@ -8676,6 +8676,73 @@ func decodeGetLibraryByHashParams(args [1]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
+// GetMigrationWalletsParams is parameters of getMigrationWallets operation.
+type GetMigrationWalletsParams struct {
+	// Accept gram and all possible fiat currencies, separated by commas.
+	Currencies []string `json:",omitempty"`
+}
+
+func unpackGetMigrationWalletsParams(packed middleware.Parameters) (params GetMigrationWalletsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "currencies",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Currencies = v.([]string)
+		}
+	}
+	return params
+}
+
+func decodeGetMigrationWalletsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetMigrationWalletsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: currencies.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "currencies",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotCurrenciesVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotCurrenciesVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Currencies = append(params.Currencies, paramsDotCurrenciesVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "currencies",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetMultisigAccountParams is parameters of getMultisigAccount operation.
 type GetMultisigAccountParams struct {
 	// Account ID.

@@ -16,6 +16,7 @@ tags:
     externalDocs:
       description: Additional documentation
       url: https://docs.tonconsole.com/tonapi/rest-api/accounts
+  - name: Migration
   - name: NFT
     externalDocs:
       description: Additional documentation
@@ -631,6 +632,46 @@ paths:
                   test_only:
                     type: boolean
         default:
+          $ref: '#/components/responses/Error'
+  /v2/migration/wallets:
+    post:
+      description: Get migratable assets value (TON balance, jettons with prices, NFT count) for several wallets at once.
+      operationId: getMigrationWallets
+      tags:
+        - Migration
+      parameters:
+        - $ref: '#/components/parameters/currenciesQuery'
+      requestBody:
+        $ref: "#/components/requestBodies/AccountIDs"
+      responses:
+        '200':
+          description: migratable value per requested wallet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MigrationWallets'
+        'default':
+          $ref: '#/components/responses/Error'
+  /v2/migration/prepare:
+    post:
+      description: Prepare ordered signable transactions that migrate every asset from `from` to `to`.
+      operationId: prepareMigration
+      tags:
+        - Migration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MigrationPrepareRequest'
+      responses:
+        '200':
+          description: ordered transactions to sign and broadcast
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MigrationPrepareResponse'
+        'default':
           $ref: '#/components/responses/Error'
   /v2/accounts/_bulk:
     post:
@@ -6145,7 +6186,103 @@ components:
         balances:
           type: array
           items:
-            $ref: '#/components/schemas/JettonBalance'
+            $ref: "#/components/schemas/JettonBalance"
+    MigrationWallets:
+      type: object
+      required:
+        - wallets
+      properties:
+        wallets:
+          type: array
+          items:
+            $ref: "#/components/schemas/MigrationWalletValue"
+    MigrationWalletValue:
+      type: object
+      required:
+        - account
+        - balance
+        - status
+        - jettons
+        - nft_count
+      properties:
+        account:
+          type: string
+          format: address
+          example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
+        balance:
+          type: integer
+          format: int64
+          description: TON balance in nanotons
+        status:
+          $ref: "#/components/schemas/AccountStatus"
+        jettons:
+          type: array
+          items:
+            $ref: "#/components/schemas/JettonBalance"
+        nft_count:
+          type: integer
+          format: int32
+          description: number of NFTs owned by the account
+    MigrationPrepareRequest:
+      type: object
+      required:
+        - from
+        - to
+      properties:
+        from:
+          type: string
+          format: address
+          description: legacy source wallet to drain
+        to:
+          type: string
+          format: address
+          description: destination wallet TON address
+        currency:
+          type: string
+          default: USD
+          description: fiat currency for the preview values
+          example: USD
+    MigrationPrepareResponse:
+      type: object
+      required:
+        - from
+        - to
+        - wallet_version
+        - transactions
+      properties:
+        from:
+          type: string
+          format: address
+        to:
+          type: string
+          format: address
+        wallet_version:
+          type: string
+          description: source wallet version (informational)
+          example: v4R2
+        transactions:
+          type: array
+          description: ordered; sign and broadcast in array order, one entry per external message
+          items:
+            $ref: "#/components/schemas/MigrationTransaction"
+    MigrationTransaction:
+      type: object
+      required:
+        - seqno
+        - boc
+        - emulation
+      properties:
+        seqno:
+          type: integer
+          format: int32
+          description: wallet seqno baked into the unsigned body
+        boc:
+          type: string
+          description: >
+            base64 BOC of the unsigned wallet body. Sign its hash, prepend the signature,
+            wrap it in an external message and broadcast.
+        emulation:
+          $ref: "#/components/schemas/MessageConsequences"
     CurrencyType:
       type: string
       example: jetton

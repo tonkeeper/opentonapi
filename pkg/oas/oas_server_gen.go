@@ -429,6 +429,13 @@ type Handler interface {
 	//
 	// GET /v2/rates/markets
 	GetMarketsRates(ctx context.Context) (*GetMarketsRatesOK, error)
+	// GetMigrationWallets implements getMigrationWallets operation.
+	//
+	// Get migratable assets value (TON balance, jettons with prices, NFT count) for several wallets at
+	// once.
+	//
+	// POST /v2/migration/wallets
+	GetMigrationWallets(ctx context.Context, req OptGetMigrationWalletsReq, params GetMigrationWalletsParams) (*MigrationWallets, error)
 	// GetMultisigAccount implements getMultisigAccount operation.
 	//
 	// Get multisig account info.
@@ -693,6 +700,12 @@ type Handler interface {
 	//
 	// POST /v2/pubkeys/wallets/_bulk
 	GetWalletsByPublicKeyBulk(ctx context.Context, req OptGetWalletsByPublicKeyBulkReq) (*WalletsByPublicKeys, error)
+	// PrepareMigration implements prepareMigration operation.
+	//
+	// Prepare ordered signable transactions that migrate every asset from `from` to `to`.
+	//
+	// POST /v2/migration/prepare
+	PrepareMigration(ctx context.Context, req *MigrationPrepareRequest) (*MigrationPrepareResponse, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.
