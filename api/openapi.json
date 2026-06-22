@@ -4991,6 +4991,134 @@
     ],
     "type": "object"
    },
+   "MigrationPrepareRequest": {
+    "properties": {
+     "currency": {
+      "default": "USD",
+      "description": "fiat currency for the preview values",
+      "example": "USD",
+      "type": "string"
+     },
+     "from": {
+      "description": "legacy source wallet to drain",
+      "format": "address",
+      "type": "string"
+     },
+     "to": {
+      "description": "destination wallet TON address",
+      "format": "address",
+      "type": "string"
+     }
+    },
+    "required": [
+     "from",
+     "to"
+    ],
+    "type": "object"
+   },
+   "MigrationPrepareResponse": {
+    "properties": {
+     "from": {
+      "format": "address",
+      "type": "string"
+     },
+     "to": {
+      "format": "address",
+      "type": "string"
+     },
+     "transactions": {
+      "description": "ordered; sign and broadcast in array order, one entry per external message",
+      "items": {
+       "$ref": "#/components/schemas/MigrationTransaction"
+      },
+      "type": "array"
+     },
+     "wallet_version": {
+      "description": "source wallet version (informational)",
+      "example": "v4R2",
+      "type": "string"
+     }
+    },
+    "required": [
+     "from",
+     "to",
+     "wallet_version",
+     "transactions"
+    ],
+    "type": "object"
+   },
+   "MigrationTransaction": {
+    "properties": {
+     "boc": {
+      "description": "base64 BOC of the unsigned wallet body. Sign its hash, prepend the signature, wrap it in an external message and broadcast.\n",
+      "type": "string"
+     },
+     "emulation": {
+      "$ref": "#/components/schemas/MessageConsequences"
+     },
+     "seqno": {
+      "description": "wallet seqno baked into the unsigned body",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "seqno",
+     "boc",
+     "emulation"
+    ],
+    "type": "object"
+   },
+   "MigrationWalletValue": {
+    "properties": {
+     "account": {
+      "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+      "format": "address",
+      "type": "string"
+     },
+     "balance": {
+      "description": "TON balance in nanotons",
+      "format": "int64",
+      "type": "integer"
+     },
+     "jettons": {
+      "items": {
+       "$ref": "#/components/schemas/JettonBalance"
+      },
+      "type": "array"
+     },
+     "nft_count": {
+      "description": "number of NFTs owned by the account",
+      "format": "int32",
+      "type": "integer"
+     },
+     "status": {
+      "$ref": "#/components/schemas/AccountStatus"
+     }
+    },
+    "required": [
+     "account",
+     "balance",
+     "status",
+     "jettons",
+     "nft_count"
+    ],
+    "type": "object"
+   },
+   "MigrationWallets": {
+    "properties": {
+     "wallets": {
+      "items": {
+       "$ref": "#/components/schemas/MigrationWalletValue"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "wallets"
+    ],
+    "type": "object"
+   },
    "MisbehaviourPunishmentConfig": {
     "properties": {
      "default_flat_fine": {
@@ -11561,6 +11689,72 @@
     ]
    }
   },
+  "/v2/migration/prepare": {
+   "post": {
+    "description": "Prepare ordered signable transactions that migrate every asset from `from` to `to`.",
+    "operationId": "prepareMigration",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MigrationPrepareRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MigrationPrepareResponse"
+        }
+       }
+      },
+      "description": "ordered transactions to sign and broadcast"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Migration"
+    ]
+   }
+  },
+  "/v2/migration/wallets": {
+   "post": {
+    "description": "Get migratable assets value (TON balance, jettons with prices, NFT count) for several wallets at once.",
+    "operationId": "getMigrationWallets",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/currenciesQuery"
+     }
+    ],
+    "requestBody": {
+     "$ref": "#/components/requestBodies/AccountIDs"
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MigrationWallets"
+        }
+       }
+      },
+      "description": "migratable value per requested wallet"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Migration"
+    ]
+   }
+  },
   "/v2/multisig/order/{account_id}": {
    "get": {
     "description": "Get multisig order",
@@ -13019,6 +13213,9 @@
     "url": "https://docs.tonconsole.com/tonapi/rest-api/accounts"
    },
    "name": "Accounts"
+  },
+  {
+   "name": "Migration"
   },
   {
    "externalDocs": {

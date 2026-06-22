@@ -7290,6 +7290,20 @@ func (s *GetMarketsRatesOK) SetMarkets(val []MarketTonRates) {
 	s.Markets = val
 }
 
+type GetMigrationWalletsReq struct {
+	AccountIds []string `json:"account_ids"`
+}
+
+// GetAccountIds returns the value of AccountIds.
+func (s *GetMigrationWalletsReq) GetAccountIds() []string {
+	return s.AccountIds
+}
+
+// SetAccountIds sets the value of AccountIds.
+func (s *GetMigrationWalletsReq) SetAccountIds(val []string) {
+	s.AccountIds = val
+}
+
 type GetNftCollectionItemsByAddressesReq struct {
 	AccountIds []string `json:"account_ids"`
 }
@@ -10357,6 +10371,212 @@ func (s *MethodExecutionResult) SetStack(val []TvmStackRecord) {
 // SetDecoded sets the value of Decoded.
 func (s *MethodExecutionResult) SetDecoded(val jx.Raw) {
 	s.Decoded = val
+}
+
+// Ref: #/components/schemas/MigrationPrepareRequest
+type MigrationPrepareRequest struct {
+	// Legacy source wallet to drain.
+	From string `json:"from"`
+	// Destination wallet TON address.
+	To string `json:"to"`
+	// Fiat currency for the preview values.
+	Currency OptString `json:"currency"`
+}
+
+// GetFrom returns the value of From.
+func (s *MigrationPrepareRequest) GetFrom() string {
+	return s.From
+}
+
+// GetTo returns the value of To.
+func (s *MigrationPrepareRequest) GetTo() string {
+	return s.To
+}
+
+// GetCurrency returns the value of Currency.
+func (s *MigrationPrepareRequest) GetCurrency() OptString {
+	return s.Currency
+}
+
+// SetFrom sets the value of From.
+func (s *MigrationPrepareRequest) SetFrom(val string) {
+	s.From = val
+}
+
+// SetTo sets the value of To.
+func (s *MigrationPrepareRequest) SetTo(val string) {
+	s.To = val
+}
+
+// SetCurrency sets the value of Currency.
+func (s *MigrationPrepareRequest) SetCurrency(val OptString) {
+	s.Currency = val
+}
+
+// Ref: #/components/schemas/MigrationPrepareResponse
+type MigrationPrepareResponse struct {
+	From string `json:"from"`
+	To   string `json:"to"`
+	// Source wallet version (informational).
+	WalletVersion string `json:"wallet_version"`
+	// Ordered; sign and broadcast in array order, one entry per external message.
+	Transactions []MigrationTransaction `json:"transactions"`
+}
+
+// GetFrom returns the value of From.
+func (s *MigrationPrepareResponse) GetFrom() string {
+	return s.From
+}
+
+// GetTo returns the value of To.
+func (s *MigrationPrepareResponse) GetTo() string {
+	return s.To
+}
+
+// GetWalletVersion returns the value of WalletVersion.
+func (s *MigrationPrepareResponse) GetWalletVersion() string {
+	return s.WalletVersion
+}
+
+// GetTransactions returns the value of Transactions.
+func (s *MigrationPrepareResponse) GetTransactions() []MigrationTransaction {
+	return s.Transactions
+}
+
+// SetFrom sets the value of From.
+func (s *MigrationPrepareResponse) SetFrom(val string) {
+	s.From = val
+}
+
+// SetTo sets the value of To.
+func (s *MigrationPrepareResponse) SetTo(val string) {
+	s.To = val
+}
+
+// SetWalletVersion sets the value of WalletVersion.
+func (s *MigrationPrepareResponse) SetWalletVersion(val string) {
+	s.WalletVersion = val
+}
+
+// SetTransactions sets the value of Transactions.
+func (s *MigrationPrepareResponse) SetTransactions(val []MigrationTransaction) {
+	s.Transactions = val
+}
+
+// Ref: #/components/schemas/MigrationTransaction
+type MigrationTransaction struct {
+	// Wallet seqno baked into the unsigned body.
+	Seqno int32 `json:"seqno"`
+	// Base64 BOC of the unsigned wallet body. Sign its hash, prepend the signature, wrap it in an
+	// external message and broadcast.
+	Boc       string              `json:"boc"`
+	Emulation MessageConsequences `json:"emulation"`
+}
+
+// GetSeqno returns the value of Seqno.
+func (s *MigrationTransaction) GetSeqno() int32 {
+	return s.Seqno
+}
+
+// GetBoc returns the value of Boc.
+func (s *MigrationTransaction) GetBoc() string {
+	return s.Boc
+}
+
+// GetEmulation returns the value of Emulation.
+func (s *MigrationTransaction) GetEmulation() MessageConsequences {
+	return s.Emulation
+}
+
+// SetSeqno sets the value of Seqno.
+func (s *MigrationTransaction) SetSeqno(val int32) {
+	s.Seqno = val
+}
+
+// SetBoc sets the value of Boc.
+func (s *MigrationTransaction) SetBoc(val string) {
+	s.Boc = val
+}
+
+// SetEmulation sets the value of Emulation.
+func (s *MigrationTransaction) SetEmulation(val MessageConsequences) {
+	s.Emulation = val
+}
+
+// Ref: #/components/schemas/MigrationWalletValue
+type MigrationWalletValue struct {
+	Account string `json:"account"`
+	// TON balance in nanotons.
+	Balance int64           `json:"balance"`
+	Status  AccountStatus   `json:"status"`
+	Jettons []JettonBalance `json:"jettons"`
+	// Number of NFTs owned by the account.
+	NftCount int32 `json:"nft_count"`
+}
+
+// GetAccount returns the value of Account.
+func (s *MigrationWalletValue) GetAccount() string {
+	return s.Account
+}
+
+// GetBalance returns the value of Balance.
+func (s *MigrationWalletValue) GetBalance() int64 {
+	return s.Balance
+}
+
+// GetStatus returns the value of Status.
+func (s *MigrationWalletValue) GetStatus() AccountStatus {
+	return s.Status
+}
+
+// GetJettons returns the value of Jettons.
+func (s *MigrationWalletValue) GetJettons() []JettonBalance {
+	return s.Jettons
+}
+
+// GetNftCount returns the value of NftCount.
+func (s *MigrationWalletValue) GetNftCount() int32 {
+	return s.NftCount
+}
+
+// SetAccount sets the value of Account.
+func (s *MigrationWalletValue) SetAccount(val string) {
+	s.Account = val
+}
+
+// SetBalance sets the value of Balance.
+func (s *MigrationWalletValue) SetBalance(val int64) {
+	s.Balance = val
+}
+
+// SetStatus sets the value of Status.
+func (s *MigrationWalletValue) SetStatus(val AccountStatus) {
+	s.Status = val
+}
+
+// SetJettons sets the value of Jettons.
+func (s *MigrationWalletValue) SetJettons(val []JettonBalance) {
+	s.Jettons = val
+}
+
+// SetNftCount sets the value of NftCount.
+func (s *MigrationWalletValue) SetNftCount(val int32) {
+	s.NftCount = val
+}
+
+// Ref: #/components/schemas/MigrationWallets
+type MigrationWallets struct {
+	Wallets []MigrationWalletValue `json:"wallets"`
+}
+
+// GetWallets returns the value of Wallets.
+func (s *MigrationWallets) GetWallets() []MigrationWalletValue {
+	return s.Wallets
+}
+
+// SetWallets sets the value of Wallets.
+func (s *MigrationWallets) SetWallets(val []MigrationWalletValue) {
+	s.Wallets = val
 }
 
 // Ref: #/components/schemas/MisbehaviourPunishmentConfig
@@ -14779,6 +14999,52 @@ func (o OptGetJettonInfosByAddressesReq) Get() (v GetJettonInfosByAddressesReq, 
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetJettonInfosByAddressesReq) Or(d GetJettonInfosByAddressesReq) GetJettonInfosByAddressesReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetMigrationWalletsReq returns new OptGetMigrationWalletsReq with value set to v.
+func NewOptGetMigrationWalletsReq(v GetMigrationWalletsReq) OptGetMigrationWalletsReq {
+	return OptGetMigrationWalletsReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetMigrationWalletsReq is optional GetMigrationWalletsReq.
+type OptGetMigrationWalletsReq struct {
+	Value GetMigrationWalletsReq
+	Set   bool
+}
+
+// IsSet returns true if OptGetMigrationWalletsReq was set.
+func (o OptGetMigrationWalletsReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetMigrationWalletsReq) Reset() {
+	var v GetMigrationWalletsReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetMigrationWalletsReq) SetTo(v GetMigrationWalletsReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetMigrationWalletsReq) Get() (v GetMigrationWalletsReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetMigrationWalletsReq) Or(d GetMigrationWalletsReq) GetMigrationWalletsReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}

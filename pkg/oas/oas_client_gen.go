@@ -447,6 +447,13 @@ type Invoker interface {
 	//
 	// GET /v2/rates/markets
 	GetMarketsRates(ctx context.Context) (*GetMarketsRatesOK, error)
+	// GetMigrationWallets invokes getMigrationWallets operation.
+	//
+	// Get migratable assets value (TON balance, jettons with prices, NFT count) for several wallets at
+	// once.
+	//
+	// POST /v2/migration/wallets
+	GetMigrationWallets(ctx context.Context, request OptGetMigrationWalletsReq, params GetMigrationWalletsParams) (*MigrationWallets, error)
 	// GetMultisigAccount invokes getMultisigAccount operation.
 	//
 	// Get multisig account info.
@@ -711,6 +718,12 @@ type Invoker interface {
 	//
 	// POST /v2/pubkeys/wallets/_bulk
 	GetWalletsByPublicKeyBulk(ctx context.Context, request OptGetWalletsByPublicKeyBulkReq) (*WalletsByPublicKeys, error)
+	// PrepareMigration invokes prepareMigration operation.
+	//
+	// Prepare ordered signable transactions that migrate every asset from `from` to `to`.
+	//
+	// POST /v2/migration/prepare
+	PrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (*MigrationPrepareResponse, error)
 	// ReindexAccount invokes reindexAccount operation.
 	//
 	// Update internal cache for a particular account.
@@ -8304,6 +8317,114 @@ func (c *Client) sendGetMarketsRates(ctx context.Context) (res *GetMarketsRatesO
 	return result, nil
 }
 
+// GetMigrationWallets invokes getMigrationWallets operation.
+//
+// Get migratable assets value (TON balance, jettons with prices, NFT count) for several wallets at
+// once.
+//
+// POST /v2/migration/wallets
+func (c *Client) GetMigrationWallets(ctx context.Context, request OptGetMigrationWalletsReq, params GetMigrationWalletsParams) (*MigrationWallets, error) {
+	res, err := c.sendGetMigrationWallets(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendGetMigrationWallets(ctx context.Context, request OptGetMigrationWalletsReq, params GetMigrationWalletsParams) (res *MigrationWallets, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getMigrationWallets"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v2/migration/wallets"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetMigrationWalletsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/migration/wallets"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "currencies" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "currencies",
+			Style:   uri.QueryStyleForm,
+			Explode: false,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if params.Currencies != nil {
+				return e.EncodeArray(func(e uri.Encoder) error {
+					for i, item := range params.Currencies {
+						if err := func() error {
+							return e.EncodeValue(conv.StringToString(item))
+						}(); err != nil {
+							return errors.Wrapf(err, "[%d]", i)
+						}
+					}
+					return nil
+				})
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeGetMigrationWalletsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetMigrationWalletsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetMultisigAccount invokes getMultisigAccount operation.
 //
 // Get multisig account info.
@@ -12695,6 +12816,83 @@ func (c *Client) sendGetWalletsByPublicKeyBulk(ctx context.Context, request OptG
 
 	stage = "DecodeResponse"
 	result, err := decodeGetWalletsByPublicKeyBulkResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PrepareMigration invokes prepareMigration operation.
+//
+// Prepare ordered signable transactions that migrate every asset from `from` to `to`.
+//
+// POST /v2/migration/prepare
+func (c *Client) PrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (*MigrationPrepareResponse, error) {
+	res, err := c.sendPrepareMigration(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (res *MigrationPrepareResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("prepareMigration"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v2/migration/prepare"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, PrepareMigrationOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v2/migration/prepare"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePrepareMigrationRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePrepareMigrationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
