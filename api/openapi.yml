@@ -7865,6 +7865,8 @@ components:
           $ref: '#/components/schemas/NftApprovedBy'
         trust:
           $ref: '#/components/schemas/TrustType'
+        metadata_status:
+          $ref: '#/components/schemas/NftCollectionMetadataStatus'
     NftCollections:
       type: object
       required:
@@ -7874,6 +7876,21 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NftCollection'
+    NftCollectionMetadataStatus:
+      type: object
+      properties:
+        url:
+          type: string
+        is_broken:
+          type: boolean
+        last_refresh_try:
+          type: integer
+          format: int64
+          nullable: true
+        last_refresh_success:
+          type: integer
+          format: int64
+          nullable: true
     Trace:
       type: object
       required:

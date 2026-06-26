@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -135,6 +136,11 @@ func (h *Handler) convertNftCollection(collection core.NftCollection, book addre
 	} else {
 		nftCollection.Trust = oas.TrustType(h.spamFilter.NftTrust(collection.Address, nil, collection.OwnerAddress, nil, name, description, image, "", ""))
 	}
+
+	if collection.ContentURL != "" && (strings.HasPrefix(collection.ContentURL, "http://") || strings.HasPrefix(collection.ContentURL, "https://")) {
+		nftCollection.MetadataStatus.SetTo(formatMetadataStatus(collection))
+	}
+
 	if len(collection.Metadata) == 0 {
 		return nftCollection
 	}
@@ -156,6 +162,22 @@ func (h *Handler) convertNftCollection(collection core.NftCollection, book addre
 		})
 	}
 	return nftCollection
+}
+
+func formatMetadataStatus(collection core.NftCollection) oas.NftCollectionMetadataStatus {
+	status := oas.NftCollectionMetadataStatus{
+		URL:                oas.NewOptString(collection.ContentURL),
+		IsBroken:           oas.NewOptBool(collection.LastOffchainMetaRefreshSuccess.IsZero()),
+		LastRefreshTry:     oas.OptNilInt64{Null: true},
+		LastRefreshSuccess: oas.OptNilInt64{Null: true},
+	}
+	if !collection.LastOffchainMetaRefreshTry.IsZero() {
+		status.LastRefreshTry.SetTo(collection.LastOffchainMetaRefreshTry.Unix())
+	}
+	if !collection.LastOffchainMetaRefreshSuccess.IsZero() {
+		status.LastRefreshSuccess.SetTo(collection.LastOffchainMetaRefreshSuccess.Unix())
+	}
+	return status
 }
 
 func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID, traceIDs []tongo.Bits256, acceptLanguage oas.OptString) ([]oas.AccountEvent, int64, error) {

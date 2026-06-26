@@ -5464,6 +5464,9 @@
       "example": {},
       "type": "object"
      },
+     "metadata_status": {
+      "$ref": "#/components/schemas/NftCollectionMetadataStatus"
+     },
      "next_item_index": {
       "example": 1,
       "format": "int64",
@@ -5493,6 +5496,27 @@
      "approved_by",
      "trust"
     ],
+    "type": "object"
+   },
+   "NftCollectionMetadataStatus": {
+    "properties": {
+     "is_broken": {
+      "type": "boolean"
+     },
+     "last_refresh_success": {
+      "format": "int64",
+      "nullable": true,
+      "type": "integer"
+     },
+     "last_refresh_try": {
+      "format": "int64",
+      "nullable": true,
+      "type": "integer"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
     "type": "object"
    },
    "NftCollections": {

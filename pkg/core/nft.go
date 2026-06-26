@@ -26,12 +26,15 @@ type NftItem struct {
 }
 
 type NftCollection struct {
-	Address           tongo.AccountID
-	NextItemIndex     int64
-	OwnerAddress      *tongo.AccountID
-	ContentLayout     int
-	CollectionContent []byte
-	Metadata          map[string]interface{}
+	Address                        tongo.AccountID
+	NextItemIndex                  int64
+	OwnerAddress                   *tongo.AccountID
+	ContentLayout                  int
+	CollectionContent              []byte
+	Metadata                       map[string]interface{}
+	ContentURL                     string
+	LastOffchainMetaRefreshTry     time.Time
+	LastOffchainMetaRefreshSuccess time.Time
 }
 
 type NftSaleInfo struct {

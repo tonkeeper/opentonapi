@@ -11168,14 +11168,15 @@ func (s *NftApprovedByItem) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/NftCollection
 type NftCollection struct {
-	Address              string                   `json:"address"`
-	NextItemIndex        int64                    `json:"next_item_index"`
-	Owner                OptAccountAddress        `json:"owner"`
-	RawCollectionContent string                   `json:"raw_collection_content"`
-	Metadata             OptNftCollectionMetadata `json:"metadata"`
-	Previews             []ImagePreview           `json:"previews"`
-	ApprovedBy           NftApprovedBy            `json:"approved_by"`
-	Trust                TrustType                `json:"trust"`
+	Address              string                         `json:"address"`
+	NextItemIndex        int64                          `json:"next_item_index"`
+	Owner                OptAccountAddress              `json:"owner"`
+	RawCollectionContent string                         `json:"raw_collection_content"`
+	Metadata             OptNftCollectionMetadata       `json:"metadata"`
+	Previews             []ImagePreview                 `json:"previews"`
+	ApprovedBy           NftApprovedBy                  `json:"approved_by"`
+	Trust                TrustType                      `json:"trust"`
+	MetadataStatus       OptNftCollectionMetadataStatus `json:"metadata_status"`
 }
 
 // GetAddress returns the value of Address.
@@ -11218,6 +11219,11 @@ func (s *NftCollection) GetTrust() TrustType {
 	return s.Trust
 }
 
+// GetMetadataStatus returns the value of MetadataStatus.
+func (s *NftCollection) GetMetadataStatus() OptNftCollectionMetadataStatus {
+	return s.MetadataStatus
+}
+
 // SetAddress sets the value of Address.
 func (s *NftCollection) SetAddress(val string) {
 	s.Address = val
@@ -11258,6 +11264,11 @@ func (s *NftCollection) SetTrust(val TrustType) {
 	s.Trust = val
 }
 
+// SetMetadataStatus sets the value of MetadataStatus.
+func (s *NftCollection) SetMetadataStatus(val OptNftCollectionMetadataStatus) {
+	s.MetadataStatus = val
+}
+
 type NftCollectionMetadata map[string]jx.Raw
 
 func (s *NftCollectionMetadata) init() NftCollectionMetadata {
@@ -11267,6 +11278,54 @@ func (s *NftCollectionMetadata) init() NftCollectionMetadata {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/NftCollectionMetadataStatus
+type NftCollectionMetadataStatus struct {
+	URL                OptString   `json:"url"`
+	IsBroken           OptBool     `json:"is_broken"`
+	LastRefreshTry     OptNilInt64 `json:"last_refresh_try"`
+	LastRefreshSuccess OptNilInt64 `json:"last_refresh_success"`
+}
+
+// GetURL returns the value of URL.
+func (s *NftCollectionMetadataStatus) GetURL() OptString {
+	return s.URL
+}
+
+// GetIsBroken returns the value of IsBroken.
+func (s *NftCollectionMetadataStatus) GetIsBroken() OptBool {
+	return s.IsBroken
+}
+
+// GetLastRefreshTry returns the value of LastRefreshTry.
+func (s *NftCollectionMetadataStatus) GetLastRefreshTry() OptNilInt64 {
+	return s.LastRefreshTry
+}
+
+// GetLastRefreshSuccess returns the value of LastRefreshSuccess.
+func (s *NftCollectionMetadataStatus) GetLastRefreshSuccess() OptNilInt64 {
+	return s.LastRefreshSuccess
+}
+
+// SetURL sets the value of URL.
+func (s *NftCollectionMetadataStatus) SetURL(val OptString) {
+	s.URL = val
+}
+
+// SetIsBroken sets the value of IsBroken.
+func (s *NftCollectionMetadataStatus) SetIsBroken(val OptBool) {
+	s.IsBroken = val
+}
+
+// SetLastRefreshTry sets the value of LastRefreshTry.
+func (s *NftCollectionMetadataStatus) SetLastRefreshTry(val OptNilInt64) {
+	s.LastRefreshTry = val
+}
+
+// SetLastRefreshSuccess sets the value of LastRefreshSuccess.
+func (s *NftCollectionMetadataStatus) SetLastRefreshSuccess(val OptNilInt64) {
+	s.LastRefreshSuccess = val
 }
 
 // Ref: #/components/schemas/NftCollections
@@ -16017,6 +16076,52 @@ func (o OptNftCollectionMetadata) Or(d NftCollectionMetadata) NftCollectionMetad
 	return d
 }
 
+// NewOptNftCollectionMetadataStatus returns new OptNftCollectionMetadataStatus with value set to v.
+func NewOptNftCollectionMetadataStatus(v NftCollectionMetadataStatus) OptNftCollectionMetadataStatus {
+	return OptNftCollectionMetadataStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNftCollectionMetadataStatus is optional NftCollectionMetadataStatus.
+type OptNftCollectionMetadataStatus struct {
+	Value NftCollectionMetadataStatus
+	Set   bool
+}
+
+// IsSet returns true if OptNftCollectionMetadataStatus was set.
+func (o OptNftCollectionMetadataStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNftCollectionMetadataStatus) Reset() {
+	var v NftCollectionMetadataStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNftCollectionMetadataStatus) SetTo(v NftCollectionMetadataStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNftCollectionMetadataStatus) Get() (v NftCollectionMetadataStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNftCollectionMetadataStatus) Or(d NftCollectionMetadataStatus) NftCollectionMetadataStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNftItem returns new OptNftItem with value set to v.
 func NewOptNftItem(v NftItem) OptNftItem {
 	return OptNftItem{
@@ -16195,6 +16300,69 @@ func (o OptNftPurchaseAction) Get() (v NftPurchaseAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNftPurchaseAction) Or(d NftPurchaseAction) NftPurchaseAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilInt64 returns new OptNilInt64 with value set to v.
+func NewOptNilInt64(v int64) OptNilInt64 {
+	return OptNilInt64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilInt64 is optional nullable int64.
+type OptNilInt64 struct {
+	Value int64
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilInt64 was set.
+func (o OptNilInt64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilInt64) Reset() {
+	var v int64
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilInt64) SetTo(v int64) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilInt64) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilInt64) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v int64
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilInt64) Get() (v int64, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilInt64) Or(d int64) int64 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
