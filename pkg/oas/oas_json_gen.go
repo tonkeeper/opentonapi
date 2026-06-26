@@ -32285,9 +32285,15 @@ func (s *NftCollection) encodeFields(e *jx.Encoder) {
 		e.FieldStart("trust")
 		s.Trust.Encode(e)
 	}
+	{
+		if s.MetadataStatus.Set {
+			e.FieldStart("metadata_status")
+			s.MetadataStatus.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNftCollection = [8]string{
+var jsonFieldsNameOfNftCollection = [9]string{
 	0: "address",
 	1: "next_item_index",
 	2: "owner",
@@ -32296,6 +32302,7 @@ var jsonFieldsNameOfNftCollection = [8]string{
 	5: "previews",
 	6: "approved_by",
 	7: "trust",
+	8: "metadata_status",
 }
 
 // Decode decodes NftCollection from json.
@@ -32303,7 +32310,7 @@ func (s *NftCollection) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NftCollection to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -32400,6 +32407,16 @@ func (s *NftCollection) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"trust\"")
 			}
+		case "metadata_status":
+			if err := func() error {
+				s.MetadataStatus.Reset()
+				if err := s.MetadataStatus.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"metadata_status\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -32409,8 +32426,9 @@ func (s *NftCollection) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b11001011,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -32510,6 +32528,120 @@ func (s NftCollectionMetadata) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NftCollectionMetadata) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NftCollectionMetadataStatus) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NftCollectionMetadataStatus) encodeFields(e *jx.Encoder) {
+	{
+		if s.URL.Set {
+			e.FieldStart("url")
+			s.URL.Encode(e)
+		}
+	}
+	{
+		if s.IsBroken.Set {
+			e.FieldStart("is_broken")
+			s.IsBroken.Encode(e)
+		}
+	}
+	{
+		if s.LastRefreshTry.Set {
+			e.FieldStart("last_refresh_try")
+			s.LastRefreshTry.Encode(e)
+		}
+	}
+	{
+		if s.LastRefreshSuccess.Set {
+			e.FieldStart("last_refresh_success")
+			s.LastRefreshSuccess.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfNftCollectionMetadataStatus = [4]string{
+	0: "url",
+	1: "is_broken",
+	2: "last_refresh_try",
+	3: "last_refresh_success",
+}
+
+// Decode decodes NftCollectionMetadataStatus from json.
+func (s *NftCollectionMetadataStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NftCollectionMetadataStatus to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "url":
+			if err := func() error {
+				s.URL.Reset()
+				if err := s.URL.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"url\"")
+			}
+		case "is_broken":
+			if err := func() error {
+				s.IsBroken.Reset()
+				if err := s.IsBroken.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_broken\"")
+			}
+		case "last_refresh_try":
+			if err := func() error {
+				s.LastRefreshTry.Reset()
+				if err := s.LastRefreshTry.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_refresh_try\"")
+			}
+		case "last_refresh_success":
+			if err := func() error {
+				s.LastRefreshSuccess.Reset()
+				if err := s.LastRefreshSuccess.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"last_refresh_success\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NftCollectionMetadataStatus")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NftCollectionMetadataStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NftCollectionMetadataStatus) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -37035,6 +37167,39 @@ func (s *OptNftCollectionMetadata) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes NftCollectionMetadataStatus as json.
+func (o OptNftCollectionMetadataStatus) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes NftCollectionMetadataStatus from json.
+func (o *OptNftCollectionMetadataStatus) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNftCollectionMetadataStatus to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNftCollectionMetadataStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNftCollectionMetadataStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes NftItem as json.
 func (o OptNftItem) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -37163,6 +37328,57 @@ func (s OptNftPurchaseAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptNftPurchaseAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes int64 as json.
+func (o OptNilInt64) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.Int64(int64(o.Value))
+}
+
+// Decode decodes int64 from json.
+func (o *OptNilInt64) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilInt64 to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v int64
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	v, err := d.Int64()
+	if err != nil {
+		return err
+	}
+	o.Value = int64(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilInt64) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilInt64) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
