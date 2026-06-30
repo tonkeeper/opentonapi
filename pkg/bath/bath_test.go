@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 
+	"maps"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/internal/g"
@@ -19,7 +21,6 @@ import (
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
 
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/pyth"
@@ -1224,7 +1225,7 @@ func TestFindActions(t *testing.T) {
 
 	var sharedStorage *litestorage.LiteStorage
 	if !isFocusedRun() {
-		sharedStorage = newBathTestStorage(t, cli, slices.Concat(maps.Values(txBlocks)...))
+		sharedStorage = newBathTestStorage(t, cli, slices.Concat(slices.Collect(maps.Values(txBlocks))...))
 	}
 
 	for _, c := range testCases {

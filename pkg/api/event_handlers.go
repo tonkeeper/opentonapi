@@ -14,7 +14,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"go.uber.org/zap"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"

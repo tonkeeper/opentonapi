@@ -15,8 +15,9 @@ import (
 	"sync"
 	"time"
 
+	"maps"
+
 	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
 
 	"github.com/cespare/xxhash/v2"
 	"github.com/go-faster/jx"
@@ -595,10 +596,10 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 		resp.Source = oas.NewOptSource(oas.Source{Files: sourceFiles})
 	}
 	knownMethods := make(map[int64]string)
-	for _, name := range maps.Keys(abi.KnownGetMethodsDecoder) {
+	for name := range maps.Keys(abi.KnownGetMethodsDecoder) {
 		knownMethods[int64(utils.MethodIdFromName(name))] = name
 	}
-	for _, methodID := range maps.Keys(info.Methods) {
+	for methodID := range maps.Keys(info.Methods) {
 		if method, ok := knownMethods[methodID]; ok {
 			resp.Methods = append(resp.Methods, oas.Method{
 				ID:     methodID,

@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 	"sync"
 
 	"github.com/tonkeeper/tongo/ton"
 
+	"maps"
+
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
-	"golang.org/x/exp/maps"
 
 	"github.com/tonkeeper/opentonapi/pkg/pyth"
 )
@@ -336,7 +338,7 @@ func DistinctAccounts(trace *Trace) []tongo.AccountID {
 	Visit(trace, func(trace *Trace) {
 		accounts[trace.Account] = struct{}{}
 	})
-	return maps.Keys(accounts)
+	return slices.Collect(maps.Keys(accounts))
 }
 
 // CopyTraceData copies additional data and transaction data from one trace to another.

@@ -10,7 +10,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"

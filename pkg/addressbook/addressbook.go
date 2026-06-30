@@ -12,6 +12,9 @@ import (
 	"sync"
 	"time"
 
+	"maps"
+	"slices"
+
 	"github.com/shopspring/decimal"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
@@ -19,8 +22,6 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -146,7 +147,7 @@ func (b *Book) SearchAttachedAccountsByPrefix(prefix string) []AttachedAccount {
 			}
 		}
 	}
-	accounts := maps.Values(exclusiveAccounts)
+	accounts := slices.Collect(maps.Values(exclusiveAccounts))
 	tonDomainPrefix := prefix + "ton"
 	tgDomainPrefix := prefix + "tme"
 	// Boost weight for accounts that match the prefix
@@ -251,7 +252,7 @@ func (b *Book) GetJettonInfoByAddress(a tongo.AccountID) (KnownJetton, bool) {
 func (b *Book) TFPools() []tongo.AccountID {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	return maps.Keys(b.tfPools)
+	return slices.Collect(maps.Keys(b.tfPools))
 }
 
 // IsWallet checks if the address is a wallet

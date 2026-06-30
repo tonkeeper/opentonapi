@@ -15,7 +15,7 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 
 	"github.com/tonkeeper/tongo"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/api/i18n"
 	"github.com/tonkeeper/opentonapi/pkg/core"
