@@ -19,7 +19,7 @@ import (
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 // GetCurrentRates fetches current jetton and fiat rates

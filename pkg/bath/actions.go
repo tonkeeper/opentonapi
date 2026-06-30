@@ -17,7 +17,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 const (

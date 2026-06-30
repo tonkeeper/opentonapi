@@ -7,9 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"slices"
 	"sort"
 	"sync"
 	"time"
+
+	"maps"
 
 	"github.com/avast/retry-go"
 	"github.com/prometheus/client_golang/prometheus"
@@ -25,7 +28,6 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/wallet"
 	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
 
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
@@ -742,5 +744,5 @@ func findMissedBlocks(ctx context.Context, s *LiteStorage, id ton.BlockID, prev 
 	for _, b := range result {
 		uniq[b] = struct{}{}
 	}
-	return maps.Keys(uniq), nil
+	return slices.Collect(maps.Keys(uniq)), nil
 }

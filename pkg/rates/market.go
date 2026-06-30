@@ -11,16 +11,18 @@ import (
 	"math"
 	"math/big"
 	"net/http"
+	"slices"
 	"sort"
 	"strconv"
 	"time"
+
+	"log/slog"
+	"maps"
 
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slog"
 )
 
 // List of services used to calculate various prices
@@ -711,7 +713,7 @@ func convertStonFiPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 		}
 		actualLpAssets[lpAsset.Account] = lpAsset
 	}
-	return actualAssets, maps.Values(actualLpAssets), nil
+	return actualAssets, slices.Collect(maps.Values(actualLpAssets)), nil
 }
 
 func convertDeDustPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
@@ -849,7 +851,7 @@ func convertDeDustPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 		actualLpAssets[lpAsset.Account] = lpAsset
 	}
 
-	return actualAssets, maps.Values(actualLpAssets), nil
+	return actualAssets, slices.Collect(maps.Values(actualLpAssets)), nil
 }
 
 func convertSwapCoffeePoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
@@ -1009,7 +1011,7 @@ func convertSwapCoffeePoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {
 		actualLpAssets[lpAsset.Account] = lpAsset
 	}
 
-	return actualAssets, maps.Values(actualLpAssets), nil
+	return actualAssets, slices.Collect(maps.Values(actualLpAssets)), nil
 }
 
 func (m *Mock) convertBidaskPoolResponse(respBody []byte) ([]Pool, []LpAsset, error) {

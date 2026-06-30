@@ -6,7 +6,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
-	"golang.org/x/exp/slices"
+	"slices"
 	"reflect"
 )
 

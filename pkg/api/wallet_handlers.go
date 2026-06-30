@@ -7,6 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
+
+	"maps"
 
 	"github.com/sourcegraph/conc/pool"
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -18,7 +21,6 @@ import (
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
-	"golang.org/x/exp/maps"
 )
 
 var errUnsupportedWalletVersion = errors.New("unsupported wallet version")
@@ -40,7 +42,7 @@ func (h *Handler) GetWalletsByPublicKey(ctx context.Context, params oas.GetWalle
 }
 
 func (h *Handler) collectWallets(ctx context.Context, versions map[ton.AccountID]abi.ContractInterface) ([]oas.Wallet, int, error) {
-	rawAccounts, err := h.storage.GetRawAccounts(ctx, maps.Keys(versions))
+	rawAccounts, err := h.storage.GetRawAccounts(ctx, slices.Collect(maps.Keys(versions)))
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
