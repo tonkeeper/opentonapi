@@ -6257,6 +6257,12 @@ components:
           default: USD
           description: fiat currency for the preview values
           example: USD
+        public_key:
+          type: string
+          description: >
+            hex-encoded ed25519 public key of the source wallet.
+            If `from` wallet is uninitialized, then public_key is used to infer wallet code
+          example: 29c1a72938b8f4f1d4e64f1e3f73e4b0e60f9b0c0e0d0e0f0a0b0c0d0e0f0a0b0
     MigrationPrepareResponse:
       type: object
       required:
@@ -6296,6 +6302,12 @@ components:
           description: >
             base64 BOC of the unsigned wallet body. Sign its hash, prepend the signature,
             wrap it in an external message and broadcast.
+        state_init:
+          type: string
+          format: cell-base64
+          description: >
+            base64 BOC of the wallet StateInit (code + data).
+            Present only on the first transaction when the source wallet is not yet initialized
         emulation:
           $ref: "#/components/schemas/MessageConsequences"
     CurrencyType:

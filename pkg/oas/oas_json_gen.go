@@ -30133,12 +30133,19 @@ func (s *MigrationPrepareRequest) encodeFields(e *jx.Encoder) {
 			s.Currency.Encode(e)
 		}
 	}
+	{
+		if s.PublicKey.Set {
+			e.FieldStart("public_key")
+			s.PublicKey.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfMigrationPrepareRequest = [3]string{
+var jsonFieldsNameOfMigrationPrepareRequest = [4]string{
 	0: "from",
 	1: "to",
 	2: "currency",
+	3: "public_key",
 }
 
 // Decode decodes MigrationPrepareRequest from json.
@@ -30184,6 +30191,16 @@ func (s *MigrationPrepareRequest) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"currency\"")
+			}
+		case "public_key":
+			if err := func() error {
+				s.PublicKey.Reset()
+				if err := s.PublicKey.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"public_key\"")
 			}
 		default:
 			return d.Skip()
@@ -30416,15 +30433,22 @@ func (s *MigrationTransaction) encodeFields(e *jx.Encoder) {
 		e.Str(s.Boc)
 	}
 	{
+		if s.StateInit.Set {
+			e.FieldStart("state_init")
+			s.StateInit.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("emulation")
 		s.Emulation.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfMigrationTransaction = [3]string{
+var jsonFieldsNameOfMigrationTransaction = [4]string{
 	0: "seqno",
 	1: "boc",
-	2: "emulation",
+	2: "state_init",
+	3: "emulation",
 }
 
 // Decode decodes MigrationTransaction from json.
@@ -30460,8 +30484,18 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"boc\"")
 			}
+		case "state_init":
+			if err := func() error {
+				s.StateInit.Reset()
+				if err := s.StateInit.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"state_init\"")
+			}
 		case "emulation":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Emulation.Decode(d); err != nil {
 					return err
@@ -30480,7 +30514,7 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
