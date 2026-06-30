@@ -10429,6 +10429,9 @@ type MigrationPrepareRequest struct {
 	To string `json:"to"`
 	// Fiat currency for the preview values.
 	Currency OptString `json:"currency"`
+	// Hex-encoded ed25519 public key of the source wallet. If `from` wallet is uninitialized, then
+	// public_key is used to infer wallet code.
+	PublicKey OptString `json:"public_key"`
 }
 
 // GetFrom returns the value of From.
@@ -10446,6 +10449,11 @@ func (s *MigrationPrepareRequest) GetCurrency() OptString {
 	return s.Currency
 }
 
+// GetPublicKey returns the value of PublicKey.
+func (s *MigrationPrepareRequest) GetPublicKey() OptString {
+	return s.PublicKey
+}
+
 // SetFrom sets the value of From.
 func (s *MigrationPrepareRequest) SetFrom(val string) {
 	s.From = val
@@ -10459,6 +10467,11 @@ func (s *MigrationPrepareRequest) SetTo(val string) {
 // SetCurrency sets the value of Currency.
 func (s *MigrationPrepareRequest) SetCurrency(val OptString) {
 	s.Currency = val
+}
+
+// SetPublicKey sets the value of PublicKey.
+func (s *MigrationPrepareRequest) SetPublicKey(val OptString) {
+	s.PublicKey = val
 }
 
 // Ref: #/components/schemas/MigrationPrepareResponse
@@ -10517,7 +10530,10 @@ type MigrationTransaction struct {
 	Seqno int32 `json:"seqno"`
 	// Base64 BOC of the unsigned wallet body. Sign its hash, prepend the signature, wrap it in an
 	// external message and broadcast.
-	Boc       string              `json:"boc"`
+	Boc string `json:"boc"`
+	// Base64 BOC of the wallet StateInit (code + data). Present only on the first transaction when the
+	// source wallet is not yet initialized.
+	StateInit OptString           `json:"state_init"`
 	Emulation MessageConsequences `json:"emulation"`
 }
 
@@ -10529,6 +10545,11 @@ func (s *MigrationTransaction) GetSeqno() int32 {
 // GetBoc returns the value of Boc.
 func (s *MigrationTransaction) GetBoc() string {
 	return s.Boc
+}
+
+// GetStateInit returns the value of StateInit.
+func (s *MigrationTransaction) GetStateInit() OptString {
+	return s.StateInit
 }
 
 // GetEmulation returns the value of Emulation.
@@ -10544,6 +10565,11 @@ func (s *MigrationTransaction) SetSeqno(val int32) {
 // SetBoc sets the value of Boc.
 func (s *MigrationTransaction) SetBoc(val string) {
 	s.Boc = val
+}
+
+// SetStateInit sets the value of StateInit.
+func (s *MigrationTransaction) SetStateInit(val OptString) {
+	s.StateInit = val
 }
 
 // SetEmulation sets the value of Emulation.

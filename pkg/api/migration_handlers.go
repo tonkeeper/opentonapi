@@ -3,8 +3,10 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/big"
 	"net/http"
 	"sync"
@@ -143,6 +145,17 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 	return resp, nil
 }
 
+func getPublicKey(pk oas.OptString) (ed25519.PublicKey, error) {
+	if !pk.IsSet() || pk.Value == "" {
+		return nil, errors.New("public_key is empty")
+	}
+	if decoded, err := hex.DecodeString(pk.Value); err != nil {
+		return nil, fmt.Errorf("public_key is not valid hex: %v", err)
+	} else {
+		return decoded, nil
+	}
+}
+
 func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepareRequest) (*oas.MigrationPrepareResponse, error) {
 	from, err := tongo.ParseAddress(req.From)
 	if err != nil {
@@ -156,24 +169,43 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	if req.Currency.IsSet() && req.Currency.Value != "" {
 		currency = req.Currency.Value
 	}
+	logger := slog.With(
+		slog.String("from", from.ID.String()),
+		slog.String("to", to.ID.String()),
+		slog.String("pubkey", req.PublicKey.Value),
+	)
+	var (
+		version     tonwallet.Version
+		publicKey   ed25519.PublicKey
+		deployInit  *tlb.StateInit
+		startSeqno  uint32 = 0
+		subWalletID uint32 = tonwallet.DefaultSubWallet
+	)
 	account, err := h.storage.GetRawAccount(ctx, from.ID)
-	if errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("source wallet not found"))
-	}
-	if err != nil {
+	if !errors.Is(err, core.ErrEntityNotFound) {
+		logger.Error("error happened on wallet inference", slog.String("error", err.Error()))
 		return nil, toError(http.StatusInternalServerError, err)
+	} else if err != nil || len(account.Code) == 0 {
+		publicKey, err = getPublicKey(req.PublicKey)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("source wallet is not initialized; %v", err))
+		}
+		version, deployInit, err = inferWalletForAddress(from.ID, publicKey)
+		if err != nil {
+			logger.Error("error happened on wallet inference", slog.String("error", err.Error()))
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+	} else {
+		version, err = wallet.GetVersionByCode(account.Code)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("unsupported source wallet: %w", err))
+		}
+		startSeqno, subWalletID, publicKey, err = parseWalletData(version, account.Data)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, fmt.Errorf("can't read wallet data: %w", err))
+		}
 	}
-	if len(account.Code) == 0 {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("source wallet is not initialized"))
-	}
-	version, err := wallet.GetVersionByCode(account.Code)
-	if err != nil {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("unsupported source wallet: %w", err))
-	}
-	startSeqno, subWalletID, publicKey, err := parseWalletData(version, account.Data)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, fmt.Errorf("can't read wallet data: %w", err))
-	}
+
 	// Discover the safe, migratable assets of the source wallet.
 	jettons, err := h.collectJettonWallets(ctx, []ton.AccountID{from.ID})
 	if err != nil {
@@ -268,7 +300,11 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		extMsg, err := tongo.CreateExternalMessage(from.ID, signedBody, nil, tlb.VarUInteger16{})
+		var init *tlb.StateInit
+		if i == 0 {
+			init = deployInit
+		}
+		extMsg, err := tongo.CreateExternalMessage(from.ID, signedBody, init, tlb.VarUInteger16{})
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -297,7 +333,7 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		resp.Transactions = append(resp.Transactions, oas.MigrationTransaction{
+		transaction := oas.MigrationTransaction{
 			Seqno: int32(seqno),
 			Boc:   bocBase64,
 			Emulation: oas.MessageConsequences{
@@ -305,10 +341,29 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 				Event: event,
 				Risk:  oasRisk,
 			},
-		})
+		}
+		if init != nil {
+			transaction.StateInit, err = convertStateInit(*init)
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+		}
+		resp.Transactions = append(resp.Transactions, transaction)
 		overrides = finalStates
 	}
 	return resp, nil
+}
+
+func convertStateInit(si tlb.StateInit) (oas.OptString, error) {
+	cell := boc.NewCell()
+	if err := tlb.Marshal(cell, si); err != nil {
+		return oas.OptString{}, fmt.Errorf("marshalling stat init: %v", err)
+	}
+	b64, err := cell.ToBocBase64()
+	if err != nil {
+		return oas.OptString{}, fmt.Errorf("base64 encoding failed: %v", err)
+	}
+	return oas.NewOptString(b64), nil
 }
 
 func (h *Handler) collectJettonWallets(ctx context.Context, owners []ton.AccountID) (map[ton.AccountID][]core.JettonWallet, error) {
@@ -389,6 +444,29 @@ func parseWalletData(version tonwallet.Version, data []byte) (seqno uint32, subW
 	default:
 		return 0, 0, nil, fmt.Errorf("unsupported wallet version for migration: %v", version.ToString())
 	}
+}
+
+func inferWalletForAddress(address ton.AccountID, pubkey ed25519.PublicKey) (tonwallet.Version, *tlb.StateInit, error) {
+	workchain := int(address.Workchain)
+	for _, v := range []tonwallet.Version{
+		tonwallet.V5Beta,
+		tonwallet.V5R1,
+		tonwallet.V4R2,
+		tonwallet.V4R1,
+		tonwallet.V3R2,
+		tonwallet.V3R1,
+	} {
+		guess, err := tonwallet.GenerateWalletAddress(pubkey, v, nil, workchain, nil)
+		if err != nil || guess != address {
+			continue
+		}
+		init, err := tonwallet.GenerateStateInit(pubkey, v, nil, workchain, nil)
+		if err != nil {
+			return 0, nil, fmt.Errorf("can't build state init for %v: %w", v.ToString(), err)
+		}
+		return v, &init, nil
+	}
+	return 0, nil, fmt.Errorf("can't determine source wallet version from the provided pubkey")
 }
 
 func buildUnsignedBody(v tonwallet.Version, subWalletID uint32, pubkey ed25519.PublicKey, workchain int, seqno uint32, validUntil time.Time, s []tonwallet.RawMessage) (*boc.Cell, error) {

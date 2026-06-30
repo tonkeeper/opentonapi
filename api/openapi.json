@@ -5025,6 +5025,11 @@
       "format": "address",
       "type": "string"
      },
+     "public_key": {
+      "description": "hex-encoded ed25519 public key of the source wallet. If `from` wallet is uninitialized, then public_key is used to infer wallet code\n",
+      "example": "29c1a72938b8f4f1d4e64f1e3f73e4b0e60f9b0c0e0d0e0f0a0b0c0d0e0f0a0b0",
+      "type": "string"
+     },
      "to": {
       "description": "destination wallet TON address",
       "format": "address",
@@ -5081,6 +5086,11 @@
       "description": "wallet seqno baked into the unsigned body",
       "format": "int32",
       "type": "integer"
+     },
+     "state_init": {
+      "description": "base64 BOC of the wallet StateInit (code + data). Present only on the first transaction when the source wallet is not yet initialized\n",
+      "format": "cell-base64",
+      "type": "string"
      }
     },
     "required": [
