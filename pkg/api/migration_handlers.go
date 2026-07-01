@@ -182,7 +182,7 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		subWalletID uint32 = tonwallet.DefaultSubWallet
 	)
 	account, err := h.storage.GetRawAccount(ctx, from.ID)
-	if !errors.Is(err, core.ErrEntityNotFound) {
+	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		logger.Error("error happened on wallet inference", slog.String("error", err.Error()))
 		return nil, toError(http.StatusInternalServerError, err)
 	} else if err != nil || len(account.Code) == 0 {
