@@ -166,12 +166,20 @@ func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
 	for i := 0; i < 3; i++ {
 		serverNumber := rand.Intn(len(ms.sendingClients))
 		c := ms.sendingClients[serverNumber]
-		_, err = c.SendMessage(ctx, payload)
+		// Bound each attempt: tongo's per-request timeout is 60s, so without this
+		// three hanging liteservers could block a request for ~180s, causing the
+		// caller (or an upstream proxy) to time out and receive an empty response.
+		ctx2, cancel := context.WithTimeout(ctx, 10*time.Second)
+		_, err := c.SendMessage(ctx2, payload)
+		cancel()
 		if err == nil {
 			liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "success", fmt.Sprintf("%d", i)).Inc()
 			return nil
 		}
 		liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "error", fmt.Sprintf("%d", i)).Inc()
+		if ctx.Err() != nil {
+			break // caller has gone away
+		}
 	}
 	return err
 }
