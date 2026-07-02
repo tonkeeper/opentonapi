@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"sync"
 
 	"log/slog"
@@ -80,7 +81,7 @@ type Handler struct {
 }
 
 func (h *Handler) NewError(ctx context.Context, err error) *oas.ErrorStatusCode {
-	return new(oas.ErrorStatusCode)
+	return toError(http.StatusInternalServerError, err)
 }
 
 // Options configures behavior of a Handler instance.
