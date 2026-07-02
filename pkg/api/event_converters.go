@@ -759,7 +759,7 @@ func (h *Handler) convertBuyXTRAction(ctx context.Context, d *bath.BuyXTRAction,
 	}
 	value := i18n.FormatTokens(d.Amount, int32(price.Decimals), price.TokenName, nil)
 	simplePreview := oas.ActionSimplePreview{
-		Name: "Deposit XTR",
+		Name: "Buy XTR",
 		Description: i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "buyXtr",
