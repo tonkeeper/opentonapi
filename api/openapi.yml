@@ -6711,6 +6711,7 @@ components:
             - WithdrawTokenStakeRequest
             - LiquidityDeposit
             - OracleRequest
+            - BuyXTR
             - DepositXTR
             - WithdrawXTR
             - Unknown
@@ -6782,6 +6783,8 @@ components:
           $ref: '#/components/schemas/WithdrawXTRAction'
         DepositXTR:
           $ref: '#/components/schemas/DepositXTRAction'
+        BuyXTR:
+          $ref: '#/components/schemas/BuyXTRAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -6846,6 +6849,18 @@ components:
           format: double
           example: 5.24
     DepositXTRAction:
+      type: object
+      required:
+        - recipient
+        - amount
+      properties:
+        recipient:
+          $ref: '#/components/schemas/AccountAddress'
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "123000000000"
+    BuyXTRAction:
       type: object
       required:
         - recipient

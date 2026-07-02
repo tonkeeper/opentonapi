@@ -103,6 +103,69 @@ var InvoicePaymentStrawJetton = Straw[BubbleInvoicePayment]{
 	},
 }
 
+type BubbleBuyXTR struct {
+	Recipient    tongo.AccountID
+	JettonMaster tongo.AccountID
+	Amount       big.Int
+	Success      bool
+}
+
+func (b BubbleBuyXTR) ToAction() (action *Action) {
+	return &Action{
+		BuyXTR: &BuyXTRAction{
+			Recipient:    b.Recipient,
+			JettonMaster: b.JettonMaster,
+			Amount:       b.Amount,
+		},
+		Success: b.Success,
+		Type:    BuyXTR,
+	}
+}
+
+var XTRBuyAction = Straw[BubbleBuyXTR]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abiXtr.XtrBuyXTRRequestMsgOp), func(bubble *Bubble) bool {
+		tx := bubble.Info.(BubbleTx)
+		body, ok := tx.decodedBody.Value.(*abiXtr.BuyXTRRequest)
+		if !ok {
+			return false
+		}
+		_, err := tongo.AccountIDFromTlb(body.UserAddress.ToMsgAddress())
+		if err != nil {
+			return false
+		}
+		return true
+	}},
+	Builder: func(newAction *BubbleBuyXTR, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.JettonMaster = tx.account.Address
+		body := tx.decodedBody.Value.(*abiXtr.BuyXTRRequest)
+		amount := new(big.Int).SetUint64(uint64(body.Amount))
+		newAction.Amount = *amount
+		userAddress, _ := tongo.AccountIDFromTlb(body.UserAddress.ToMsgAddress())
+		newAction.Recipient = *userAddress
+
+		return nil
+	},
+	SingleChild: &Straw[BubbleBuyXTR]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x4af6f2fe)},
+		Children: []Straw[BubbleBuyXTR]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0x01339000)},
+				SingleChild: &Straw[BubbleBuyXTR]{
+					CheckFuncs: []bubbleCheck{IsTx, HasOpcode(0xd53276db)},
+					Builder: func(newAction *BubbleBuyXTR, bubble *Bubble) error {
+						newAction.Success = true
+						return nil
+					},
+				},
+			},
+			{
+				CheckFuncs: []bubbleCheck{Is(BubbleContractDeploy{})},
+			},
+		},
+	},
+}
+
 type BubbleDepositXTR struct {
 	Recipient    tongo.AccountID
 	JettonMaster tongo.AccountID
