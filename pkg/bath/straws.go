@@ -118,6 +118,7 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		DepositFFVaultStakeStraw,
 		WithdrawalRequestFFVaultStraw,
 		XTRDepositAction,
+		XTRBuyAction,
 	}
 }
 

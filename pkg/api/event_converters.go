@@ -745,6 +745,38 @@ func (h *Handler) convertOracleRequestAction(o *bath.OracleRequestAction, accept
 	return action, simplePreview
 }
 
+func (h *Handler) convertBuyXTRAction(ctx context.Context, d *bath.BuyXTRAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptBuyXTRAction, oas.ActionSimplePreview) {
+	price := h.convertPrice(ctx, core.Price{
+		Currency: core.Currency{
+			Type:   core.CurrencyJetton,
+			Jetton: &d.JettonMaster,
+		},
+		Amount: d.Amount,
+	})
+	buyXtrAction := oas.BuyXTRAction{
+		Recipient: convertAccountAddress(d.Recipient, h.addressBook),
+		Amount:    d.Amount.String(),
+	}
+	value := i18n.FormatTokens(d.Amount, int32(price.Decimals), price.TokenName, nil)
+	simplePreview := oas.ActionSimplePreview{
+		Name: "Deposit XTR",
+		Description: i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "buyXtr",
+				Other: "Buy {{.Value}}",
+			},
+			TemplateData: i18n.Template{
+				"Value": value,
+			},
+		}),
+		Accounts: distinctAccounts(viewer, h.addressBook, &d.Recipient),
+		Value:    oas.NewOptString(value),
+	}
+	var action oas.OptBuyXTRAction
+	action.SetTo(buyXtrAction)
+	return action, simplePreview
+}
+
 func (h *Handler) convertDepositXTRAction(ctx context.Context, d *bath.DepositXTRAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptDepositXTRAction, oas.ActionSimplePreview) {
 	price := h.convertPrice(ctx, core.Price{
 		Currency: core.Currency{
@@ -1164,6 +1196,8 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		}
 	case bath.OracleRequest:
 		action.OracleRequest, action.SimplePreview = h.convertOracleRequestAction(a.OracleRequest, acceptLanguage.Value, viewer)
+	case bath.BuyXTR:
+		action.BuyXTR, action.SimplePreview = h.convertBuyXTRAction(ctx, a.BuyXTR, acceptLanguage.Value, viewer)
 	case bath.DepositXTR:
 		action.DepositXTR, action.SimplePreview = h.convertDepositXTRAction(ctx, a.DepositXTR, acceptLanguage.Value, viewer)
 	case bath.WithdrawXTR:
