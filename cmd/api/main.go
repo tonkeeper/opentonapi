@@ -60,6 +60,9 @@ func main() {
 	storage, err := litestorage.NewLiteStorage(
 		log,
 		client,
+		litestorage.WithPreloadBlocks([]tongo.BlockID{
+			tongo.MustParseBlockID("(0,8000000000000000,72945279)"),
+		}),
 		litestorage.WithPreloadAccounts(cfg.App.Accounts),
 		litestorage.WithBlockChannel(storageBlockCh),
 		litestorage.WithPythPriceFeeds(pythFeeds),
