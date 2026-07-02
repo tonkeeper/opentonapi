@@ -1166,6 +1166,9 @@
      "AuctionBid": {
       "$ref": "#/components/schemas/AuctionBidAction"
      },
+     "BuyXTR": {
+      "$ref": "#/components/schemas/BuyXTRAction"
+     },
      "ContractDeploy": {
       "$ref": "#/components/schemas/ContractDeployAction"
      },
@@ -1303,6 +1306,7 @@
        "WithdrawTokenStakeRequest",
        "LiquidityDeposit",
        "OracleRequest",
+       "BuyXTR",
        "DepositXTR",
        "WithdrawXTR",
        "Unknown"
@@ -2816,6 +2820,23 @@
     ],
     "example": "cskip_no_state",
     "type": "string"
+   },
+   "BuyXTRAction": {
+    "properties": {
+     "amount": {
+      "example": "123000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "recipient": {
+      "$ref": "#/components/schemas/AccountAddress"
+     }
+    },
+    "required": [
+     "recipient",
+     "amount"
+    ],
+    "type": "object"
    },
    "ChartPoints": {
     "description": "Each inner array is a pair [timestamp, price]:\n  • index 0 — Unix timestamp (int64)  \n  • index 1 — token price (decimal) in the requested currency.\n",

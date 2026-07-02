@@ -742,6 +742,7 @@ type Action struct {
 	OracleRequest             OptOracleRequestAction             `json:"OracleRequest"`
 	WithdrawXTR               OptWithdrawXTRAction               `json:"WithdrawXTR"`
 	DepositXTR                OptDepositXTRAction                `json:"DepositXTR"`
+	BuyXTR                    OptBuyXTRAction                    `json:"BuyXTR"`
 	SimplePreview             ActionSimplePreview                `json:"simple_preview"`
 	BaseTransactions          []string                           `json:"base_transactions"`
 }
@@ -909,6 +910,11 @@ func (s *Action) GetWithdrawXTR() OptWithdrawXTRAction {
 // GetDepositXTR returns the value of DepositXTR.
 func (s *Action) GetDepositXTR() OptDepositXTRAction {
 	return s.DepositXTR
+}
+
+// GetBuyXTR returns the value of BuyXTR.
+func (s *Action) GetBuyXTR() OptBuyXTRAction {
+	return s.BuyXTR
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -1084,6 +1090,11 @@ func (s *Action) SetWithdrawXTR(val OptWithdrawXTRAction) {
 // SetDepositXTR sets the value of DepositXTR.
 func (s *Action) SetDepositXTR(val OptDepositXTRAction) {
 	s.DepositXTR = val
+}
+
+// SetBuyXTR sets the value of BuyXTR.
+func (s *Action) SetBuyXTR(val OptBuyXTRAction) {
+	s.BuyXTR = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1323,6 +1334,7 @@ const (
 	ActionTypeWithdrawTokenStakeRequest ActionType = "WithdrawTokenStakeRequest"
 	ActionTypeLiquidityDeposit          ActionType = "LiquidityDeposit"
 	ActionTypeOracleRequest             ActionType = "OracleRequest"
+	ActionTypeBuyXTR                    ActionType = "BuyXTR"
 	ActionTypeDepositXTR                ActionType = "DepositXTR"
 	ActionTypeWithdrawXTR               ActionType = "WithdrawXTR"
 	ActionTypeUnknown                   ActionType = "Unknown"
@@ -1360,6 +1372,7 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeWithdrawTokenStakeRequest,
 		ActionTypeLiquidityDeposit,
 		ActionTypeOracleRequest,
+		ActionTypeBuyXTR,
 		ActionTypeDepositXTR,
 		ActionTypeWithdrawXTR,
 		ActionTypeUnknown,
@@ -1426,6 +1439,8 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeLiquidityDeposit:
 		return []byte(s), nil
 	case ActionTypeOracleRequest:
+		return []byte(s), nil
+	case ActionTypeBuyXTR:
 		return []byte(s), nil
 	case ActionTypeDepositXTR:
 		return []byte(s), nil
@@ -1527,6 +1542,9 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeOracleRequest:
 		*s = ActionTypeOracleRequest
+		return nil
+	case ActionTypeBuyXTR:
+		*s = ActionTypeBuyXTR
 		return nil
 	case ActionTypeDepositXTR:
 		*s = ActionTypeDepositXTR
@@ -4516,6 +4534,32 @@ func (s *BouncePhaseType) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/BuyXTRAction
+type BuyXTRAction struct {
+	Recipient AccountAddress `json:"recipient"`
+	Amount    string         `json:"amount"`
+}
+
+// GetRecipient returns the value of Recipient.
+func (s *BuyXTRAction) GetRecipient() AccountAddress {
+	return s.Recipient
+}
+
+// GetAmount returns the value of Amount.
+func (s *BuyXTRAction) GetAmount() string {
+	return s.Amount
+}
+
+// SetRecipient sets the value of Recipient.
+func (s *BuyXTRAction) SetRecipient(val AccountAddress) {
+	s.Recipient = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *BuyXTRAction) SetAmount(val string) {
+	s.Amount = val
 }
 
 type ChartPoints [][]float64
@@ -13890,6 +13934,52 @@ func (o OptBouncePhaseType) Get() (v BouncePhaseType, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBouncePhaseType) Or(d BouncePhaseType) BouncePhaseType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBuyXTRAction returns new OptBuyXTRAction with value set to v.
+func NewOptBuyXTRAction(v BuyXTRAction) OptBuyXTRAction {
+	return OptBuyXTRAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBuyXTRAction is optional BuyXTRAction.
+type OptBuyXTRAction struct {
+	Value BuyXTRAction
+	Set   bool
+}
+
+// IsSet returns true if OptBuyXTRAction was set.
+func (o OptBuyXTRAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBuyXTRAction) Reset() {
+	var v BuyXTRAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBuyXTRAction) SetTo(v BuyXTRAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBuyXTRAction) Get() (v BuyXTRAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBuyXTRAction) Or(d BuyXTRAction) BuyXTRAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}

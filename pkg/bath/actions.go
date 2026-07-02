@@ -14,10 +14,11 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/ton"
 
+	"slices"
+
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
-	"slices"
 )
 
 const (
@@ -50,6 +51,7 @@ const (
 	SetSignatureAllowed       ActionType = "SetSignatureAllowed"
 	LiquidityDeposit          ActionType = "LiquidityDeposit"
 	OracleRequest             ActionType = "OracleRequest"
+	BuyXTR                    ActionType = "BuyXTR"
 	DepositXTR                ActionType = "DepositXTR"
 	WithdrawXTR               ActionType = "WithdrawXTR"
 	Unknown                   ActionType = "Unknown"
@@ -107,6 +109,7 @@ type (
 		SetSignatureAllowed       *SetSignatureAllowedAction       `json:",omitempty"`
 		LiquidityDepositAction    *LiquidityDepositAction          `json:",omitempty"`
 		OracleRequest             *OracleRequestAction             `json:",omitempty"`
+		BuyXTR                    *BuyXTRAction                    `json:",omitempty"`
 		DepositXTR                *DepositXTRAction                `json:",omitempty"`
 		WithdrawXTR               *WithdrawXTRAction               `json:",omitempty"`
 		Success                   bool
@@ -309,6 +312,12 @@ type (
 		Oracle     tongo.AccountID
 		ResponseTo tongo.AccountID
 		PriceFeeds []OraclePriceFeedInfo
+	}
+
+	BuyXTRAction struct {
+		Recipient    tongo.AccountID
+		JettonMaster tongo.AccountID
+		Amount       big.Int
 	}
 
 	DepositXTRAction struct {
