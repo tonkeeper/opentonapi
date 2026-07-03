@@ -81,6 +81,10 @@ type Handler struct {
 }
 
 func (h *Handler) NewError(ctx context.Context, err error) *oas.ErrorStatusCode {
+	var e *oas.ErrorStatusCode
+	if errors.As(err, &e) {
+		return e
+	}
 	return toError(http.StatusInternalServerError, err)
 }
 

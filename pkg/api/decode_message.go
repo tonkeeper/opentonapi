@@ -97,7 +97,7 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 	case tongoWallet.V4R1, tongoWallet.V4R2:
 		v4, err := tongoWallet.DecodeMessageV4(msgCell)
 		if err != nil {
-			return nil, err
+			return nil, toError(http.StatusBadRequest, err)
 		}
 		rawMessages := make([]oas.DecodedRawMessage, 0, len(v4.RawMessages))
 		for _, msg := range v4.RawMessages {
@@ -120,7 +120,7 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 	case tongoWallet.V3R1, tongoWallet.V3R2:
 		v3, err := tongoWallet.DecodeMessageV3(msgCell)
 		if err != nil {
-			return nil, err
+			return nil, toError(http.StatusBadRequest, err)
 		}
 		rawMessages := make([]oas.DecodedRawMessage, 0, len(v3.RawMessages))
 		for _, msg := range v3.RawMessages {
@@ -142,7 +142,7 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 	case tongoWallet.HighLoadV2R2, tongoWallet.HighLoadV2R1:
 		highload, err := tongoWallet.DecodeHighloadV2Message(msgCell)
 		if err != nil {
-			return nil, err
+			return nil, toError(http.StatusBadRequest, err)
 		}
 		rawMessages := make([]oas.DecodedRawMessage, 0, len(highload.RawMessages))
 		for _, msg := range highload.RawMessages {
@@ -163,7 +163,7 @@ func (h *Handler) DecodeMessage(ctx context.Context, req *oas.DecodeMessageReq) 
 	case tongoWallet.V5R1:
 		v5, err := tongoWallet.DecodeMessageV5(msgCell)
 		if err != nil {
-			return nil, err
+			return nil, toError(http.StatusBadRequest, err)
 		}
 		rawMessages := make([]oas.DecodedRawMessage, 0, len(v5.RawMessages()))
 		for _, msg := range v5.RawMessages() {

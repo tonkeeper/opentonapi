@@ -52,6 +52,10 @@ func extendedCode(code references.ExtendedCode) oas.OptInt64 {
 }
 
 func toError(defaultCode int, err error) *oas.ErrorStatusCode {
+	var res *oas.ErrorStatusCode
+	if errors.As(err, &res) {
+		return res
+	}
 	var e ErrorWithExtendedCode
 	if errors.As(err, &e) {
 		return &oas.ErrorStatusCode{
