@@ -211,3 +211,18 @@ func TestSignedBodyForEmulation(t *testing.T) {
 	// v3/v4 prepend a 512-bit signature in front of the body bits.
 	require.Equal(t, body.BitsAvailableForRead()+512, signed.BitsAvailableForRead())
 }
+
+func TestSignedBodyForEmulationV5(t *testing.T) {
+	to := ton.MustParseAccountID("0:97264395bd65a255a429b11326c84128b7d70ffed7949abae3036d506ba38621")
+	sweep, err := toWalletRawMessage(tongoWallet.Message{Amount: 0, Address: to, Mode: migrationSweepMode})
+	require.NoError(t, err)
+	body, err := buildUnsignedBody(tongoWallet.V5R1, 0, make([]byte, 32), 0, 1, time.Unix(1900000000, 0), []tongoWallet.RawMessage{sweep})
+	require.NoError(t, err)
+
+	signed, err := signedBodyForEmulation(tongoWallet.V5R1, body)
+	require.NoError(t, err)
+	// v5 carries its signature as the trailing 512 bits; the unsigned body must stay untouched
+	// while emulation gets a copy with a zero placeholder appended.
+	require.Equal(t, body.BitsAvailableForRead()+512, signed.BitsAvailableForRead())
+	require.Equal(t, body.RefsSize(), signed.RefsSize())
+}

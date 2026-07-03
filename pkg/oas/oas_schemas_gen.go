@@ -10465,6 +10465,34 @@ func (s *MethodExecutionResult) SetDecoded(val jx.Raw) {
 	s.Decoded = val
 }
 
+// Ref: #/components/schemas/MigrationOutMessage
+type MigrationOutMessage struct {
+	// Base64 BOC of the internal message cell the wallet resends.
+	Boc string `json:"boc"`
+	// Send-mode byte (e.g. 3 for a transfer, 128 for the final balance sweep).
+	Mode int32 `json:"mode"`
+}
+
+// GetBoc returns the value of Boc.
+func (s *MigrationOutMessage) GetBoc() string {
+	return s.Boc
+}
+
+// GetMode returns the value of Mode.
+func (s *MigrationOutMessage) GetMode() int32 {
+	return s.Mode
+}
+
+// SetBoc sets the value of Boc.
+func (s *MigrationOutMessage) SetBoc(val string) {
+	s.Boc = val
+}
+
+// SetMode sets the value of Mode.
+func (s *MigrationOutMessage) SetMode(val int32) {
+	s.Mode = val
+}
+
 // Ref: #/components/schemas/MigrationPrepareRequest
 type MigrationPrepareRequest struct {
 	// Legacy source wallet to drain.
@@ -10577,8 +10605,11 @@ type MigrationTransaction struct {
 	Boc string `json:"boc"`
 	// Base64 BOC of the wallet StateInit (code + data). Present only on the first transaction when the
 	// source wallet is not yet initialized.
-	StateInit OptString           `json:"state_init"`
-	Emulation MessageConsequences `json:"emulation"`
+	StateInit OptString `json:"state_init"`
+	// Ordered raw internal messages carried by this transaction — the cells the wallet resends. These
+	// are what populate the payload/actions.
+	Messages  []MigrationOutMessage `json:"messages"`
+	Emulation MessageConsequences   `json:"emulation"`
 }
 
 // GetSeqno returns the value of Seqno.
@@ -10594,6 +10625,11 @@ func (s *MigrationTransaction) GetBoc() string {
 // GetStateInit returns the value of StateInit.
 func (s *MigrationTransaction) GetStateInit() OptString {
 	return s.StateInit
+}
+
+// GetMessages returns the value of Messages.
+func (s *MigrationTransaction) GetMessages() []MigrationOutMessage {
+	return s.Messages
 }
 
 // GetEmulation returns the value of Emulation.
@@ -10614,6 +10650,11 @@ func (s *MigrationTransaction) SetBoc(val string) {
 // SetStateInit sets the value of StateInit.
 func (s *MigrationTransaction) SetStateInit(val OptString) {
 	s.StateInit = val
+}
+
+// SetMessages sets the value of Messages.
+func (s *MigrationTransaction) SetMessages(val []MigrationOutMessage) {
+	s.Messages = val
 }
 
 // SetEmulation sets the value of Emulation.
