@@ -6291,6 +6291,7 @@ components:
       required:
         - seqno
         - boc
+        - messages
         - emulation
       properties:
         seqno:
@@ -6308,8 +6309,29 @@ components:
           description: >
             base64 BOC of the wallet StateInit (code + data).
             Present only on the first transaction when the source wallet is not yet initialized
+        messages:
+          type: array
+          description: >
+            ordered raw internal messages carried by this transaction — the cells the wallet
+            resends. These are what populate the payload/actions.
+          items:
+            $ref: "#/components/schemas/MigrationOutMessage"
         emulation:
           $ref: "#/components/schemas/MessageConsequences"
+    MigrationOutMessage:
+      type: object
+      required:
+        - boc
+        - mode
+      properties:
+        boc:
+          type: string
+          format: cell-base64
+          description: base64 BOC of the internal message cell the wallet resends
+        mode:
+          type: integer
+          format: int32
+          description: send-mode byte (e.g. 3 for a transfer, 128 for the final balance sweep)
     CurrencyType:
       type: string
       example: jetton

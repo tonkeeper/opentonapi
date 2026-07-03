@@ -4606,6 +4606,17 @@ func (s *MigrationTransaction) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if s.Messages == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "messages",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Emulation.Validate(); err != nil {
 			return err
 		}

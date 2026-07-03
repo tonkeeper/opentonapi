@@ -5033,6 +5033,25 @@
     ],
     "type": "object"
    },
+   "MigrationOutMessage": {
+    "properties": {
+     "boc": {
+      "description": "base64 BOC of the internal message cell the wallet resends",
+      "format": "cell-base64",
+      "type": "string"
+     },
+     "mode": {
+      "description": "send-mode byte (e.g. 3 for a transfer, 128 for the final balance sweep)",
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "boc",
+     "mode"
+    ],
+    "type": "object"
+   },
    "MigrationPrepareRequest": {
     "properties": {
      "currency": {
@@ -5103,6 +5122,13 @@
      "emulation": {
       "$ref": "#/components/schemas/MessageConsequences"
      },
+     "messages": {
+      "description": "ordered raw internal messages carried by this transaction — the cells the wallet resends. These are what populate the payload/actions.\n",
+      "items": {
+       "$ref": "#/components/schemas/MigrationOutMessage"
+      },
+      "type": "array"
+     },
      "seqno": {
       "description": "wallet seqno baked into the unsigned body",
       "format": "int32",
@@ -5117,6 +5143,7 @@
     "required": [
      "seqno",
      "boc",
+     "messages",
      "emulation"
     ],
     "type": "object"

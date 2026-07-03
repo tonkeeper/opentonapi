@@ -15,6 +15,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
+	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
@@ -37,6 +38,17 @@ const migrationForwardAmount = tlb.Grams(1)
 const migrationSweepMode = 128
 
 const migrationMsgLifetime = 5 * time.Minute
+
+var migrationSkipNftCollections = map[ton.AccountID]bool{
+	references.TonstakersAccountPool: true,
+}
+
+func isSkippedNftCollection(collection *ton.AccountID) bool {
+	if collection == nil {
+		return false
+	}
+	return migrationSkipNftCollections[*collection]
+}
 
 type jettonBulkStorage interface {
 	GetJettonWalletsByOwnerAddresses(ctx context.Context, owners []ton.AccountID, mintless bool) ([]core.JettonWallet, error)
@@ -81,6 +93,9 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 				continue
 			}
 			if nftScam[item.Address] == core.TrustBlacklist {
+				continue
+			}
+			if isSkippedNftCollection(item.CollectionAddress) {
 				continue
 			}
 			nftCountByOwner[*item.OwnerAddress]++
@@ -252,6 +267,9 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		if nftScam[nft.Address] == core.TrustBlacklist {
 			continue
 		}
+		if isSkippedNftCollection(nft.CollectionAddress) {
+			continue
+		}
 		msg := walletNFTTransferMessage(nft.Address, to.ID)
 		msgRaw, err := toWalletRawMessage(msg)
 		if err != nil {
@@ -325,7 +343,20 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		event, err := h.toAccountEvent(ctx, from.ID, trace, bath.EnrichWithIntentions(trace, actions), oas.OptString{}, true)
+		enriched := bath.EnrichWithIntentions(trace, actions)
+		// The final message sweeps the wallet with mode 128, whose signed body declares 0 TON. When
+		// the emulator can't deliver that sweep (e.g. the destination is a fresh wallet) the TON
+		// transfer surfaces as an intention with amount 0, rendering as "Transferring 0 Gram". Fill in
+		// the real amount being swept — the whole wallet balance — so the simple_preview shown on the
+		// confirmation screen agrees with the risk object.
+		if risk.TransferAllRemainingBalance && account != nil && account.GramBalance > 0 {
+			for _, a := range enriched.Actions {
+				if a.TonTransfer != nil && a.TonTransfer.Recipient == to.ID && a.TonTransfer.Amount == 0 {
+					a.TonTransfer.Amount = account.GramBalance
+				}
+			}
+		}
+		event, err := h.toAccountEvent(ctx, from.ID, trace, enriched, oas.OptString{}, true)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -333,9 +364,28 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
+		// convertRisk reports only the gas attached to the other messages for a mode-128 sweep. Align
+		// the reported TON/Gram amount with the swept balance shown in the preview above. The fiat
+		// equivalent (oasRisk.TotalEquivalent) is already computed from that balance by convertRisk.
+		if oasRisk.TransferAllRemainingBalance && account != nil && account.GramBalance > oasRisk.Gram {
+			oasRisk.Ton = oas.NewOptInt64(account.GramBalance)
+			oasRisk.Gram = account.GramBalance
+		}
+		outMessages := make([]oas.MigrationOutMessage, 0, len(batch))
+		for _, rm := range batch {
+			msgBoc, err := rm.Message.ToBocBase64()
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+			outMessages = append(outMessages, oas.MigrationOutMessage{
+				Boc:  msgBoc,
+				Mode: int32(rm.Mode),
+			})
+		}
 		transaction := oas.MigrationTransaction{
-			Seqno: int32(seqno),
-			Boc:   bocBase64,
+			Seqno:    int32(seqno),
+			Boc:      bocBase64,
+			Messages: outMessages,
 			Emulation: oas.MessageConsequences{
 				Trace: convertedTrace,
 				Event: event,
@@ -509,11 +559,28 @@ func buildUnsignedBody(v tonwallet.Version, subWalletID uint32, pubkey ed25519.P
 }
 
 // signedBodyForEmulation wraps the unsigned body with a zero signature so it can be emulated with
-// signature checks disabled. v3/v4 prepend the signature, v5 carries a trailing placeholder.
+// signature checks disabled. v3/v4 prepend the signature, v5 appends a trailing 512-bit placeholder.
 func signedBodyForEmulation(v tonwallet.Version, body *boc.Cell) (*boc.Cell, error) {
 	switch v {
 	case tonwallet.V5R1, tonwallet.V5Beta:
-		return body, nil
+		// Wallet v5 carries its signature as the trailing 512 bits of the body. The unsigned body
+		// returned to the client no longer contains that placeholder, so build a separate cell with
+		// a zero signature appended for emulation (WithIgnoreSignatureDepth skips verification but the
+		// contract still parses those 512 bits).
+		cell := boc.NewCell()
+		if err := cell.WriteBitString(body.RawBitString()); err != nil {
+			return nil, err
+		}
+		for _, ref := range body.Refs() {
+			if err := cell.AddRef(ref); err != nil {
+				return nil, err
+			}
+		}
+		var zeroSignature [64]byte
+		if err := cell.WriteBytes(zeroSignature[:]); err != nil {
+			return nil, err
+		}
+		return cell, nil
 	default:
 		signed := tonwallet.SignedMsgBody{Sign: tlb.Bits512{}, Message: tlb.Any(*body)}
 		cell := boc.NewCell()
