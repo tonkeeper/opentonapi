@@ -334,8 +334,10 @@ func (h *Handler) SearchAccounts(ctx context.Context, params oas.SearchAccountsP
 	attachedAccounts := h.addressBook.SearchAttachedAccountsByPrefix(params.Name)
 	accounts := make([]addressbook.AttachedAccount, 0, len(attachedAccounts))
 	for _, account := range attachedAccounts {
-		if account.Symbol != "" {
-			trust := h.spamFilter.JettonTrust(account.Wallet, account.Symbol, account.Name, account.Preview)
+		if (account.Type == addressbook.JettonNameAccountType || account.Type == addressbook.JettonSymbolAccountType) &&
+			account.Trust != core.TrustWhitelist {
+			// name has " · jetton" suffix, slug is the original name
+			trust := h.spamFilter.JettonTrust(account.Wallet, account.Symbol, account.Slug, account.Preview)
 			if trust == core.TrustBlacklist {
 				continue
 			}
