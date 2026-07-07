@@ -63,3 +63,26 @@ type AccountStat struct {
 	MultisigCount int32
 	StakingCount  int32
 }
+
+type AccountDeploymentType string
+
+const (
+	AccountDeploymentTypeExternal AccountDeploymentType = "ext_in_msg"
+	AccountDeploymentTypeInternal AccountDeploymentType = "int_msg"
+)
+
+type AccountDeployment struct {
+	Type         AccountDeploymentType
+	Deployer     *ton.AccountID
+	FirstSponsor *ton.AccountID
+}
+
+type AccountFlowAssets struct {
+	Gram int64
+}
+
+type AccountFlowItem struct {
+	Account  ton.AccountID
+	Received AccountFlowAssets
+	Sent     AccountFlowAssets
+}

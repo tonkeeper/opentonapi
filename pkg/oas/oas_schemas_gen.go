@@ -72,16 +72,17 @@ type Account struct {
 	// {'USD': 1, 'IDR': 1000}.
 	CurrenciesBalance OptAccountCurrenciesBalance `json:"currencies_balance"`
 	// Unix timestamp.
-	LastActivity int64         `json:"last_activity"`
-	Status       AccountStatus `json:"status"`
-	Interfaces   []string      `json:"interfaces"`
-	Name         OptString     `json:"name"`
-	IsScam       OptBool       `json:"is_scam"`
-	Icon         OptString     `json:"icon"`
-	MemoRequired OptBool       `json:"memo_required"`
-	GetMethods   []string      `json:"get_methods"`
-	IsSuspended  OptBool       `json:"is_suspended"`
-	IsWallet     bool          `json:"is_wallet"`
+	LastActivity int64                `json:"last_activity"`
+	Status       AccountStatus        `json:"status"`
+	Interfaces   []string             `json:"interfaces"`
+	Name         OptString            `json:"name"`
+	IsScam       OptBool              `json:"is_scam"`
+	Icon         OptString            `json:"icon"`
+	MemoRequired OptBool              `json:"memo_required"`
+	GetMethods   []string             `json:"get_methods"`
+	IsSuspended  OptBool              `json:"is_suspended"`
+	IsWallet     bool                 `json:"is_wallet"`
+	Deployment   OptAccountDeployment `json:"deployment"`
 }
 
 // GetAddress returns the value of Address.
@@ -154,6 +155,11 @@ func (s *Account) GetIsWallet() bool {
 	return s.IsWallet
 }
 
+// GetDeployment returns the value of Deployment.
+func (s *Account) GetDeployment() OptAccountDeployment {
+	return s.Deployment
+}
+
 // SetAddress sets the value of Address.
 func (s *Account) SetAddress(val string) {
 	s.Address = val
@@ -222,6 +228,11 @@ func (s *Account) SetIsSuspended(val OptBool) {
 // SetIsWallet sets the value of IsWallet.
 func (s *Account) SetIsWallet(val bool) {
 	s.IsWallet = val
+}
+
+// SetDeployment sets the value of Deployment.
+func (s *Account) SetDeployment(val OptAccountDeployment) {
+	s.Deployment = val
 }
 
 // Ref: #/components/schemas/AccountAddress
@@ -296,6 +307,86 @@ func (s *AccountCurrenciesBalance) init() AccountCurrenciesBalance {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/AccountDeployment
+type AccountDeployment struct {
+	Type AccountDeploymentType `json:"type"`
+	// Source of the internal message that deployed the account.
+	Deployer OptString `json:"deployer"`
+	// Source of the earliest positive non-bounced internal message received by the account.
+	FirstSponsor OptString `json:"first_sponsor"`
+}
+
+// GetType returns the value of Type.
+func (s *AccountDeployment) GetType() AccountDeploymentType {
+	return s.Type
+}
+
+// GetDeployer returns the value of Deployer.
+func (s *AccountDeployment) GetDeployer() OptString {
+	return s.Deployer
+}
+
+// GetFirstSponsor returns the value of FirstSponsor.
+func (s *AccountDeployment) GetFirstSponsor() OptString {
+	return s.FirstSponsor
+}
+
+// SetType sets the value of Type.
+func (s *AccountDeployment) SetType(val AccountDeploymentType) {
+	s.Type = val
+}
+
+// SetDeployer sets the value of Deployer.
+func (s *AccountDeployment) SetDeployer(val OptString) {
+	s.Deployer = val
+}
+
+// SetFirstSponsor sets the value of FirstSponsor.
+func (s *AccountDeployment) SetFirstSponsor(val OptString) {
+	s.FirstSponsor = val
+}
+
+type AccountDeploymentType string
+
+const (
+	AccountDeploymentTypeExtInMsg AccountDeploymentType = "ext_in_msg"
+	AccountDeploymentTypeIntMsg   AccountDeploymentType = "int_msg"
+)
+
+// AllValues returns all AccountDeploymentType values.
+func (AccountDeploymentType) AllValues() []AccountDeploymentType {
+	return []AccountDeploymentType{
+		AccountDeploymentTypeExtInMsg,
+		AccountDeploymentTypeIntMsg,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AccountDeploymentType) MarshalText() ([]byte, error) {
+	switch s {
+	case AccountDeploymentTypeExtInMsg:
+		return []byte(s), nil
+	case AccountDeploymentTypeIntMsg:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AccountDeploymentType) UnmarshalText(data []byte) error {
+	switch AccountDeploymentType(data) {
+	case AccountDeploymentTypeExtInMsg:
+		*s = AccountDeploymentTypeExtInMsg
+		return nil
+	case AccountDeploymentTypeIntMsg:
+		*s = AccountDeploymentTypeIntMsg
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // High-level view over a transaction trace caused by a single inbound message. TonAPI analyses the
@@ -448,6 +539,110 @@ func (s *AccountEvents) SetEvents(val []AccountEvent) {
 // SetNextFrom sets the value of NextFrom.
 func (s *AccountEvents) SetNextFrom(val int64) {
 	s.NextFrom = val
+}
+
+// Ref: #/components/schemas/AccountFlow
+type AccountFlow struct {
+	Items []AccountFlowItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *AccountFlow) GetItems() []AccountFlowItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *AccountFlow) SetItems(val []AccountFlowItem) {
+	s.Items = val
+}
+
+// Ref: #/components/schemas/AccountFlowAssets
+type AccountFlowAssets struct {
+	Gram    int64               `json:"gram"`
+	Jettons []AccountFlowJetton `json:"jettons"`
+}
+
+// GetGram returns the value of Gram.
+func (s *AccountFlowAssets) GetGram() int64 {
+	return s.Gram
+}
+
+// GetJettons returns the value of Jettons.
+func (s *AccountFlowAssets) GetJettons() []AccountFlowJetton {
+	return s.Jettons
+}
+
+// SetGram sets the value of Gram.
+func (s *AccountFlowAssets) SetGram(val int64) {
+	s.Gram = val
+}
+
+// SetJettons sets the value of Jettons.
+func (s *AccountFlowAssets) SetJettons(val []AccountFlowJetton) {
+	s.Jettons = val
+}
+
+// Ref: #/components/schemas/AccountFlowItem
+type AccountFlowItem struct {
+	Account  AccountAddress    `json:"account"`
+	Received AccountFlowAssets `json:"received"`
+	Sent     AccountFlowAssets `json:"sent"`
+}
+
+// GetAccount returns the value of Account.
+func (s *AccountFlowItem) GetAccount() AccountAddress {
+	return s.Account
+}
+
+// GetReceived returns the value of Received.
+func (s *AccountFlowItem) GetReceived() AccountFlowAssets {
+	return s.Received
+}
+
+// GetSent returns the value of Sent.
+func (s *AccountFlowItem) GetSent() AccountFlowAssets {
+	return s.Sent
+}
+
+// SetAccount sets the value of Account.
+func (s *AccountFlowItem) SetAccount(val AccountAddress) {
+	s.Account = val
+}
+
+// SetReceived sets the value of Received.
+func (s *AccountFlowItem) SetReceived(val AccountFlowAssets) {
+	s.Received = val
+}
+
+// SetSent sets the value of Sent.
+func (s *AccountFlowItem) SetSent(val AccountFlowAssets) {
+	s.Sent = val
+}
+
+// Ref: #/components/schemas/AccountFlowJetton
+type AccountFlowJetton struct {
+	Jetton JettonPreview `json:"jetton"`
+	Qty    string        `json:"qty"`
+}
+
+// GetJetton returns the value of Jetton.
+func (s *AccountFlowJetton) GetJetton() JettonPreview {
+	return s.Jetton
+}
+
+// GetQty returns the value of Qty.
+func (s *AccountFlowJetton) GetQty() string {
+	return s.Qty
+}
+
+// SetJetton sets the value of Jetton.
+func (s *AccountFlowJetton) SetJetton(val JettonPreview) {
+	s.Jetton = val
+}
+
+// SetQty sets the value of Qty.
+func (s *AccountFlowJetton) SetQty(val string) {
+	s.Qty = val
 }
 
 // Ref: #/components/schemas/AccountInfoByStateInit
@@ -12181,6 +12376,52 @@ func (o OptAccountCurrenciesBalance) Get() (v AccountCurrenciesBalance, ok bool)
 
 // Or returns value if set, or given parameter if does not.
 func (o OptAccountCurrenciesBalance) Or(d AccountCurrenciesBalance) AccountCurrenciesBalance {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptAccountDeployment returns new OptAccountDeployment with value set to v.
+func NewOptAccountDeployment(v AccountDeployment) OptAccountDeployment {
+	return OptAccountDeployment{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAccountDeployment is optional AccountDeployment.
+type OptAccountDeployment struct {
+	Value AccountDeployment
+	Set   bool
+}
+
+// IsSet returns true if OptAccountDeployment was set.
+func (o OptAccountDeployment) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAccountDeployment) Reset() {
+	var v AccountDeployment
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAccountDeployment) SetTo(v AccountDeployment) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAccountDeployment) Get() (v AccountDeployment, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAccountDeployment) Or(d AccountDeployment) AccountDeployment {
 	if v, ok := o.Get(); ok {
 		return v
 	}

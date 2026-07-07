@@ -126,7 +126,7 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 			}
 		}
 	}
-	if strings.HasSuffix(params.AccountID, ".ton") {
+	if strings.HasSuffix(params.AccountID, ".ton") || strings.HasSuffix(params.AccountID, ".t.me") {
 		trust := h.spamFilter.TonDomainTrust(params.AccountID)
 		if trust == core.TrustBlacklist {
 			res.IsScam = oas.NewOptBool(true)
@@ -135,7 +135,41 @@ func (h *Handler) GetAccount(ctx context.Context, params oas.GetAccountParams) (
 	if rawAccount.ExtraBalances != nil {
 		res.ExtraBalance = convertExtraCurrencies(rawAccount.ExtraBalances)
 	}
+	deployment, err := h.storage.GetAccountDeployment(ctx, account.ID)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if deployment != nil {
+		converted := oas.AccountDeployment{Type: oas.AccountDeploymentType(deployment.Type)}
+		if deployment.Deployer != nil {
+			converted.Deployer = oas.NewOptString(deployment.Deployer.ToRaw())
+		}
+		if deployment.FirstSponsor != nil {
+			converted.FirstSponsor = oas.NewOptString(deployment.FirstSponsor.ToRaw())
+		}
+		res.Deployment = oas.NewOptAccountDeployment(converted)
+	}
 	return &res, nil
+}
+
+func (h *Handler) GetAccountFlow(ctx context.Context, params oas.GetAccountFlowParams) (*oas.AccountFlow, error) {
+	account, err := tongo.ParseAddress(params.AccountID)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	items, err := h.storage.GetAccountFlow(ctx, account.ID, params.Limit.Value, params.Offset.Value)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	result := &oas.AccountFlow{Items: make([]oas.AccountFlowItem, 0, len(items))}
+	for _, item := range items {
+		result.Items = append(result.Items, oas.AccountFlowItem{
+			Account:  convertAccountAddress(item.Account, h.addressBook),
+			Received: oas.AccountFlowAssets{Gram: item.Received.Gram},
+			Sent:     oas.AccountFlowAssets{Gram: item.Sent.Gram},
+		})
+	}
+	return result, nil
 }
 
 func (h *Handler) GetAccounts(ctx context.Context, request oas.OptGetAccountsReq, params oas.GetAccountsParams) (*oas.Accounts, error) {

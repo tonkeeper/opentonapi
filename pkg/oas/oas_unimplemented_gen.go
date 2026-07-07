@@ -218,6 +218,15 @@ func (UnimplementedHandler) GetAccountExtraCurrencyHistoryByID(ctx context.Conte
 	return r, ht.ErrNotImplemented
 }
 
+// GetAccountFlow implements getAccountFlow operation.
+//
+// Get aggregated incoming and outgoing asset flow by counterparty.
+//
+// GET /v2/accounts/{account_id}/flow
+func (UnimplementedHandler) GetAccountFlow(ctx context.Context, params GetAccountFlowParams) (r *AccountFlow, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccountInfoByStateInit implements getAccountInfoByStateInit operation.
 //
 // Get account info by state init.

@@ -814,6 +814,9 @@
       "example": {},
       "type": "object"
      },
+     "deployment": {
+      "$ref": "#/components/schemas/AccountDeployment"
+     },
      "extra_balance": {
       "items": {
        "$ref": "#/components/schemas/ExtraCurrency"
@@ -911,6 +914,31 @@
     ],
     "type": "object"
    },
+   "AccountDeployment": {
+    "properties": {
+     "deployer": {
+      "description": "Source of the internal message that deployed the account.",
+      "format": "address",
+      "type": "string"
+     },
+     "first_sponsor": {
+      "description": "Source of the earliest positive non-bounced internal message received by the account.",
+      "format": "address",
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "ext_in_msg",
+       "int_msg"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
    "AccountEvent": {
     "description": "High-level view over a transaction trace caused by a single inbound message. TonAPI analyses the trace, detects known patterns and groups low-level transactions into user-facing actions (Jetton transfer, NFT purchase, etc.). Actions are a best-effort UI abstraction and may change; do not rely on them for protocol-critical logic.\n",
     "properties": {
@@ -1000,6 +1028,76 @@
     "required": [
      "events",
      "next_from"
+    ],
+    "type": "object"
+   },
+   "AccountFlow": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/AccountFlowItem"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "type": "object"
+   },
+   "AccountFlowAssets": {
+    "properties": {
+     "gram": {
+      "example": 1000000000,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "jettons": {
+      "items": {
+       "$ref": "#/components/schemas/AccountFlowJetton"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "gram"
+    ],
+    "type": "object"
+   },
+   "AccountFlowItem": {
+    "properties": {
+     "account": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "received": {
+      "$ref": "#/components/schemas/AccountFlowAssets"
+     },
+     "sent": {
+      "$ref": "#/components/schemas/AccountFlowAssets"
+     }
+    },
+    "required": [
+     "account",
+     "received",
+     "sent"
+    ],
+    "type": "object"
+   },
+   "AccountFlowJetton": {
+    "properties": {
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     },
+     "qty": {
+      "example": "1000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "jetton",
+     "qty"
     ],
     "type": "object"
    },
@@ -8868,6 +8966,41 @@
        }
       },
       "description": "account extra currency history"
+     },
+     "default": {
+      "$ref": "#/components/responses/Error"
+     }
+    },
+    "tags": [
+     "Accounts"
+    ]
+   }
+  },
+  "/v2/accounts/{account_id}/flow": {
+   "get": {
+    "description": "Get aggregated incoming and outgoing asset flow by counterparty.",
+    "operationId": "getAccountFlow",
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/accountIDParameter"
+     },
+     {
+      "$ref": "#/components/parameters/limitQuery"
+     },
+     {
+      "$ref": "#/components/parameters/offsetQuery"
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountFlow"
+        }
+       }
+      },
+      "description": "account flow"
      },
      "default": {
       "$ref": "#/components/responses/Error"

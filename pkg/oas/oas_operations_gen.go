@@ -28,6 +28,7 @@ const (
 	GetAccountEventOperation                           OperationName = "GetAccountEvent"
 	GetAccountEventsOperation                          OperationName = "GetAccountEvents"
 	GetAccountExtraCurrencyHistoryByIDOperation        OperationName = "GetAccountExtraCurrencyHistoryByID"
+	GetAccountFlowOperation                            OperationName = "GetAccountFlow"
 	GetAccountInfoByStateInitOperation                 OperationName = "GetAccountInfoByStateInit"
 	GetAccountJettonBalanceOperation                   OperationName = "GetAccountJettonBalance"
 	GetAccountJettonHistoryByIDOperation               OperationName = "GetAccountJettonHistoryByID"

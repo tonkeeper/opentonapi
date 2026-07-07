@@ -709,6 +709,25 @@ paths:
                 $ref: '#/components/schemas/Account'
         'default':
           $ref: '#/components/responses/Error'
+  /v2/accounts/{account_id}/flow:
+    get:
+      description: Get aggregated incoming and outgoing asset flow by counterparty.
+      operationId: getAccountFlow
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/accountIDParameter'
+        - $ref: '#/components/parameters/limitQuery'
+        - $ref: '#/components/parameters/offsetQuery'
+      responses:
+        '200':
+          description: account flow
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountFlow'
+        'default':
+          $ref: '#/components/responses/Error'
   /v2/accounts/{account_id}/dns/backresolve:
     get:
       description: Get account's domains
@@ -5325,6 +5344,74 @@ components:
           type: boolean
         is_wallet:
           type: boolean
+        deployment:
+          $ref: '#/components/schemas/AccountDeployment'
+    AccountDeployment:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - ext_in_msg
+            - int_msg
+        deployer:
+          type: string
+          format: address
+          description: Source of the internal message that deployed the account.
+        first_sponsor:
+          type: string
+          format: address
+          description: Source of the earliest positive non-bounced internal message received by the account.
+    AccountFlow:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountFlowItem'
+    AccountFlowItem:
+      type: object
+      required:
+        - account
+        - received
+        - sent
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountAddress'
+        received:
+          $ref: '#/components/schemas/AccountFlowAssets'
+        sent:
+          $ref: '#/components/schemas/AccountFlowAssets'
+    AccountFlowAssets:
+      type: object
+      required:
+        - gram
+      properties:
+        gram:
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1000000000
+        jettons:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountFlowJetton'
+    AccountFlowJetton:
+      type: object
+      required:
+        - jetton
+        - qty
+      properties:
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
+        qty:
+          type: string
+          x-js-format: bigint
+          example: "1000000"
     Accounts:
       type: object
       required:

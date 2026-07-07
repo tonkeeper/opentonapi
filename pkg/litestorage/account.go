@@ -42,6 +42,14 @@ func (s *LiteStorage) GetAccountDiff(ctx context.Context, account tongo.AccountI
 	return 0, errors.New("not implemented")
 }
 
+func (s *LiteStorage) GetAccountDeployment(context.Context, tongo.AccountID) (*core.AccountDeployment, error) {
+	return nil, nil
+}
+
+func (s *LiteStorage) GetAccountFlow(context.Context, tongo.AccountID, int, int) ([]core.AccountFlowItem, error) {
+	return nil, nil
+}
+
 func (s *LiteStorage) GetLatencyAndLastMasterchainSeqno(ctx context.Context) (int64, uint32, error) {
 	blockHeader, err := s.LastMasterchainBlockHeader(ctx)
 	if err != nil {

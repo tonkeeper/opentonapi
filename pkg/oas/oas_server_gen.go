@@ -148,6 +148,12 @@ type Handler interface {
 	//
 	// GET /v2/accounts/{account_id}/extra-currency/{id}/history
 	GetAccountExtraCurrencyHistoryByID(ctx context.Context, params GetAccountExtraCurrencyHistoryByIDParams) (*AccountEvents, error)
+	// GetAccountFlow implements getAccountFlow operation.
+	//
+	// Get aggregated incoming and outgoing asset flow by counterparty.
+	//
+	// GET /v2/accounts/{account_id}/flow
+	GetAccountFlow(ctx context.Context, params GetAccountFlowParams) (*AccountFlow, error)
 	// GetAccountInfoByStateInit implements getAccountInfoByStateInit operation.
 	//
 	// Get account info by state init.
