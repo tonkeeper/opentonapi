@@ -17,13 +17,17 @@ import (
 )
 
 func jettonPreview(master ton.AccountID, meta NormalizedMetadata, score int32, scaledUiParams *core.ScaledUIParameters) oas.JettonPreview {
+	image := meta.PreviewImage
+	if meta.Verification == core.TrustBlacklist {
+		image = ""
+	}
 	preview := oas.JettonPreview{
 		Address:      master.ToRaw(),
 		Name:         meta.Name,
 		Symbol:       meta.Symbol,
 		Verification: oas.JettonVerificationType(meta.Verification),
 		Decimals:     meta.Decimals,
-		Image:        meta.PreviewImage,
+		Image:        image,
 		Score:        score,
 	}
 	if meta.CustomPayloadApiUri != "" {
@@ -53,7 +57,7 @@ func jettonMetadata(account ton.AccountID, meta NormalizedMetadata) oas.JettonMe
 	if meta.Description != "" {
 		metadata.Description.SetTo(meta.Description)
 	}
-	if meta.Image != "" {
+	if meta.Image != "" && meta.Verification != core.TrustBlacklist {
 		metadata.Image.SetTo(meta.Image)
 	}
 	if meta.CustomPayloadApiUri != "" {
@@ -221,6 +225,10 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32, scaledUiParams *core.ScaledUIParameters) oas.JettonInfo {
 	meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
 	metadata := jettonMetadata(master.Address, meta)
+	preview := meta.PreviewImage
+	if meta.Verification == core.TrustBlacklist {
+		preview = ""
+	}
 	info := oas.JettonInfo{
 		Mintable:     master.Mintable,
 		TotalSupply:  master.TotalSupply.String(),
@@ -228,7 +236,7 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 		Verification: oas.JettonVerificationType(meta.Verification),
 		HoldersCount: holders[master.Address],
 		Admin:        convertOptAccountAddress(master.Admin, h.addressBook),
-		Preview:      meta.PreviewImage,
+		Preview:      preview,
 	}
 	if scaledUiParams != nil {
 		info.ScaledUI.SetTo(oas.ScaledUI{

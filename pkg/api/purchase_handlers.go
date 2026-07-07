@@ -138,13 +138,17 @@ func (h *Handler) convertPrice(ctx context.Context, price core.Price) oas.Price 
 		}
 	case core.CurrencyJetton:
 		meta := h.GetJettonNormalizedMetadata(ctx, *price.Currency.Jetton)
+		image := meta.PreviewImage
+		if meta.Verification == core.TrustBlacklist {
+			image = ""
+		}
 		res := oas.Price{
 			CurrencyType: oas.CurrencyTypeJetton,
 			Value:        price.Amount.String(),
 			Decimals:     meta.Decimals,
 			TokenName:    meta.Symbol,
 			Verification: oas.TrustType(meta.Verification),
-			Image:        meta.PreviewImage,
+			Image:        image,
 		}
 		res.Jetton.SetTo(price.Currency.Jetton.ToRaw())
 		return res
