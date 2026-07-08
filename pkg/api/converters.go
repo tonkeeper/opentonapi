@@ -30,6 +30,16 @@ type ErrorWithExtendedCode struct {
 	Code         int
 	Message      string
 	ExtendedCode references.ExtendedCode
+	// Details, when set, exposes the required/available TON amounts (in nanotons)
+	// as structured fields so clients don't have to parse them out of Message.
+	// Clients switch on ExtendedCode to decide how to interpret it.
+	Details *InsufficientFunds
+}
+
+// InsufficientFunds carries the gas shortfall of a failed request.
+type InsufficientFunds struct {
+	Required  int64
+	Available int64
 }
 
 func (e ErrorWithExtendedCode) Error() string {
@@ -58,12 +68,19 @@ func toError(defaultCode int, err error) *oas.ErrorStatusCode {
 	}
 	var e ErrorWithExtendedCode
 	if errors.As(err, &e) {
+		response := oas.Error{
+			Error:     censor(e.Message),
+			ErrorCode: extendedCode(e.ExtendedCode),
+		}
+		if e.Details != nil {
+			response.Details = oas.NewOptInsufficientFunds(oas.InsufficientFunds{
+				Required:  e.Details.Required,
+				Available: e.Details.Available,
+			})
+		}
 		return &oas.ErrorStatusCode{
 			StatusCode: e.Code,
-			Response: oas.Error{
-				Error:     censor(e.Message),
-				ErrorCode: extendedCode(e.ExtendedCode),
-			},
+			Response:   response,
 		}
 	}
 	if s, ok := status.FromError(err); ok {

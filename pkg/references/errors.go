@@ -18,3 +18,9 @@ const (
 	ErrGaslessNotEnoughJettons
 	ErrGaslessUnsupportedExtension
 )
+
+const (
+	// ErrInsufficientTONForGas is reported when the source wallet lacks TON to cover transfer gas.
+	// The error carries the required/available amounts in Error.insufficient_funds.
+	ErrInsufficientTONForGas ExtendedCode = iota + 50_000
+)

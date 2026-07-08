@@ -6251,8 +6251,9 @@ func (s *EncryptedComment) SetCipherText(val string) {
 }
 
 type Error struct {
-	Error     string   `json:"error"`
-	ErrorCode OptInt64 `json:"error_code"`
+	Error     string               `json:"error"`
+	ErrorCode OptInt64             `json:"error_code"`
+	Details   OptInsufficientFunds `json:"details"`
 }
 
 // GetError returns the value of Error.
@@ -6265,6 +6266,11 @@ func (s *Error) GetErrorCode() OptInt64 {
 	return s.ErrorCode
 }
 
+// GetDetails returns the value of Details.
+func (s *Error) GetDetails() OptInsufficientFunds {
+	return s.Details
+}
+
 // SetError sets the value of Error.
 func (s *Error) SetError(val string) {
 	s.Error = val
@@ -6273,6 +6279,11 @@ func (s *Error) SetError(val string) {
 // SetErrorCode sets the value of ErrorCode.
 func (s *Error) SetErrorCode(val OptInt64) {
 	s.ErrorCode = val
+}
+
+// SetDetails sets the value of Details.
+func (s *Error) SetDetails(val OptInsufficientFunds) {
+	s.Details = val
 }
 
 // ErrorStatusCode wraps Error with StatusCode.
@@ -8521,6 +8532,36 @@ func (s *InitStateRaw) SetRootHash(val string) {
 // SetFileHash sets the value of FileHash.
 func (s *InitStateRaw) SetFileHash(val string) {
 	s.FileHash = val
+}
+
+// Present on an error when a request failed because the source wallet does not hold enough TON to
+// cover the required gas (error_code 50000).
+// Ref: #/components/schemas/InsufficientFunds
+type InsufficientFunds struct {
+	// TON in nanotons required to cover transfer gas.
+	Required int64 `json:"required"`
+	// TON in nanotons currently available on the source wallet.
+	Available int64 `json:"available"`
+}
+
+// GetRequired returns the value of Required.
+func (s *InsufficientFunds) GetRequired() int64 {
+	return s.Required
+}
+
+// GetAvailable returns the value of Available.
+func (s *InsufficientFunds) GetAvailable() int64 {
+	return s.Available
+}
+
+// SetRequired sets the value of Required.
+func (s *InsufficientFunds) SetRequired(val int64) {
+	s.Required = val
+}
+
+// SetAvailable sets the value of Available.
+func (s *InsufficientFunds) SetAvailable(val int64) {
+	s.Available = val
 }
 
 // Ref: #/components/schemas/JettonAssetInfo
@@ -15539,6 +15580,52 @@ func (o OptGetWalletsByPublicKeyBulkReq) Get() (v GetWalletsByPublicKeyBulkReq, 
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetWalletsByPublicKeyBulkReq) Or(d GetWalletsByPublicKeyBulkReq) GetWalletsByPublicKeyBulkReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInsufficientFunds returns new OptInsufficientFunds with value set to v.
+func NewOptInsufficientFunds(v InsufficientFunds) OptInsufficientFunds {
+	return OptInsufficientFunds{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInsufficientFunds is optional InsufficientFunds.
+type OptInsufficientFunds struct {
+	Value InsufficientFunds
+	Set   bool
+}
+
+// IsSet returns true if OptInsufficientFunds was set.
+func (o OptInsufficientFunds) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInsufficientFunds) Reset() {
+	var v InsufficientFunds
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInsufficientFunds) SetTo(v InsufficientFunds) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInsufficientFunds) Get() (v InsufficientFunds, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInsufficientFunds) Or(d InsufficientFunds) InsufficientFunds {
 	if v, ok := o.Get(); ok {
 		return v
 	}
