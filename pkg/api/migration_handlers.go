@@ -39,6 +39,9 @@ const migrationSweepMode = 128
 
 const migrationMsgLifetime = 5 * time.Minute
 
+// migrationNftPageSize is the SearchNFTs page size used when enumerating a wallet's NFTs for migration.
+const migrationNftPageSize = 1000
+
 var migrationSkipNftCollections = map[ton.AccountID]bool{
 	references.TonstakersAccountPool: true,
 }
@@ -79,12 +82,20 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 		accounts, accountsErr = h.storage.GetRawAccounts(ctx, ids)
 	})
 	wg.Go(func() {
-		nfts, err := h.storage.GetNFTs(ctx, ids)
-		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-			nftsErr = err
-			return
+		var nfts []core.NftItem
+		for _, id := range ids {
+			owned, err := h.collectOwnedNFTs(ctx, id)
+			if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+				nftsErr = err
+				return
+			}
+			nfts = append(nfts, owned...)
 		}
-		nftScam, scamErr := h.spamFilter.GetNftsScamData(ctx, ids)
+		nftItemIDs := make([]ton.AccountID, 0, len(nfts))
+		for _, item := range nfts {
+			nftItemIDs = append(nftItemIDs, item.Address)
+		}
+		nftScam, scamErr := h.spamFilter.GetNftsScamData(ctx, nftItemIDs)
 		if scamErr != nil {
 			h.logger.Warn("error getting nft scam data", zap.Error(scamErr))
 		}
@@ -226,11 +237,15 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	nfts, err := h.storage.GetNFTs(ctx, []ton.AccountID{from.ID})
+	nfts, err := h.collectOwnedNFTs(ctx, from.ID)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	nftScam, scamErr := h.spamFilter.GetNftsScamData(ctx, []ton.AccountID{from.ID})
+	nftItemIDs := make([]ton.AccountID, 0, len(nfts))
+	for _, nft := range nfts {
+		nftItemIDs = append(nftItemIDs, nft.Address)
+	}
+	nftScam, scamErr := h.spamFilter.GetNftsScamData(ctx, nftItemIDs)
 	if scamErr != nil {
 		h.logger.Warn("error getting nft scam data", zap.Error(scamErr))
 	}
@@ -414,6 +429,31 @@ func convertStateInit(si tlb.StateInit) (oas.OptString, error) {
 		return oas.OptString{}, fmt.Errorf("base64 encoding failed: %v", err)
 	}
 	return oas.NewOptString(b64), nil
+}
+
+func (h *Handler) collectOwnedNFTs(ctx context.Context, owner ton.AccountID) ([]core.NftItem, error) {
+	var ids []ton.AccountID
+	for offset := 0; ; offset += migrationNftPageSize {
+		page, err := h.storage.SearchNFTs(ctx,
+			nil, // any collection
+			&core.Filter[tongo.AccountID]{Value: owner},
+			false, // includeOnSale: NFTs escrowed by a sale contract can't be swept by the wallet
+			false, // onlyVerified: keep unverified items; blacklisted ones are dropped via scam data
+			migrationNftPageSize,
+			offset,
+		)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, page...)
+		if len(page) < migrationNftPageSize {
+			break
+		}
+	}
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	return h.storage.GetNFTs(ctx, ids)
 }
 
 func (h *Handler) collectJettonWallets(ctx context.Context, owners []ton.AccountID) (map[ton.AccountID][]core.JettonWallet, error) {
