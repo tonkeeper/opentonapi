@@ -293,16 +293,9 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		messages = append(messages, msgRaw)
 		gas += int64(migrationGasPerTransfer)
 	}
-	if account.GramBalance < gas {
-		return nil, toError(http.StatusBadRequest, ErrorWithExtendedCode{
-			Code:         http.StatusBadRequest,
-			Message:      fmt.Sprintf("INSUFFICIENT_TON_FOR_GAS: required %d nanotons to cover transfer gas, available %d", gas, account.GramBalance),
-			ExtendedCode: references.ErrInsufficientTONForGas,
-			Details: &InsufficientFunds{
-				Required:  gas,
-				Available: account.GramBalance,
-			},
-		})
+	var realBalance int64
+	if account != nil {
+		realBalance = account.GramBalance
 	}
 	// The final message sweeps the remaining TON balance to the destination.
 	msgRaw, err := toWalletRawMessage(tonwallet.Message{
@@ -324,9 +317,25 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		WalletVersion: version.ToString(),
 		Transactions:  make([]oas.MigrationTransaction, 0, len(batches)),
 	}
+	emulationBalance := realBalance
+	if needed := gas + int64(ton.OneGRAM); emulationBalance < needed {
+		emulationBalance = needed
+	}
+	var seedState tlb.ShardAccount
+	if account != nil && len(account.Code) > 0 {
+		seedState, err = h.storage.GetAccountState(ctx, from.ID)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, err)
+		}
+	}
+	seed, err := prepareAccountState(from.ID, seedState, emulationBalance)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
 	// Emulate transactions sequentially, feeding each transaction's resulting state into the next so
-	// that seqno, balance and emptied jetton wallets are reflected in later fees and previews.
-	var overrides map[ton.AccountID]tlb.ShardAccount
+	// that seqno, balance and emptied jetton wallets are reflected in later fees and previews. The
+	// synthetic balance seeds batch 0; later batches use the emulated finalStates.
+	overrides := map[ton.AccountID]tlb.ShardAccount{from.ID: seed}
 	for i, batch := range batches {
 		seqno := startSeqno + uint32(i)
 		body, err := buildUnsignedBody(version, subWalletID, publicKey, int(from.ID.Workchain), seqno, validUntil, batch)
@@ -367,15 +376,10 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		enriched := bath.EnrichWithIntentions(trace, actions)
-		// The final message sweeps the wallet with mode 128, whose signed body declares 0 TON. When
-		// the emulator can't deliver that sweep (e.g. the destination is a fresh wallet) the TON
-		// transfer surfaces as an intention with amount 0, rendering as "Transferring 0 Gram". Fill in
-		// the real amount being swept — the whole wallet balance — so the simple_preview shown on the
-		// confirmation screen agrees with the risk object.
-		if risk.TransferAllRemainingBalance && account != nil && account.GramBalance > 0 {
+		if risk.TransferAllRemainingBalance {
 			for _, a := range enriched.Actions {
-				if a.TonTransfer != nil && a.TonTransfer.Recipient == to.ID && a.TonTransfer.Amount == 0 {
-					a.TonTransfer.Amount = account.GramBalance
+				if a.TonTransfer != nil && a.TonTransfer.Sender == from.ID && a.TonTransfer.Recipient == to.ID {
+					a.TonTransfer.Amount = realBalance
 				}
 			}
 		}
@@ -390,9 +394,9 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		// convertRisk reports only the gas attached to the other messages for a mode-128 sweep. Align
 		// the reported TON/Gram amount with the swept balance shown in the preview above. The fiat
 		// equivalent (oasRisk.TotalEquivalent) is already computed from that balance by convertRisk.
-		if oasRisk.TransferAllRemainingBalance && account != nil && account.GramBalance > oasRisk.Gram {
-			oasRisk.Ton = oas.NewOptInt64(account.GramBalance)
-			oasRisk.Gram = account.GramBalance
+		if oasRisk.TransferAllRemainingBalance && realBalance > oasRisk.Gram {
+			oasRisk.Ton = oas.NewOptInt64(realBalance)
+			oasRisk.Gram = realBalance
 		}
 		outMessages := make([]oas.MigrationOutMessage, 0, len(batch))
 		for _, rm := range batch {
