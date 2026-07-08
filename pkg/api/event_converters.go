@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -115,7 +116,7 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 	}
 	if risk.TransferAllRemainingBalance {
 		a, err := h.storage.GetRawAccount(ctx, walletAddress)
-		if err != nil {
+		if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 			return oas.Risk{}, err
 		}
 		if a != nil && a.GramBalance > int64(risk.Gram) {
