@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/tonkeeper/opentonapi/pkg/defi"
-	"github.com/tonkeeper/opentonapi/pkg/defi/evaa"
-	"github.com/tonkeeper/opentonapi/pkg/defi/whales"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/ton"
@@ -18,9 +16,10 @@ func (h *Handler) GetAccountDefiAssets(ctx context.Context, params oas.GetAccoun
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	positions := make([]defi.Asset, 0)
-	positions = append(positions, whales.Assets(ctx, h.storage, h.logger, account.ID)...)
-	positions = append(positions, evaa.Assets(ctx, h.executor, h.logger, account.ID)...)
+	var positions []defi.Asset
+	if h.defiAssets != nil {
+		positions = h.defiAssets.Assets(ctx, account.ID)
+	}
 
 	assets := make([]oas.DefiAsset, 0, len(positions))
 	for _, position := range positions {

@@ -53,6 +53,7 @@ type Handler struct {
 	metaCache      metadataCache
 	tonConnect     *tonconnect.Server
 	verifierSource verifierSource
+	defiAssets     defiAssetsSource
 	rewards        *rewards.Service
 	stats          *rewards.Stats
 	publicAPIURL   string
@@ -102,6 +103,7 @@ type Options struct {
 	ctxToDetails            ctxToDetails
 	gasless                 Gasless
 	verifier                verifierSource
+	defiAssets              defiAssetsSource
 	score                   scoreSource
 	parallelTraceProcessing bool
 	archiveLiteServers      []config.LiteServer
@@ -184,6 +186,15 @@ func WithVerifier(verifier verifierSource) Option {
 func WithScore(score scoreSource) Option {
 	return func(o *Options) {
 		o.score = score
+	}
+}
+
+// WithDefiAssets configures the source of an account's defi positions
+// (staking, lending, liquidity pools, etc.) used by GetAccountDefiAssets.
+// When not set, GetAccountDefiAssets returns an empty result.
+func WithDefiAssets(source defiAssetsSource) Option {
+	return func(o *Options) {
+		o.defiAssets = source
 	}
 }
 
@@ -287,6 +298,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		score:          options.score,
 		ratesSource:    rates.InitCalculator(options.ratesSource),
 		verifierSource: options.verifier,
+		defiAssets:     options.defiAssets,
 		publicAPIURL:   options.publicAPIURL,
 		metaCache: metadataCache{
 			collectionsCache: cache.NewLRUCache[tongo.AccountID, collectionMeta](10000, "nft_metadata_cache"),

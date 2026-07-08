@@ -22,6 +22,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/defi"
 	"github.com/tonkeeper/opentonapi/pkg/rates"
 )
 
@@ -214,6 +215,12 @@ type SpamFilter interface {
 
 type verifierSource interface {
 	GetAccountSource(accountID ton.AccountID) (verifier.Source, error)
+}
+
+// defiAssetsSource collects an account's positions across defi protocols (staking pools,
+// lending markets, etc). The actual protocol integrations live outside opentonapi.
+type defiAssetsSource interface {
+	Assets(ctx context.Context, accountID ton.AccountID) []defi.Asset
 }
 
 // collectionMeta bundles a collection's metadata with its owner address so the
