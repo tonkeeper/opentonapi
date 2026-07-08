@@ -394,7 +394,7 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		enrichJettonPreviewsWithFiat(&event, currency, todayRates)
+		enrichPreviewsWithFiat(&event, currency, todayRates)
 		oasRisk, err := h.convertRisk(ctx, *risk, from.ID, currencyPtr)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -451,12 +451,12 @@ func convertStateInit(si tlb.StateInit) (oas.OptString, error) {
 	return oas.NewOptString(b64), nil
 }
 
-// enrichJettonPreviewsWithFiat appends the fiat equivalent of each jetton transfer to its
+// enrichPreviewsWithFiat appends the fiat equivalent of each TON or jetton transfer to its
 // simple_preview description, e.g. "Transferring 100 USDT (≈ 99.50 USD)". Best-effort: actions
-// without a known jetton or currency rate are left unchanged. The rates map is keyed by
-// upper-cased currency codes and by jetton raw master addresses, all denominated against a
-// common TON base (same as convertRisk uses).
-func enrichJettonPreviewsWithFiat(event *oas.AccountEvent, currency string, todayRates map[string]float64) {
+// without a known market rate (e.g. NFT transfers) or currency rate are left unchanged. The rates
+// map is keyed by upper-cased currency codes and by jetton raw master addresses, all denominated
+// against a common TON base (same as convertRisk uses); TON itself has an implicit rate of 1.
+func enrichPreviewsWithFiat(event *oas.AccountEvent, currency string, todayRates map[string]float64) {
 	if len(todayRates) == 0 {
 		return
 	}
@@ -464,23 +464,29 @@ func enrichJettonPreviewsWithFiat(event *oas.AccountEvent, currency string, toda
 	if !ok || curPrice == 0 {
 		return
 	}
-	for i := range event.Actions {
-		jt, ok := event.Actions[i].JettonTransfer.Get()
-		if !ok {
-			continue
-		}
-		rate, ok := todayRates[jt.Jetton.Address]
-		if !ok || rate == 0 {
-			continue
-		}
-		amount, ok := new(big.Float).SetString(jt.Amount) // raw indivisible units
-		if !ok {
-			continue
-		}
-		human := new(big.Float).Quo(amount, big.NewFloat(math.Pow10(jt.Jetton.Decimals)))
-		fiat, _ := new(big.Float).Quo(new(big.Float).Mul(human, big.NewFloat(rate)), big.NewFloat(curPrice)).Float64()
-		preview := &event.Actions[i].SimplePreview
+	appendFiat := func(preview *oas.ActionSimplePreview, fiat float64) {
 		preview.Description = fmt.Sprintf("%s (≈ %.2f %s)", preview.Description, fiat, strings.ToUpper(currency))
+	}
+	for i := range event.Actions {
+		switch {
+		case event.Actions[i].TonTransfer.Set:
+			// TON is the rate base, so its rate against the common base is 1.
+			fiat := float64(event.Actions[i].TonTransfer.Value.Amount) / 1e9 / curPrice
+			appendFiat(&event.Actions[i].SimplePreview, fiat)
+		case event.Actions[i].JettonTransfer.Set:
+			jt := event.Actions[i].JettonTransfer.Value
+			rate, ok := todayRates[jt.Jetton.Address]
+			if !ok || rate == 0 {
+				continue
+			}
+			amount, ok := new(big.Float).SetString(jt.Amount) // raw indivisible units
+			if !ok {
+				continue
+			}
+			human := new(big.Float).Quo(amount, big.NewFloat(math.Pow10(jt.Jetton.Decimals)))
+			fiat, _ := new(big.Float).Quo(new(big.Float).Mul(human, big.NewFloat(rate)), big.NewFloat(curPrice)).Float64()
+			appendFiat(&event.Actions[i].SimplePreview, fiat)
+		}
 	}
 }
 
