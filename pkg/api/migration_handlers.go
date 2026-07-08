@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"math/big"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -336,6 +338,11 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	// that seqno, balance and emptied jetton wallets are reflected in later fees and previews. The
 	// synthetic balance seeds batch 0; later batches use the emulated finalStates.
 	overrides := map[ton.AccountID]tlb.ShardAccount{from.ID: seed}
+	// Fetch rates once for the fiat previews below. Best-effort: on failure we skip the fiat suffix.
+	todayRates, _, _, _, ratesErr := h.getRates()
+	if ratesErr != nil {
+		h.logger.Warn("migration: can't get rates for fiat preview", zap.Error(ratesErr))
+	}
 	for i, batch := range batches {
 		seqno := startSeqno + uint32(i)
 		body, err := buildUnsignedBody(version, subWalletID, publicKey, int(from.ID.Workchain), seqno, validUntil, batch)
@@ -387,6 +394,7 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
+		enrichJettonPreviewsWithFiat(&event, currency, todayRates)
 		oasRisk, err := h.convertRisk(ctx, *risk, from.ID, currencyPtr)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
@@ -441,6 +449,39 @@ func convertStateInit(si tlb.StateInit) (oas.OptString, error) {
 		return oas.OptString{}, fmt.Errorf("base64 encoding failed: %v", err)
 	}
 	return oas.NewOptString(b64), nil
+}
+
+// enrichJettonPreviewsWithFiat appends the fiat equivalent of each jetton transfer to its
+// simple_preview description, e.g. "Transferring 100 USDT (≈ 99.50 USD)". Best-effort: actions
+// without a known jetton or currency rate are left unchanged. The rates map is keyed by
+// upper-cased currency codes and by jetton raw master addresses, all denominated against a
+// common TON base (same as convertRisk uses).
+func enrichJettonPreviewsWithFiat(event *oas.AccountEvent, currency string, todayRates map[string]float64) {
+	if len(todayRates) == 0 {
+		return
+	}
+	curPrice, ok := todayRates[strings.ToUpper(currency)]
+	if !ok || curPrice == 0 {
+		return
+	}
+	for i := range event.Actions {
+		jt, ok := event.Actions[i].JettonTransfer.Get()
+		if !ok {
+			continue
+		}
+		rate, ok := todayRates[jt.Jetton.Address]
+		if !ok || rate == 0 {
+			continue
+		}
+		amount, ok := new(big.Float).SetString(jt.Amount) // raw indivisible units
+		if !ok {
+			continue
+		}
+		human := new(big.Float).Quo(amount, big.NewFloat(math.Pow10(jt.Jetton.Decimals)))
+		fiat, _ := new(big.Float).Quo(new(big.Float).Mul(human, big.NewFloat(rate)), big.NewFloat(curPrice)).Float64()
+		preview := &event.Actions[i].SimplePreview
+		preview.Description = fmt.Sprintf("%s (≈ %.2f %s)", preview.Description, fiat, strings.ToUpper(currency))
+	}
 }
 
 func (h *Handler) collectOwnedNFTs(ctx context.Context, owner ton.AccountID) ([]core.NftItem, error) {
