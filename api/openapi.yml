@@ -6332,6 +6332,25 @@ components:
           type: integer
           format: int32
           description: send-mode byte (e.g. 3 for a transfer, 128 for the final balance sweep)
+    InsufficientFunds:
+      type: object
+      description: >
+        Present on an error when a request failed because the source wallet does not
+        hold enough TON to cover the required gas (error_code 50000).
+      required:
+        - required
+        - available
+      properties:
+        required:
+          type: integer
+          format: int64
+          description: TON in nanotons required to cover transfer gas
+          x-js-format: bigint
+        available:
+          type: integer
+          format: int64
+          description: TON in nanotons currently available on the source wallet
+          x-js-format: bigint
     CurrencyType:
       type: string
       example: jetton
@@ -9447,3 +9466,5 @@ components:
               error_code:
                 type: integer
                 format: int64
+              details:
+                $ref: '#/components/schemas/InsufficientFunds'

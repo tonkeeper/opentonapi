@@ -294,7 +294,15 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		gas += int64(migrationGasPerTransfer)
 	}
 	if account.GramBalance < gas {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("INSUFFICIENT_TON_FOR_GAS: required %d nanotons to cover transfer gas, available %d", gas, account.GramBalance))
+		return nil, toError(http.StatusBadRequest, ErrorWithExtendedCode{
+			Code:         http.StatusBadRequest,
+			Message:      fmt.Sprintf("INSUFFICIENT_TON_FOR_GAS: required %d nanotons to cover transfer gas, available %d", gas, account.GramBalance),
+			ExtendedCode: references.ErrInsufficientTONForGas,
+			Details: &InsufficientFunds{
+				Required:  gas,
+				Available: account.GramBalance,
+			},
+		})
 	}
 	// The final message sweeps the remaining TON balance to the destination.
 	msgRaw, err := toWalletRawMessage(tonwallet.Message{

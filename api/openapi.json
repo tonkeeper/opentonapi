@@ -767,6 +767,9 @@
      "application/json": {
       "schema": {
        "properties": {
+        "details": {
+         "$ref": "#/components/schemas/InsufficientFunds"
+        },
         "error": {
          "type": "string"
         },
@@ -4065,6 +4068,28 @@
      "workchain",
      "root_hash",
      "file_hash"
+    ],
+    "type": "object"
+   },
+   "InsufficientFunds": {
+    "description": "Present on an error when a request failed because the source wallet does not hold enough TON to cover the required gas (error_code 50000).\n",
+    "properties": {
+     "available": {
+      "description": "TON in nanotons currently available on the source wallet",
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "required": {
+      "description": "TON in nanotons required to cover transfer gas",
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "required",
+     "available"
     ],
     "type": "object"
    },
