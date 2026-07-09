@@ -7551,6 +7551,10 @@ components:
         value:
           type: string
           example: "5 Gram"
+        fiat_value:
+          type: string
+          description: the value of this action expressed in the requested fiat currency.
+          example: "4.99 USD"
         value_image:
           type: string
           description: a link to an image that depicts this action's asset.

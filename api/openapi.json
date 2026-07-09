@@ -1390,6 +1390,11 @@
       "example": "Transferring 5 Gram",
       "type": "string"
      },
+     "fiat_value": {
+      "description": "the value of this action expressed in the requested fiat currency.",
+      "example": "4.99 USD",
+      "type": "string"
+     },
      "name": {
       "example": "Gram Transfer",
       "type": "string"

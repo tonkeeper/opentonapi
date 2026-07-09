@@ -2758,6 +2758,12 @@ func (s *ActionSimplePreview) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.FiatValue.Set {
+			e.FieldStart("fiat_value")
+			s.FiatValue.Encode(e)
+		}
+	}
+	{
 		if s.ValueImage.Set {
 			e.FieldStart("value_image")
 			s.ValueImage.Encode(e)
@@ -2773,13 +2779,14 @@ func (s *ActionSimplePreview) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfActionSimplePreview = [6]string{
+var jsonFieldsNameOfActionSimplePreview = [7]string{
 	0: "name",
 	1: "description",
 	2: "action_image",
 	3: "value",
-	4: "value_image",
-	5: "accounts",
+	4: "fiat_value",
+	5: "value_image",
+	6: "accounts",
 }
 
 // Decode decodes ActionSimplePreview from json.
@@ -2835,6 +2842,16 @@ func (s *ActionSimplePreview) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"value\"")
 			}
+		case "fiat_value":
+			if err := func() error {
+				s.FiatValue.Reset()
+				if err := s.FiatValue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"fiat_value\"")
+			}
 		case "value_image":
 			if err := func() error {
 				s.ValueImage.Reset()
@@ -2846,7 +2863,7 @@ func (s *ActionSimplePreview) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"value_image\"")
 			}
 		case "accounts":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				s.Accounts = make([]AccountAddress, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -2873,7 +2890,7 @@ func (s *ActionSimplePreview) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00100011,
+		0b01000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
