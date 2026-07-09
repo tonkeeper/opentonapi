@@ -1196,6 +1196,8 @@ type ActionSimplePreview struct {
 	// A link to an image for this particular action.
 	ActionImage OptString `json:"action_image"`
 	Value       OptString `json:"value"`
+	// The value of this action expressed in the requested fiat currency.
+	FiatValue OptString `json:"fiat_value"`
 	// A link to an image that depicts this action's asset.
 	ValueImage OptString        `json:"value_image"`
 	Accounts   []AccountAddress `json:"accounts"`
@@ -1219,6 +1221,11 @@ func (s *ActionSimplePreview) GetActionImage() OptString {
 // GetValue returns the value of Value.
 func (s *ActionSimplePreview) GetValue() OptString {
 	return s.Value
+}
+
+// GetFiatValue returns the value of FiatValue.
+func (s *ActionSimplePreview) GetFiatValue() OptString {
+	return s.FiatValue
 }
 
 // GetValueImage returns the value of ValueImage.
@@ -1249,6 +1256,11 @@ func (s *ActionSimplePreview) SetActionImage(val OptString) {
 // SetValue sets the value of Value.
 func (s *ActionSimplePreview) SetValue(val OptString) {
 	s.Value = val
+}
+
+// SetFiatValue sets the value of FiatValue.
+func (s *ActionSimplePreview) SetFiatValue(val OptString) {
+	s.FiatValue = val
 }
 
 // SetValueImage sets the value of ValueImage.
