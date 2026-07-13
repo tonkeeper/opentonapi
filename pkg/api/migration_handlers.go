@@ -36,8 +36,11 @@ const migrationGasPerTransfer = ton.OneGRAM / 20 // 0.05 TON
 // migrationForwardAmount is forwarded to the destination so it receives a transfer notification.
 const migrationForwardAmount = tlb.Grams(1)
 
-// migrationSweepMode sends the entire remaining balance and ignores errors of the sweep itself.
-const migrationSweepMode = 128
+// migrationSweepMode sends the entire remaining balance (128) and ignores errors of the sweep
+// itself (+2). The +2 SendIgnoreErrors bit is mandatory for wallet v5: it rejects any action sent
+// from an external message that lacks it (exit code 137), which would otherwise revert the whole
+// batch. v3/v4 don't enforce it, but the bit is harmless there.
+const migrationSweepMode = 128 + 2
 
 const migrationMsgLifetime = 5 * time.Minute
 
