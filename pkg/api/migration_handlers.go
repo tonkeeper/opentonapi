@@ -10,6 +10,7 @@ import (
 	"math"
 	"math/big"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -619,6 +620,9 @@ func inferWalletForAddress(address ton.AccountID, pubkey ed25519.PublicKey) (ton
 }
 
 func buildUnsignedBody(v tonwallet.Version, subWalletID uint32, pubkey ed25519.PublicKey, workchain int, seqno uint32, validUntil time.Time, s []tonwallet.RawMessage) (*boc.Cell, error) {
+	// actions are executed by wallet code in reverse order
+	s = slices.Clone(s)
+	slices.Reverse(s)
 	switch v {
 	case tonwallet.V3R1, tonwallet.V3R2:
 		body := tonwallet.MessageV3{
