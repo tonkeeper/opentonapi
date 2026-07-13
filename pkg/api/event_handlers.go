@@ -12,9 +12,10 @@ import (
 	"sync"
 	"time"
 
+	"slices"
+
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"go.uber.org/zap"
-	"slices"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -677,7 +678,7 @@ func extractDestinationWallet(message tlb.Message) (*ton.AccountID, error) {
 }
 
 func prepareAccountState(accountID tongo.AccountID, state tlb.ShardAccount, startBalance int64) (tlb.ShardAccount, error) {
-	if state.Account.Status() == tlb.AccountActive {
+	if state.Account.SumType == "Account" && state.Account.Account.Storage.State.SumType == "AccountActive" {
 		state.Account.Account.Storage.Balance.Grams = tlb.Grams(startBalance)
 		state.Account.Account.StorageStat.StorageExtra.SumType = "StorageExtraNone"
 		return state, nil
