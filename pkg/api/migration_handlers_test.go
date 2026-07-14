@@ -10,6 +10,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
@@ -197,6 +198,44 @@ func TestBuildUnsignedBodyV4(t *testing.T) {
 	require.Equal(t, uint32(subWalletID), decoded.SubWalletId)
 	require.Equal(t, int8(0), decoded.Op)
 	require.Len(t, decoded.RawMessages, len(messages))
+}
+
+func TestParseWalletDataV5Beta(t *testing.T) {
+	// Wallet v5 beta has a different storage layout than v5r1. Parsing it with the v5r1 data type
+	// misaligns the bits and fails with "not enough refs"; it must use the beta data type.
+	var pubkey tlb.Bits256
+	pubkey[0] = 0xaa
+	pubkey[31] = 0xbb
+	networkGlobalID := int32(tongoWallet.MainnetGlobalID)
+	data := tongoWallet.DataV5Beta{
+		Seqno: 7,
+		WalletID: tongoWallet.WalletV5ID{
+			NetworkGlobalID: uint32(networkGlobalID),
+			Workchain:       0,
+			SubWalletID:     0,
+		},
+		PublicKey: pubkey,
+	}
+	cell := boc.NewCell()
+	require.NoError(t, tlb.Marshal(cell, data))
+	raw, err := cell.ToBoc()
+	require.NoError(t, err)
+
+	seqno, subWalletID, gotKey, err := parseWalletData(tongoWallet.V5Beta, raw)
+	require.NoError(t, err)
+	require.Equal(t, uint32(7), seqno)
+	require.Equal(t, uint32(0), subWalletID)
+	require.Equal(t, pubkey[:], []byte(gotKey))
+}
+
+func TestBuildUnsignedBodyV5Beta(t *testing.T) {
+	to := ton.MustParseAccountID("0:97264395bd65a255a429b11326c84128b7d70ffed7949abae3036d506ba38621")
+	sweep, err := toWalletRawMessage(tongoWallet.Message{Amount: 0, Address: to, Mode: migrationSweepMode})
+	require.NoError(t, err)
+
+	body, err := buildUnsignedBody(tongoWallet.V5Beta, 0, make([]byte, 32), 0, 3, time.Unix(1900000000, 0), []tongoWallet.RawMessage{sweep})
+	require.NoError(t, err)
+	require.NotNil(t, body)
 }
 
 func TestSignedBodyForEmulation(t *testing.T) {

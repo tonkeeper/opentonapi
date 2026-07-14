@@ -585,12 +585,20 @@ func parseWalletData(version tonwallet.Version, data []byte) (seqno uint32, subW
 			return 0, 0, nil, err
 		}
 		return d.Seqno, d.SubWalletId, append(ed25519.PublicKey{}, d.PublicKey[:]...), nil
-	case tonwallet.V5R1, tonwallet.V5Beta:
+	case tonwallet.V5R1:
 		var d tonwallet.DataV5R1
 		if err := tlb.Unmarshal(cells[0], &d); err != nil {
 			return 0, 0, nil, err
 		}
 		return d.Seqno, 0, append(ed25519.PublicKey{}, d.PublicKey[:]...), nil
+	case tonwallet.V5Beta:
+		// Wallet v5 beta has a different storage layout than v5r1 (uint33 seqno, 80-bit wallet_id,
+		// uint8 extension values), so it must be parsed with its own data type.
+		var d tonwallet.DataV5Beta
+		if err := tlb.Unmarshal(cells[0], &d); err != nil {
+			return 0, 0, nil, err
+		}
+		return uint32(d.Seqno), 0, append(ed25519.PublicKey{}, d.PublicKey[:]...), nil
 	default:
 		return 0, 0, nil, fmt.Errorf("unsupported wallet version for migration: %v", version.ToString())
 	}
@@ -649,8 +657,17 @@ func buildUnsignedBody(v tonwallet.Version, subWalletID uint32, pubkey ed25519.P
 			return nil, err
 		}
 		return cell, nil
-	case tonwallet.V5R1, tonwallet.V5Beta:
+	case tonwallet.V5R1:
 		w5 := tonwallet.NewWalletV5R1(pubkey, tonwallet.Options{Workchain: &workchain})
+		return w5.CreateMsgBodyWithoutSignature(s, tonwallet.MessageConfig{
+			Seqno:      seqno,
+			ValidUntil: validUntil,
+			V5MsgType:  tonwallet.V5MsgTypeSignedExternal,
+		})
+	case tonwallet.V5Beta:
+		// v5 beta uses a distinct signed-message format from v5r1, so it must be built with the
+		// beta wallet implementation rather than reusing the v5r1 body.
+		w5 := tonwallet.NewWalletV5Beta(v, pubkey, tonwallet.Options{Workchain: &workchain})
 		return w5.CreateMsgBodyWithoutSignature(s, tonwallet.MessageConfig{
 			Seqno:      seqno,
 			ValidUntil: validUntil,
