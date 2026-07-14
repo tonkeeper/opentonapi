@@ -62,6 +62,10 @@ func (c *Cache[K, V]) Delete(key K) {
 	c.cache.Delete(key)
 }
 
+func (c *Cache[K, V]) Len() int {
+	return c.cache.Len()
+}
+
 // Keys returns the keys of the cache. the order is relied on algorithms.
 func (c *Cache[K, V]) Keys() []K {
 	return c.cache.Keys()
