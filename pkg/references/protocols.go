@@ -17,6 +17,10 @@ var (
 )
 
 var (
-	EthenaPool  = ton.MustParseAccountID("0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5")
-	ToncoRouter = ton.MustParseAccountID("0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86")
+	EthenaPool = ton.MustParseAccountID("0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5")
+	// EthenaTsUSDeMaster is the master of Ethena's tsUSDe ("TON Staked USDe"). It also
+	// acts as the recipient jetton wallet during transfers, which is why the generic
+	// jetton straws can't recognize the recipient side (see EthenaTsUSDeTransferStraw).
+	EthenaTsUSDeMaster = ton.MustParseAccountID("0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d")
+	ToncoRouter        = ton.MustParseAccountID("0:bffadd270a738531da7b13ba8fc403826c2586173f9ede9c316fab53bc59ac86")
 )

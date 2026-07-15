@@ -121,6 +121,10 @@ func TestFindActions(t *testing.T) {
 	// this map is a separate, because using testCases (if we want the map to be inferred)
 	//      breaks IDEA's ability to "click specific test case" perhaps in other IDE's too
 	txBlocks := map[string][]tongo.BlockID{
+		"5f55199edefad18c3e17c92cc276f6ceffe0a6ba0146dd89dbd55ae9ec3785b9": {
+			tongo.MustParseBlockID("(0,8000000000000000,84363378)"),
+			tongo.MustParseBlockID("(0,8000000000000000,84363379)"),
+		},
 		"6e4cfc51eeef38a46896a556c9faae05754b31f563592fc866207234dec5966a": {
 			tongo.MustParseBlockID("(0,8000000000000000,68194499)"),
 		},
@@ -1048,6 +1052,13 @@ func TestFindActions(t *testing.T) {
 			name:           "ethena withdraw stake request",
 			hash:           "b8336722a26a86e03b986e9c8207b94a31105e75115af62649e1a95e0d4033bc",
 			filenamePrefix: "ethena-withdraw-stake-request",
+		},
+		{
+			// tsUSDe transfer whose recipient side is routed through the tsUSDe master;
+			// previously reported as "failed" because the recipient bubble didn't match. See EthenaTsUSDeTransferStraw.
+			name:           "ethena tsusde transfer",
+			hash:           "5f55199edefad18c3e17c92cc276f6ceffe0a6ba0146dd89dbd55ae9ec3785b9",
+			filenamePrefix: "ethena-tsusde-transfer",
 		},
 		{
 			name:           "deposit both ton + bmTON liquidity bidask",
