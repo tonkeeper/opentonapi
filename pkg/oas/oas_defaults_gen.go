@@ -28,6 +28,18 @@ func (s *MigrationPrepareRequest) setDefaults() {
 		val := string("USD")
 		s.Currency.SetTo(val)
 	}
+	{
+		val := MigrationPrepareRequestGasPayer("self")
+		s.GasPayer.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *MigrationTransaction) setDefaults() {
+	{
+		val := bool(false)
+		s.Sponsored.SetTo(val)
+	}
 }
 
 // setDefaults set default value of fields.

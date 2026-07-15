@@ -15,6 +15,7 @@ import (
 	"slices"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
+	"github.com/tonkeeper/tongo/boc"
 	"go.uber.org/zap"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -31,6 +32,7 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/tontest"
 	"github.com/tonkeeper/tongo/txemulator"
+	tongoWallet "github.com/tonkeeper/tongo/wallet"
 )
 
 var (
@@ -754,20 +756,21 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 		walletAddress = &addr.ID
 		m.Info.ExtInMsgInfo.Dest = addr.ID.ToMsgAddress()
 	}
-	var code []byte
+	var code boc.Cell
 	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
-		code = account.Code
-	} else if m.Init.Exists && m.Init.Value.Value.Code.Exists {
-		code, err = m.Init.Value.Value.Code.Value.Value.ToBoc()
+		codeP, err := boc.DeserializeSingleRootBoc(account.Code)
 		if err != nil {
 			return nil, toError(http.StatusBadRequest, err)
 		}
-	} else if err == nil {
+		code = *codeP
+	} else if m.Init.Exists && m.Init.Value.Value.Code.Exists {
+		code = m.Init.Value.Value.Code.Value.Value
+	} else if err == nil || errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("code not found and message doesn't have init"))
 	} else {
 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("account: %s GetRawAccount err: %w", walletAddress.ToRaw(), err))
 	}
-	walletVersion, err := wallet.GetVersionByCode(code)
+	walletVersion, err := tongoWallet.GetVersionByCode(code)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}

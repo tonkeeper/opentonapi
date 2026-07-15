@@ -10570,6 +10570,15 @@ type MigrationPrepareRequest struct {
 	// Hex-encoded ed25519 public key of the source wallet. If `from` wallet is uninitialized, then
 	// public_key is used to infer wallet code.
 	PublicKey OptString `json:"public_key"`
+	// Who pays the gas:
+	// - `self` — the source wallet pays, as usual
+	// - `battery` — asset transfers are sponsored by the Tonkeeper Battery
+	// - `gasless` — source wallet pays with jetton, in this case `gas_jetton_master` is required too
+	// (only from this list: `/v2/gasless/config`).
+	GasPayer OptMigrationPrepareRequestGasPayer `json:"gas_payer"`
+	// Master address of jetton that should be used to cover transactions fees. Must be supported by
+	// /v2/gasless/config and held by the source wallet.
+	GasJettonMaster OptString `json:"gas_jetton_master"`
 }
 
 // GetFrom returns the value of From.
@@ -10592,6 +10601,16 @@ func (s *MigrationPrepareRequest) GetPublicKey() OptString {
 	return s.PublicKey
 }
 
+// GetGasPayer returns the value of GasPayer.
+func (s *MigrationPrepareRequest) GetGasPayer() OptMigrationPrepareRequestGasPayer {
+	return s.GasPayer
+}
+
+// GetGasJettonMaster returns the value of GasJettonMaster.
+func (s *MigrationPrepareRequest) GetGasJettonMaster() OptString {
+	return s.GasJettonMaster
+}
+
 // SetFrom sets the value of From.
 func (s *MigrationPrepareRequest) SetFrom(val string) {
 	s.From = val
@@ -10610,6 +10629,69 @@ func (s *MigrationPrepareRequest) SetCurrency(val OptString) {
 // SetPublicKey sets the value of PublicKey.
 func (s *MigrationPrepareRequest) SetPublicKey(val OptString) {
 	s.PublicKey = val
+}
+
+// SetGasPayer sets the value of GasPayer.
+func (s *MigrationPrepareRequest) SetGasPayer(val OptMigrationPrepareRequestGasPayer) {
+	s.GasPayer = val
+}
+
+// SetGasJettonMaster sets the value of GasJettonMaster.
+func (s *MigrationPrepareRequest) SetGasJettonMaster(val OptString) {
+	s.GasJettonMaster = val
+}
+
+// Who pays the gas:
+// - `self` — the source wallet pays, as usual
+// - `battery` — asset transfers are sponsored by the Tonkeeper Battery
+// - `gasless` — source wallet pays with jetton, in this case `gas_jetton_master` is required too
+// (only from this list: `/v2/gasless/config`).
+type MigrationPrepareRequestGasPayer string
+
+const (
+	MigrationPrepareRequestGasPayerSelf    MigrationPrepareRequestGasPayer = "self"
+	MigrationPrepareRequestGasPayerBattery MigrationPrepareRequestGasPayer = "battery"
+	MigrationPrepareRequestGasPayerGasless MigrationPrepareRequestGasPayer = "gasless"
+)
+
+// AllValues returns all MigrationPrepareRequestGasPayer values.
+func (MigrationPrepareRequestGasPayer) AllValues() []MigrationPrepareRequestGasPayer {
+	return []MigrationPrepareRequestGasPayer{
+		MigrationPrepareRequestGasPayerSelf,
+		MigrationPrepareRequestGasPayerBattery,
+		MigrationPrepareRequestGasPayerGasless,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MigrationPrepareRequestGasPayer) MarshalText() ([]byte, error) {
+	switch s {
+	case MigrationPrepareRequestGasPayerSelf:
+		return []byte(s), nil
+	case MigrationPrepareRequestGasPayerBattery:
+		return []byte(s), nil
+	case MigrationPrepareRequestGasPayerGasless:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MigrationPrepareRequestGasPayer) UnmarshalText(data []byte) error {
+	switch MigrationPrepareRequestGasPayer(data) {
+	case MigrationPrepareRequestGasPayerSelf:
+		*s = MigrationPrepareRequestGasPayerSelf
+		return nil
+	case MigrationPrepareRequestGasPayerBattery:
+		*s = MigrationPrepareRequestGasPayerBattery
+		return nil
+	case MigrationPrepareRequestGasPayerGasless:
+		*s = MigrationPrepareRequestGasPayerGasless
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/MigrationPrepareResponse
@@ -10666,9 +10748,19 @@ func (s *MigrationPrepareResponse) SetTransactions(val []MigrationTransaction) {
 type MigrationTransaction struct {
 	// Wallet seqno baked into the unsigned body.
 	Seqno int32 `json:"seqno"`
-	// Base64 BOC of the unsigned wallet body. Sign its hash, prepend the signature, wrap it in an
-	// external message and broadcast.
+	// Base64 BOC of the unsigned wallet body. The body type is determined by (wallet_version,
+	// sponsored): for v3/v4 it is always the external body — sign its hash, prepend the signature,
+	// wrap in an external message; for w5 with sponsored=false it is the external body with the
+	// signature appended as the trailing 512 bits; for w5 with sponsored=true it is the internal_signed
+	// body — sign and wrap it for /v2/gasless/send as in the gasless flow.
 	Boc string `json:"boc"`
+	// True — the Battery relay pays gas for this transaction; submit it via /v2/gasless/send. false
+	// — self-paid; sign and broadcast via /v2/blockchain/message as usual (e.g. the final TON sweep).
+	Sponsored OptBool `json:"sponsored"`
+	// Gasless only; the relay commission in indivisible gas-jetton units, embedded in the boc as a
+	// jetton transfer to the relay. Exact for the first transaction; an estimate for later ones
+	// (re-running prepare refreshes it).
+	Commission OptString `json:"commission"`
 	// Base64 BOC of the wallet StateInit (code + data). Present only on the first transaction when the
 	// source wallet is not yet initialized.
 	StateInit OptString `json:"state_init"`
@@ -10686,6 +10778,16 @@ func (s *MigrationTransaction) GetSeqno() int32 {
 // GetBoc returns the value of Boc.
 func (s *MigrationTransaction) GetBoc() string {
 	return s.Boc
+}
+
+// GetSponsored returns the value of Sponsored.
+func (s *MigrationTransaction) GetSponsored() OptBool {
+	return s.Sponsored
+}
+
+// GetCommission returns the value of Commission.
+func (s *MigrationTransaction) GetCommission() OptString {
+	return s.Commission
 }
 
 // GetStateInit returns the value of StateInit.
@@ -10711,6 +10813,16 @@ func (s *MigrationTransaction) SetSeqno(val int32) {
 // SetBoc sets the value of Boc.
 func (s *MigrationTransaction) SetBoc(val string) {
 	s.Boc = val
+}
+
+// SetSponsored sets the value of Sponsored.
+func (s *MigrationTransaction) SetSponsored(val OptBool) {
+	s.Sponsored = val
+}
+
+// SetCommission sets the value of Commission.
+func (s *MigrationTransaction) SetCommission(val OptString) {
+	s.Commission = val
 }
 
 // SetStateInit sets the value of StateInit.
@@ -16295,6 +16407,52 @@ func (o OptMessageConsequences) Get() (v MessageConsequences, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessageConsequences) Or(d MessageConsequences) MessageConsequences {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMigrationPrepareRequestGasPayer returns new OptMigrationPrepareRequestGasPayer with value set to v.
+func NewOptMigrationPrepareRequestGasPayer(v MigrationPrepareRequestGasPayer) OptMigrationPrepareRequestGasPayer {
+	return OptMigrationPrepareRequestGasPayer{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMigrationPrepareRequestGasPayer is optional MigrationPrepareRequestGasPayer.
+type OptMigrationPrepareRequestGasPayer struct {
+	Value MigrationPrepareRequestGasPayer
+	Set   bool
+}
+
+// IsSet returns true if OptMigrationPrepareRequestGasPayer was set.
+func (o OptMigrationPrepareRequestGasPayer) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMigrationPrepareRequestGasPayer) Reset() {
+	var v MigrationPrepareRequestGasPayer
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMigrationPrepareRequestGasPayer) SetTo(v MigrationPrepareRequestGasPayer) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMigrationPrepareRequestGasPayer) Get() (v MigrationPrepareRequestGasPayer, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMigrationPrepareRequestGasPayer) Or(d MigrationPrepareRequestGasPayer) MigrationPrepareRequestGasPayer {
 	if v, ok := o.Get(); ok {
 		return v
 	}

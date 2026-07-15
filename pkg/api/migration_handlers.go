@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"crypto/ed25519"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,17 +14,21 @@ import (
 	"sync"
 	"time"
 
+	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/contract/jetton"
+	"github.com/tonkeeper/tongo/contract/nft"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	"github.com/tonkeeper/tongo/txemulator"
+	"github.com/tonkeeper/tongo/utils"
 	tonwallet "github.com/tonkeeper/tongo/wallet"
 	"go.uber.org/zap"
 )
@@ -36,6 +39,9 @@ const migrationGasPerTransfer = ton.OneGRAM / 20 // 0.05 TON
 
 // migrationForwardAmount is forwarded to the destination so it receives a transfer notification.
 const migrationForwardAmount = tlb.Grams(1)
+
+// minGramTransferFee is threshold below which "send remaining gram" does not make sense
+const minGramTransferFee = 500000
 
 // migrationSweepMode sends the entire remaining balance (128) and ignores errors of the sweep
 // itself (+2). The +2 SendIgnoreErrors bit is mandatory for wallet v5: it rejects any action sent
@@ -48,6 +54,12 @@ const migrationMsgLifetime = 5 * time.Minute
 // migrationNftPageSize is the SearchNFTs page size used when enumerating a wallet's NFTs for migration.
 const migrationNftPageSize = 1000
 
+// batterySponsorshipCap see MaxHelp = 2.1 TON in custodial-battery
+const batterySponsorshipCap = 2_100_000_000
+
+// sponsoredBatchMaxMessages bounds a battery-sponsored batch so its gas fits the sponsorship cap.
+const sponsoredBatchMaxMessages = int(batterySponsorshipCap / migrationGasPerTransfer)
+
 var migrationSkipNftCollections = map[ton.AccountID]bool{
 	references.TonstakersAccountPool: true,
 }
@@ -57,10 +69,6 @@ func isSkippedNftCollection(collection *ton.AccountID) bool {
 		return false
 	}
 	return migrationSkipNftCollections[*collection]
-}
-
-type jettonBulkStorage interface {
-	GetJettonWalletsByOwnerAddresses(ctx context.Context, owners []ton.AccountID, mintless bool) ([]core.JettonWallet, error)
 }
 
 func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrationWalletsReq, params oas.GetMigrationWalletsParams) (*oas.MigrationWallets, error) {
@@ -109,7 +117,7 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 			if item.OwnerAddress == nil {
 				continue
 			}
-			if nftScam[item.Address] == core.TrustBlacklist {
+			if h.isBlacklistedNft(ctx, item, nftScam[item.Address]) {
 				continue
 			}
 			if isSkippedNftCollection(item.CollectionAddress) {
@@ -159,41 +167,46 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 	}
 	resp := &oas.MigrationWallets{Wallets: make([]oas.MigrationWalletValue, 0, len(ids))}
 	for _, id := range ids {
-		wallet := oas.MigrationWalletValue{
+		w := oas.MigrationWalletValue{
 			Account:  id.ToRaw(),
 			Status:   oas.AccountStatusNonexist,
 			Jettons:  jettonsByOwner[id],
 			NftCount: nftCountByOwner[id],
 		}
-		if wallet.Jettons == nil {
-			wallet.Jettons = []oas.JettonBalance{}
+		if w.Jettons == nil {
+			w.Jettons = []oas.JettonBalance{}
 		}
 		if account, ok := accountByID[id]; ok {
-			wallet.Balance = account.GramBalance
-			wallet.Status = oas.AccountStatus(account.Status)
+			w.Balance = account.GramBalance
+			w.Status = oas.AccountStatus(account.Status)
 		}
-		resp.Wallets = append(resp.Wallets, wallet)
+		resp.Wallets = append(resp.Wallets, w)
 	}
 	return resp, nil
 }
 
-func getPublicKey(pk oas.OptString) (ed25519.PublicKey, error) {
-	if !pk.IsSet() || pk.Value == "" {
-		return nil, errors.New("public_key is empty")
+type migrationBatch struct {
+	messages   []tonwallet.RawMessage
+	sponsored  bool
+	commission *big.Int // fee set by gasless estimate
+}
+
+func (mb migrationBatch) chunk(n int) (batches []migrationBatch) {
+	for b := range slices.Chunk(mb.messages, n) {
+		batches = append(batches, migrationBatch{
+			messages:  b,
+			sponsored: mb.sponsored,
+		})
 	}
-	if decoded, err := hex.DecodeString(pk.Value); err != nil {
-		return nil, fmt.Errorf("public_key is not valid hex: %v", err)
-	} else {
-		return decoded, nil
-	}
+	return
 }
 
 func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepareRequest) (*oas.MigrationPrepareResponse, error) {
-	from, err := tongo.ParseAddress(req.From)
+	sourceAddr, err := tongo.ParseAddress(req.From)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid `from` address: %w", err))
 	}
-	to, err := tongo.ParseAddress(req.To)
+	destAddr, err := tongo.ParseAddress(req.To)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid `to` address: %w", err))
 	}
@@ -201,258 +214,310 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	if req.Currency.IsSet() && req.Currency.Value != "" {
 		currency = req.Currency.Value
 	}
+	gasPayer := req.GasPayer.Or(oas.MigrationPrepareRequestGasPayerSelf)
+	batteryPays := gasPayer == oas.MigrationPrepareRequestGasPayerBattery
+	gaslessPays := gasPayer == oas.MigrationPrepareRequestGasPayerGasless
+	if (batteryPays || gaslessPays) && h.gasless == nil {
+		return nil, toError(http.StatusNotImplemented, fmt.Errorf("gas_payer %v is not supported by this deployment", gasPayer))
+	}
 	logger := slog.With(
-		slog.String("from", from.ID.String()),
-		slog.String("to", to.ID.String()),
+		slog.String("from", sourceAddr.ID.String()),
+		slog.String("to", destAddr.ID.String()),
 		slog.String("pubkey", req.PublicKey.Value),
 	)
-	var (
-		version     tonwallet.Version
-		publicKey   ed25519.PublicKey
-		deployInit  *tlb.StateInit
-		startSeqno  uint32 = 0
-		subWalletID uint32 = tonwallet.DefaultSubWallet
-	)
-	account, err := h.storage.GetRawAccount(ctx, from.ID)
-	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-		logger.Error("error happened on wallet inference", slog.String("error", err.Error()))
+	sourceAccount, err := h.storage.GetAccountState(ctx, sourceAddr.ID)
+	if err != nil {
+		logger.Error("failed to get account state", slog.String("error", err.Error()))
 		return nil, toError(http.StatusInternalServerError, err)
-	} else if err != nil || len(account.Code) == 0 {
-		publicKey, err = getPublicKey(req.PublicKey)
+	}
+	sourceWallet, startSeqno, deployInit, err := resolveWallet(sourceAccount, sourceAddr.ID, req.PublicKey)
+	if err != nil {
+		logger.Error("error happened on wallet inference", slog.String("error", err.Error()))
+		return nil, err
+	}
+	if gaslessPays && !sourceWallet.IsRelaySupported() {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("gasless migration requires a v5 source wallet; use gas_payer=battery or self"))
+	}
+	var gasJettonMaster *ton.AccountID
+	if gaslessPays {
+		gasJettonMaster, err = h.requireGasJetton(ctx, req.GasJettonMaster)
 		if err != nil {
-			return nil, toError(http.StatusBadRequest, fmt.Errorf("source wallet is not initialized; %v", err))
+			return nil, toError(http.StatusBadRequest, err)
 		}
-		version, deployInit, err = inferWalletForAddress(from.ID, publicKey)
-		if err != nil {
-			logger.Error("error happened on wallet inference", slog.String("error", err.Error()))
-			return nil, toError(http.StatusInternalServerError, err)
-		}
+	}
+	// todo allow battery for v4 and v3
+	relayFunded := (batteryPays || gaslessPays) && sourceWallet.IsRelaySupported()
+	var gramBalance int64
+	if currColl, ok := sourceAccount.Account.CurrencyCollection(); ok {
+		gramBalance = int64(currColl.Grams)
+	}
+
+	// Fetch rates once for the fiat previews below. Best-effort: on failure we skip the fiat suffix.
+	todayRates, _, _, _, ratesErr := h.getRates()
+	var currencyPtr *string
+	if ratesErr != nil {
+		h.logger.Warn("migration: can't get rates for fiat preview", zap.Error(ratesErr))
 	} else {
-		version, err = wallet.GetVersionByCode(account.Code)
-		if err != nil {
-			return nil, toError(http.StatusBadRequest, fmt.Errorf("unsupported source wallet: %w", err))
-		}
-		startSeqno, subWalletID, publicKey, err = parseWalletData(version, account.Data)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, fmt.Errorf("can't read wallet data: %w", err))
+		if _, ok := todayRates[strings.ToUpper(currency)]; ok {
+			currencyPtr = &currency
 		}
 	}
 
-	// Discover the safe, migratable assets of the source wallet.
-	jettons, err := h.collectJettonWallets(ctx, []ton.AccountID{from.ID})
+	plan, err := h.prepareMigrationPlan(ctx, sourceAddr, destAddr, relayFunded, gramBalance, sourceWallet, gasJettonMaster)
 	if err != nil {
+		logger.Error("failed to prepare migration plan", slog.String("error", err.Error()))
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	nfts, err := h.collectOwnedNFTs(ctx, from.ID)
-	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	nftItemIDs := make([]ton.AccountID, 0, len(nfts))
-	for _, nft := range nfts {
-		nftItemIDs = append(nftItemIDs, nft.Address)
-	}
-	nftScam, scamErr := h.spamFilter.GetNftsScamData(ctx, nftItemIDs)
-	if scamErr != nil {
-		h.logger.Warn("error getting nft scam data", zap.Error(scamErr))
-	}
-	// Build the ordered internal messages: jettons, then NFTs, then the final TON sweep.
-	var messages []tonwallet.RawMessage
-	var gas int64
-	for _, jetton := range jettons[from.ID] {
-		if jetton.Lock != nil || jetton.Balance.IsZero() {
-			continue
-		}
-		balance, err := h.convertJettonBalance(ctx, jetton, nil, nil, nil)
-		if err != nil {
-			h.logger.Warn(fmt.Sprintf("skip jetton %v: %v", jetton.JettonAddress.ToRaw(), err))
-			continue
-		}
-		if balance.Jetton.Verification == oas.JettonVerificationTypeBlacklist {
-			continue
-		}
-		msg, err := walletJettonTransferMessage(jetton.Address, to.ID, jetton.Balance.BigInt())
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		msgRaw, err := toWalletRawMessage(msg)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		messages = append(messages, msgRaw)
-		gas += int64(migrationGasPerTransfer)
-	}
-	for _, nft := range nfts {
-		if nft.OwnerAddress == nil || *nft.OwnerAddress != from.ID {
-			continue
-		}
-		if nftScam[nft.Address] == core.TrustBlacklist {
-			continue
-		}
-		if isSkippedNftCollection(nft.CollectionAddress) {
-			continue
-		}
-		msg := walletNFTTransferMessage(nft.Address, to.ID)
-		msgRaw, err := toWalletRawMessage(msg)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		messages = append(messages, msgRaw)
-		gas += int64(migrationGasPerTransfer)
-	}
-	var realBalance int64
-	if account != nil {
-		realBalance = account.GramBalance
-	}
-	// The final message sweeps the remaining TON balance to the destination.
-	msgRaw, err := toWalletRawMessage(tonwallet.Message{
-		Amount:  0,
-		Address: to.ID,
-		Bounce:  false,
-		Mode:    migrationSweepMode,
-	})
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	messages = append(messages, msgRaw)
-	batches := chunkMessages(messages, walletMaxMessageCount(version))
-	validUntil := time.Now().Add(migrationMsgLifetime)
-	currencyPtr := &currency
+
 	resp := &oas.MigrationPrepareResponse{
-		From:          from.ID.ToRaw(),
-		To:            to.ID.ToRaw(),
-		WalletVersion: version.ToString(),
-		Transactions:  make([]oas.MigrationTransaction, 0, len(batches)),
+		From:          sourceAddr.ID.ToRaw(),
+		To:            destAddr.ID.ToRaw(),
+		WalletVersion: sourceWallet.GetVersion().ToString(),
+		Transactions:  make([]oas.MigrationTransaction, 0, len(plan)),
 	}
-	emulationBalance := realBalance
-	if needed := gas + int64(ton.OneGRAM); emulationBalance < needed {
-		emulationBalance = needed
-	}
-	var seedState tlb.ShardAccount
-	if account != nil && len(account.Code) > 0 {
-		seedState, err = h.storage.GetAccountState(ctx, from.ID)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+	// TODO: test that initial balance is always correct for uninit wallets
+	emuAccountStates := map[ton.AccountID]tlb.ShardAccount{sourceAddr.ID: sourceAccount}
+	emuTime := time.Now().Unix()
+	validUntil := time.Now().Add(migrationMsgLifetime)
+	seqno := startSeqno
+	for _, batch := range plan {
+		msgType := tonwallet.V5MsgTypeSignedExternal
+		if batch.sponsored {
+			msgType = tonwallet.V5MsgTypeSignedInternal
 		}
-	}
-	seed, err := prepareAccountState(from.ID, seedState, emulationBalance)
-	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
-	}
-	// Emulate transactions sequentially, feeding each transaction's resulting state into the next so
-	// that seqno, balance and emptied jetton wallets are reflected in later fees and previews. The
-	// synthetic balance seeds batch 0; later batches use the emulated finalStates.
-	overrides := map[ton.AccountID]tlb.ShardAccount{from.ID: seed}
-	// Fetch rates once for the fiat previews below. Best-effort: on failure we skip the fiat suffix.
-	todayRates, _, _, _, ratesErr := h.getRates()
-	if ratesErr != nil {
-		h.logger.Warn("migration: can't get rates for fiat preview", zap.Error(ratesErr))
-	}
-	for i, batch := range batches {
-		seqno := startSeqno + uint32(i)
-		body, err := buildUnsignedBody(version, subWalletID, publicKey, int(from.ID.Workchain), seqno, validUntil, batch)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		bocBase64, err := body.ToBocBase64()
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		signedBody, err := signedBodyForEmulation(version, body)
+		unsignedMsg, err := sourceWallet.CreateMsgBodyWithoutSignature(tonwallet.MessageConfig{
+			Seqno: seqno, ValidUntil: validUntil, V5MsgType: msgType,
+		}, batch.messages)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		var init *tlb.StateInit
-		if i == 0 {
+		if seqno == 0 {
 			init = deployInit
 		}
-		extMsg, err := tongo.CreateExternalMessage(from.ID, signedBody, init, tlb.VarUInteger16{})
+		emuMsg, err := h.buildWalletMsgForEmulation(sourceWallet, unsignedMsg, init, batch, sourceAddr)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
-		extMsgCell := boc.NewCell()
-		if err := tlb.Marshal(extMsgCell, extMsg); err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		risk, err := wallet.ExtractRisk(version, extMsgCell)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		trace, finalStates, err := h.emulateWalletMessage(ctx, extMsg, overrides)
+		var trace *core.Trace
+		trace, emuAccountStates, emuTime, err = h.emulateWalletMessage(ctx, emuMsg, emuAccountStates, emuTime)
 		if err != nil {
 			return nil, toProperEmulationError(err)
 		}
-		convertedTrace := h.convertTrace(trace, h.addressBook)
-		actions, err := bath.FindActions(ctx, trace, bath.ForAccount(from.ID), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
+
+		transaction, err := h.buildEmulatedTrace(ctx, trace, sourceAddr, batch, destAddr, gramBalance, currency, todayRates, currencyPtr, unsignedMsg, seqno, init)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
-		}
-		enriched := bath.EnrichWithIntentions(trace, actions)
-		if risk.TransferAllRemainingBalance {
-			for _, a := range enriched.Actions {
-				if a.TonTransfer != nil && a.TonTransfer.Sender == from.ID && a.TonTransfer.Recipient == to.ID {
-					a.TonTransfer.Amount = realBalance
-				}
-			}
-		}
-		event, err := h.toAccountEvent(ctx, from.ID, trace, enriched, oas.OptString{}, true)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		enrichPreviewsWithFiat(&event, currency, todayRates)
-		oasRisk, err := h.convertRisk(ctx, *risk, from.ID, currencyPtr)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		// convertRisk reports only the gas attached to the other messages for a mode-128 sweep. Align
-		// the reported TON/Gram amount with the swept balance shown in the preview above. The fiat
-		// equivalent (oasRisk.TotalEquivalent) is already computed from that balance by convertRisk.
-		if oasRisk.TransferAllRemainingBalance && realBalance > oasRisk.Gram {
-			oasRisk.Ton = oas.NewOptInt64(realBalance)
-			oasRisk.Gram = realBalance
-		}
-		outMessages := make([]oas.MigrationOutMessage, 0, len(batch))
-		for _, rm := range batch {
-			msgBoc, err := rm.Message.ToBocBase64()
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			outMessages = append(outMessages, oas.MigrationOutMessage{
-				Boc:  msgBoc,
-				Mode: int32(rm.Mode),
-			})
-		}
-		transaction := oas.MigrationTransaction{
-			Seqno:    int32(seqno),
-			Boc:      bocBase64,
-			Messages: outMessages,
-			Emulation: oas.MessageConsequences{
-				Trace: convertedTrace,
-				Event: event,
-				Risk:  oasRisk,
-			},
-		}
-		if init != nil {
-			transaction.StateInit, err = convertStateInit(*init)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
 		}
 		resp.Transactions = append(resp.Transactions, transaction)
-		overrides = finalStates
+		seqno += 1
 	}
 	return resp, nil
 }
 
-func convertStateInit(si tlb.StateInit) (oas.OptString, error) {
-	cell := boc.NewCell()
-	if err := tlb.Marshal(cell, si); err != nil {
-		return oas.OptString{}, fmt.Errorf("marshalling stat init: %v", err)
-	}
-	b64, err := cell.ToBocBase64()
+// prepareMigrationPlan builds the chunked batch plan. gasJettonMaster, when set, is moved to the last sponsored slot
+// and the relay commission is priced and embedded into every sponsored batch.
+func (h *Handler) prepareMigrationPlan(ctx context.Context, sourceAddr ton.Address, destAddr ton.Address, relayFunded bool, gramBalance int64, sourceWallet *tonwallet.Wallet, gasJettonMaster *ton.AccountID) ([]migrationBatch, error) {
+	nftTransfers, err := h.prepareNFTTransfers(ctx, sourceAddr.ID, destAddr.ID)
 	if err != nil {
-		return oas.OptString{}, fmt.Errorf("base64 encoding failed: %v", err)
+		return nil, err
 	}
-	return oas.NewOptString(b64), nil
+	jettons, err := h.collectMigratableJettons(ctx, sourceAddr.ID)
+	if err != nil {
+		return nil, err
+	}
+	if len(nftTransfers) == 0 && len(jettons) == 0 {
+		gasJettonMaster = nil // nothing to sponsor — plain (possibly sweep-only) plan
+	}
+	buildPlan := func(gasReserve *big.Int) ([]migrationBatch, error) {
+		jettonTransfers, err := prepareJettonTransfers(sourceAddr.ID, destAddr.ID, jettons, gasJettonMaster, gasReserve)
+		if err != nil {
+			return nil, err
+		}
+		plan, err := assembleMigrationPlan(destAddr.ID, relayFunded, gramBalance, nftTransfers, jettonTransfers)
+		if err != nil {
+			return nil, err
+		}
+		return chunkMigrationPlan(sourceWallet, relayFunded, gasJettonMaster != nil, plan), nil
+	}
+	var gasReserve *big.Int
+	if gasJettonMaster != nil {
+		// Battery's estimate emulates the batch plus a 1-nano commission placeholder, and its
+		// emulator hard-fails on any jetton overdraft — a full-balance gas transfer can never
+		// price. Keep one indivisible unit back for the first pricing pass; embedGaslessCommission
+		// replaces the reserve with the real commission budget anyway.
+		gasReserve = big.NewInt(1)
+	}
+	plan, err := buildPlan(gasReserve)
+	if err != nil {
+		return nil, err
+	}
+	if gasJettonMaster == nil {
+		return plan, nil
+	}
+	plan, err = h.embedGaslessCommission(ctx, plan, buildPlan, sourceAddr.ID, sourceWallet.GetPublicKey(), *gasJettonMaster)
+	if err != nil {
+		return nil, toError(http.StatusBadRequest, err)
+	}
+	return plan, nil
+}
+
+func (h *Handler) buildEmulatedTrace(ctx context.Context, trace *core.Trace, sourceAddr ton.Address, batch migrationBatch, destAddr ton.Address, realBalance int64, currency string, todayRates map[string]float64, currencyPtr *string, unsignedMsg *boc.Cell, seqno uint32, init *tlb.StateInit) (oas.MigrationTransaction, error) {
+	convertedTrace := h.convertTrace(trace, h.addressBook)
+	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(sourceAddr.ID), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
+	if err != nil {
+		return oas.MigrationTransaction{}, toError(http.StatusInternalServerError, err)
+	}
+	enriched := bath.EnrichWithIntentions(trace, actions)
+	risk, err := wallet.ExtractRiskFromRawMessages(batch.messages)
+	if err != nil {
+		return oas.MigrationTransaction{}, toError(http.StatusInternalServerError, err)
+	}
+	if risk.TransferAllRemainingBalance {
+		for _, a := range enriched.Actions {
+			if a.TonTransfer != nil && a.TonTransfer.Sender == sourceAddr.ID && a.TonTransfer.Recipient == destAddr.ID {
+				a.TonTransfer.Amount = realBalance
+			}
+		}
+	}
+	event, err := h.toAccountEvent(ctx, sourceAddr.ID, trace, enriched, oas.OptString{}, true)
+	if err != nil {
+		return oas.MigrationTransaction{}, toError(http.StatusInternalServerError, err)
+	}
+	enrichPreviewsWithFiat(&event, currency, todayRates)
+	oasRisk, err := h.convertRisk(ctx, *risk, sourceAddr.ID, currencyPtr)
+	if err != nil {
+		return oas.MigrationTransaction{}, toError(http.StatusInternalServerError, err)
+	}
+	// convertRisk reports only the gas attached to the other messages for a mode-128 sweep. Align
+	// the reported TON/Gram amount with the swept balance shown in the preview above. The fiat
+	// equivalent (oasRisk.TotalEquivalent) is already computed from that balance by convertRisk.
+	if oasRisk.TransferAllRemainingBalance && realBalance > oasRisk.Gram {
+		oasRisk.Ton = oas.NewOptInt64(realBalance)
+		oasRisk.Gram = realBalance
+	}
+	outMessages, err := utils.MapSliceErr(batch.messages, convertWalletMessage)
+	if err != nil {
+		return oas.MigrationTransaction{}, toError(http.StatusInternalServerError, err)
+	}
+	return convertTransaction(unsignedMsg, seqno, batch, outMessages, convertedTrace, event, oasRisk, init)
+}
+
+func (h *Handler) buildWalletMsgForEmulation(sourceWallet *tonwallet.Wallet, unsignedMsg *boc.Cell, init *tlb.StateInit, batch migrationBatch, sourceAddr ton.Address) (tlb.Message, error) {
+	// A zero signature is enough for emulation: WithIgnoreSignatureDepth skips verification,
+	// but the contract still expects the signature bits to be present in the body.
+	signedBody, err := sourceWallet.AttachSignature(unsignedMsg, tlb.Bits512{})
+	if err != nil {
+		return tlb.Message{}, nil
+	}
+	var emuMsg tlb.Message
+	if batch.sponsored {
+		emuMsg, err = relayerMessage(batch, emuMsg, err, sourceAddr, signedBody, init)
+	} else {
+		emuMsg, err = tongo.CreateExternalMessage(sourceAddr.ID, signedBody, init, tlb.VarUInteger16{})
+	}
+	if err != nil {
+		return tlb.Message{}, nil
+	}
+	return emuMsg, err
+}
+
+func relayerMessage(batch migrationBatch, emuMsg tlb.Message, err error, sourceAddr ton.Address, signedBody *boc.Cell, init *tlb.StateInit) (tlb.Message, error) {
+	// Emulate what the relay would deliver: an internal message carrying the signed body,
+	// with enough TON attached to fund the batch (per-transfer gas plus a fee margin).
+	attach := int64(len(batch.messages)+1) * int64(migrationGasPerTransfer)
+	emuMsg, _, err = tonwallet.Message{
+		Amount:  tlb.Grams(attach),
+		Address: sourceAddr.ID,
+		Src:     &ton.AccountID{}, // mocked relay address
+		Body:    signedBody,
+		Bounce:  true,
+		Init:    init,
+	}.ToInternal()
+	return emuMsg, err
+}
+
+func chunkMigrationPlan(w *tonwallet.Wallet, relayFunded, reserveCommissionSlot bool, plan []migrationBatch) (chunkedPlan []migrationBatch) {
+	reserved := 0
+	if reserveCommissionSlot {
+		reserved = 1
+	}
+	chunkSize := w.MaxMessageNumber() - reserved
+	if relayFunded {
+		chunkSize = min(sponsoredBatchMaxMessages-reserved, chunkSize)
+	}
+	for _, batch := range plan {
+		chunkedPlan = append(chunkedPlan, batch.chunk(chunkSize)...)
+	}
+	return chunkedPlan
+}
+
+func assembleMigrationPlan(to ton.AccountID, relayFunded bool, gramBalance int64, nftTransfers, jettonTransfers []tonwallet.RawMessage) ([]migrationBatch, error) {
+	var plan []migrationBatch
+
+	if len(nftTransfers) > 0 {
+		plan = append(plan, migrationBatch{messages: nftTransfers, sponsored: relayFunded})
+	}
+	if len(jettonTransfers) > 0 {
+		plan = append(plan, migrationBatch{messages: jettonTransfers, sponsored: relayFunded})
+	}
+
+	// The final message sweeps the remaining TON balance to the destination.
+	// The sweep is a separate, final transaction: jetton/NFT transfers generate excess messages (and bounces on failure)
+	// To collect it, a separate transaction is needed
+	if gramBalance > minGramTransferFee {
+		sweepTransfer, err := tonwallet.ToRawMessage(tonwallet.Message{
+			Amount:  0,
+			Address: to,
+			Bounce:  false,
+			Mode:    migrationSweepMode,
+		})
+		if err != nil {
+			return nil, err
+		}
+		plan = append(plan, migrationBatch{messages: []tonwallet.RawMessage{sweepTransfer}})
+	}
+
+	return plan, nil
+}
+
+func convertWalletMessage(msg tonwallet.RawMessage) (oas.MigrationOutMessage, error) {
+	msgBoc, err := msg.Message.ToBocBase64()
+	if err != nil {
+		return oas.MigrationOutMessage{}, err
+	}
+	return oas.MigrationOutMessage{
+		Boc:  msgBoc,
+		Mode: int32(msg.Mode),
+	}, nil
+}
+
+func convertTransaction(unsignedMsg *boc.Cell, seqno uint32, batch migrationBatch, outMessages []oas.MigrationOutMessage, convertedTrace oas.Trace, event oas.AccountEvent, oasRisk oas.Risk, init *tlb.StateInit) (oas.MigrationTransaction, error) {
+	bocBase64, err := unsignedMsg.ToBocBase64()
+	if err != nil {
+		return oas.MigrationTransaction{}, err
+	}
+	transaction := oas.MigrationTransaction{
+		Seqno:     int32(seqno),
+		Boc:       bocBase64,
+		Sponsored: oas.NewOptBool(batch.sponsored),
+		Messages:  outMessages,
+		Emulation: oas.MessageConsequences{
+			Trace: convertedTrace,
+			Event: event,
+			Risk:  oasRisk,
+		},
+	}
+	if batch.commission != nil {
+		transaction.Commission = oas.NewOptString(batch.commission.String())
+	}
+	if init != nil {
+		transaction.StateInit, err = convertStateInit(*init)
+		if err != nil {
+			return oas.MigrationTransaction{}, err
+		}
+	}
+	return transaction, nil
 }
 
 // enrichPreviewsWithFiat sets the fiat equivalent of each TON or jetton transfer on its
@@ -491,6 +556,238 @@ func enrichPreviewsWithFiat(event *oas.AccountEvent, currency string, todayRates
 	}
 }
 
+type migratableJetton struct {
+	wallet core.JettonWallet
+}
+
+// collectMigratableJettons lists the wallet's jettons eligible for migration, skipping
+// locked, empty and blacklisted balances.
+func (h *Handler) collectMigratableJettons(ctx context.Context, from ton.AccountID) ([]migratableJetton, error) {
+	jettons, err := h.collectJettonWallets(ctx, []ton.AccountID{from})
+	if err != nil {
+		return nil, err
+	}
+	var out []migratableJetton
+	for _, jw := range jettons[from] {
+		if jw.Lock != nil || jw.Balance.IsZero() {
+			continue
+		}
+		balance, err := h.convertJettonBalance(ctx, jw, nil, nil, nil)
+		if err != nil {
+			h.logger.Warn(fmt.Sprintf("skip jetton %v: %v", jw.JettonAddress.ToRaw(), err))
+			continue
+		}
+		if balance.Jetton.Verification == oas.JettonVerificationTypeBlacklist {
+			continue
+		}
+		out = append(out, migratableJetton{wallet: jw})
+	}
+	return out, nil
+}
+
+// prepareJettonTransfers builds a full-balance transfer message for every jetton. Excesses
+// are sent to the destination (response_destination = to). When gasJettonMaster is set,
+// that jetton's transfer goes last with gasReserve kept back for the relay commission
+// (see embedGaslessCommission).
+func prepareJettonTransfers(from, to ton.AccountID, jettons []migratableJetton, gasJettonMaster *ton.AccountID, gasReserve *big.Int) ([]tonwallet.RawMessage, error) {
+	var messages []tonwallet.RawMessage
+	var gasTransfer *tonwallet.RawMessage
+	for _, mj := range jettons {
+		amount := mj.wallet.Balance.BigInt()
+		if gasJettonMaster != nil && mj.wallet.JettonAddress == *gasJettonMaster {
+			if gasReserve != nil {
+				amount = amount.Sub(amount, gasReserve)
+			}
+			if amount.Sign() <= 0 {
+				return nil, errGasJettonBalanceTooLow
+			}
+			transfer, err := jettonTransferRawMessage(from, to, mj.wallet.Address, amount)
+			if err != nil {
+				return nil, err
+			}
+			gasTransfer = &transfer
+			continue
+		}
+		msgRaw, err := jettonTransferRawMessage(from, to, mj.wallet.Address, amount)
+		if err != nil {
+			return nil, err
+		}
+		messages = append(messages, msgRaw)
+	}
+	if gasJettonMaster != nil {
+		if gasTransfer == nil {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("the source wallet holds no %v jetton", gasJettonMaster.ToRaw()))
+		}
+		messages = append(messages, *gasTransfer)
+	}
+	return messages, nil
+}
+
+func jettonTransferRawMessage(from, to, senderJettonWallet ton.AccountID, amount *big.Int) (tonwallet.RawMessage, error) {
+	return tonwallet.ToRawMessage(jetton.TransferMessage{
+		Sender:              from,
+		SenderJettonWallet:  &senderJettonWallet,
+		JettonAmount:        amount,
+		Destination:         to,
+		ResponseDestination: &to,
+		AttachedGram:        migrationGasPerTransfer,
+		ForwardGramAmount:   migrationForwardAmount,
+	})
+}
+
+// requireGasJetton parses the requested commission jetton and checks that the gasless
+// relay supports it. Whether the wallet holds it is checked in prepareMigrationPlan.
+func (h *Handler) requireGasJetton(ctx context.Context, requested oas.OptString) (*ton.AccountID, error) {
+	if !requested.IsSet() || requested.Value == "" {
+		return nil, fmt.Errorf("gas_jetton_master is required when gas_payer is gasless")
+	}
+	master, err := tongo.ParseAddress(requested.Value)
+	if err != nil {
+		return nil, fmt.Errorf("invalid gas_jetton_master: %w", err)
+	}
+	config, err := h.gasless.Config(ctx)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, fmt.Errorf("failed to get gasless config"))
+	}
+	supported := slices.ContainsFunc(config.SupportedJettons, func(s string) bool {
+		id, err := ton.ParseAccountID(s)
+		return err == nil && id == master.ID
+	})
+	if !supported {
+		return nil, fmt.Errorf("jetton %v is not supported as a gasless gas jetton", master.ID.ToRaw())
+	}
+	return &master.ID, nil
+}
+
+// errGasJettonBalanceTooLow reports that the candidate gas jetton cannot cover the relay
+// commission on top of what the migration itself transfers.
+var errGasJettonBalanceTooLow = errors.New("gas jetton balance does not cover the relay commission")
+
+func isGaslessJettonBalanceError(err error) bool {
+	var extended ErrorWithExtendedCode
+	if errors.As(err, &extended) {
+		return extended.ExtendedCode == references.ErrGaslessNotEnoughJettons
+	}
+	return false
+}
+
+// embedGaslessCommission prices the relay commission via the battery Estimate handshake and
+// appends the commission transfer — built by battery, so mintless payloads and attach
+// amounts are correct by construction — to every sponsored batch. Pricing estimates the
+// first sponsored batch, then re-runs buildPlan reserving one commission per sponsored
+// batch out of the gas jetton's own transfer, and re-estimates until the price stops
+// growing (it shouldn't grow when the amount shrinks). Only the first batch's commission
+// is exact: later batches are re-prepared before signing (see the client contract in
+// docs/migration-gasless-design.md).
+func (h *Handler) embedGaslessCommission(ctx context.Context, plan []migrationBatch, buildPlan func(gasReserve *big.Int) ([]migrationBatch, error), owner ton.AccountID, pubkey ed25519.PublicKey, master ton.AccountID) ([]migrationBatch, error) {
+	var sponsored []int
+	for i, b := range plan {
+		if b.sponsored {
+			sponsored = append(sponsored, i)
+		}
+	}
+	if len(sponsored) == 0 {
+		return plan, nil
+	}
+	commission := new(big.Int)
+	var estimated gasless.SignRawParams
+	for attempt := 0; ; attempt++ {
+		messages, err := g.MapSliceErr(plan[sponsored[0]].messages, func(m tonwallet.RawMessage) (string, error) {
+			return m.Message.ToBocHex()
+		})
+		if err != nil {
+			return nil, err
+		}
+		estimated, err = h.gasless.Estimate(ctx, gasless.EstimationParams{
+			MasterID:                     master,
+			WalletAddress:                owner,
+			WalletPublicKey:              pubkey,
+			Messages:                     messages,
+			ThrowErrorIfNotEnoughJettons: attempt > 0,
+		})
+		if err != nil {
+			if isGaslessJettonBalanceError(err) {
+				return nil, fmt.Errorf("%w: %v", errGasJettonBalanceTooLow, err)
+			}
+			return nil, err
+		}
+		newCommission, ok := new(big.Int).SetString(estimated.Commission, 10)
+		if !ok || newCommission.Sign() < 0 {
+			return nil, fmt.Errorf("invalid commission %q in gasless estimate", estimated.Commission)
+		}
+		if attempt > 0 && newCommission.Cmp(commission) <= 0 {
+			commission = newCommission
+			break
+		}
+		if attempt >= 2 {
+			return nil, fmt.Errorf("gasless commission estimation did not converge")
+		}
+		commission = newCommission
+		plan, err = buildPlan(new(big.Int).Mul(commission, big.NewInt(int64(len(sponsored)))))
+		if err != nil {
+			return nil, err
+		}
+	}
+	if len(estimated.Messages) != len(plan[sponsored[0]].messages)+1 {
+		return nil, fmt.Errorf("gasless estimate returned %d messages for %d", len(estimated.Messages), len(plan[sponsored[0]].messages))
+	}
+	commissionTransfer, err := estimated.Messages[len(estimated.Messages)-1].ToWalletMessage()
+	if err != nil {
+		return nil, fmt.Errorf("bad commission transfer in gasless estimate: %w", err)
+	}
+	for _, i := range sponsored {
+		plan[i].messages = append(slices.Clone(plan[i].messages), commissionTransfer)
+		plan[i].commission = commission
+	}
+	return plan, nil
+}
+
+func (h *Handler) isBlacklistedNft(ctx context.Context, item core.NftItem, itemScam core.TrustType) bool {
+	return h.convertNFT(ctx, item, h.addressBook, h.metaCache, itemScam).Trust == oas.TrustType(core.TrustBlacklist)
+}
+
+// prepareNFTTransfers builds a transfer message for every migratable NFT owned by the wallet,
+// skipping blacklisted items and skipped collections. Excesses are sent to the destination
+// (response_destination = to).
+func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to ton.AccountID) ([]tonwallet.RawMessage, error) {
+	nfts, err := h.collectOwnedNFTs(ctx, from)
+	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+		return nil, err
+	}
+	nftItemIDs := make([]ton.AccountID, 0, len(nfts))
+	for _, item := range nfts {
+		nftItemIDs = append(nftItemIDs, item.Address)
+	}
+	nftScam, scamErr := h.spamFilter.GetNftsScamData(ctx, nftItemIDs)
+	if scamErr != nil {
+		h.logger.Warn("error getting nft scam data", zap.Error(scamErr))
+	}
+	var messages []tonwallet.RawMessage
+	for _, item := range nfts {
+		if item.OwnerAddress == nil || *item.OwnerAddress != from {
+			continue
+		}
+		if h.isBlacklistedNft(ctx, item, nftScam[item.Address]) {
+			continue
+		}
+		if isSkippedNftCollection(item.CollectionAddress) {
+			continue
+		}
+		msgRaw, err := tonwallet.ToRawMessage(nft.ItemTransferMessage{
+			ItemAddress:         item.Address,
+			Destination:         to,
+			ResponseDestination: to,
+			AttachedGram:        migrationGasPerTransfer,
+			ForwardGram:         migrationForwardAmount,
+		})
+		if err != nil {
+			return nil, err
+		}
+		messages = append(messages, msgRaw)
+	}
+	return messages, nil
+}
+
 func (h *Handler) collectOwnedNFTs(ctx context.Context, owner ton.AccountID) ([]core.NftItem, error) {
 	var ids []ton.AccountID
 	for offset := 0; ; offset += migrationNftPageSize {
@@ -517,11 +814,7 @@ func (h *Handler) collectOwnedNFTs(ctx context.Context, owner ton.AccountID) ([]
 }
 
 func (h *Handler) collectJettonWallets(ctx context.Context, owners []ton.AccountID) (map[ton.AccountID][]core.JettonWallet, error) {
-	bulk, ok := h.storage.(jettonBulkStorage)
-	if !ok {
-		return nil, core.ErrEntityNotFound
-	}
-	wallets, err := bulk.GetJettonWalletsByOwnerAddresses(ctx, owners, false)
+	wallets, err := h.storage.GetJettonWalletsByOwnerAddresses(ctx, owners, false)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, err
 	}
@@ -535,10 +828,16 @@ func (h *Handler) collectJettonWallets(ctx context.Context, owners []ton.Account
 	return byOwner, nil
 }
 
-func (h *Handler) emulateWalletMessage(ctx context.Context, msg tlb.Message, overrides map[ton.AccountID]tlb.ShardAccount) (*core.Trace, map[ton.AccountID]tlb.ShardAccount, error) {
+// emulateWalletMessage emulates msg with the given account overrides. startTime (epoch, 0 = emulator default) sets the emulation clock;
+// callers emulating several dependent batches must
+// keep it monotonic across batches (see PrepareMigration) or storage-phase checks fail.
+func (h *Handler) emulateWalletMessage(
+	ctx context.Context, msg tlb.Message, overrides map[ton.AccountID]tlb.ShardAccount, startTime int64,
+) (*core.Trace, map[ton.AccountID]tlb.ShardAccount, int64, error) {
+
 	configBase64, err := h.storage.TrimmedConfigBase64()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, startTime, err
 	}
 	options := []txemulator.TraceOption{
 		txemulator.WithConfigBase64(configBase64),
@@ -546,243 +845,58 @@ func (h *Handler) emulateWalletMessage(ctx context.Context, msg tlb.Message, ove
 		txemulator.WithLimit(1100),
 		txemulator.WithIgnoreSignatureDepth(1),
 	}
+	if startTime > 0 {
+		options = append(options, txemulator.WithTime(startTime))
+	}
 	if len(overrides) > 0 {
 		options = append(options, txemulator.WithAccountsMap(overrides))
 	}
 	emulator, err := txemulator.NewTraceBuilder(options...)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, startTime, err
 	}
 	tree, err := emulator.Run(ctx, msg)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, startTime, err
 	}
 	trace, err := EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, startTime, err
 	}
-	return trace, emulator.FinalStates(), nil
-}
-
-func parseWalletData(version tonwallet.Version, data []byte) (seqno uint32, subWalletID uint32, publicKey ed25519.PublicKey, err error) {
-	cells, err := boc.DeserializeBoc(data)
-	if err != nil {
-		return 0, 0, nil, err
-	}
-	if len(cells) == 0 {
-		return 0, 0, nil, fmt.Errorf("empty wallet data")
-	}
-	switch version {
-	case tonwallet.V3R1, tonwallet.V3R2:
-		var d tonwallet.DataV3
-		if err := tlb.Unmarshal(cells[0], &d); err != nil {
-			return 0, 0, nil, err
-		}
-		return d.Seqno, d.SubWalletId, append(ed25519.PublicKey{}, d.PublicKey[:]...), nil
-	case tonwallet.V4R1, tonwallet.V4R2:
-		var d tonwallet.DataV4
-		if err := tlb.Unmarshal(cells[0], &d); err != nil {
-			return 0, 0, nil, err
-		}
-		return d.Seqno, d.SubWalletId, append(ed25519.PublicKey{}, d.PublicKey[:]...), nil
-	case tonwallet.V5R1:
-		var d tonwallet.DataV5R1
-		if err := tlb.Unmarshal(cells[0], &d); err != nil {
-			return 0, 0, nil, err
-		}
-		return d.Seqno, 0, append(ed25519.PublicKey{}, d.PublicKey[:]...), nil
-	case tonwallet.V5Beta:
-		// Wallet v5 beta has a different storage layout than v5r1 (uint33 seqno, 80-bit wallet_id,
-		// uint8 extension values), so it must be parsed with its own data type.
-		var d tonwallet.DataV5Beta
-		if err := tlb.Unmarshal(cells[0], &d); err != nil {
-			return 0, 0, nil, err
-		}
-		return uint32(d.Seqno), 0, append(ed25519.PublicKey{}, d.PublicKey[:]...), nil
-	default:
-		return 0, 0, nil, fmt.Errorf("unsupported wallet version for migration: %v", version.ToString())
-	}
-}
-
-func inferWalletForAddress(address ton.AccountID, pubkey ed25519.PublicKey) (tonwallet.Version, *tlb.StateInit, error) {
-	workchain := int(address.Workchain)
-	for _, v := range []tonwallet.Version{
-		tonwallet.V5Beta,
-		tonwallet.V5R1,
-		tonwallet.V4R2,
-		tonwallet.V4R1,
-		tonwallet.V3R2,
-		tonwallet.V3R1,
-	} {
-		guess, err := tonwallet.GenerateWalletAddress(pubkey, v, nil, workchain, nil)
-		if err != nil || guess != address {
+	finalStates := emulator.FinalStates()
+	endTime := startTime
+	for _, state := range finalStates {
+		if state.Account.SumType != "Account" {
 			continue
 		}
-		init, err := tonwallet.GenerateStateInit(pubkey, v, nil, workchain, nil)
+		if lastPaid := int64(state.Account.Account.StorageStat.LastPaid) + 1; lastPaid > startTime {
+			endTime = lastPaid
+		}
+	}
+	return trace, finalStates, endTime, nil
+}
+
+// resolveWallet build standard wallet, if it's not initialized it is inferred based on public key and known wallets
+func resolveWallet(account tlb.ShardAccount, from ton.AccountID, publicKey oas.OptString) (*tonwallet.Wallet, uint32, *tlb.StateInit, error) {
+	stateInit := account.Account.Account.Storage.State.AccountActive.StateInit
+	if !(stateInit.Data.Exists && stateInit.Code.Exists) {
+		pubkey, err := requirePublicKey(publicKey)
 		if err != nil {
-			return 0, nil, fmt.Errorf("can't build state init for %v: %w", v.ToString(), err)
+			return nil, 0, nil, toError(http.StatusBadRequest, fmt.Errorf("source wallet is not initialized; public key parameter is required then: %v", err))
 		}
-		return v, &init, nil
-	}
-	return 0, nil, fmt.Errorf("can't determine source wallet version from the provided pubkey")
-}
-
-func buildUnsignedBody(v tonwallet.Version, subWalletID uint32, pubkey ed25519.PublicKey, workchain int, seqno uint32, validUntil time.Time, s []tonwallet.RawMessage) (*boc.Cell, error) {
-	// actions are executed by wallet code in reverse order
-	s = slices.Clone(s)
-	slices.Reverse(s)
-	switch v {
-	case tonwallet.V3R1, tonwallet.V3R2:
-		body := tonwallet.MessageV3{
-			SubWalletId: subWalletID,
-			ValidUntil:  uint32(validUntil.Unix()),
-			Seqno:       seqno,
-			RawMessages: tonwallet.PayloadV1toV4(s),
+		w, err := tonwallet.NewFromAddress(pubkey, from)
+		if err != nil {
+			return nil, 0, nil, toError(http.StatusInternalServerError, fmt.Errorf("can't determine source wallet version: %w", err))
 		}
-		cell := boc.NewCell()
-		if err := tlb.Marshal(cell, body); err != nil {
-			return nil, err
+		deployInit, err := w.StateInit()
+		if err != nil {
+			return nil, 0, nil, toError(http.StatusInternalServerError, err)
 		}
-		return cell, nil
-	case tonwallet.V4R1, tonwallet.V4R2:
-		body := tonwallet.MessageV4{
-			SubWalletId: subWalletID,
-			ValidUntil:  uint32(validUntil.Unix()),
-			Seqno:       seqno,
-			Op:          0,
-			RawMessages: tonwallet.PayloadV1toV4(s),
-		}
-		cell := boc.NewCell()
-		if err := tlb.Marshal(cell, body); err != nil {
-			return nil, err
-		}
-		return cell, nil
-	case tonwallet.V5R1:
-		w5 := tonwallet.NewWalletV5R1(pubkey, tonwallet.Options{Workchain: &workchain})
-		return w5.CreateMsgBodyWithoutSignature(s, tonwallet.MessageConfig{
-			Seqno:      seqno,
-			ValidUntil: validUntil,
-			V5MsgType:  tonwallet.V5MsgTypeSignedExternal,
-		})
-	case tonwallet.V5Beta:
-		// v5 beta uses a distinct signed-message format from v5r1, so it must be built with the
-		// beta wallet implementation rather than reusing the v5r1 body.
-		w5 := tonwallet.NewWalletV5Beta(v, pubkey, tonwallet.Options{Workchain: &workchain})
-		return w5.CreateMsgBodyWithoutSignature(s, tonwallet.MessageConfig{
-			Seqno:      seqno,
-			ValidUntil: validUntil,
-			V5MsgType:  tonwallet.V5MsgTypeSignedExternal,
-		})
-	default:
-		return nil, fmt.Errorf("unsupported wallet version for migration: %v", v.ToString())
+		return &w, 0, deployInit, nil
 	}
-}
-
-// signedBodyForEmulation wraps the unsigned body with a zero signature so it can be emulated with
-// signature checks disabled. v3/v4 prepend the signature, v5 appends a trailing 512-bit placeholder.
-func signedBodyForEmulation(v tonwallet.Version, body *boc.Cell) (*boc.Cell, error) {
-	switch v {
-	case tonwallet.V5R1, tonwallet.V5Beta:
-		// Wallet v5 carries its signature as the trailing 512 bits of the body. The unsigned body
-		// returned to the client no longer contains that placeholder, so build a separate cell with
-		// a zero signature appended for emulation (WithIgnoreSignatureDepth skips verification but the
-		// contract still parses those 512 bits).
-		cell := boc.NewCell()
-		if err := cell.WriteBitString(body.RawBitString()); err != nil {
-			return nil, err
-		}
-		for _, ref := range body.Refs() {
-			if err := cell.AddRef(ref); err != nil {
-				return nil, err
-			}
-		}
-		var zeroSignature [64]byte
-		if err := cell.WriteBytes(zeroSignature[:]); err != nil {
-			return nil, err
-		}
-		return cell, nil
-	default:
-		signed := tonwallet.SignedMsgBody{Sign: tlb.Bits512{}, Message: tlb.Any(*body)}
-		cell := boc.NewCell()
-		if err := tlb.Marshal(cell, signed); err != nil {
-			return nil, err
-		}
-		return cell, nil
-	}
-}
-
-func chunkMessages(s []tonwallet.RawMessage, n int) [][]tonwallet.RawMessage {
-	if n <= 0 {
-		n = 1
-	}
-	var batches [][]tonwallet.RawMessage
-	for i := 0; i < len(s); i += n {
-		end := min(i+n, len(s))
-		batches = append(batches, s[i:end])
-	}
-	return batches
-}
-
-func walletJettonTransferMessage(src, dst ton.AccountID, amount *big.Int) (tonwallet.Message, error) {
-	body := boc.NewCell()
-	msgBody := abi.JettonTransferMsgBody{
-		QueryId:             0,
-		Amount:              tlb.VarUInteger16(*amount),
-		Destination:         dst.ToMsgAddress(),
-		ResponseDestination: dst.ToMsgAddress(),
-		ForwardTonAmount:    tlb.VarUInteger16(*big.NewInt(int64(migrationForwardAmount))),
-	}
-	if err := body.WriteUint(0xf8a7ea5, 32); err != nil {
-		return tonwallet.Message{}, err
-	}
-	if err := tlb.Marshal(body, msgBody); err != nil {
-		return tonwallet.Message{}, err
-	}
-	return tonwallet.Message{
-		Amount:  migrationGasPerTransfer,
-		Address: src,
-		Bounce:  true,
-		Mode:    tonwallet.DefaultMessageMode,
-		Body:    body,
-	}, nil
-}
-
-func walletNFTTransferMessage(src, dst ton.AccountID) tonwallet.Message {
-	body := boc.NewCell()
-	msgBody := abi.NftTransferMsgBody{
-		QueryId:             0,
-		NewOwner:            dst.ToMsgAddress(),
-		ResponseDestination: dst.ToMsgAddress(),
-		ForwardAmount:       tlb.VarUInteger16(*big.NewInt(int64(migrationForwardAmount))),
-	}
-	_ = body.WriteUint(0x5fcc3d14, 32)
-	_ = tlb.Marshal(body, msgBody)
-	return tonwallet.Message{
-		Amount:  migrationGasPerTransfer,
-		Address: src,
-		Bounce:  true,
-		Mode:    tonwallet.DefaultMessageMode,
-		Body:    body,
-	}
-}
-
-func toWalletRawMessage(msg tonwallet.Message) (tonwallet.RawMessage, error) {
-	intMsg, mode, err := msg.ToInternal()
+	w, seqno, err := tonwallet.NewFromCodeAndData(stateInit.Code.Value.Value, stateInit.Data.Value.Value, tonwallet.WithWorkchain(int(from.Workchain)))
 	if err != nil {
-		return tonwallet.RawMessage{}, err
+		return nil, 0, nil, toError(http.StatusBadRequest, fmt.Errorf("unsupported source wallet: %w", err))
 	}
-	cell := boc.NewCell()
-	if err := tlb.Marshal(cell, intMsg); err != nil {
-		return tonwallet.RawMessage{}, err
-	}
-	return tonwallet.RawMessage{Message: cell, Mode: mode}, nil
-}
-
-func walletMaxMessageCount(v tonwallet.Version) int {
-	switch v {
-	case tonwallet.V5R1, tonwallet.V5Beta:
-		return 255
-	default:
-		return 4
-	}
+	return &w, seqno, nil, nil
 }

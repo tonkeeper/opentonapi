@@ -30546,13 +30546,27 @@ func (s *MigrationPrepareRequest) encodeFields(e *jx.Encoder) {
 			s.PublicKey.Encode(e)
 		}
 	}
+	{
+		if s.GasPayer.Set {
+			e.FieldStart("gas_payer")
+			s.GasPayer.Encode(e)
+		}
+	}
+	{
+		if s.GasJettonMaster.Set {
+			e.FieldStart("gas_jetton_master")
+			s.GasJettonMaster.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfMigrationPrepareRequest = [4]string{
+var jsonFieldsNameOfMigrationPrepareRequest = [6]string{
 	0: "from",
 	1: "to",
 	2: "currency",
 	3: "public_key",
+	4: "gas_payer",
+	5: "gas_jetton_master",
 }
 
 // Decode decodes MigrationPrepareRequest from json.
@@ -30609,6 +30623,26 @@ func (s *MigrationPrepareRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"public_key\"")
 			}
+		case "gas_payer":
+			if err := func() error {
+				s.GasPayer.Reset()
+				if err := s.GasPayer.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gas_payer\"")
+			}
+		case "gas_jetton_master":
+			if err := func() error {
+				s.GasJettonMaster.Reset()
+				if err := s.GasJettonMaster.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gas_jetton_master\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -30661,6 +30695,48 @@ func (s *MigrationPrepareRequest) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *MigrationPrepareRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MigrationPrepareRequestGasPayer as json.
+func (s MigrationPrepareRequestGasPayer) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes MigrationPrepareRequestGasPayer from json.
+func (s *MigrationPrepareRequestGasPayer) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MigrationPrepareRequestGasPayer to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch MigrationPrepareRequestGasPayer(v) {
+	case MigrationPrepareRequestGasPayerSelf:
+		*s = MigrationPrepareRequestGasPayerSelf
+	case MigrationPrepareRequestGasPayerBattery:
+		*s = MigrationPrepareRequestGasPayerBattery
+	case MigrationPrepareRequestGasPayerGasless:
+		*s = MigrationPrepareRequestGasPayerGasless
+	default:
+		*s = MigrationPrepareRequestGasPayer(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MigrationPrepareRequestGasPayer) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MigrationPrepareRequestGasPayer) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -30840,6 +30916,18 @@ func (s *MigrationTransaction) encodeFields(e *jx.Encoder) {
 		e.Str(s.Boc)
 	}
 	{
+		if s.Sponsored.Set {
+			e.FieldStart("sponsored")
+			s.Sponsored.Encode(e)
+		}
+	}
+	{
+		if s.Commission.Set {
+			e.FieldStart("commission")
+			s.Commission.Encode(e)
+		}
+	}
+	{
 		if s.StateInit.Set {
 			e.FieldStart("state_init")
 			s.StateInit.Encode(e)
@@ -30859,12 +30947,14 @@ func (s *MigrationTransaction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfMigrationTransaction = [5]string{
+var jsonFieldsNameOfMigrationTransaction = [7]string{
 	0: "seqno",
 	1: "boc",
-	2: "state_init",
-	3: "messages",
-	4: "emulation",
+	2: "sponsored",
+	3: "commission",
+	4: "state_init",
+	5: "messages",
+	6: "emulation",
 }
 
 // Decode decodes MigrationTransaction from json.
@@ -30873,6 +30963,7 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode MigrationTransaction to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -30900,6 +30991,26 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"boc\"")
 			}
+		case "sponsored":
+			if err := func() error {
+				s.Sponsored.Reset()
+				if err := s.Sponsored.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sponsored\"")
+			}
+		case "commission":
+			if err := func() error {
+				s.Commission.Reset()
+				if err := s.Commission.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"commission\"")
+			}
 		case "state_init":
 			if err := func() error {
 				s.StateInit.Reset()
@@ -30911,7 +31022,7 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"state_init\"")
 			}
 		case "messages":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				s.Messages = make([]MigrationOutMessage, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -30929,7 +31040,7 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"messages\"")
 			}
 		case "emulation":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.Emulation.Decode(d); err != nil {
 					return err
@@ -30948,7 +31059,7 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011011,
+		0b01100011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -37772,6 +37883,39 @@ func (s OptMessageConsequences) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptMessageConsequences) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MigrationPrepareRequestGasPayer as json.
+func (o OptMigrationPrepareRequestGasPayer) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes MigrationPrepareRequestGasPayer from json.
+func (o *OptMigrationPrepareRequestGasPayer) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptMigrationPrepareRequestGasPayer to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptMigrationPrepareRequestGasPayer) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptMigrationPrepareRequestGasPayer) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
