@@ -257,7 +257,7 @@ func (h *Handler) GetEvent(ctx context.Context, params oas.GetEventParams) (*oas
 	if err != nil {
 		h.logger.Warn("error getting events spam data", zap.Error(err))
 	}
-	event.IsScam = event.IsScam || isBannedTraces[traceID.Hex()]
+	event.IsScam = h.applyTraceBan(event.IsScam, isBannedTraces[traceID.Hex()], trace.Account)
 	if emulated {
 		event.InProgress = true
 	}
@@ -298,23 +298,32 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	if len(traceIDs) > 0 {
 		lastLT = traceIDs[len(traceIDs)-1].Lt
 	}
+	// initiatorByEvent maps each event ID to its trace initiator so the banned-trace
+	// override can respect the account whitelist (see applyTraceBan).
+	initiatorByEvent := make(map[string]tongo.AccountID, len(traceIDs))
 	if h.parallelTraceProcessing {
 		// Parallel mode: trades latency for CPU density.
 		// Disable via PARALLEL_TRACE_PROCESSING=false under DDoS.
 		results := make([]oas.AccountEvent, len(traceIDs))
+		initiators := make([]tongo.AccountID, len(traceIDs))
 		var traceWg sync.WaitGroup
 		for i, traceID := range traceIDs {
 			traceWg.Add(1)
 			go func(idx int, tid core.TraceID) {
 				defer traceWg.Done()
-				results[idx] = h.processTrace(ctx, account.ID, tid, params.AcceptLanguage, params.SubjectOnly.Value)
+				results[idx], initiators[idx] = h.processTrace(ctx, account.ID, tid, params.AcceptLanguage, params.SubjectOnly.Value)
 			}(i, traceID)
 		}
 		traceWg.Wait()
 		events = append(events, results...)
+		for i := range results {
+			initiatorByEvent[results[i].EventID] = initiators[i]
+		}
 	} else {
 		for _, traceID := range traceIDs {
-			events = append(events, h.processTrace(ctx, account.ID, traceID, params.AcceptLanguage, params.SubjectOnly.Value))
+			event, initiator := h.processTrace(ctx, account.ID, traceID, params.AcceptLanguage, params.SubjectOnly.Value)
+			events = append(events, event)
+			initiatorByEvent[event.EventID] = initiator
 		}
 	}
 
@@ -372,6 +381,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 			}
 			event.InProgress = true
 			event.EventID = hash.Hex()
+			initiatorByEvent[event.EventID] = trace.Account
 			events = slices.Insert(events, 0, event)
 			if len(events) > params.Limit {
 				events = events[:params.Limit]
@@ -401,29 +411,33 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		}
 	}
 	for i := range events {
-		events[i].IsScam = events[i].IsScam || isBannedTraces[events[i].EventID]
+		events[i].IsScam = h.applyTraceBan(events[i].IsScam, isBannedTraces[events[i].EventID], initiatorByEvent[events[i].EventID])
 	}
 	return &oas.AccountEvents{Events: events, NextFrom: int64(lastLT)}, nil
 }
 
-func (h *Handler) processTrace(ctx context.Context, account tongo.AccountID, tid core.TraceID, lang oas.OptString, subjectOnly bool) oas.AccountEvent {
+// processTrace returns the account event and the trace initiator (root account),
+// which the caller needs to let a whitelisted initiator override a DB trace ban.
+// On fallbacks the trace isn't available, so a zero AccountID is returned, which
+// leaves any ban in place (TrustNone).
+func (h *Handler) processTrace(ctx context.Context, account tongo.AccountID, tid core.TraceID, lang oas.OptString, subjectOnly bool) (oas.AccountEvent, tongo.AccountID) {
 	trace, err := h.storage.GetTrace(ctx, tid.Hash)
 	if errors.Is(err, core.ErrTraceIsTooLong) {
-		return h.toAccountEventForLongTrace(account, tid)
+		return h.toAccountEventForLongTrace(account, tid), tongo.AccountID{}
 	}
 	if err != nil {
-		return h.toUnknownAccountEvent(account, tid)
+		return h.toUnknownAccountEvent(account, tid), tongo.AccountID{}
 	}
 	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(account), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
-		return h.toUnknownAccountEvent(account, tid)
+		return h.toUnknownAccountEvent(account, tid), tongo.AccountID{}
 	}
 	result := bath.EnrichWithIntentions(trace, actions)
 	converted, err := h.toAccountEvent(ctx, account, trace, result, lang, subjectOnly)
 	if err != nil {
-		return h.toUnknownAccountEvent(account, tid)
+		return h.toUnknownAccountEvent(account, tid), tongo.AccountID{}
 	}
-	return converted
+	return converted, trace.Account
 }
 
 func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEventParams) (*oas.AccountEvent, error) {
@@ -468,11 +482,20 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 	wg.Wait()
-	event.IsScam = event.IsScam || isBannedTraces[traceID.Hex()]
+	event.IsScam = h.applyTraceBan(event.IsScam, isBannedTraces[traceID.Hex()], trace.Account)
 	if emulated {
 		event.InProgress = true
 	}
 	return &event, nil
+}
+
+func (h *Handler) applyTraceBan(heuristicScam, banned bool, initiator tongo.AccountID) bool {
+	switch h.spamFilter.AccountTrust(initiator) {
+	case core.TrustWhitelist, core.TrustGraylist:
+		return false
+	default:
+		return heuristicScam || banned
+	}
 }
 
 func toProperEmulationError(err error) error {
