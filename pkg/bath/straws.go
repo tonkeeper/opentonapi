@@ -18,6 +18,7 @@ var JettonTransfersBurnsMints = []Merger{
 	StonfiV1PTONStraw,
 	StonfiV2PTONStrawReverse,
 	StonfiV2PTONStraw,
+	EthenaTsUSDeTransferStraw,
 	FlawedJettonTransferClassicStraw,
 	FlawedJettonTransferMinimalStraw,
 	JettonTransferClassicStraw,
@@ -44,6 +45,7 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		//5
 		StonfiV2PTONStrawReverse,
 		StonfiV2PTONStraw,
+		EthenaTsUSDeTransferStraw,
 		FlawedJettonTransferClassicStraw,
 		FlawedJettonTransferMinimalStraw,
 		XTRWithdrawAction,

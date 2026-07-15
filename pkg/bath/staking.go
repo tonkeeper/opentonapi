@@ -489,6 +489,70 @@ var WithdrawEthenaStakeRequestStraw = Straw[BubbleWithdrawTokenStakeRequest]{
 	},
 }
 
+// EthenaTsUSDeTransferStraw handles plain transfers of Ethena's tsUSDe ("TON Staked USDe").
+//
+// tsUSDe routes the recipient side of a transfer through its jetton master
+// (references.EthenaTsUSDeMaster) instead of an ordinary jetton wallet, and the master's
+// internal_transfer body does not follow the standard TEP-74 layout, so it fails to decode.
+// As a result the generic JettonTransferClassicStraw can match the recipient neither by the
+// JettonWallet interface nor by the decoded JettonInternalTransfer operation: its optional
+// recipient child never attaches, BubbleJettonTransfer.success keeps its zero value (false),
+// and the action is reported as "failed" even though every transaction in the trace succeeded.
+//
+// This straw gates the recipient bubble on the raw internal_transfer opcode (HasOpcode, which
+// does not need the body to decode) so success is taken from the actual recipient transaction.
+// It must be registered before the generic jetton straws so it wins the match.
+var EthenaTsUSDeTransferStraw = Straw[BubbleJettonTransfer]{
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
+	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+		newAction.senderWallet = tx.account.Address
+		newAction.sender = tx.inputFrom
+		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
+		newAction.amount = body.Amount
+		newAction.payload = body.ForwardPayload.Value
+		recipient, err := ton.AccountIDFromTlb(body.Destination)
+		if err == nil && recipient != nil {
+			newAction.recipient = &Account{Address: *recipient}
+			bubble.Accounts = append(bubble.Accounts, *recipient)
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleJettonTransfer]{
+		CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.EthenaTsUSDeMaster), HasOpcode(abi.JettonInternalTransferMsgOpCode)},
+		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.recipientWallet = tx.account.Address
+			if newAction.master.IsZero() {
+				newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
+			}
+			newAction.success = tx.success
+			return nil
+		},
+		ValueFlowUpdater: func(newAction *BubbleJettonTransfer, flow *ValueFlow) {
+			if newAction.success {
+				if newAction.recipient != nil {
+					flow.AddJettons(newAction.recipient.Address, newAction.master, big.Int(newAction.amount))
+				}
+				if newAction.sender != nil {
+					flow.SubJettons(newAction.sender.Address, newAction.master, big.Int(newAction.amount))
+				}
+			}
+		},
+		Children: []Straw[BubbleJettonTransfer]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp), IsAccount(references.EthenaPool)},
+				Optional:   true,
+			},
+			{
+				CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.ExcessMsgOp)},
+				Optional:   true,
+			},
+		},
+	},
+}
+
 var DepositAffluentEarnStraw = Straw[BubbleDepositTokenStake]{
 	CheckFuncs: []bubbleCheck{IsJettonTransfer, func(bubble *Bubble) bool {
 		tx, _ := bubble.Info.(BubbleJettonTransfer)
