@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"crypto/ed25519"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -412,4 +414,27 @@ func (h *Handler) convertMultisigOrder(ctx context.Context, order core.MultisigO
 		Risk:               oasRisk,
 		ChangingParameters: cp,
 	}, nil
+}
+
+func convertStateInit(si tlb.StateInit) (oas.OptString, error) {
+	cell := boc.NewCell()
+	if err := tlb.Marshal(cell, si); err != nil {
+		return oas.OptString{}, fmt.Errorf("marshalling stat init: %v", err)
+	}
+	b64, err := cell.ToBocBase64()
+	if err != nil {
+		return oas.OptString{}, fmt.Errorf("base64 encoding failed: %v", err)
+	}
+	return oas.NewOptString(b64), nil
+}
+
+func requirePublicKey(pk oas.OptString) (ed25519.PublicKey, error) {
+	if !pk.IsSet() || pk.Value == "" {
+		return nil, errors.New("public_key is empty")
+	}
+	if decoded, err := hex.DecodeString(pk.Value); err != nil {
+		return nil, fmt.Errorf("public_key is not valid hex: %v", err)
+	} else {
+		return decoded, nil
+	}
 }

@@ -17,3 +17,15 @@ func FromStrings[T ~string](strings []string) []T {
 	}
 	return result
 }
+
+func MapSliceErr[A, B any](slice []A, f func(A) (B, error)) ([]B, error) {
+	result := make([]B, len(slice))
+	for i, a := range slice {
+		b, err := f(a)
+		if err != nil {
+			return nil, err
+		}
+		result[i] = b
+	}
+	return result, nil
+}

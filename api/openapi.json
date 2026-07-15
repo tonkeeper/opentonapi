@@ -5101,6 +5101,21 @@
       "format": "address",
       "type": "string"
      },
+     "gas_jetton_master": {
+      "description": "Master address of jetton that should be used to cover transactions fees. Must be supported by /v2/gasless/config and held by the source wallet.\n",
+      "format": "address",
+      "type": "string"
+     },
+     "gas_payer": {
+      "default": "self",
+      "description": "Who pays the gas:\n  - `self` — the source wallet pays, as usual\n  - `battery` — asset transfers are sponsored by the Tonkeeper Battery\n  - `gasless` — source wallet pays with jetton, in this case `gas_jetton_master` is required too (only from this list: `/v2/gasless/config`)\n",
+      "enum": [
+       "self",
+       "battery",
+       "gasless"
+      ],
+      "type": "string"
+     },
      "public_key": {
       "description": "hex-encoded ed25519 public key of the source wallet. If `from` wallet is uninitialized, then public_key is used to infer wallet code\n",
       "example": "29c1a72938b8f4f1d4e64f1e3f73e4b0e60f9b0c0e0d0e0f0a0b0c0d0e0f0a0b0",
@@ -5152,7 +5167,11 @@
    "MigrationTransaction": {
     "properties": {
      "boc": {
-      "description": "base64 BOC of the unsigned wallet body. Sign its hash, prepend the signature, wrap it in an external message and broadcast.\n",
+      "description": "base64 BOC of the unsigned wallet body. The body type is determined by (wallet_version, sponsored): for v3/v4 it is always the external body — sign its hash, prepend the signature, wrap in an external message; for w5 with sponsored=false it is the external body with the signature appended as the trailing 512 bits; for w5 with sponsored=true it is the internal_signed body — sign and wrap it for /v2/gasless/send as in the gasless flow.\n",
+      "type": "string"
+     },
+     "commission": {
+      "description": "gasless only; the relay commission in indivisible gas-jetton units, embedded in the boc as a jetton transfer to the relay. Exact for the first transaction; an estimate for later ones (re-running prepare refreshes it).\n",
       "type": "string"
      },
      "emulation": {
@@ -5169,6 +5188,11 @@
       "description": "wallet seqno baked into the unsigned body",
       "format": "int32",
       "type": "integer"
+     },
+     "sponsored": {
+      "default": false,
+      "description": "true — the Battery relay pays gas for this transaction; submit it via /v2/gasless/send. false — self-paid; sign and broadcast via /v2/blockchain/message as usual (e.g. the final TON sweep).\n",
+      "type": "boolean"
      },
      "state_init": {
       "description": "base64 BOC of the wallet StateInit (code + data). Present only on the first transaction when the source wallet is not yet initialized\n",

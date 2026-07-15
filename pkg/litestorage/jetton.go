@@ -18,6 +18,10 @@ import (
 	"github.com/tonkeeper/tongo/ton"
 )
 
+func (s *LiteStorage) GetJettonWalletsByOwnerAddresses(ctx context.Context, owners []ton.AccountID, mintless bool) ([]core.JettonWallet, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
 func (s *LiteStorage) GetJettonWalletsByOwnerAddress(ctx context.Context, address ton.AccountID, jetton *ton.AccountID, isJettonMaster bool, mintless bool, limit, offset int) ([]core.JettonWallet, error) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
 		storageTimeHistogramVec.WithLabelValues("get_jetton_wallets_by_owner").Observe(v)

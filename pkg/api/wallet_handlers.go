@@ -14,7 +14,6 @@ import (
 	"github.com/sourcegraph/conc/pool"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
-	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
@@ -130,7 +129,11 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	if len(rawAccount.Code) == 0 {
 		return &oas.Seqno{Seqno: int32(seqno)}, nil
 	}
-	walletVersion, err := wallet.GetVersionByCode(rawAccount.Code)
+	codeCell, err := boc.DeserializeSingleRootBoc(rawAccount.Code)
+	if err != nil {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	walletVersion, err := tongoWallet.GetVersionByCode(*codeCell)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
