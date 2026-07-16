@@ -17131,6 +17131,12 @@ func (s *EmulateMessageToWalletReq) encodeFields(e *jx.Encoder) {
 		e.Str(s.Boc)
 	}
 	{
+		if s.AddressOverride.Set {
+			e.FieldStart("address_override")
+			s.AddressOverride.Encode(e)
+		}
+	}
+	{
 		if s.Params != nil {
 			e.FieldStart("params")
 			e.ArrStart()
@@ -17142,9 +17148,10 @@ func (s *EmulateMessageToWalletReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfEmulateMessageToWalletReq = [2]string{
+var jsonFieldsNameOfEmulateMessageToWalletReq = [3]string{
 	0: "boc",
-	1: "params",
+	1: "address_override",
+	2: "params",
 }
 
 // Decode decodes EmulateMessageToWalletReq from json.
@@ -17167,6 +17174,16 @@ func (s *EmulateMessageToWalletReq) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"boc\"")
+			}
+		case "address_override":
+			if err := func() error {
+				s.AddressOverride.Reset()
+				if err := s.AddressOverride.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"address_override\"")
 			}
 		case "params":
 			if err := func() error {
