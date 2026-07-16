@@ -746,6 +746,14 @@ func (h *Handler) EmulateMessageToWallet(ctx context.Context, request *oas.Emula
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
+	if request.AddressOverride.IsSet() {
+		addr, err := tongo.ParseAddress(request.AddressOverride.Value)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, err)
+		}
+		walletAddress = &addr.ID
+		m.Info.ExtInMsgInfo.Dest = addr.ID.ToMsgAddress()
+	}
 	var code []byte
 	if account, err := h.storage.GetRawAccount(ctx, *walletAddress); err == nil && len(account.Code) > 0 {
 		code = account.Code

@@ -492,6 +492,12 @@
      "application/json": {
       "schema": {
        "properties": {
+        "address_override": {
+         "description": "Override the destination wallet address extracted from the BoC. Useful when the BoC was signed with a throwaway key and the real wallet address must be emulated against.",
+         "example": "0:97146a46acc2654y27947f14c4a4b14273e954f78bc017790b41208b0043200b",
+         "format": "address",
+         "type": "string"
+        },
         "boc": {
          "format": "cell",
          "type": "string"

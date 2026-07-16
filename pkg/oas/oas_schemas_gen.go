@@ -6187,6 +6187,9 @@ func (s *EmulateMessageToTraceReq) SetBoc(val string) {
 
 type EmulateMessageToWalletReq struct {
 	Boc string `json:"boc"`
+	// Override the destination wallet address extracted from the BoC. Useful when the BoC was signed
+	// with a throwaway key and the real wallet address must be emulated against.
+	AddressOverride OptString `json:"address_override"`
 	// Additional per account configuration.
 	Params []EmulateMessageToWalletReqParamsItem `json:"params"`
 }
@@ -6194,6 +6197,11 @@ type EmulateMessageToWalletReq struct {
 // GetBoc returns the value of Boc.
 func (s *EmulateMessageToWalletReq) GetBoc() string {
 	return s.Boc
+}
+
+// GetAddressOverride returns the value of AddressOverride.
+func (s *EmulateMessageToWalletReq) GetAddressOverride() OptString {
+	return s.AddressOverride
 }
 
 // GetParams returns the value of Params.
@@ -6204,6 +6212,11 @@ func (s *EmulateMessageToWalletReq) GetParams() []EmulateMessageToWalletReqParam
 // SetBoc sets the value of Boc.
 func (s *EmulateMessageToWalletReq) SetBoc(val string) {
 	s.Boc = val
+}
+
+// SetAddressOverride sets the value of AddressOverride.
+func (s *EmulateMessageToWalletReq) SetAddressOverride(val OptString) {
+	s.AddressOverride = val
 }
 
 // SetParams sets the value of Params.
