@@ -457,6 +457,10 @@ func TestFindActions(t *testing.T) {
 		"9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa": {
 			tongo.MustParseBlockID("(0,8000000000000000,62729945)"),
 		},
+		"8cd9d960e66fab8cebf45a679f46426cdc8bbd5411d31a89c1c2163a195de386": {
+			tongo.MustParseBlockID("(0,8000000000000000,85794512)"),
+			tongo.MustParseBlockID("(0,8000000000000000,85794513)"),
+		},
 	}
 
 	type Case struct {
@@ -1231,6 +1235,11 @@ func TestFindActions(t *testing.T) {
 			name:           "swap snotfi then tonco",
 			filenamePrefix: "swap-snotfi-then-tonco",
 			hash:           "9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa",
+		},
+		{
+			name:           "gas relay USDT",
+			filenamePrefix: "gas-relay-usdt",
+			hash:           "8cd9d960e66fab8cebf45a679f46426cdc8bbd5411d31a89c1c2163a195de386",
 		},
 	}
 

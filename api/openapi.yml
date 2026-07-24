@@ -7087,6 +7087,23 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         target:
           $ref: '#/components/schemas/AccountAddress'
+        is_battery:
+          type: boolean
+        relayer_fee:
+          $ref: '#/components/schemas/GasRelayFee'
+    GasRelayFee:
+      type: object
+      required:
+        - jetton
+        - amount
+      properties:
+        jetton:
+          $ref: '#/components/schemas/JettonPreview'
+        amount:
+          type: string
+          x-js-format: bigint
+          example: "1000000000"
+          description: amount in quanta of tokens
     PurchaseAction:
       type: object
       required:

@@ -1189,7 +1189,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 	case bath.SetSignatureAllowed:
 		action.SetSignatureAllowedAction, action.SimplePreview = h.convertSetSignatureAllowed(ctx, a.SetSignatureAllowed, acceptLanguage.Value, viewer)
 	case bath.GasRelay:
-		action.GasRelay, action.SimplePreview = h.convertGasRelayAction(a.GasRelay, acceptLanguage.Value, viewer)
+		action.GasRelay, action.SimplePreview = h.convertGasRelayAction(ctx, a.GasRelay, acceptLanguage.Value, viewer, eventLt)
 	case bath.LiquidityDeposit:
 		action.LiquidityDeposit, action.SimplePreview, err = h.convertLiquidityDepositAction(ctx, a.LiquidityDepositAction, acceptLanguage.Value, viewer, eventLt)
 		if err != nil {
@@ -1505,23 +1505,60 @@ func (h *Handler) convertUnsubscribe(ctx context.Context, a *bath.UnSubscribeAct
 	return action, simplePreview
 }
 
-func (h *Handler) convertGasRelayAction(t *bath.GasRelayAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptGasRelayAction, oas.ActionSimplePreview) {
+func (h *Handler) convertGasRelayAction(ctx context.Context, t *bath.GasRelayAction, acceptLanguage string, viewer *tongo.AccountID, eventLt int64) (oas.OptGasRelayAction, oas.ActionSimplePreview) {
 	var action oas.OptGasRelayAction
-	action.SetTo(oas.GasRelayAction{
-		Amount:  t.Amount,
-		Target:  convertAccountAddress(t.Target, h.addressBook),
-		Relayer: convertAccountAddress(t.Relayer, h.addressBook),
-	})
-	simplePreview := oas.ActionSimplePreview{
-		Name: "Gas Relay",
-		Description: i18n.T(acceptLanguage, i18n.C{
+	oasAction := oas.GasRelayAction{
+		Amount:    t.Amount,
+		Target:    convertAccountAddress(t.Target, h.addressBook),
+		Relayer:   convertAccountAddress(t.Relayer, h.addressBook),
+		IsBattery: oas.NewOptBool(t.IsBattery),
+	}
+	if t.RelayerFee != nil {
+		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, t.RelayerFee.JettonMaster, &eventLt)
+		if err != nil {
+			// non-critical, continue without scaled UI params
+			scaledUiParams = nil
+		}
+		meta := h.GetJettonNormalizedMetadata(ctx, t.RelayerFee.JettonMaster)
+		score, _ := h.score.GetJettonScore(t.RelayerFee.JettonMaster)
+		preview := jettonPreview(t.RelayerFee.JettonMaster, meta, score, scaledUiParams)
+		oasAction.RelayerFee.SetTo(oas.GasRelayFee{
+			Jetton: preview,
+			Amount: g.Pointer(big.Int(t.RelayerFee.Amount)).String(),
+		})
+	}
+	action.SetTo(oasAction)
+	var name, description string
+	if t.IsBattery {
+		name = "Tonkeeper battery"
+		description = i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "gasRelayBatteryAction",
+				Other: "Tonkeeper battery",
+			},
+		})
+	} else if t.RelayerFee != nil {
+		name = "Tonkeeper gasless"
+		description = i18n.T(acceptLanguage, i18n.C{
+			DefaultMessage: &i18n.M{
+				ID:    "gasRelayGaslessAction",
+				Other: "Tonkeeper gasless",
+			},
+		})
+	} else {
+		name = "Gas Relay"
+		description = i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &i18n.M{
 				ID:    "gasRelayAction",
 				Other: "Relay for gas",
 			},
-		}),
-		Accounts: distinctAccounts(viewer, h.addressBook, &t.Relayer, &t.Target),
-		Value:    oas.NewOptString(i18n.FormatGrams(t.Amount)),
+		})
+	}
+	simplePreview := oas.ActionSimplePreview{
+		Name:        name,
+		Description: description,
+		Accounts:    distinctAccounts(viewer, h.addressBook, &t.Relayer, &t.Target),
+		Value:       oas.NewOptString(i18n.FormatGrams(t.Amount)),
 	}
 	return action, simplePreview
 }

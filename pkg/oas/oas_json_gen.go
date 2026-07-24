@@ -19190,12 +19190,26 @@ func (s *GasRelayAction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("target")
 		s.Target.Encode(e)
 	}
+	{
+		if s.IsBattery.Set {
+			e.FieldStart("is_battery")
+			s.IsBattery.Encode(e)
+		}
+	}
+	{
+		if s.RelayerFee.Set {
+			e.FieldStart("relayer_fee")
+			s.RelayerFee.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfGasRelayAction = [3]string{
+var jsonFieldsNameOfGasRelayAction = [5]string{
 	0: "amount",
 	1: "relayer",
 	2: "target",
+	3: "is_battery",
+	4: "relayer_fee",
 }
 
 // Decode decodes GasRelayAction from json.
@@ -19238,6 +19252,26 @@ func (s *GasRelayAction) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"target\"")
+			}
+		case "is_battery":
+			if err := func() error {
+				s.IsBattery.Reset()
+				if err := s.IsBattery.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_battery\"")
+			}
+		case "relayer_fee":
+			if err := func() error {
+				s.RelayerFee.Reset()
+				if err := s.RelayerFee.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"relayer_fee\"")
 			}
 		default:
 			return d.Skip()
@@ -19291,6 +19325,117 @@ func (s *GasRelayAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *GasRelayAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GasRelayFee) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GasRelayFee) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("jetton")
+		s.Jetton.Encode(e)
+	}
+	{
+		e.FieldStart("amount")
+		e.Str(s.Amount)
+	}
+}
+
+var jsonFieldsNameOfGasRelayFee = [2]string{
+	0: "jetton",
+	1: "amount",
+}
+
+// Decode decodes GasRelayFee from json.
+func (s *GasRelayFee) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GasRelayFee to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "jetton":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Jetton.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"jetton\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Amount = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"amount\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GasRelayFee")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGasRelayFee) {
+					name = jsonFieldsNameOfGasRelayFee[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GasRelayFee) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GasRelayFee) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -37151,6 +37296,39 @@ func (s OptGasRelayAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptGasRelayAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GasRelayFee as json.
+func (o OptGasRelayFee) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes GasRelayFee from json.
+func (o *OptGasRelayFee) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptGasRelayFee to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptGasRelayFee) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptGasRelayFee) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
