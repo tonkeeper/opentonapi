@@ -4,7 +4,9 @@
        "GasRelay": {
          "Amount": 574655153,
          "Relayer": "0:f33f5a1e309236c21fd412b9d522e24a6a6ef3745c01f7ec7d731bc0f844c334",
-         "Target": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940"
+         "Target": "0:f22aa05e75c981a9440d178f532a1fe5426137a399afa42f2f114562a1277940",
+         "IsBattery": true,
+         "RelayerFee": null
        },
        "Success": true,
        "Type": "GasRelay",

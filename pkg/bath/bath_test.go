@@ -460,6 +460,10 @@ func TestFindActions(t *testing.T) {
 		"a349ed88485f06f15410ddd0add8aa384f1dafc8e131a3732149d8b6d407eca4": {
 			tongo.MustParseBlockID("(0,8000000000000000,92385315)"),
 		},
+		"8cd9d960e66fab8cebf45a679f46426cdc8bbd5411d31a89c1c2163a195de386": {
+			tongo.MustParseBlockID("(0,8000000000000000,85794512)"),
+			tongo.MustParseBlockID("(0,8000000000000000,85794513)"),
+		},
 	}
 
 	type Case struct {
@@ -1241,6 +1245,11 @@ func TestFindActions(t *testing.T) {
 			name:           "stonfi v2 swap with failed payout",
 			filenamePrefix: "stonfi-v2-swap-failed-payout",
 			hash:           "a349ed88485f06f15410ddd0add8aa384f1dafc8e131a3732149d8b6d407eca4",
+		},
+		{
+			name:           "gas relay USDT",
+			filenamePrefix: "gas-relay-usdt",
+			hash:           "8cd9d960e66fab8cebf45a679f46426cdc8bbd5411d31a89c1c2163a195de386",
 		},
 	}
 

@@ -3982,8 +3982,14 @@
       "type": "integer",
       "x-js-format": "bigint"
      },
+     "is_battery": {
+      "type": "boolean"
+     },
      "relayer": {
       "$ref": "#/components/schemas/AccountAddress"
+     },
+     "relayer_fee": {
+      "$ref": "#/components/schemas/GasRelayFee"
      },
      "target": {
       "$ref": "#/components/schemas/AccountAddress"
@@ -3993,6 +3999,24 @@
      "amount",
      "relayer",
      "target"
+    ],
+    "type": "object"
+   },
+   "GasRelayFee": {
+    "properties": {
+     "amount": {
+      "description": "amount in quanta of tokens",
+      "example": "1000000000",
+      "type": "string",
+      "x-js-format": "bigint"
+     },
+     "jetton": {
+      "$ref": "#/components/schemas/JettonPreview"
+     }
+    },
+    "required": [
+     "jetton",
+     "amount"
     ],
     "type": "object"
    },

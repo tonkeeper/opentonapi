@@ -38,12 +38,11 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 	return []Merger{
 		//0
 		StrawFindAuctionBidFragmentSimple,
-		GasRelayerStraw(book),
 		NftTransferStraw,
 		NftTransferNotifyStraw,
 		StonfiV1PTONStraw,
-		//5
 		StonfiV2PTONStrawReverse,
+		//5
 		StonfiV2PTONStraw,
 		EthenaTsUSDeTransferStraw,
 		FlawedJettonTransferClassicStraw,
@@ -52,6 +51,7 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		// 10
 		JettonTransferClassicStraw,
 		JettonTransferMinimalStraw,
+		GasRelayerStraw(book),
 		JettonBurnStraw,
 		WtonMintStraw,
 		NftPurchaseStraw,
