@@ -4,31 +4,43 @@ import (
 	"reflect"
 
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 )
 
 type GasRelayBubble struct {
-	Amount  int64
-	Relayer ton.AccountID
-	Target  ton.AccountID
+	Amount     int64
+	Relayer    ton.AccountID
+	Target     ton.AccountID
+	IsBattery  bool
+	RelayerFee *GasRelayFee
 }
 
 func (b GasRelayBubble) ToAction() *Action {
 	return &Action{
 		Type: GasRelay,
 		GasRelay: &GasRelayAction{
-			Amount:  b.Amount,
-			Relayer: b.Relayer,
-			Target:  b.Target,
+			Amount:     b.Amount,
+			Relayer:    b.Relayer,
+			Target:     b.Target,
+			IsBattery:  b.IsBattery,
+			RelayerFee: b.RelayerFee,
 		},
 		Success: true,
 	}
 }
 
 type GasRelayAction struct {
-	Amount  int64
-	Relayer ton.AccountID
-	Target  ton.AccountID
+	Amount     int64
+	Relayer    ton.AccountID
+	Target     ton.AccountID
+	IsBattery  bool
+	RelayerFee *GasRelayFee
+}
+
+type GasRelayFee struct {
+	JettonMaster ton.AccountID
+	Amount       tlb.VarUInteger16
 }
 
 func (a GasRelayAction) SubjectAccounts() []ton.AccountID {
@@ -84,7 +96,23 @@ func GasRelayerStraw(book AddressBook) Straw[GasRelayBubble] {
 			newAction.Relayer = tx.inputFrom.Address
 			newAction.Target = tx.account.Address
 			newAction.Amount = tx.inputAmount
+			newAction.IsBattery = true
 			return nil
+		},
+		Children: []Straw[GasRelayBubble]{
+			{
+				CheckFuncs: []bubbleCheck{IsTx, IsJettonTransfer, JettonTransferOperation(abi.TonkeeperRelayerFeeJettonOp)},
+				Builder: func(newAction *GasRelayBubble, bubble *Bubble) error {
+					tx := bubble.Info.(BubbleJettonTransfer)
+					newAction.RelayerFee = &GasRelayFee{
+						JettonMaster: tx.master,
+						Amount:       tx.amount,
+					}
+					newAction.IsBattery = false
+					return nil
+				},
+				Optional: true,
+			},
 		},
 	}
 }

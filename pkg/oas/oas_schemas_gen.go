@@ -6961,9 +6961,11 @@ func (s *GasLimitPrices) SetDeleteDueLimit(val int64) {
 
 // Ref: #/components/schemas/GasRelayAction
 type GasRelayAction struct {
-	Amount  int64          `json:"amount"`
-	Relayer AccountAddress `json:"relayer"`
-	Target  AccountAddress `json:"target"`
+	Amount     int64          `json:"amount"`
+	Relayer    AccountAddress `json:"relayer"`
+	Target     AccountAddress `json:"target"`
+	IsBattery  OptBool        `json:"is_battery"`
+	RelayerFee OptGasRelayFee `json:"relayer_fee"`
 }
 
 // GetAmount returns the value of Amount.
@@ -6981,6 +6983,16 @@ func (s *GasRelayAction) GetTarget() AccountAddress {
 	return s.Target
 }
 
+// GetIsBattery returns the value of IsBattery.
+func (s *GasRelayAction) GetIsBattery() OptBool {
+	return s.IsBattery
+}
+
+// GetRelayerFee returns the value of RelayerFee.
+func (s *GasRelayAction) GetRelayerFee() OptGasRelayFee {
+	return s.RelayerFee
+}
+
 // SetAmount sets the value of Amount.
 func (s *GasRelayAction) SetAmount(val int64) {
 	s.Amount = val
@@ -6994,6 +7006,43 @@ func (s *GasRelayAction) SetRelayer(val AccountAddress) {
 // SetTarget sets the value of Target.
 func (s *GasRelayAction) SetTarget(val AccountAddress) {
 	s.Target = val
+}
+
+// SetIsBattery sets the value of IsBattery.
+func (s *GasRelayAction) SetIsBattery(val OptBool) {
+	s.IsBattery = val
+}
+
+// SetRelayerFee sets the value of RelayerFee.
+func (s *GasRelayAction) SetRelayerFee(val OptGasRelayFee) {
+	s.RelayerFee = val
+}
+
+// Ref: #/components/schemas/GasRelayFee
+type GasRelayFee struct {
+	Jetton JettonPreview `json:"jetton"`
+	// Amount in quanta of tokens.
+	Amount string `json:"amount"`
+}
+
+// GetJetton returns the value of Jetton.
+func (s *GasRelayFee) GetJetton() JettonPreview {
+	return s.Jetton
+}
+
+// GetAmount returns the value of Amount.
+func (s *GasRelayFee) GetAmount() string {
+	return s.Amount
+}
+
+// SetJetton sets the value of Jetton.
+func (s *GasRelayFee) SetJetton(val JettonPreview) {
+	s.Jetton = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *GasRelayFee) SetAmount(val string) {
+	s.Amount = val
 }
 
 // Ref: #/components/schemas/GaslessConfig
@@ -15303,6 +15352,52 @@ func (o OptGasRelayAction) Get() (v GasRelayAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGasRelayAction) Or(d GasRelayAction) GasRelayAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGasRelayFee returns new OptGasRelayFee with value set to v.
+func NewOptGasRelayFee(v GasRelayFee) OptGasRelayFee {
+	return OptGasRelayFee{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGasRelayFee is optional GasRelayFee.
+type OptGasRelayFee struct {
+	Value GasRelayFee
+	Set   bool
+}
+
+// IsSet returns true if OptGasRelayFee was set.
+func (o OptGasRelayFee) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGasRelayFee) Reset() {
+	var v GasRelayFee
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGasRelayFee) SetTo(v GasRelayFee) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGasRelayFee) Get() (v GasRelayFee, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGasRelayFee) Or(d GasRelayFee) GasRelayFee {
 	if v, ok := o.Get(); ok {
 		return v
 	}
