@@ -111,6 +111,7 @@ type storage interface {
 	GetSeqno(ctx context.Context, account tongo.AccountID) (uint32, error)
 
 	GetAccountState(ctx context.Context, a tongo.AccountID) (tlb.ShardAccount, error)
+	GetLatestAccountState(ctx context.Context, a tongo.AccountID) (tlb.ShardAccount, error)
 	GetLibraries(ctx context.Context, libraries []tongo.Bits256) (map[tongo.Bits256]*boc.Cell, error)
 	GetAllShardsInfo(context.Context, ton.BlockIDExt) ([]ton.BlockIDExt, error)
 	GetMasterchainInfo(ctx context.Context) (liteclient.LiteServerMasterchainInfoC, error)

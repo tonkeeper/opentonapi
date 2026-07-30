@@ -225,7 +225,7 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		slog.String("to", destAddr.ID.String()),
 		slog.String("pubkey", req.PublicKey.Value),
 	)
-	sourceAccount, err := h.storage.GetAccountState(ctx, sourceAddr.ID)
+	sourceAccount, err := h.storage.GetLatestAccountState(ctx, sourceAddr.ID)
 	if err != nil {
 		logger.Error("failed to get account state", slog.String("error", err.Error()))
 		return nil, toError(http.StatusInternalServerError, err)

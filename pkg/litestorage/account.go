@@ -28,6 +28,10 @@ func (s *LiteStorage) GetAccountState(ctx context.Context, a tongo.AccountID) (t
 	return s.client.GetAccountState(ctx, a)
 }
 
+func (s *LiteStorage) GetLatestAccountState(ctx context.Context, a tongo.AccountID) (tlb.ShardAccount, error) {
+	return s.GetAccountState(ctx, a)
+}
+
 func (s *LiteStorage) AccountStatusAndInterfaces(addr tongo.AccountID) (tlb.AccountStatus, []abi.ContractInterface, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
