@@ -64,6 +64,10 @@ var migrationSkipNftCollections = map[ton.AccountID]bool{
 	references.TonstakersAccountPool: true,
 }
 
+// errEmulationFailed marks a failure of the emulator run itself, as opposed to an infrastructure
+// error in the surrounding emulation setup. See toMigrationEmulationError.
+var errEmulationFailed = errors.New("migration batch emulation failed")
+
 func isSkippedNftCollection(collection *ton.AccountID) bool {
 	if collection == nil {
 		return false
@@ -302,6 +306,9 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		var trace *core.Trace
 		trace, emuAccountStates, emuTime, err = h.emulateWalletMessage(ctx, emuMsg, emuAccountStates, emuTime)
 		if err != nil {
+			if errors.Is(err, errEmulationFailed) {
+				return nil, toError(http.StatusConflict, err)
+			}
 			return nil, toProperEmulationError(err)
 		}
 
@@ -857,7 +864,7 @@ func (h *Handler) emulateWalletMessage(
 	}
 	tree, err := emulator.Run(ctx, msg)
 	if err != nil {
-		return nil, nil, startTime, err
+		return nil, nil, startTime, fmt.Errorf("%w: %w", errEmulationFailed, err)
 	}
 	trace, err := EmulatedTreeToTrace(ctx, h.executor, h.storage, tree, emulator.FinalStates(), nil, h.configPool, true)
 	if err != nil {
