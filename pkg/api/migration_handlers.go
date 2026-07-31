@@ -798,7 +798,7 @@ func (h *Handler) collectOwnedNFTs(ctx context.Context, owner ton.AccountID) ([]
 			nil, // any collection
 			&core.Filter[tongo.AccountID]{Value: owner},
 			false, // includeOnSale: NFTs escrowed by a sale contract can't be swept by the wallet
-			false, // onlyVerified: keep unverified items; blacklisted ones are dropped via scam data
+			true,  // onlyVerified
 			migrationNftPageSize,
 			offset,
 		)
@@ -912,7 +912,7 @@ func getJettonMigrationBalance(jw core.JettonWallet, conv jettonConverter) (oas.
 	if err != nil {
 		return oas.JettonBalance{}, err
 	}
-	if balance.Jetton.Verification == oas.JettonVerificationTypeBlacklist {
+	if balance.Jetton.Verification != oas.JettonVerificationTypeWhitelist {
 		return oas.JettonBalance{}, errJettonNotAvailableForMigration
 	}
 	return balance, nil
