@@ -68,6 +68,10 @@ var migrationSkipNftCollections = map[ton.AccountID]bool{
 // error in the surrounding emulation setup. See toMigrationEmulationError.
 var errEmulationFailed = errors.New("migration batch emulation failed")
 
+var errJettonNotAvailableForMigration = errors.New("jetton not available for migration")
+
+type jettonConverter func(core.JettonWallet) (oas.JettonBalance, error)
+
 func isSkippedNftCollection(collection *ton.AccountID) bool {
 	if collection == nil {
 		return false
@@ -151,20 +155,8 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 	jettonsByOwner := make(map[ton.AccountID][]oas.JettonBalance, len(jettonWallets))
 	for owner, wallets := range jettonWallets {
 		balances := make([]oas.JettonBalance, 0, len(wallets))
-		for _, w := range wallets {
-			if w.Lock != nil {
-				// locked jettons cannot be migrated
-				continue
-			}
-			balance, err := h.convertJettonBalance(ctx, w, params.Currencies, nil, nil)
-			if err != nil {
-				h.logger.Warn(fmt.Sprintf("failed to convert jetton balance for wallet %v", w.JettonAddress.ToRaw()), zap.Error(err))
-				continue
-			}
-			if balance.Jetton.Verification == oas.JettonVerificationTypeBlacklist {
-				// skip scam jettons
-				continue
-			}
+		for _, migration := range h.getJettonMigrations(ctx, wallets, params.Currencies) {
+			balance := migration.balance
 			balances = append(balances, balance)
 		}
 		jettonsByOwner[owner] = balances
@@ -183,6 +175,9 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 		if account, ok := accountByID[id]; ok {
 			w.Balance = account.GramBalance
 			w.Status = oas.AccountStatus(account.Status)
+		}
+		if !hasMigratableAssets(w) {
+			continue
 		}
 		resp.Wallets = append(resp.Wallets, w)
 	}
@@ -564,7 +559,8 @@ func enrichPreviewsWithFiat(event *oas.AccountEvent, currency string, todayRates
 }
 
 type migratableJetton struct {
-	wallet core.JettonWallet
+	wallet  core.JettonWallet
+	balance oas.JettonBalance
 }
 
 // collectMigratableJettons lists the wallet's jettons eligible for migration, skipping
@@ -574,22 +570,22 @@ func (h *Handler) collectMigratableJettons(ctx context.Context, from ton.Account
 	if err != nil {
 		return nil, err
 	}
-	var out []migratableJetton
-	for _, jw := range jettons[from] {
-		if jw.Lock != nil || jw.Balance.IsZero() {
-			continue
-		}
-		balance, err := h.convertJettonBalance(ctx, jw, nil, nil, nil)
+	return h.getJettonMigrations(ctx, jettons[from], nil), nil
+}
+
+func (h *Handler) getJettonMigrations(ctx context.Context, wallets []core.JettonWallet, currencies []string) []migratableJetton {
+	out := make([]migratableJetton, 0, len(wallets))
+	for _, jw := range wallets {
+		balance, err := getJettonMigrationBalance(jw, func(w core.JettonWallet) (oas.JettonBalance, error) {
+			return h.convertJettonBalance(ctx, w, currencies, nil, nil)
+		})
 		if err != nil {
 			h.logger.Warn(fmt.Sprintf("skip jetton %v: %v", jw.JettonAddress.ToRaw(), err))
 			continue
 		}
-		if balance.Jetton.Verification == oas.JettonVerificationTypeBlacklist {
-			continue
-		}
-		out = append(out, migratableJetton{wallet: jw})
+		out = append(out, migratableJetton{wallet: jw, balance: balance})
 	}
-	return out, nil
+	return out
 }
 
 // prepareJettonTransfers builds a full-balance transfer message for every jetton. Excesses
@@ -906,4 +902,22 @@ func resolveWallet(account tlb.ShardAccount, from ton.AccountID, publicKey oas.O
 		return nil, 0, nil, toError(http.StatusBadRequest, fmt.Errorf("unsupported source wallet: %w", err))
 	}
 	return &w, seqno, nil, nil
+}
+
+func getJettonMigrationBalance(jw core.JettonWallet, conv jettonConverter) (oas.JettonBalance, error) {
+	if jw.Lock != nil || jw.Balance.IsZero() {
+		return oas.JettonBalance{}, errJettonNotAvailableForMigration
+	}
+	balance, err := conv(jw)
+	if err != nil {
+		return oas.JettonBalance{}, err
+	}
+	if balance.Jetton.Verification == oas.JettonVerificationTypeBlacklist {
+		return oas.JettonBalance{}, errJettonNotAvailableForMigration
+	}
+	return balance, nil
+}
+
+func hasMigratableAssets(wallet oas.MigrationWalletValue) bool {
+	return wallet.Balance > minGramTransferFee || len(wallet.Jettons) != 0 || wallet.NftCount != 0
 }
