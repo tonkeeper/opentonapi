@@ -7,7 +7,9 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
+	tonwallet "github.com/tonkeeper/tongo/wallet"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
@@ -230,6 +232,193 @@ func TestHasMigratableAssets(t *testing.T) {
 			require.Equal(t, tt.want, hasMigratableAssets(tt.wallet))
 		})
 	}
+}
+
+func TestRequiredGas(t *testing.T) {
+	transfer := tonwallet.RawMessage{Mode: tonwallet.DefaultMessageMode}
+	sweep := tonwallet.RawMessage{Mode: migrationSweepMode}
+	tests := []struct {
+		name string
+		plan migrationPlan
+		want tlb.Grams
+	}{
+		{
+			name: "empty plan needs nothing",
+		},
+		{
+			name: "sweep-only plan attaches no gas",
+			plan: []migrationBatch{{messages: []tonwallet.RawMessage{sweep}}},
+		},
+		{
+			name: "self-paid transfers are charged per message",
+			plan: []migrationBatch{
+				{messages: []tonwallet.RawMessage{transfer, transfer}},
+				{messages: []tonwallet.RawMessage{transfer}},
+				{messages: []tonwallet.RawMessage{sweep}},
+			},
+			want: 3 * migrationGasPerTransfer,
+		},
+		{
+			name: "sponsored batches are funded by the relay",
+			plan: []migrationBatch{
+				{messages: []tonwallet.RawMessage{transfer, transfer}, sponsored: true},
+				{messages: []tonwallet.RawMessage{sweep}},
+			},
+		},
+		{
+			name: "mixed plan charges only the unsponsored part",
+			plan: []migrationBatch{
+				{messages: []tonwallet.RawMessage{transfer, transfer}, sponsored: true},
+				{messages: []tonwallet.RawMessage{transfer}},
+				{messages: []tonwallet.RawMessage{sweep}},
+			},
+			want: migrationGasPerTransfer,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.want, tt.plan.minGramBalanceRequired())
+		})
+	}
+}
+
+func TestGasFundedMessages(t *testing.T) {
+	batch := migrationBatch{messages: []tonwallet.RawMessage{
+		{Mode: tonwallet.DefaultMessageMode},
+		{Mode: migrationSweepMode},
+		{Mode: tonwallet.DefaultMessageMode},
+	}}
+	require.Equal(t, 2, batch.gasFundedMessages(), "the balance-carrying sweep needs no attached gas")
+}
+
+var testMigrationSource = ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000001")
+
+func testEmulatedStates(balance tlb.Grams) map[ton.AccountID]tlb.ShardAccount {
+	var account tlb.ShardAccount
+	account.Account.SumType = "Account"
+	account.Account.Account.Storage.Balance.Grams = balance
+	return map[ton.AccountID]tlb.ShardAccount{testMigrationSource: account}
+}
+
+// TestWalletSpend pins the accounting behind the emulated gas price: what the wallet parted with is
+// the difference between the balance it started on and the one the emulator left it at — the
+// emulated state already nets off the excess the transfers send back.
+func TestWalletSpend(t *testing.T) {
+	spent, err := gramBalanceSpent(testEmulatedStates(7*ton.OneGRAM), testMigrationSource, 8*ton.OneGRAM)
+	require.NoError(t, err)
+	require.EqualValues(t, ton.OneGRAM, spent)
+
+	// A relay-funded batch credits the wallet, which must not wrap around into a huge spend.
+	spent, err = gramBalanceSpent(testEmulatedStates(9*ton.OneGRAM), testMigrationSource, 8*ton.OneGRAM)
+	require.NoError(t, err)
+	require.EqualValues(t, -int64(ton.OneGRAM), spent)
+
+	_, err = gramBalanceSpent(map[ton.AccountID]tlb.ShardAccount{}, testMigrationSource, ton.OneGRAM)
+	require.Error(t, err, "a missing source state must not pass as a zero spend")
+
+	var uninit tlb.ShardAccount
+	uninit.Account.SumType = "AccountNone"
+	_, err = gramBalanceSpent(map[ton.AccountID]tlb.ShardAccount{testMigrationSource: uninit}, testMigrationSource, ton.OneGRAM)
+	require.Error(t, err, "an uninitialized source must not pass as a full spend")
+}
+
+// TestDropOverfunding pins the step that keeps the over-funding out of the response: the sweep, and
+// so the amount the user is shown, must be emulated against the balance the wallet really has.
+func TestDropOverfunding(t *testing.T) {
+	source := testMigrationSource
+
+	// The wallet started 6 TON over-funded and spent 1 TON of its own, so 2 TON is what is really left.
+	emulated := testEmulatedStates(8 * ton.OneGRAM)
+	require.NoError(t, deductGramBalance(emulated, source, 6*ton.OneGRAM))
+	require.Equal(t, 2*ton.OneGRAM, emulated[source].Account.Account.Storage.Balance.Grams)
+
+	require.Error(t, deductGramBalance(map[ton.AccountID]tlb.ShardAccount{}, source, ton.OneGRAM),
+		"a missing source state must not pass silently")
+
+	require.Error(t, deductGramBalance(testEmulatedStates(ton.OneGRAM), source, 6*ton.OneGRAM),
+		"a balance below the over-funding means the wallet spent into it")
+}
+
+// TestDropOverfundFromBalances pins that the over-funding never reaches the reported trace: the
+// balance of every source transaction in it, at any depth, is the one the wallet really ends on.
+func TestDropOverfundFromBalances(t *testing.T) {
+	other := ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000002")
+	tx := func(account ton.AccountID, endBalance int64, children ...*core.Trace) *core.Trace {
+		return &core.Trace{
+			Transaction: core.Transaction{
+				TransactionID: core.TransactionID{Account: account},
+				EndBalance:    endBalance,
+			},
+			Children: children,
+		}
+	}
+	// The wallet tx, a jetton wallet in between, and the excess coming back to the source.
+	trace := tx(testMigrationSource, 7*int64(ton.OneGRAM),
+		tx(other, 3*int64(ton.OneGRAM),
+			tx(testMigrationSource, 7*int64(ton.OneGRAM))))
+
+	dropOverfundFromBalances(trace, testMigrationSource, 6*ton.OneGRAM)
+
+	require.EqualValues(t, ton.OneGRAM, trace.EndBalance)
+	require.EqualValues(t, 3*ton.OneGRAM, trace.Children[0].EndBalance, "other accounts are untouched")
+	require.EqualValues(t, ton.OneGRAM, trace.Children[0].Children[0].EndBalance, "a refund to the source counts too")
+
+	// An over-funding above the reported balance must not wrap the balance around.
+	shallow := tx(testMigrationSource, int64(ton.OneGRAM))
+	dropOverfundFromBalances(shallow, testMigrationSource, 6*ton.OneGRAM)
+	require.Zero(t, shallow.EndBalance)
+
+	dropOverfundFromBalances(nil, testMigrationSource, ton.OneGRAM) // must not panic
+}
+
+// TestEmulationOutcomeError guards the hole that let a failed batch into a 200 response: the
+// emulator reports an aborted transaction as a successful emulation, so the outcome must be checked.
+func TestEmulationOutcomeError(t *testing.T) {
+	succeeded := &core.Trace{Transaction: core.Transaction{Success: true}}
+	require.NoError(t, traceError(succeeded, 3))
+
+	aborted := &core.Trace{Transaction: core.Transaction{
+		Aborted:      true,
+		ComputePhase: &core.TxComputePhase{Success: true, ExitCode: 0},
+		ActionPhase:  &core.TxActionPhase{ResultCode: 37},
+	}}
+	err := traceError(aborted, 3)
+	require.ErrorIs(t, err, errEmulationFailed)
+	require.Contains(t, err.Error(), "seqno 3")
+	require.Contains(t, err.Error(), "action result code 37")
+	require.NotContains(t, err.Error(), "compute exit code", "a compute phase that succeeded is not a reason")
+
+	// Running out of gas skips the compute phase, which leaves exit code 0 behind: report the reason.
+	outOfGas := &core.Trace{Transaction: core.Transaction{
+		Aborted: true,
+		ComputePhase: &core.TxComputePhase{
+			Skipped:    true,
+			SkipReason: tlb.ComputeSkipReasonNoGas,
+		},
+	}}
+	err = traceError(outOfGas, 0)
+	require.ErrorIs(t, err, errEmulationFailed)
+	require.Contains(t, err.Error(), string(tlb.ComputeSkipReasonNoGas))
+	require.NotContains(t, err.Error(), "exit code 0")
+
+	// No phase owns up to the failure: it must still be reported, not answered with a 200.
+	phaseless := &core.Trace{Transaction: core.Transaction{Aborted: true}}
+	err = traceError(phaseless, 1)
+	require.ErrorIs(t, err, errEmulationFailed)
+	require.Contains(t, err.Error(), "aborted=true")
+
+	// Skipped actions do not abort the batch (+2 SendIgnoreErrors) and are only reported in the
+	// emulated trace (skipped_actions), not rejected.
+	skipped := &core.Trace{Transaction: core.Transaction{
+		Success:     true,
+		ActionPhase: &core.TxActionPhase{Success: true, TotalActions: 4, SkippedActions: 1},
+	}}
+	require.NoError(t, traceError(skipped, 4))
+
+	// A trace-less emulation is a failure, not a pass, and must not panic on the way out.
+	err = traceError(nil, 2)
+	require.ErrorIs(t, err, errEmulationFailed)
+	require.Contains(t, err.Error(), "seqno 2")
 }
 
 func requireBadRequestPrefix(t *testing.T, err error, prefix string) {
