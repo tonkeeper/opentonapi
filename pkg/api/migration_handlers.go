@@ -49,6 +49,13 @@ const minGramTransferFee = 500000
 // batch. v3/v4 don't enforce it, but the bit is harmless there.
 const migrationSweepMode = 128 + 2
 
+// migrationOverfundMargin is added on top of the plan's minimum gas when the source is over-funded
+// for emulation. The minimum only counts what is attached to the transfers; the margin covers what
+// the wallet transactions themselves burn (compute, forwarding, storage) so that a wallet which can
+// really afford the migration never fails emulation on a rounding difference. It never reaches the
+// response: dropOverfundFromBalances and the pre-sweep deduction take it back out.
+const migrationOverfundMargin = 5 * ton.OneGRAM
+
 const migrationMsgLifetime = 5 * time.Minute
 
 // migrationNftPageSize is the SearchNFTs page size used when enumerating a wallet's NFTs for migration.
@@ -190,6 +197,8 @@ type migrationBatch struct {
 	commission *big.Int // fee set by gasless estimate
 }
 
+type migrationPlan []migrationBatch
+
 func (mb migrationBatch) chunk(n int) (batches []migrationBatch) {
 	for b := range slices.Chunk(mb.messages, n) {
 		batches = append(batches, migrationBatch{
@@ -198,6 +207,26 @@ func (mb migrationBatch) chunk(n int) (batches []migrationBatch) {
 		})
 	}
 	return
+}
+
+func (mb migrationBatch) gasFundedMessages() int {
+	var n int
+	for _, message := range mb.messages {
+		if message.Mode&128 == 0 {
+			n++
+		}
+	}
+	return n
+}
+
+func (plan migrationPlan) minGramBalanceRequired() tlb.Grams {
+	var res tlb.Grams
+	for _, batch := range plan {
+		if !batch.sponsored {
+			res += tlb.Grams(batch.gasFundedMessages()) * migrationGasPerTransfer
+		}
+	}
+	return res
 }
 
 func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepareRequest) (*oas.MigrationPrepareResponse, error) {
@@ -246,9 +275,9 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	}
 	// todo allow battery for v4 and v3
 	relayFunded := (batteryPays || gaslessPays) && sourceWallet.IsRelaySupported()
-	var gramBalance int64
+	var gramBalance tlb.Grams
 	if currColl, ok := sourceAccount.Account.CurrencyCollection(); ok {
-		gramBalance = int64(currColl.Grams)
+		gramBalance = currColl.Grams
 	}
 
 	// Fetch rates once for the fiat previews below. Best-effort: on failure we skip the fiat suffix.
@@ -268,6 +297,11 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		return nil, toError(http.StatusInternalServerError, err)
 	}
 
+	minGramBalance := plan.minGramBalanceRequired()
+	if minGramBalance > gramBalance {
+		return nil, errInsufficientGramForGas(int64(minGramBalance), int64(gramBalance))
+	}
+
 	resp := &oas.MigrationPrepareResponse{
 		From:          sourceAddr.ID.ToRaw(),
 		To:            destAddr.ID.ToRaw(),
@@ -275,11 +309,28 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		Transactions:  make([]oas.MigrationTransaction, 0, len(plan)),
 	}
 	// TODO: test that initial balance is always correct for uninit wallets
-	emuAccountStates := map[ton.AccountID]tlb.ShardAccount{sourceAddr.ID: sourceAccount}
+	var emulationOverfund tlb.Grams
+	emulationState := make(map[ton.AccountID]tlb.ShardAccount)
+	emulationStartBalance := gramBalance
+	if minGramBalance != 0 && sourceAccount.Account.SumType == "Account" {
+		emulationOverfund = minGramBalance + migrationOverfundMargin
+		emulationStartBalance += emulationOverfund
+		stateOverfund := sourceAccount // copy
+		stateOverfund.Account.Account.Storage.Balance.Grams = emulationStartBalance
+		emulationState[sourceAddr.ID] = stateOverfund
+	} else {
+		emulationState[sourceAddr.ID] = sourceAccount
+	}
 	emuTime := time.Now().Unix()
 	validUntil := time.Now().Add(migrationMsgLifetime)
 	seqno := startSeqno
 	for _, batch := range plan {
+		if emulationOverfund != 0 && batch.gasFundedMessages() == 0 {
+			if err := deductGramBalance(emulationState, sourceAddr.ID, emulationOverfund); err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+			emulationOverfund = 0
+		}
 		msgType := tonwallet.V5MsgTypeSignedExternal
 		if batch.sponsored {
 			msgType = tonwallet.V5MsgTypeSignedInternal
@@ -299,15 +350,28 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 			return nil, toError(http.StatusInternalServerError, err)
 		}
 		var trace *core.Trace
-		trace, emuAccountStates, emuTime, err = h.emulateWalletMessage(ctx, emuMsg, emuAccountStates, emuTime)
+		trace, emulationState, emuTime, err = h.emulateWalletMessage(ctx, emuMsg, emulationState, emuTime)
 		if err != nil {
 			if errors.Is(err, errEmulationFailed) {
 				return nil, toError(http.StatusConflict, err)
 			}
 			return nil, toProperEmulationError(err)
 		}
+		if err := traceError(trace, seqno); err != nil {
+			return nil, toError(http.StatusConflict, err)
+		}
+		if emulationOverfund != 0 {
+			gramSpent, err := gramBalanceSpent(emulationState, sourceAddr.ID, emulationStartBalance)
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+			if gramSpent > int64(gramBalance) {
+				return nil, errInsufficientGramForGas(gramSpent, int64(gramBalance))
+			}
+			dropOverfundFromBalances(trace, sourceAddr.ID, emulationOverfund)
+		}
 
-		transaction, err := h.buildEmulatedTrace(ctx, trace, sourceAddr, batch, destAddr, gramBalance, currency, todayRates, currencyPtr, unsignedMsg, seqno, init)
+		transaction, err := h.buildEmulatedTrace(ctx, trace, sourceAddr, batch, destAddr, int64(gramBalance), currency, todayRates, currencyPtr, unsignedMsg, seqno, init)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, err)
 		}
@@ -319,7 +383,7 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 
 // prepareMigrationPlan builds the chunked batch plan. gasJettonMaster, when set, is moved to the last sponsored slot
 // and the relay commission is priced and embedded into every sponsored batch.
-func (h *Handler) prepareMigrationPlan(ctx context.Context, sourceAddr ton.Address, destAddr ton.Address, relayFunded bool, gramBalance int64, sourceWallet *tonwallet.Wallet, gasJettonMaster *ton.AccountID) ([]migrationBatch, error) {
+func (h *Handler) prepareMigrationPlan(ctx context.Context, sourceAddr ton.Address, destAddr ton.Address, relayFunded bool, gramBalance tlb.Grams, sourceWallet *tonwallet.Wallet, gasJettonMaster *ton.AccountID) (migrationPlan, error) {
 	nftTransfers, err := h.prepareNFTTransfers(ctx, sourceAddr.ID, destAddr.ID)
 	if err != nil {
 		return nil, err
@@ -454,7 +518,7 @@ func chunkMigrationPlan(w *tonwallet.Wallet, relayFunded, reserveCommissionSlot 
 	return chunkedPlan
 }
 
-func assembleMigrationPlan(to ton.AccountID, relayFunded bool, gramBalance int64, nftTransfers, jettonTransfers []tonwallet.RawMessage) ([]migrationBatch, error) {
+func assembleMigrationPlan(to ton.AccountID, relayFunded bool, gramBalance tlb.Grams, nftTransfers, jettonTransfers []tonwallet.RawMessage) (migrationPlan, error) {
 	var plan []migrationBatch
 
 	if len(nftTransfers) > 0 {
@@ -925,4 +989,86 @@ func getJettonMigrationBalance(jw core.JettonWallet, conv jettonConverter) (oas.
 
 func hasMigratableAssets(wallet oas.MigrationWalletValue) bool {
 	return wallet.Balance > minGramTransferFee || len(wallet.Jettons) != 0 || wallet.NftCount != 0
+}
+
+func errInsufficientGramForGas(required, available int64) error {
+	return toError(http.StatusConflict, ErrorWithExtendedCode{
+		Code:         http.StatusConflict,
+		Message:      "insufficient GRAM for gas",
+		ExtendedCode: references.ErrInsufficientTONForGas,
+		Details: &InsufficientFunds{
+			Required:  required,
+			Available: available,
+		},
+	})
+}
+
+func emulatedGramBalance(state map[ton.AccountID]tlb.ShardAccount, key ton.AccountID) (tlb.Grams, error) {
+	shardAcc, ok := state[key]
+	if !ok {
+		return 0, fmt.Errorf("emulation returned no state for source %v", key.ToRaw())
+	}
+	if shardAcc.Account.SumType != "Account" {
+		return 0, fmt.Errorf("source %v is not initialized after emulation", key.ToRaw())
+	}
+	return shardAcc.Account.Account.Storage.Balance.Grams, nil
+}
+
+func gramBalanceSpent(state map[ton.AccountID]tlb.ShardAccount, key ton.AccountID, startBalance tlb.Grams) (int64, error) {
+	gramBalance, err := emulatedGramBalance(state, key)
+	if err != nil {
+		return 0, err
+	}
+	return int64(startBalance) - int64(gramBalance), nil
+}
+
+func deductGramBalance(state map[ton.AccountID]tlb.ShardAccount, key ton.AccountID, val tlb.Grams) error {
+	gramBalance, err := emulatedGramBalance(state, key)
+	if err != nil {
+		return err
+	}
+	if gramBalance < val {
+		return fmt.Errorf("source %v spent into its over-funding: balance %v is below %v", key.ToRaw(), gramBalance, val)
+	}
+	shardAcc := state[key]
+	shardAcc.Account.Account.Storage.Balance.Grams = gramBalance - val
+	state[key] = shardAcc
+	return nil
+}
+
+func dropOverfundFromBalances(trace *core.Trace, key ton.AccountID, overfund tlb.Grams) {
+	if trace == nil {
+		return
+	}
+	if trace.Account == key {
+		trace.EndBalance = max(trace.EndBalance-int64(overfund), 0)
+	}
+	for _, child := range trace.Children {
+		dropOverfundFromBalances(child, key, overfund)
+	}
+}
+
+func traceError(trace *core.Trace, seqno uint32) error {
+	if trace == nil {
+		return fmt.Errorf("%w on seqno %v: emulation returned no trace", errEmulationFailed, seqno)
+	}
+	if trace.Success && !trace.Aborted {
+		return nil
+	}
+	var reasons []error
+	if phase := trace.ComputePhase; phase != nil {
+		switch {
+		case phase.Skipped:
+			reasons = append(reasons, fmt.Errorf("compute phase skipped: %v", phase.SkipReason))
+		case !phase.Success:
+			reasons = append(reasons, fmt.Errorf("compute exit code %v", phase.ExitCode))
+		}
+	}
+	if phase := trace.ActionPhase; phase != nil && !phase.Success {
+		reasons = append(reasons, fmt.Errorf("action result code %v", phase.ResultCode))
+	}
+	if len(reasons) == 0 {
+		reasons = append(reasons, fmt.Errorf("aborted=%v success=%v", trace.Aborted, trace.Success))
+	}
+	return fmt.Errorf("%w on seqno %v: %w", errEmulationFailed, seqno, errors.Join(reasons...))
 }
