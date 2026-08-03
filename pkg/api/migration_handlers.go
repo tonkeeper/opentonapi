@@ -125,7 +125,7 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 			if item.OwnerAddress == nil {
 				continue
 			}
-			if h.isBlacklistedNft(ctx, item, nftScam[item.Address]) {
+			if !h.isWhitelistedNft(ctx, item, nftScam[item.Address]) {
 				continue
 			}
 			if isSkippedNftCollection(item.CollectionAddress) {
@@ -745,8 +745,13 @@ func (h *Handler) embedGaslessCommission(ctx context.Context, plan []migrationBa
 	return plan, nil
 }
 
-func (h *Handler) isBlacklistedNft(ctx context.Context, item core.NftItem, itemScam core.TrustType) bool {
-	return h.convertNFT(ctx, item, h.addressBook, h.metaCache, itemScam).Trust == oas.TrustType(core.TrustBlacklist)
+func (h *Handler) isWhitelistedNft(ctx context.Context, item core.NftItem, itemScam core.TrustType) bool {
+	switch h.convertNFT(ctx, item, h.addressBook, h.metaCache, itemScam).Trust {
+	case oas.TrustType(core.TrustWhitelist):
+		return true
+	default:
+		return false
+	}
 }
 
 // prepareNFTTransfers builds a transfer message for every migratable NFT owned by the wallet,
@@ -770,7 +775,7 @@ func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to ton.AccountI
 		if item.OwnerAddress == nil || *item.OwnerAddress != from {
 			continue
 		}
-		if h.isBlacklistedNft(ctx, item, nftScam[item.Address]) {
+		if !h.isWhitelistedNft(ctx, item, nftScam[item.Address]) {
 			continue
 		}
 		if isSkippedNftCollection(item.CollectionAddress) {
