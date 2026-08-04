@@ -121,6 +121,14 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		WithdrawalRequestFFVaultStraw,
 		XTRDepositAction,
 		XTRBuyAction,
+		// 70
+		// Hipo. The unstake straws need JettonBurnStraw (13) to have merged the hGRAM
+		// burn first, and WithdrawHipoStakeStraw upgrades what
+		// WithdrawHipoStakeRequestStraw produced, so this relative order is required.
+		DepositHipoStakeStraw,
+		DepositHipoStakeDeferredStraw,
+		WithdrawHipoStakeRequestStraw,
+		WithdrawHipoStakeStraw,
 	}
 }
 
