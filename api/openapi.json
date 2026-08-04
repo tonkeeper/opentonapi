@@ -6135,7 +6135,8 @@
      "whales",
      "tf",
      "liquidTF",
-     "ffvault"
+     "ffvault",
+     "hipo"
     ],
     "type": "string"
    },

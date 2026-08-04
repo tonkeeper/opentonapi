@@ -1,0 +1,67 @@
+{
+   "Actions": [
+     {
+       "DepositStake": {
+         "Staker": "0:3bd5479721beaf48dc0c7f777690c8d7275e173f6f61e01b5ed027b7a3c09000",
+         "Amount": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 5000039599
+         },
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "DepositStake",
+       "BaseTransactions": [
+         "4085595d995bb2083b2ebb2be3ebbaa2e3790cc2f5f219392ae0021fd8d47626",
+         "a3115a98940947329c3e8b924c148efd19a0989f33398781a5f4f491542b4127",
+         "30c721019e303562db0bed0ee66ed773cad6b4a5539bb3fb13758fa5cf550b70",
+         "9e056045d4c09eb3d6ea8c8ef4f7b101f79cab6ec4d0a673575d9f327f7be0ba",
+         "7277bfc1bf83fdb5482567198f37804fc7dd88951115d331f04d35afaff28bb2",
+         "c138e8e8ea5cd1e329b7e5c2921eca174f8039ca9b465d038b4e6b7ecc100b47"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:3bd5479721beaf48dc0c7f777690c8d7275e173f6f61e01b5ed027b7a3c09000",
+       "Ton": -5100683410,
+       "Fee": 643812,
+       "Jettons": null
+     },
+     {
+       "Account": "0:4fc5a9cb92adce9aad7fbb3ebc8599f54107c9511202c553534bca97089a4190",
+       "Ton": 0,
+       "Fee": 684677,
+       "Jettons": null
+     },
+     {
+       "Account": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+       "Ton": 5000039262,
+       "Fee": 1502140,
+       "Jettons": null
+     },
+     {
+       "Account": "0:b6d4d107cf7ab228536c0d305a8530096ce869e55e7aa42ffbfbebc226c84a6a",
+       "Ton": 95593094,
+       "Fee": 456668,
+       "Jettons": null
+     },
+     {
+       "Account": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+       "Ton": -84,
+       "Fee": 588486,
+       "Jettons": null
+     },
+     {
+       "Account": "0:e860fc2bd284f930d86a778e77d02e3b85f3b891976bb0a6fb8050e9e9f21463",
+       "Ton": 890621,
+       "Fee": 284734,
+       "Jettons": null
+     }
+   ]
+ }

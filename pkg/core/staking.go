@@ -51,6 +51,7 @@ const (
 	StakingImplementationLiquidTF StakingImplementation = "liquidTF"
 	StakingImplementationWhales   StakingImplementation = "whales"
 	StakingImplementationFfVault  StakingImplementation = "ffvault"
+	StakingImplementationHipo     StakingImplementation = "hipo"
 )
 
 // CalculateAPY computes the annualised net APY of a liquid-staking pool from
