@@ -457,6 +457,21 @@ func TestFindActions(t *testing.T) {
 		"9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa": {
 			tongo.MustParseBlockID("(0,8000000000000000,62729945)"),
 		},
+		"19b6fc7ca736a65411b7578e9db17f965eeaa60ccb91ce64712f6127d407ad38": {
+			tongo.MustParseBlockID("(0,8000000000000000,85114134)"),
+		},
+		"d4e8cd268769f830ceb6e58a1bf7f3fb85b13757e80fd2a9a31cce94e4914936": {
+			tongo.MustParseBlockID("(0,8000000000000000,88409051)"),
+		},
+		"472085c2ca9e2dc8f93dad9dfa2b656f8953d92cfd108504de48a78857562123": {
+			tongo.MustParseBlockID("(0,c000000000000000,88431279)"),
+		},
+		"9236ab916e92293a822e1bb701c970de97eac3df18f1a18bfca3a4d3fd049229": {
+			tongo.MustParseBlockID("(0,c000000000000000,88394637)"),
+		},
+		"ba0d8ea61d2caf1d870919362b8a9178726e8f3d71e45c0c866ae7fc450e6aff": {
+			tongo.MustParseBlockID("(0,8000000000000000,62680498)"),
+		},
 	}
 
 	type Case struct {
@@ -1231,6 +1246,50 @@ func TestFindActions(t *testing.T) {
 			name:           "swap snotfi then tonco",
 			filenamePrefix: "swap-snotfi-then-tonco",
 			hash:           "9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa",
+		},
+		{
+			// Hipo mints hGRAM immediately only while no validation round is running, so
+			// this shape is rare on mainnet: this is the only occurrence in the last
+			// month of treasury history. Its block is already past the retention window
+			// of the public liteservers, so the golden file still has to be recorded
+			// against an archive liteserver (LITE_SERVERS).
+			skip:           true,
+			name:           "hipo instant stake",
+			filenamePrefix: "hipo-instant-stake",
+			hash:           "19b6fc7ca736a65411b7578e9db17f965eeaa60ccb91ce64712f6127d407ad38",
+		},
+		{
+			// Stake placed during a running round: coins are saved on the wallet and an
+			// SBT is minted, hGRAM follows at round end.
+			name:           "hipo deferred stake",
+			filenamePrefix: "hipo-deferred-stake",
+			hash:           "d4e8cd268769f830ceb6e58a1bf7f3fb85b13757e80fd2a9a31cce94e4914936",
+		},
+		{
+			// Treasury had liquid GRAM, so the hGRAM burn is paid out in the same trace.
+			name:           "hipo instant unstake",
+			filenamePrefix: "hipo-instant-unstake",
+			hash:           "472085c2ca9e2dc8f93dad9dfa2b656f8953d92cfd108504de48a78857562123",
+		},
+		{
+			// Unstake during a running round: an SBT is minted for the round-end payout,
+			// so this stays a withdraw request.
+			name:           "hipo deferred unstake",
+			filenamePrefix: "hipo-deferred-unstake",
+			hash:           "9236ab916e92293a822e1bb701c970de97eac3df18f1a18bfca3a4d3fd049229",
+		},
+		{
+			// Negative case: the treasury refused the unstake and returned the hGRAM with
+			// proxy_rollback_unstake. It must not be reported as a withdrawal or a
+			// withdraw request - the expected output is a plain jetton burn. Rollbacks
+			// are rare, and this block is past the retention window of the public
+			// liteservers, so the golden file still has to be recorded against an archive
+			// liteserver (LITE_SERVERS). TestHipoUnstakeNotRolledBack covers the guard
+			// itself without network access.
+			skip:           true,
+			name:           "hipo rollback unstake",
+			filenamePrefix: "hipo-rollback-unstake",
+			hash:           "ba0d8ea61d2caf1d870919362b8a9178726e8f3d71e45c0c866ae7fc450e6aff",
 		},
 	}
 
