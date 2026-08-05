@@ -56,6 +56,9 @@ const migrationSweepMode = 128 + 2
 // response: dropOverfundFromBalances and the pre-sweep deduction take it back out.
 const migrationOverfundMargin = 5 * ton.OneGRAM
 
+// migrationMsgLifetime is how long a single prepared transaction stays valid. It is counted from the
+// point at which that transaction's turn comes, not from the moment prepare was called — see
+// migrationValidUntil.
 const migrationMsgLifetime = 5 * time.Minute
 
 // migrationNftPageSize is the SearchNFTs page size used when enumerating a wallet's NFTs for migration.
@@ -340,9 +343,18 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		return nil, err
 	}
 	emuTime := time.Now().Unix()
-	validUntil := time.Now().Add(migrationMsgLifetime)
 	seqno := startSeqno
 	for _, batch := range plan {
+		// Every batch gets its own deadline, counted from the clock this batch starts on rather than
+		// from the moment prepare was called. Both consumers need that. Emulation advances its clock by
+		// the chain time each batch takes (shard delays, several rounds per jetton/NFT transfer), and
+		// the client signs and broadcasts the batches in order, waiting for each to land before the
+		// next. A wallet that only fits four messages per transaction — v3 and v4 — turns a wallet with
+		// a few dozen assets into a dozen-plus batches, and a single now+lifetime deadline shared by all
+		// of them expires partway down the plan: the wallet then rejects the remaining batches with exit
+		// code 36 (valid_until <= now), which surfaces here as an emulation failure in the middle of an
+		// otherwise fine migration.
+		validUntil := migrationValidUntil(emuTime)
 		// the final TON sweep carries no gas-funded messages
 		sweep := batch.gasFundedMessages() == 0
 		if emulationOverfund != 0 && sweep && gramShortfall == nil {
@@ -971,14 +983,16 @@ func (h *Handler) emulateWalletMessage(
 		return nil, nil, startTime, err
 	}
 	finalStates := emulator.FinalStates()
+	// The emulator runs the message tree round by round and moves its own clock forward between rounds,
+	// so accounts touched late in the tree carry the latest LastPaid. Take the maximum: comparing
+	// against startTime instead would make the result depend on map iteration order, and returning
+	// anything below the clock the emulation actually ended on would rewind time for the next batch.
 	endTime := startTime
 	for _, state := range finalStates {
 		if state.Account.SumType != "Account" {
 			continue
 		}
-		if lastPaid := int64(state.Account.Account.StorageStat.LastPaid) + 1; lastPaid > startTime {
-			endTime = lastPaid
-		}
+		endTime = max(endTime, int64(state.Account.Account.StorageStat.LastPaid)+1)
 	}
 	return trace, finalStates, endTime, nil
 }
@@ -1071,6 +1085,14 @@ func worseShortfall(current *InsufficientFunds, required, available int64) *Insu
 		return current
 	}
 	return &InsufficientFunds{Required: required, Available: available}
+}
+
+// migrationValidUntil is the deadline of the batch that starts on emulation clock emuTime. emuTime is
+// never behind the wall clock — it starts at time.Now() and only moves forward — so the first batch
+// gets the full lifetime from now and each later one gets the full lifetime from the point its
+// predecessors have landed.
+func migrationValidUntil(emuTime int64) time.Time {
+	return time.Unix(emuTime, 0).Add(migrationMsgLifetime)
 }
 
 func emulatedGramBalance(state map[ton.AccountID]tlb.ShardAccount, key ton.AccountID) (tlb.Grams, error) {

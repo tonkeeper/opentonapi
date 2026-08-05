@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
@@ -291,6 +292,33 @@ func TestGasFundedMessages(t *testing.T) {
 		{Mode: tonwallet.DefaultMessageMode},
 	}}
 	require.Equal(t, 2, batch.gasFundedMessages(), "the balance-carrying sweep needs no attached gas")
+}
+
+// TestMigrationValidUntilFollowsEmulationClock pins the fix for migrations that died partway down the
+// plan on v3/v4 sources. Those wallets carry only four messages per transaction, so a wallet with a
+// few dozen assets becomes a dozen-plus batches, and the emulator moves its clock forward by the chain
+// time every batch takes. A deadline pinned to the moment prepare was called expired mid-plan and the
+// wallet rejected the remaining batches with exit code 36. Each batch's deadline must instead sit a
+// full lifetime ahead of the clock that batch starts on.
+func TestMigrationValidUntilFollowsEmulationClock(t *testing.T) {
+	start := time.Now().Unix()
+	// A v3/v4 plan for >50 assets: 4 messages per transaction plus the final sweep. Per-batch drift is
+	// the emulator's inter-shard delay times the rounds a jetton transfer takes to settle.
+	const batches = 50/4 + 1 + 1
+	const driftPerBatch = 8 * 4
+
+	emuTime := start
+	for i := range batches {
+		validUntil := migrationValidUntil(emuTime)
+		require.Truef(t, validUntil.Unix() > emuTime,
+			"batch %v is already expired on the clock it starts on: valid_until %v, now %v", i, validUntil.Unix(), emuTime)
+		emuTime += driftPerBatch
+	}
+
+	// The old behaviour — one deadline for the whole plan — is what this guards against.
+	fixed := time.Unix(start, 0).Add(migrationMsgLifetime)
+	require.Less(t, fixed.Unix(), emuTime,
+		"the test is not exercising the regression: the plan no longer outruns a fixed deadline")
 }
 
 var testMigrationSource = ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000001")
