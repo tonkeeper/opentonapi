@@ -229,7 +229,7 @@ func (plan migrationPlan) minGramBalanceRequired() tlb.Grams {
 	return res
 }
 
-func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepareRequest) (*oas.MigrationPrepareResponse, error) {
+func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepareRequest) (oas.PrepareMigrationRes, error) {
 	sourceAddr, err := tongo.ParseAddress(req.From)
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("invalid `from` address: %w", err))
@@ -298,9 +298,6 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	}
 
 	minGramBalance := plan.minGramBalanceRequired()
-	if minGramBalance > gramBalance {
-		return nil, errInsufficientGramForGas(int64(minGramBalance), int64(gramBalance))
-	}
 
 	resp := &oas.MigrationPrepareResponse{
 		From:          sourceAddr.ID.ToRaw(),
@@ -321,13 +318,37 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	} else {
 		emulationState[sourceAddr.ID] = sourceAccount
 	}
+	// A source that can't cover the gas still gets the whole plan: emulation runs against the
+	// over-funded balance, so every batch can be built and previewed, and the shortfall is reported
+	// together with that preview once the loop is done.
+	gramShortfall := worseShortfall(nil, int64(minGramBalance), int64(gramBalance))
+	if gramShortfall != nil && emulationOverfund == 0 {
+		// Nothing was over-funded — the source is not initialized — so emulation would genuinely run
+		// out of funds and report a batch failure instead of the shortfall. Report it bare.
+		return nil, errInsufficientGramForGas(gramShortfall.Required, gramShortfall.Available)
+	}
+	// fail degrades a later failure to the shortfall that caused it. Once the source is known to be
+	// short, a broken batch says nothing new, and half a plan must never be handed out: the client
+	// signs the transactions in order, so a truncated list would sweep the TON before the jettons.
+	fail := func(err error) (oas.PrepareMigrationRes, error) {
+		if gramShortfall != nil {
+			return nil, errInsufficientGramForGas(gramShortfall.Required, gramShortfall.Available)
+		}
+		return nil, err
+	}
 	emuTime := time.Now().Unix()
 	validUntil := time.Now().Add(migrationMsgLifetime)
 	seqno := startSeqno
 	for _, batch := range plan {
-		if emulationOverfund != 0 && batch.gasFundedMessages() == 0 {
+		// the final TON sweep carries no gas-funded messages
+		sweep := batch.gasFundedMessages() == 0
+		if emulationOverfund != 0 && sweep && gramShortfall == nil {
+			// Take the over-funding back out before the sweep so the swept amount is the one the wallet
+			// really has. With a shortfall the wallet has already spent into the over-funding and there
+			// is nothing to take back: leave it in and let dropOverfundFromBalances and the realBalance
+			// override keep it out of the response.
 			if err := deductGramBalance(emulationState, sourceAddr.ID, emulationOverfund); err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
+				return fail(toError(http.StatusInternalServerError, err))
 			}
 			emulationOverfund = 0
 		}
@@ -339,7 +360,7 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 			Seqno: seqno, ValidUntil: validUntil, V5MsgType: msgType,
 		}, batch.messages)
 		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+			return fail(toError(http.StatusInternalServerError, err))
 		}
 		var init *tlb.StateInit
 		if seqno == 0 {
@@ -347,36 +368,43 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		}
 		emuMsg, err := h.buildWalletMsgForEmulation(sourceWallet, unsignedMsg, init, batch, sourceAddr)
 		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+			return fail(toError(http.StatusInternalServerError, err))
 		}
 		var trace *core.Trace
 		trace, emulationState, emuTime, err = h.emulateWalletMessage(ctx, emuMsg, emulationState, emuTime)
 		if err != nil {
 			if errors.Is(err, errEmulationFailed) {
-				return nil, toError(http.StatusConflict, err)
+				return fail(toError(http.StatusConflict, err))
 			}
-			return nil, toProperEmulationError(err)
+			return fail(toProperEmulationError(err))
 		}
 		if err := traceError(trace, seqno); err != nil {
-			return nil, toError(http.StatusConflict, err)
+			return fail(toError(http.StatusConflict, err))
 		}
 		if emulationOverfund != 0 {
-			gramSpent, err := gramBalanceSpent(emulationState, sourceAddr.ID, emulationStartBalance)
-			if err != nil {
-				return nil, toError(http.StatusInternalServerError, err)
-			}
-			if gramSpent > int64(gramBalance) {
-				return nil, errInsufficientGramForGas(gramSpent, int64(gramBalance))
+			// The sweep spends the whole balance, over-funding included, so its delta measures nothing.
+			if !sweep {
+				gramSpent, err := gramBalanceSpent(emulationState, sourceAddr.ID, emulationStartBalance)
+				if err != nil {
+					return fail(toError(http.StatusInternalServerError, err))
+				}
+				gramShortfall = worseShortfall(gramShortfall, gramSpent, int64(gramBalance))
 			}
 			dropOverfundFromBalances(trace, sourceAddr.ID, emulationOverfund)
 		}
 
 		transaction, err := h.buildEmulatedTrace(ctx, trace, sourceAddr, batch, destAddr, int64(gramBalance), currency, todayRates, currencyPtr, unsignedMsg, seqno, init)
 		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+			return fail(toError(http.StatusInternalServerError, err))
 		}
 		resp.Transactions = append(resp.Transactions, transaction)
 		seqno += 1
+	}
+	if gramShortfall != nil {
+		// Note: the sweep was emulated on over-funded money, so raw message values inside the trace are
+		// inflated. dropOverfundFromBalances corrects the end balances, and buildEmulatedTrace pins the
+		// sweep's risk and TON transfer amount to the real balance — that is what clients render.
+		return migrationConflict(resp, *gramShortfall), nil
 	}
 	return resp, nil
 }
@@ -991,16 +1019,51 @@ func hasMigratableAssets(wallet oas.MigrationWalletValue) bool {
 	return wallet.Balance > minGramTransferFee || len(wallet.Jettons) != 0 || wallet.NftCount != 0
 }
 
+// migrationInsufficientGramMsg is the message of both 409 flavours: with the prepared plan
+// (migrationConflict) and without it (errInsufficientGramForGas).
+const migrationInsufficientGramMsg = "insufficient GRAM for gas"
+
 func errInsufficientGramForGas(required, available int64) error {
 	return toError(http.StatusConflict, ErrorWithExtendedCode{
 		Code:         http.StatusConflict,
-		Message:      "insufficient GRAM for gas",
+		Message:      migrationInsufficientGramMsg,
 		ExtendedCode: references.ErrInsufficientTONForGas,
 		Details: &InsufficientFunds{
 			Required:  required,
 			Available: available,
 		},
 	})
+}
+
+// migrationConflict returns the prepared migration together with the shortfall that keeps it from
+// being executable, as HTTP 409 with error_code 50000. The transactions are the ones the migration
+// would consist of once the source holds Required, so a client that only lacks gas can show the whole
+// preview next to the shortfall instead of re-requesting prepare after the top-up. See
+// MigrationPrepareConflict in api/openapi.yml.
+func migrationConflict(resp *oas.MigrationPrepareResponse, shortfall InsufficientFunds) *oas.MigrationPrepareConflict {
+	return &oas.MigrationPrepareConflict{
+		From:          resp.From,
+		To:            resp.To,
+		WalletVersion: resp.WalletVersion,
+		Transactions:  resp.Transactions,
+		Error:         migrationInsufficientGramMsg,
+		ErrorCode:     extendedCode(references.ErrInsufficientTONForGas),
+		Details: oas.NewOptInsufficientFunds(oas.InsufficientFunds{
+			Required:  shortfall.Required,
+			Available: shortfall.Available,
+		}),
+	}
+}
+
+// worseShortfall folds an observed (required, available) pair into the shortfall found so far, keeping
+// the larger requirement: `required` is what the source must hold for the whole plan to go through, so
+// reporting the smaller of two observations would only buy the client a second failed attempt. A
+// covered observation never clears a shortfall already found.
+func worseShortfall(current *InsufficientFunds, required, available int64) *InsufficientFunds {
+	if required <= available || (current != nil && current.Required >= required) {
+		return current
+	}
+	return &InsufficientFunds{Required: required, Available: available}
 }
 
 func emulatedGramBalance(state map[ton.AccountID]tlb.ShardAccount, key ton.AccountID) (tlb.Grams, error) {

@@ -705,7 +705,7 @@ type Handler interface {
 	// Prepare ordered signable transactions that migrate every asset from `from` to `to`.
 	//
 	// POST /v2/migration/prepare
-	PrepareMigration(ctx context.Context, req *MigrationPrepareRequest) (*MigrationPrepareResponse, error)
+	PrepareMigration(ctx context.Context, req *MigrationPrepareRequest) (PrepareMigrationRes, error)
 	// ReindexAccount implements reindexAccount operation.
 	//
 	// Update internal cache for a particular account.

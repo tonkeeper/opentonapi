@@ -5088,6 +5088,34 @@
     ],
     "type": "object"
    },
+   "MigrationPrepareConflict": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/MigrationPrepareResponse"
+     },
+     {
+      "properties": {
+       "details": {
+        "$ref": "#/components/schemas/InsufficientFunds"
+       },
+       "error": {
+        "example": "insufficient GRAM for gas",
+        "type": "string"
+       },
+       "error_code": {
+        "description": "same extended code as on a plain error response (50000)",
+        "format": "int64",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "error"
+      ],
+      "type": "object"
+     }
+    ],
+    "description": "The prepared migration together with the reason it cannot be executed as-is. Returned with HTTP 409 and error_code 50000 when the source wallet holds migratable assets but not enough TON to cover the transfer gas: the transactions are the ones the migration would consist of once the source holds `details.required`, so a client can show the full preview next to the shortfall instead of re-requesting prepare after the top-up.\n"
+   },
    "MigrationPrepareRequest": {
     "properties": {
      "currency": {
@@ -11876,6 +11904,16 @@
        }
       },
       "description": "ordered transactions to sign and broadcast"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MigrationPrepareConflict"
+        }
+       }
+      },
+      "description": "the migration is prepared but not executable as-is — see `error_code`\n"
      },
      "default": {
       "$ref": "#/components/responses/Error"

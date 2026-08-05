@@ -1042,7 +1042,7 @@ func (UnimplementedHandler) GetWalletsByPublicKeyBulk(ctx context.Context, req O
 // Prepare ordered signable transactions that migrate every asset from `from` to `to`.
 //
 // POST /v2/migration/prepare
-func (UnimplementedHandler) PrepareMigration(ctx context.Context, req *MigrationPrepareRequest) (r *MigrationPrepareResponse, _ error) {
+func (UnimplementedHandler) PrepareMigration(ctx context.Context, req *MigrationPrepareRequest) (r PrepareMigrationRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

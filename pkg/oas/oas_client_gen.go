@@ -723,7 +723,7 @@ type Invoker interface {
 	// Prepare ordered signable transactions that migrate every asset from `from` to `to`.
 	//
 	// POST /v2/migration/prepare
-	PrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (*MigrationPrepareResponse, error)
+	PrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (PrepareMigrationRes, error)
 	// ReindexAccount invokes reindexAccount operation.
 	//
 	// Update internal cache for a particular account.
@@ -12828,12 +12828,12 @@ func (c *Client) sendGetWalletsByPublicKeyBulk(ctx context.Context, request OptG
 // Prepare ordered signable transactions that migrate every asset from `from` to `to`.
 //
 // POST /v2/migration/prepare
-func (c *Client) PrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (*MigrationPrepareResponse, error) {
+func (c *Client) PrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (PrepareMigrationRes, error) {
 	res, err := c.sendPrepareMigration(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendPrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (res *MigrationPrepareResponse, err error) {
+func (c *Client) sendPrepareMigration(ctx context.Context, request *MigrationPrepareRequest) (res PrepareMigrationRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("prepareMigration"),
 		semconv.HTTPRequestMethodKey.String("POST"),
