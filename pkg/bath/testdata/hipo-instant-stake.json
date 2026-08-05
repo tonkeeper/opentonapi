@@ -1,0 +1,53 @@
+{
+   "Actions": [
+     {
+       "DepositStake": {
+         "Staker": "0:7f2beb264ebbd6a81f8bb96737394f380a3b75f0c20eb550dc4c1312dd60e0cc",
+         "Amount": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 100000000
+         },
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "DepositStake",
+       "BaseTransactions": [
+         "8a7e859868cb186829978521fcbed99f08bdc7e753a9ef5920435007d0a8157d",
+         "099ff1431c1e4a74f699f150013f0941d4114b5518ea9b7a0ec1618fe5016057",
+         "7f86c22ae88b4db1c0aea7e915012d075734d20b5e73a6c8f7facb60634eb81b",
+         "b14833d1e822e3e2d6619f7101d157b5f4283f09e44e8bef9d257a6b9a876516"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:708755c60ec1289e08a0c348b3facfb7a6491e32ba482a2a042e36e6181f410c",
+       "Ton": 0,
+       "Fee": 556595,
+       "Jettons": null
+     },
+     {
+       "Account": "0:7f2beb264ebbd6a81f8bb96737394f380a3b75f0c20eb550dc4c1312dd60e0cc",
+       "Ton": -102356662,
+       "Fee": 385729,
+       "Jettons": null
+     },
+     {
+       "Account": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+       "Ton": 99999865,
+       "Fee": 779804,
+       "Jettons": null
+     },
+     {
+       "Account": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+       "Ton": -35,
+       "Fee": 634704,
+       "Jettons": null
+     }
+   ]
+ }
