@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/shopspring/decimal"
@@ -419,6 +421,88 @@ func TestEmulationOutcomeError(t *testing.T) {
 	err = traceError(nil, 2)
 	require.ErrorIs(t, err, errEmulationFailed)
 	require.Contains(t, err.Error(), "seqno 2")
+}
+
+// oneGram is ton.OneGRAM as the int64 nanoton amount the shortfall helpers work in.
+const oneGram = int64(ton.OneGRAM)
+
+// TestMigrationConflict pins the contract of the insufficient-gas response: a wallet that only lacks
+// gas gets the whole prepared migration back, on the same body as the shortfall, so it does not have
+// to re-request prepare after topping up. The JSON assertions guard the shape itself — the fields must
+// stay at the top level, i.e. exactly where the success response has them.
+func TestMigrationConflict(t *testing.T) {
+	resp := &oas.MigrationPrepareResponse{
+		From:          "0:97264395bd65a255a429b11326c84128b7d70ffed7949abae3036d506ba38621",
+		To:            "0:97264395bd65a255a429b11326c84128b7d70ffed7949abae3036d506ba38622",
+		WalletVersion: "v5R1",
+		Transactions: []oas.MigrationTransaction{
+			{Seqno: 0, Boc: "te6first"},
+			{Seqno: 1, Boc: "te6second"},
+		},
+	}
+	conflict := migrationConflict(resp, InsufficientFunds{Required: 3 * oneGram, Available: oneGram})
+
+	require.Equal(t, resp.From, conflict.From)
+	require.Equal(t, resp.To, conflict.To)
+	require.Equal(t, resp.WalletVersion, conflict.WalletVersion)
+	require.Equal(t, resp.Transactions, conflict.Transactions, "the whole plan travels with the shortfall")
+	require.Equal(t, "insufficient GRAM for gas", conflict.Error)
+	require.True(t, conflict.ErrorCode.Set)
+	require.EqualValues(t, 50000, conflict.ErrorCode.Value, "the extended code clients switch on")
+	require.True(t, conflict.Details.Set)
+	require.EqualValues(t, 3*oneGram, conflict.Details.Value.Required)
+	require.EqualValues(t, oneGram, conflict.Details.Value.Available)
+
+	raw, err := json.Marshal(conflict)
+	require.NoError(t, err)
+	var body map[string]json.RawMessage
+	require.NoError(t, json.Unmarshal(raw, &body))
+	for _, field := range []string{"from", "to", "wallet_version", "transactions", "error", "error_code", "details"} {
+		require.Contains(t, body, field, "%v must be a top-level field", field)
+	}
+	require.JSONEq(t, `{"required":3000000000,"available":1000000000}`, string(body["details"]))
+	var encodedTransactions []json.RawMessage
+	require.NoError(t, json.Unmarshal(body["transactions"], &encodedTransactions))
+	require.Len(t, encodedTransactions, 2, "every transaction is serialized, not just the first")
+}
+
+// TestInsufficientGramForGasError covers the bare 409, still returned when the plan cannot be built:
+// an uninitialized source cannot be over-funded for emulation, and a failure after a shortfall was
+// found must report the shortfall rather than its consequence.
+func TestInsufficientGramForGasError(t *testing.T) {
+	err := errInsufficientGramForGas(3*oneGram, oneGram)
+	statusCode, ok := err.(*oas.ErrorStatusCode)
+	require.True(t, ok, "expected *oas.ErrorStatusCode, got %T", err)
+	require.Equal(t, http.StatusConflict, statusCode.StatusCode)
+	require.Equal(t, "insufficient GRAM for gas", statusCode.Response.Error)
+	require.True(t, statusCode.Response.ErrorCode.Set)
+	require.EqualValues(t, 50000, statusCode.Response.ErrorCode.Value)
+	require.True(t, statusCode.Response.Details.Set)
+	require.EqualValues(t, 3*oneGram, statusCode.Response.Details.Value.Required)
+	require.EqualValues(t, oneGram, statusCode.Response.Details.Value.Available)
+}
+
+// TestWorseShortfall pins the number the client is told to top up to. The static plan minimum only
+// counts the gas attached to the transfers; the emulated spend also covers what the wallet itself
+// burns, so the larger of the two must win or the client tops up and fails again.
+func TestWorseShortfall(t *testing.T) {
+	require.Nil(t, worseShortfall(nil, oneGram, oneGram), "a covered requirement is no shortfall")
+	require.Nil(t, worseShortfall(nil, oneGram, 2*oneGram))
+
+	found := worseShortfall(nil, 2*oneGram, oneGram)
+	require.NotNil(t, found)
+	require.EqualValues(t, 2*oneGram, found.Required)
+	require.EqualValues(t, oneGram, found.Available)
+
+	// The emulated cost exceeds the static minimum: report the bigger one.
+	worse := worseShortfall(found, 3*oneGram, oneGram)
+	require.EqualValues(t, 3*oneGram, worse.Required)
+
+	// A smaller or equal later observation must not shrink the requirement.
+	require.Same(t, worse, worseShortfall(worse, 2*oneGram, oneGram))
+	require.Same(t, worse, worseShortfall(worse, 3*oneGram, oneGram))
+	// A batch the source can cover does not clear a shortfall already found.
+	require.Same(t, worse, worseShortfall(worse, 0, oneGram))
 }
 
 func requireBadRequestPrefix(t *testing.T, err error, prefix string) {

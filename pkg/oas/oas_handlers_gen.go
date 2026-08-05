@@ -17537,7 +17537,7 @@ func (s *Server) handlePrepareMigrationRequest(args [0]string, argsEscaped bool,
 		}
 	}()
 
-	var response *MigrationPrepareResponse
+	var response PrepareMigrationRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -17553,7 +17553,7 @@ func (s *Server) handlePrepareMigrationRequest(args [0]string, argsEscaped bool,
 		type (
 			Request  = *MigrationPrepareRequest
 			Params   = struct{}
-			Response = *MigrationPrepareResponse
+			Response = PrepareMigrationRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,

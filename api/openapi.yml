@@ -671,6 +671,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MigrationPrepareResponse'
+        '409':
+          description: >
+            the migration is prepared but not executable as-is — see `error_code`
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MigrationPrepareConflict'
         'default':
           $ref: '#/components/responses/Error'
   /v2/accounts/_bulk:
@@ -6312,6 +6319,28 @@ components:
           description: ordered; sign and broadcast in array order, one entry per external message
           items:
             $ref: "#/components/schemas/MigrationTransaction"
+    MigrationPrepareConflict:
+      description: >
+        The prepared migration together with the reason it cannot be executed as-is. Returned with
+        HTTP 409 and error_code 50000 when the source wallet holds migratable assets but not enough
+        TON to cover the transfer gas: the transactions are the ones the migration would consist of
+        once the source holds `details.required`, so a client can show the full preview next to the
+        shortfall instead of re-requesting prepare after the top-up.
+      allOf:
+        - $ref: '#/components/schemas/MigrationPrepareResponse'
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: string
+              example: insufficient GRAM for gas
+            error_code:
+              type: integer
+              format: int64
+              description: same extended code as on a plain error response (50000)
+            details:
+              $ref: '#/components/schemas/InsufficientFunds'
     MigrationTransaction:
       type: object
       required:

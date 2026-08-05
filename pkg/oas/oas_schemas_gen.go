@@ -10559,6 +10559,93 @@ func (s *MigrationOutMessage) SetMode(val int32) {
 	s.Mode = val
 }
 
+// Merged schema.
+// Ref: #/components/schemas/MigrationPrepareConflict
+type MigrationPrepareConflict struct {
+	From string `json:"from"`
+	To   string `json:"to"`
+	// Source wallet version (informational).
+	WalletVersion string `json:"wallet_version"`
+	// Ordered; sign and broadcast in array order, one entry per external message.
+	Transactions []MigrationTransaction `json:"transactions"`
+	Error        string                 `json:"error"`
+	// Same extended code as on a plain error response (50000).
+	ErrorCode OptInt64             `json:"error_code"`
+	Details   OptInsufficientFunds `json:"details"`
+}
+
+// GetFrom returns the value of From.
+func (s *MigrationPrepareConflict) GetFrom() string {
+	return s.From
+}
+
+// GetTo returns the value of To.
+func (s *MigrationPrepareConflict) GetTo() string {
+	return s.To
+}
+
+// GetWalletVersion returns the value of WalletVersion.
+func (s *MigrationPrepareConflict) GetWalletVersion() string {
+	return s.WalletVersion
+}
+
+// GetTransactions returns the value of Transactions.
+func (s *MigrationPrepareConflict) GetTransactions() []MigrationTransaction {
+	return s.Transactions
+}
+
+// GetError returns the value of Error.
+func (s *MigrationPrepareConflict) GetError() string {
+	return s.Error
+}
+
+// GetErrorCode returns the value of ErrorCode.
+func (s *MigrationPrepareConflict) GetErrorCode() OptInt64 {
+	return s.ErrorCode
+}
+
+// GetDetails returns the value of Details.
+func (s *MigrationPrepareConflict) GetDetails() OptInsufficientFunds {
+	return s.Details
+}
+
+// SetFrom sets the value of From.
+func (s *MigrationPrepareConflict) SetFrom(val string) {
+	s.From = val
+}
+
+// SetTo sets the value of To.
+func (s *MigrationPrepareConflict) SetTo(val string) {
+	s.To = val
+}
+
+// SetWalletVersion sets the value of WalletVersion.
+func (s *MigrationPrepareConflict) SetWalletVersion(val string) {
+	s.WalletVersion = val
+}
+
+// SetTransactions sets the value of Transactions.
+func (s *MigrationPrepareConflict) SetTransactions(val []MigrationTransaction) {
+	s.Transactions = val
+}
+
+// SetError sets the value of Error.
+func (s *MigrationPrepareConflict) SetError(val string) {
+	s.Error = val
+}
+
+// SetErrorCode sets the value of ErrorCode.
+func (s *MigrationPrepareConflict) SetErrorCode(val OptInt64) {
+	s.ErrorCode = val
+}
+
+// SetDetails sets the value of Details.
+func (s *MigrationPrepareConflict) SetDetails(val OptInsufficientFunds) {
+	s.Details = val
+}
+
+func (*MigrationPrepareConflict) prepareMigrationRes() {}
+
 // Ref: #/components/schemas/MigrationPrepareRequest
 type MigrationPrepareRequest struct {
 	// Legacy source wallet to drain.
@@ -10743,6 +10830,8 @@ func (s *MigrationPrepareResponse) SetWalletVersion(val string) {
 func (s *MigrationPrepareResponse) SetTransactions(val []MigrationTransaction) {
 	s.Transactions = val
 }
+
+func (*MigrationPrepareResponse) prepareMigrationRes() {}
 
 // Ref: #/components/schemas/MigrationTransaction
 type MigrationTransaction struct {
