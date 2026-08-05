@@ -494,7 +494,7 @@ func (h *Handler) buildEmulatedTrace(ctx context.Context, trace *core.Trace, sou
 	if err != nil {
 		return oas.MigrationTransaction{}, toError(http.StatusInternalServerError, err)
 	}
-	return convertTransaction(unsignedMsg, seqno, batch, outMessages, convertedTrace, event, oasRisk, init)
+	return convertTransaction(unsignedMsg, seqno, batch, outMessages, convertedTrace, event, oasRisk, init, traceFees(trace))
 }
 
 func (h *Handler) buildWalletMsgForEmulation(sourceWallet *tonwallet.Wallet, unsignedMsg *boc.Cell, init *tlb.StateInit, batch migrationBatch, sourceAddr ton.Address) (tlb.Message, error) {
@@ -586,7 +586,7 @@ func convertWalletMessage(msg tonwallet.RawMessage) (oas.MigrationOutMessage, er
 	}, nil
 }
 
-func convertTransaction(unsignedMsg *boc.Cell, seqno uint32, batch migrationBatch, outMessages []oas.MigrationOutMessage, convertedTrace oas.Trace, event oas.AccountEvent, oasRisk oas.Risk, init *tlb.StateInit) (oas.MigrationTransaction, error) {
+func convertTransaction(unsignedMsg *boc.Cell, seqno uint32, batch migrationBatch, outMessages []oas.MigrationOutMessage, convertedTrace oas.Trace, event oas.AccountEvent, oasRisk oas.Risk, init *tlb.StateInit, gasSpent int64) (oas.MigrationTransaction, error) {
 	bocBase64, err := unsignedMsg.ToBocBase64()
 	if err != nil {
 		return oas.MigrationTransaction{}, err
@@ -601,6 +601,7 @@ func convertTransaction(unsignedMsg *boc.Cell, seqno uint32, batch migrationBatc
 			Event: event,
 			Risk:  oasRisk,
 		},
+		GasSpent: gasSpent,
 	}
 	if batch.commission != nil {
 		transaction.Commission = oas.NewOptString(batch.commission.String())
@@ -1109,6 +1110,27 @@ func dropOverfundFromBalances(trace *core.Trace, key ton.AccountID, overfund tlb
 	for _, child := range trace.Children {
 		dropOverfundFromBalances(child, key, overfund)
 	}
+}
+
+// traceFees sums the TON burned as fees by every transaction in trace. The per-transaction arithmetic
+// mirrors core.convertTransaction (pkg/core/converters.go) and bath.fromTrace: total_fees already
+// contains the action phase's total_action_fees, i.e. only the validator's cut of each outbound
+// message's forward fee, so swapping that for the full total_fwd_fees also accounts for the part
+// collected downstream when the message is imported. Emulating against an over-funded source balance
+// does not distort this: gas is instruction count, forward fees are cell and bit count, storage fees
+// are cell count and elapsed time — none of them depend on the balance.
+func traceFees(trace *core.Trace) int64 {
+	if trace == nil {
+		return 0
+	}
+	fees := trace.TotalFee
+	if phase := trace.ActionPhase; phase != nil {
+		fees += int64(phase.FwdFees) - int64(phase.TotalFees)
+	}
+	for _, child := range trace.Children {
+		fees += traceFees(child)
+	}
+	return fees
 }
 
 func traceError(trace *core.Trace, seqno uint32) error {
