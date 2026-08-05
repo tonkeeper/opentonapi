@@ -457,8 +457,8 @@ func TestFindActions(t *testing.T) {
 		"9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa": {
 			tongo.MustParseBlockID("(0,8000000000000000,62729945)"),
 		},
-		"19b6fc7ca736a65411b7578e9db17f965eeaa60ccb91ce64712f6127d407ad38": {
-			tongo.MustParseBlockID("(0,8000000000000000,85114134)"),
+		"28bd278900a7b0f8febf02784b5dc4c3b4b693ad237ccdd4b212fe271b3507c8": {
+			tongo.MustParseBlockID("(0,8000000000000000,88655705)"),
 		},
 		"d4e8cd268769f830ceb6e58a1bf7f3fb85b13757e80fd2a9a31cce94e4914936": {
 			tongo.MustParseBlockID("(0,8000000000000000,88409051)"),
@@ -1248,15 +1248,11 @@ func TestFindActions(t *testing.T) {
 			hash:           "9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa",
 		},
 		{
-			// Hipo mints hGRAM immediately only while no validation round is running, so
-			// this shape is rare on mainnet: this is the only occurrence in the last
-			// month of treasury history. Its block is already past the retention window
-			// of the public liteservers, so the golden file still has to be recorded
-			// against an archive liteserver (LITE_SERVERS).
-			skip:           true,
+			// Instant minting is enabled: the treasury mints hGRAM in the deposit trace
+			// itself instead of deferring it to the round end.
 			name:           "hipo instant stake",
 			filenamePrefix: "hipo-instant-stake",
-			hash:           "19b6fc7ca736a65411b7578e9db17f965eeaa60ccb91ce64712f6127d407ad38",
+			hash:           "28bd278900a7b0f8febf02784b5dc4c3b4b693ad237ccdd4b212fe271b3507c8",
 		},
 		{
 			// Stake placed during a running round: coins are saved on the wallet and an
