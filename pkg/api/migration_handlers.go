@@ -138,6 +138,9 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 			if isSkippedNftCollection(item.CollectionAddress) {
 				continue
 			}
+			if !item.Transferable {
+				continue
+			}
 			nftCountByOwner[*item.OwnerAddress]++
 		}
 	})
@@ -848,8 +851,8 @@ func (h *Handler) isWhitelistedNft(ctx context.Context, item core.NftItem, itemS
 }
 
 // prepareNFTTransfers builds a transfer message for every migratable NFT owned by the wallet,
-// skipping blacklisted items and skipped collections. Excesses are sent to the destination
-// (response_destination = to).
+// skipping blacklisted items, skipped collections, and non-transferable items (e.g. SBTs). Excesses
+// are sent to the destination (response_destination = to).
 func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to ton.AccountID) ([]tonwallet.RawMessage, error) {
 	nfts, err := h.collectOwnedNFTs(ctx, from)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
@@ -872,6 +875,9 @@ func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to ton.AccountI
 			continue
 		}
 		if isSkippedNftCollection(item.CollectionAddress) {
+			continue
+		}
+		if !item.Transferable {
 			continue
 		}
 		msgRaw, err := tonwallet.ToRawMessage(nft.ItemTransferMessage{
