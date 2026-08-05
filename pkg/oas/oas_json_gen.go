@@ -31153,9 +31153,13 @@ func (s *MigrationTransaction) encodeFields(e *jx.Encoder) {
 		e.FieldStart("emulation")
 		s.Emulation.Encode(e)
 	}
+	{
+		e.FieldStart("gas_spent")
+		e.Int64(s.GasSpent)
+	}
 }
 
-var jsonFieldsNameOfMigrationTransaction = [7]string{
+var jsonFieldsNameOfMigrationTransaction = [8]string{
 	0: "seqno",
 	1: "boc",
 	2: "sponsored",
@@ -31163,6 +31167,7 @@ var jsonFieldsNameOfMigrationTransaction = [7]string{
 	4: "state_init",
 	5: "messages",
 	6: "emulation",
+	7: "gas_spent",
 }
 
 // Decode decodes MigrationTransaction from json.
@@ -31257,6 +31262,18 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"emulation\"")
 			}
+		case "gas_spent":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int64()
+				s.GasSpent = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"gas_spent\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -31267,7 +31284,7 @@ func (s *MigrationTransaction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01100011,
+		0b11100011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

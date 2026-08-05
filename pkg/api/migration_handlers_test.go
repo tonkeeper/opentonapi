@@ -436,8 +436,8 @@ func TestMigrationConflict(t *testing.T) {
 		To:            "0:97264395bd65a255a429b11326c84128b7d70ffed7949abae3036d506ba38622",
 		WalletVersion: "v5R1",
 		Transactions: []oas.MigrationTransaction{
-			{Seqno: 0, Boc: "te6first"},
-			{Seqno: 1, Boc: "te6second"},
+			{Seqno: 0, Boc: "te6first", GasSpent: 4321000},
+			{Seqno: 1, Boc: "te6second", GasSpent: 1234000},
 		},
 	}
 	conflict := migrationConflict(resp, InsufficientFunds{Required: 3 * oneGram, Available: oneGram})
@@ -464,6 +464,9 @@ func TestMigrationConflict(t *testing.T) {
 	var encodedTransactions []json.RawMessage
 	require.NoError(t, json.Unmarshal(body["transactions"], &encodedTransactions))
 	require.Len(t, encodedTransactions, 2, "every transaction is serialized, not just the first")
+	var firstTransaction map[string]json.RawMessage
+	require.NoError(t, json.Unmarshal(encodedTransactions[0], &firstTransaction))
+	require.JSONEq(t, "4321000", string(firstTransaction["gas_spent"]), "the fee is reported per transaction")
 }
 
 // TestInsufficientGramForGasError covers the bare 409, still returned when the plan cannot be built:
@@ -503,6 +506,26 @@ func TestWorseShortfall(t *testing.T) {
 	require.Same(t, worse, worseShortfall(worse, 3*oneGram, oneGram))
 	// A batch the source can cover does not clear a shortfall already found.
 	require.Same(t, worse, worseShortfall(worse, 0, oneGram))
+}
+
+// TestTraceFees pins the fee reported as gas_spent: every transaction in the trace contributes, and an
+// action phase replaces its total_action_fees — already inside total_fees — with the full forward fee,
+// so the part collected downstream when the message is imported is counted too.
+func TestTraceFees(t *testing.T) {
+	trace := func(totalFee int64, phase *core.TxActionPhase, children ...*core.Trace) *core.Trace {
+		return &core.Trace{
+			Transaction: core.Transaction{TotalFee: totalFee, ActionPhase: phase},
+			Children:    children,
+		}
+	}
+	require.Zero(t, traceFees(nil), "a missing trace costs nothing")
+	require.EqualValues(t, 1000, traceFees(trace(1000, nil)), "no action phase, no children")
+
+	// 1000 + (400 - 100) on the wallet, 700 on the jetton wallet, 300 on the destination.
+	full := trace(1000, &core.TxActionPhase{FwdFees: 400, TotalFees: 100},
+		trace(700, nil, trace(300, nil)),
+	)
+	require.EqualValues(t, 2300, traceFees(full))
 }
 
 func requireBadRequestPrefix(t *testing.T, err error, prefix string) {

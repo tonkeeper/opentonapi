@@ -5205,6 +5205,12 @@
      "emulation": {
       "$ref": "#/components/schemas/MessageConsequences"
      },
+     "gas_spent": {
+      "description": "TON burned as network fees by this transaction, in nanotons — the sum over every transaction in `emulation.trace`. For a transfer batch this is only part of the gas attached to its messages: the transfers name the destination wallet as response_destination, so the unburned remainder arrives there instead of returning to the source. For the final balance sweep it is the fee deducted from the swept amount. When `sponsored` is true these fees are covered by the relay, which charges `commission` instead.\n",
+      "example": 4321000,
+      "format": "int64",
+      "type": "integer"
+     },
      "messages": {
       "description": "ordered raw internal messages carried by this transaction — the cells the wallet resends. These are what populate the payload/actions.\n",
       "items": {
@@ -5232,7 +5238,8 @@
      "seqno",
      "boc",
      "messages",
-     "emulation"
+     "emulation",
+     "gas_spent"
     ],
     "type": "object"
    },

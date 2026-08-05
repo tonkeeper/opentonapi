@@ -10857,6 +10857,13 @@ type MigrationTransaction struct {
 	// are what populate the payload/actions.
 	Messages  []MigrationOutMessage `json:"messages"`
 	Emulation MessageConsequences   `json:"emulation"`
+	// TON burned as network fees by this transaction, in nanotons — the sum over every transaction in
+	// `emulation.trace`. For a transfer batch this is only part of the gas attached to its messages: the
+	// transfers name the destination wallet as response_destination, so the unburned remainder arrives
+	// there instead of returning to the source. For the final balance sweep it is the fee deducted from
+	// the swept amount. When `sponsored` is true these fees are covered by the relay, which charges
+	// `commission` instead.
+	GasSpent int64 `json:"gas_spent"`
 }
 
 // GetSeqno returns the value of Seqno.
@@ -10894,6 +10901,11 @@ func (s *MigrationTransaction) GetEmulation() MessageConsequences {
 	return s.Emulation
 }
 
+// GetGasSpent returns the value of GasSpent.
+func (s *MigrationTransaction) GetGasSpent() int64 {
+	return s.GasSpent
+}
+
 // SetSeqno sets the value of Seqno.
 func (s *MigrationTransaction) SetSeqno(val int32) {
 	s.Seqno = val
@@ -10927,6 +10939,11 @@ func (s *MigrationTransaction) SetMessages(val []MigrationOutMessage) {
 // SetEmulation sets the value of Emulation.
 func (s *MigrationTransaction) SetEmulation(val MessageConsequences) {
 	s.Emulation = val
+}
+
+// SetGasSpent sets the value of GasSpent.
+func (s *MigrationTransaction) SetGasSpent(val int64) {
+	s.GasSpent = val
 }
 
 // Ref: #/components/schemas/MigrationWalletValue
