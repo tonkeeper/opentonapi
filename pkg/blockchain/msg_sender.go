@@ -170,7 +170,7 @@ func (ms *MsgSender) send(ctx context.Context, payload []byte) error {
 		// three hanging liteservers could block a request for ~180s, causing the
 		// caller (or an upstream proxy) to time out and receive an empty response.
 		ctx2, cancel := context.WithTimeout(ctx, 10*time.Second)
-		_, err := c.SendMessage(ctx2, payload)
+		_, err = c.SendMessage(ctx2, payload)
 		cancel()
 		if err == nil {
 			liteserverMessageSendMc.WithLabelValues(fmt.Sprintf("%d", serverNumber), "success", fmt.Sprintf("%d", i)).Inc()
