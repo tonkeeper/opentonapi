@@ -1,10 +1,13 @@
 package blockchain
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/tongo/config"
+	"github.com/tonkeeper/tongo/liteapi"
 )
 
 func TestMsgSender_dropExpiredBatches(t *testing.T) {
@@ -56,4 +59,27 @@ func TestMsgSender_dropExpiredBatches(t *testing.T) {
 			require.Equal(t, tt.wantBocs, gotBocs)
 		})
 	}
+}
+
+// TestMsgSender_send_AllAttemptsFail is a regression test: send() must
+// return the underlying error when every liteserver attempt fails, not
+// swallow it. It previously returned nil because `_, err := c.SendMessage(...)`
+// inside the retry loop shadowed the function-scoped err instead of assigning it.
+func TestMsgSender_send_AllAttemptsFail(t *testing.T) {
+	badServer := config.LiteServer{
+		Host: "127.0.0.1:1", // nothing listens here; connection must fail
+		Key:  "wQEUBFTZKUpFvUVWkT8vTsxRUKWZFqXOMpXFBS2ykRE=",
+	}
+	client, err := liteapi.NewClient(
+		liteapi.WithAsyncConnectionsInit(),
+		liteapi.WithLiteServers([]config.LiteServer{badServer}),
+	)
+	require.NoError(t, err)
+
+	ms := &MsgSender{sendingClients: []*liteapi.Client{client}}
+	sendCtx, sendCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer sendCancel()
+
+	err = ms.send(sendCtx, []byte("payload content is irrelevant to send()"))
+	require.Error(t, err, "send() must surface the failure, not swallow it")
 }
