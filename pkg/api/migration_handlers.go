@@ -1,6 +1,7 @@
 package api
 
 import (
+	"cmp"
 	"context"
 	"crypto/ed25519"
 	"errors"
@@ -193,6 +194,37 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 			continue
 		}
 		resp.Wallets = append(resp.Wallets, w)
+	}
+	// Best-effort: used only to rank wallets by fiat value below. On failure every
+	// jetton contributes 0, degrading the ranking to TON balance alone.
+	todayRates, _, _, _, ratesErr := h.getRates()
+	if todayRates == nil || ratesErr != nil {
+		h.logger.Warn("migration: can't get rates for fiat sort", zap.Error(ratesErr))
+	} else {
+		// Rank by fiat value: a TON-denominated total (gram balance plus jetton
+		// holdings priced via todayRates) sorts the same as a fiat amount would, since
+		// every wallet's total would be divided by the same currency price.
+		fiatValue := make(map[string]float64, len(resp.Wallets))
+		for _, w := range resp.Wallets {
+			total := float64(w.Balance) / float64(ton.OneGRAM)
+			for _, jb := range w.Jettons {
+				rate, ok := todayRates[jb.Jetton.Address]
+				if !ok || rate == 0 {
+					continue
+				}
+				amount, ok := new(big.Float).SetString(jb.Balance)
+				if !ok {
+					continue
+				}
+				human := new(big.Float).Quo(amount, big.NewFloat(math.Pow10(jb.Jetton.Decimals)))
+				f, _ := new(big.Float).Mul(human, big.NewFloat(rate)).Float64()
+				total += f
+			}
+			fiatValue[w.Account] = total
+		}
+		slices.SortFunc(resp.Wallets, func(a, b oas.MigrationWalletValue) int {
+			return cmp.Compare(fiatValue[b.Account], fiatValue[a.Account])
+		})
 	}
 	return resp, nil
 }
