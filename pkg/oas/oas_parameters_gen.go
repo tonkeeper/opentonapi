@@ -8097,8 +8097,8 @@ func decodeGetJettonHoldersParams(args [1]string, argsEscaped bool, r *http.Requ
 						if err := (validate.Int{
 							MinSet:        true,
 							Min:           0,
-							MaxSet:        true,
-							Max:           9000,
+							MaxSet:        false,
+							Max:           0,
 							MinExclusive:  false,
 							MaxExclusive:  false,
 							MultipleOfSet: false,
