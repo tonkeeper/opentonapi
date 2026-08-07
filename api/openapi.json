@@ -10742,7 +10742,6 @@
       "required": false,
       "schema": {
        "default": 0,
-       "maximum": 9000,
        "minimum": 0,
        "type": "integer"
       }
