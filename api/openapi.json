@@ -10638,6 +10638,7 @@
       }
      },
      {
+      "description": "Deprecated: served from a cache, so results may lag behind real-time. Use `last_account_id` for live, real-time pagination instead.",
       "in": "query",
       "name": "offset",
       "schema": {
@@ -10646,6 +10647,16 @@
        "format": "int32",
        "minimum": 0,
        "type": "integer"
+      }
+     },
+     {
+      "description": "Cursor for pagination, always resolved live. Pass the `metadata.address` of the last jetton master from the previous page to get the next page. Preferred over `offset`.",
+      "in": "query",
+      "name": "last_account_id",
+      "schema": {
+       "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+       "format": "address",
+       "type": "string"
       }
      }
     ],

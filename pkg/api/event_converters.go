@@ -103,6 +103,7 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 	var curPrice float64
 	var todayRates map[string]float64
 	var err error
+	currencyKnown := currency != nil
 	if currency != nil {
 		todayRates, _, _, _, err = h.getRates()
 		if err != nil {
@@ -111,7 +112,8 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		var prs bool
 		curPrice, prs = todayRates[strings.ToUpper(*currency)]
 		if !prs {
-			return oas.Risk{}, fmt.Errorf("can't calculate risk: unknown currency")
+			h.logger.Warn("can't calculate risk: unknown currency", zap.String("currency", *currency))
+			currencyKnown = false
 		}
 	}
 	if risk.TransferAllRemainingBalance {
@@ -155,7 +157,7 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		}
 		oasRisk.Jettons = append(oasRisk.Jettons, jettonQuantity)
 	}
-	if currency != nil {
+	if currencyKnown {
 		oasRisk.TotalEquivalent = oas.NewOptFloat32(float32(total / curPrice))
 	}
 	if len(risk.Nfts) > 0 {

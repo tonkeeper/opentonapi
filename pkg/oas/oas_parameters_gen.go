@@ -8316,8 +8316,13 @@ func decodeGetJettonTransferPayloadParams(args [2]string, argsEscaped bool, r *h
 
 // GetJettonsParams is parameters of getJettons operation.
 type GetJettonsParams struct {
-	Limit  OptInt32 `json:",omitempty,omitzero"`
+	Limit OptInt32 `json:",omitempty,omitzero"`
+	// Deprecated: served from a cache, so results may lag behind real-time. Use `last_account_id` for
+	// live, real-time pagination instead.
 	Offset OptInt32 `json:",omitempty,omitzero"`
+	// Cursor for pagination, always resolved live. Pass the `metadata.address` of the last jetton master
+	// from the previous page to get the next page. Preferred over `offset`.
+	LastAccountID OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetJettonsParams(packed middleware.Parameters) (params GetJettonsParams) {
@@ -8337,6 +8342,15 @@ func unpackGetJettonsParams(packed middleware.Parameters) (params GetJettonsPara
 		}
 		if v, ok := packed[key]; ok {
 			params.Offset = v.(OptInt32)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "last_account_id",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.LastAccountID = v.(OptString)
 		}
 	}
 	return params
@@ -8482,6 +8496,47 @@ func decodeGetJettonsParams(args [0]string, argsEscaped bool, r *http.Request) (
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: last_account_id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "last_account_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLastAccountIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLastAccountIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.LastAccountID.SetTo(paramsDotLastAccountIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "last_account_id",
 			In:   "query",
 			Err:  err,
 		}
