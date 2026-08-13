@@ -10189,6 +10189,10 @@ func (s *Server) handleGetJettonsRequest(args [0]string, argsEscaped bool, w htt
 					Name: "offset",
 					In:   "query",
 				}: params.Offset,
+				{
+					Name: "last_account_id",
+					In:   "query",
+				}: params.LastAccountID,
 			},
 			Raw: r,
 		}

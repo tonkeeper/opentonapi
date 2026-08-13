@@ -101,7 +101,7 @@ type storage interface {
 	GetWalletAddressesByPubkeys(ctx context.Context, pubKeys []ed25519.PublicKey) (map[string]map[ton.AccountID]abi.ContractInterface, error)
 	GetSubscriptionsV2(ctx context.Context, address tongo.AccountID) ([]core.SubscriptionV2, error)
 	GetSubscriptionsV1(ctx context.Context, address tongo.AccountID) ([]core.SubscriptionV1, error)
-	GetJettonMasters(ctx context.Context, limit, offset int) ([]core.JettonMaster, error)
+	GetJettonMasters(ctx context.Context, limit int, lastAccountID *tongo.AccountID) ([]core.JettonMaster, error)
 	GetJettonMastersByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.JettonMaster, error)
 
 	GetLastConfig(ctx context.Context) (ton.BlockchainConfig, error)
@@ -151,6 +151,11 @@ type liteStorageRaw interface {
 	GetConfigAllRaw(ctx context.Context, mode uint32, id tongo.BlockIDExt) (liteclient.LiteServerConfigInfoC, error)
 	GetShardBlockProofRaw(ctx context.Context, id tongo.BlockIDExt) (liteclient.LiteServerShardBlockProofC, error)
 	GetOutMsgQueueSizes(ctx context.Context) (liteclient.LiteServerOutMsgQueueSizesC, error)
+}
+
+// jettonMastersOffsetSource serves legacy offset-based /v2/jettons pagination without ever running an OFFSET query against storage
+type jettonMastersOffsetSource interface {
+	Slice(limit, offset int) []core.JettonMaster
 }
 
 // chainState provides current blockchain state which change very rarely or slow like staking APY income

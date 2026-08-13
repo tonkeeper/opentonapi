@@ -1587,12 +1587,24 @@ paths:
             minimum: 1
         - name: offset
           in: query
+          description: >-
+            Deprecated: served from a cache, so results may lag behind real-time. Use `last_account_id` for
+            live, real-time pagination instead.
           schema:
             type: integer
             format: int32
             default: 0
             example: 10
             minimum: 0
+        - name: last_account_id
+          in: query
+          description: >-
+            Cursor for pagination, always resolved live. Pass the `metadata.address` of the last jetton master
+            from the previous page to get the next page. Preferred over `offset`.
+          schema:
+            type: string
+            format: address
+            example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
       responses:
         '200':
           description: a list of jettons

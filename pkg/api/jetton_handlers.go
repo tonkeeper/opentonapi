@@ -198,11 +198,27 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 			limit = 1000
 		}
 	}
-	offset := 0
-	if params.Offset.IsSet() {
-		offset = max(int(params.Offset.Value), 0)
+	var jettons []core.JettonMaster
+	var err error
+	switch {
+	case params.LastAccountID.IsSet():
+		var account ton.Address
+		account, err = tongo.ParseAddress(params.LastAccountID.Value)
+		if err != nil {
+			return nil, toError(http.StatusBadRequest, fmt.Errorf("last_account_id: %w", err))
+		}
+		jettons, err = h.storage.GetJettonMasters(ctx, limit, &account.ID)
+	case params.Offset.IsSet() && params.Offset.Value > 0:
+		if h.jettonMasters != nil {
+			offset := max(int(params.Offset.Value), 0)
+			jettons = h.jettonMasters.Slice(limit, offset)
+		} else {
+			h.logger.Error("received an offset-based /v2/jettons request, but no jettonMastersOffsetSource is configured")
+			return nil, toError(http.StatusInternalServerError, fmt.Errorf("offset-based pagination is currently not available"))
+		}
+	default:
+		jettons, err = h.storage.GetJettonMasters(ctx, limit, nil)
 	}
-	jettons, err := h.storage.GetJettonMasters(ctx, limit, offset)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
