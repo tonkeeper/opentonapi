@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	"github.com/tonkeeper/tongo/abi"
+	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/ton"
 
 	"github.com/shopspring/decimal"
@@ -28,6 +29,12 @@ type JettonHolder struct {
 	Balance       decimal.Decimal
 }
 
+type JettonMasterRich struct {
+	Metadata   tep64.Metadata
+	Interfaces []abi.ContractInterface
+	ScaledUI   *ScaledUIParameters
+}
+
 type JettonMaster struct {
 	// Address of a jetton master.
 	Address           tongo.AccountID
@@ -37,6 +44,8 @@ type JettonMaster struct {
 	CodeHash          string
 	DataHash          string
 	LastTransactionLt uint64
+	// Enriched might be populated to avoid N+1 db lookups (atm the GetJettonMasters does it)
+	Enriched *JettonMasterRich
 }
 
 type JettonWalletLockData struct {

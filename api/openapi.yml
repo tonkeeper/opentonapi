@@ -1588,8 +1588,8 @@ paths:
         - name: offset
           in: query
           description: >-
-            Deprecated: served from a cache, so results may lag behind real-time. Use `last_account_id` for
-            live, real-time pagination instead.
+            Deprecated: pagination is based on a daily snapshot, so some new jettons may not appear yet.
+            Use `last_account_id` for real-time pagination instead.
           schema:
             type: integer
             format: int32

@@ -188,6 +188,11 @@ func (s *LiteStorage) GetJettonMasters(ctx context.Context, limit int, lastAccou
 	return []core.JettonMaster{}, nil
 }
 
+func (s *LiteStorage) GetJettonMastersByOffset(ctx context.Context, limit, offset int) ([]core.JettonMaster, error) {
+	// TODO: implement
+	return []core.JettonMaster{}, nil
+}
+
 func (s *LiteStorage) GetJettonMastersByAddresses(ctx context.Context, addresses []ton.AccountID) ([]core.JettonMaster, error) {
 	return []core.JettonMaster{}, nil
 }

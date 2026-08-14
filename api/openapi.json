@@ -10638,7 +10638,7 @@
       }
      },
      {
-      "description": "Deprecated: served from a cache, so results may lag behind real-time. Use `last_account_id` for live, real-time pagination instead.",
+      "description": "Deprecated: pagination is based on a daily snapshot, so some new jettons may not appear yet. Use `last_account_id` for real-time pagination instead.",
       "in": "query",
       "name": "offset",
       "schema": {

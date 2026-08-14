@@ -209,13 +209,8 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 		}
 		jettons, err = h.storage.GetJettonMasters(ctx, limit, &account.ID)
 	case params.Offset.IsSet() && params.Offset.Value > 0:
-		if h.jettonMasters != nil {
-			offset := max(int(params.Offset.Value), 0)
-			jettons = h.jettonMasters.Slice(limit, offset)
-		} else {
-			h.logger.Error("received an offset-based /v2/jettons request, but no jettonMastersOffsetSource is configured")
-			return nil, toError(http.StatusInternalServerError, fmt.Errorf("offset-based pagination is currently not available"))
-		}
+		offset := max(int(params.Offset.Value), 0)
+		jettons, err = h.storage.GetJettonMastersByOffset(ctx, limit, offset)
 	default:
 		jettons, err = h.storage.GetJettonMasters(ctx, limit, nil)
 	}
@@ -232,9 +227,14 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, master.Address, nil)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+		var scaledUiParams *core.ScaledUIParameters
+		if master.Enriched == nil {
+			scaledUiParams, err = h.storage.GetScaledUIParameters(ctx, master.Address, nil)
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+		} else {
+			scaledUiParams = master.Enriched.ScaledUI
 		}
 		results[idx] = h.convertJettonInfo(ctx, master, holders, scaledUiParams)
 	}
@@ -379,9 +379,14 @@ func (h *Handler) GetJettonInfosByAddresses(ctx context.Context, request oas.Opt
 	}
 	results := make([]oas.JettonInfo, len(jettons))
 	for idx, master := range jettons {
-		scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, master.Address, nil)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
+		var scaledUiParams *core.ScaledUIParameters
+		if master.Enriched == nil {
+			scaledUiParams, err = h.storage.GetScaledUIParameters(ctx, master.Address, nil)
+			if err != nil {
+				return nil, toError(http.StatusInternalServerError, err)
+			}
+		} else {
+			scaledUiParams = master.Enriched.ScaledUI
 		}
 		results[idx] = h.convertJettonInfo(ctx, master, jettonsHolders, scaledUiParams)
 	}
