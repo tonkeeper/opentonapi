@@ -79,10 +79,6 @@ type Handler struct {
 	mu         sync.Mutex
 	dns        *dns.DNS // todo: update when blockchain config changes
 	configPool *sync.Pool
-
-	// jettonMasters serves legacy offset-based /v2/jettons requests. May be nil, in which case
-	// offset-based requests fail rather than being silently served as page one.
-	jettonMasters jettonMastersOffsetSource
 }
 
 func (h *Handler) NewError(ctx context.Context, err error) *oas.ErrorStatusCode {
@@ -112,8 +108,6 @@ type Options struct {
 	parallelTraceProcessing bool
 	archiveLiteServers      []config.LiteServer
 	publicAPIURL            string
-
-	jettonMastersOffsetSource jettonMastersOffsetSource
 }
 
 type Option func(o *Options)
@@ -222,14 +216,6 @@ func WithPublicAPIURL(publicAPIURL string) Option {
 	}
 }
 
-// WithJettonMastersOffsetSource registers the source used to serve legacy offset-based
-// /v2/jettons requests. When not set, offset-based requests fail with an error.
-func WithJettonMastersOffsetSource(source jettonMastersOffsetSource) Option {
-	return func(o *Options) {
-		o.jettonMastersOffsetSource = source
-	}
-}
-
 func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 	options := &Options{}
 	for _, o := range opts {
@@ -333,13 +319,16 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		configPool:              configPool,
 		rewards:                 rwd,
 		stats:                   rewards.NewStats(liteapi.WithLiteServers(options.archiveLiteServers)),
-		jettonMasters:           options.jettonMastersOffsetSource,
 	}, nil
 }
 
 func (h *Handler) GetJettonNormalizedMetadata(ctx context.Context, master tongo.AccountID) NormalizedMetadata {
 	meta, _ := h.metaCache.getJettonMeta(ctx, master)
 	// TODO: should we ignore the second returned value?
+	return h.normalizeJettonMetadata(master, meta)
+}
+
+func (h *Handler) normalizeJettonMetadata(master tongo.AccountID, meta tep64.Metadata) NormalizedMetadata {
 	if info, ok := h.addressBook.GetJettonInfoByAddress(master); ok {
 		return NormalizeMetadata(master, meta, &info, core.TrustNone)
 	}

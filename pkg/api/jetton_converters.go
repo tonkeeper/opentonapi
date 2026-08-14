@@ -219,7 +219,12 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 }
 
 func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaster, holders map[tongo.AccountID]int32, scaledUiParams *core.ScaledUIParameters) oas.JettonInfo {
-	meta := h.GetJettonNormalizedMetadata(ctx, master.Address)
+	var meta NormalizedMetadata
+	if master.Enriched != nil {
+		meta = h.normalizeJettonMetadata(master.Address, master.Enriched.Metadata)
+	} else {
+		meta = h.GetJettonNormalizedMetadata(ctx, master.Address)
+	}
 	metadata := jettonMetadata(master.Address, meta)
 	info := oas.JettonInfo{
 		Mintable:     master.Mintable,
@@ -249,8 +254,14 @@ func (h *Handler) convertJettonInfo(ctx context.Context, master core.JettonMaste
 	if ab.Name != "" {
 		info.SetName(oas.NewOptNilString(ab.Name))
 	}
-	rawAccount, _ := h.storage.GetRawAccount(ctx, master.Address)
-	if rawAccount != nil && len(rawAccount.Interfaces) != 0 {
+	if master.Enriched != nil {
+		if len(master.Enriched.Interfaces) != 0 {
+			info.Interfaces = make([]string, len(master.Enriched.Interfaces))
+			for i, v := range master.Enriched.Interfaces {
+				info.Interfaces[i] = v.String()
+			}
+		}
+	} else if rawAccount, _ := h.storage.GetRawAccount(ctx, master.Address); rawAccount != nil && len(rawAccount.Interfaces) != 0 {
 		info.Interfaces = make([]string, len(rawAccount.Interfaces))
 		for i, v := range rawAccount.Interfaces {
 			info.Interfaces[i] = v.String()
