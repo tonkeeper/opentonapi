@@ -301,8 +301,8 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		logger.Error("error happened on wallet inference", slog.String("error", err.Error()))
 		return nil, err
 	}
-	if gaslessPays && !sourceWallet.IsRelaySupported() {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("gasless migration requires a v5 source wallet; use gas_payer=battery or self"))
+	if (gaslessPays || batteryPays) && !sourceWallet.IsRelaySupported() {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("%v migration requires a v5 source wallet; use gas_payer=self", gasPayer))
 	}
 	var gasJettonMaster *ton.AccountID
 	if gaslessPays {
