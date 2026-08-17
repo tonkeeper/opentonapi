@@ -301,8 +301,9 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		logger.Error("error happened on wallet inference", slog.String("error", err.Error()))
 		return nil, err
 	}
-	if gaslessPays && !sourceWallet.IsRelaySupported() {
-		return nil, toError(http.StatusBadRequest, fmt.Errorf("gasless migration requires a v5 source wallet; use gas_payer=battery or self"))
+	// both relayed modes need owner-signed internal messages, which only v5 supports
+	if (gaslessPays || batteryPays) && !sourceWallet.IsRelaySupported() {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("%v migration requires a v5 source wallet; use gas_payer=self", gasPayer))
 	}
 	var gasJettonMaster *ton.AccountID
 	if gaslessPays {
@@ -311,8 +312,8 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 			return nil, toError(http.StatusBadRequest, err)
 		}
 	}
-	// todo allow battery for v4 and v3
-	relayFunded := (batteryPays || gaslessPays) && sourceWallet.IsRelaySupported()
+	// todo allow battery for v4 and v3 by pre-funding the source instead of relaying
+	relayFunded := batteryPays || gaslessPays
 	var gramBalance tlb.Grams
 	if currColl, ok := sourceAccount.Account.CurrencyCollection(); ok {
 		gramBalance = currColl.Grams
