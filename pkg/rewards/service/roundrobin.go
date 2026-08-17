@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync/atomic"
 
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo/config"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/liteclient"
@@ -21,16 +22,13 @@ const tracerName = "github.com/tonkeeper/opentonapi/pkg/validatorsrewards/servic
 
 // LiteClient is the interface for blockchain operations. Implemented by
 // RoundRobinClient and used by all service methods.
-type LiteClient interface {
-	GetMasterchainInfo(context.Context) (liteclient.LiteServerMasterchainInfoC, error)
-	LookupBlock(context.Context, ton.BlockID, uint32, *uint64, *uint32) (ton.BlockIDExt, tlb.BlockInfo, error)
-	GetBlock(context.Context, ton.BlockIDExt) (tlb.Block, error)
-	GetAccountState(context.Context, ton.AccountID) (tlb.ShardAccount, error)
-	GetConfigParams(context.Context, liteapi.ConfigMode, []uint32) (tlb.ConfigParams, error)
-	RunSmcMethodByID(context.Context, ton.AccountID, int, tlb.VmStack) (uint32, tlb.VmStack, error)
-	RunSmcMethod(context.Context, ton.AccountID, string, tlb.VmStack) (uint32, tlb.VmStack, error)
-	WithBlock(ton.BlockIDExt) LiteClient
-}
+//
+// It is core.LiteClient rather than a narrower interface of its own: two
+// self-returning interfaces over the same client cannot be substituted for each
+// other in Go, which has no covariant returns, so a second one here would mean
+// the rewards service was the one place a deployment could not supply its own
+// blockchain connection.
+type LiteClient = core.LiteClient
 
 // clientEntry holds a liteapi client and its metadata for debug logging.
 type clientEntry struct {

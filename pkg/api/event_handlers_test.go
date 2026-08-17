@@ -10,6 +10,7 @@ import (
 
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 	"github.com/tonkeeper/tongo"
 
@@ -87,7 +88,7 @@ func TestHandler_EmulateMessageToAccountEvent(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 			require.Nil(t, err)
-			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
+			liteStorage, err := litestorage.NewLiteStorage(logger, core.LiteAPIClient(cli))
 			require.Nil(t, err)
 			book := &mockAddressBook{
 				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {

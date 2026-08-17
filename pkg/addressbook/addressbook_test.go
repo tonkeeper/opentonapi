@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/pkg/config"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/ton"
@@ -91,7 +92,7 @@ func TestSearchAttachedAccountsByPrefix(t *testing.T) {
 	client, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.NoError(t, err, "Failed to create lite API client")
 
-	liteStorage, err := litestorage.NewLiteStorage(logger, client)
+	liteStorage, err := litestorage.NewLiteStorage(logger, core.LiteAPIClient(client))
 	require.NoError(t, err, "Failed to create lite storage")
 
 	book := NewAddressBook(logger, config.AddressPath, config.JettonPath, config.CollectionPath, liteStorage)

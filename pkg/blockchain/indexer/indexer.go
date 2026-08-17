@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/sourcegraph/conc/iter"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"go.uber.org/zap"
 )
@@ -22,10 +22,10 @@ type chunk struct {
 // Indexer tracks the blockchain and notifies subscribers about new blocks.
 type Indexer struct {
 	logger *zap.Logger
-	cli    *liteapi.Client
+	cli    core.LiteClient
 }
 
-func New(logger *zap.Logger, cli *liteapi.Client) *Indexer {
+func New(logger *zap.Logger, cli core.LiteClient) *Indexer {
 	return &Indexer{
 		cli:    cli,
 		logger: logger,

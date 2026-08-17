@@ -102,7 +102,7 @@ func isFocusedRun() bool {
 func newBathTestStorage(t *testing.T, cli *liteapi.Client, blocks []tongo.BlockID) *litestorage.LiteStorage {
 	t.Helper()
 	storage, err := litestorage.NewLiteStorage(zap.L(),
-		cli,
+		core.LiteAPIClient(cli),
 		litestorage.WithPreloadBlocks(blocks),
 		litestorage.WithPythPriceFeeds(pyth.Default),
 	)

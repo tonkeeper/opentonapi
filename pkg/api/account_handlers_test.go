@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
 
 	"github.com/tonkeeper/opentonapi/pkg/chainstate"
@@ -65,7 +66,7 @@ func TestHandler_GetRawAccount(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 			require.Nil(t, err)
-			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
+			liteStorage, err := litestorage.NewLiteStorage(logger, core.LiteAPIClient(cli))
 			require.Nil(t, err)
 			book := &mockAddressBook{
 				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
@@ -150,7 +151,7 @@ func TestHandler_GetBlockchainRawAccounts(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 			require.Nil(t, err)
-			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
+			liteStorage, err := litestorage.NewLiteStorage(logger, core.LiteAPIClient(cli))
 			require.Nil(t, err)
 			h := &Handler{
 				storage: liteStorage,
@@ -201,7 +202,7 @@ func TestHandler_GetAccount(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 			require.Nil(t, err)
-			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
+			liteStorage, err := litestorage.NewLiteStorage(logger, core.LiteAPIClient(cli))
 			require.Nil(t, err)
 			book := &mockAddressBook{
 				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
@@ -274,7 +275,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 			require.Nil(t, err)
-			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
+			liteStorage, err := litestorage.NewLiteStorage(logger, core.LiteAPIClient(cli))
 			require.Nil(t, err)
 			book := &mockAddressBook{
 				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
@@ -360,7 +361,7 @@ func TestHandler_GetTransactions(t *testing.T) {
 			logger, _ := zap.NewDevelopment()
 			cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 			require.Nil(t, err)
-			liteStorage, err := litestorage.NewLiteStorage(logger, cli)
+			liteStorage, err := litestorage.NewLiteStorage(logger, core.LiteAPIClient(cli))
 			require.Nil(t, err)
 			book := &mockAddressBook{
 				OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {

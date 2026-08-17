@@ -107,6 +107,7 @@ type Options struct {
 	score                   scoreSource
 	parallelTraceProcessing bool
 	archiveLiteServers      []config.LiteServer
+	archiveClient           rewards.LiteClient
 	publicAPIURL            string
 }
 
@@ -210,6 +211,18 @@ func WithArchiveLiteServers(s []config.LiteServer) Option {
 	}
 }
 
+// WithArchiveClient supplies the blockchain connection the rewards service
+// reads validator history through, instead of NewHandler building one from the
+// servers given to WithArchiveLiteServers. It is how a deployment running its
+// own lightserver pool keeps the rewards service on that pool rather than
+// opening a second one; when set, WithArchiveLiteServers is not used to
+// construct a client.
+func WithArchiveClient(cli rewards.LiteClient) Option {
+	return func(o *Options) {
+		o.archiveClient = cli
+	}
+}
+
 func WithPublicAPIURL(publicAPIURL string) Option {
 	return func(o *Options) {
 		o.publicAPIURL = publicAPIURL
@@ -275,13 +288,24 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		slog.Warn("unable to detect tongo version", "err", err)
 	}
 	var rwd *rewards.Service
-	if len(options.archiveLiteServers) != 0 {
-		cli, err := rewards.NewClient(options.archiveLiteServers)
-		if err == nil {
-			rwd = rewards.New(cli, options.archiveLiteServers)
-			log.Println("rewards service initialized")
-		} else {
-			log.Println("rewards service unavailable:", err)
+	var stats *rewards.Stats
+	switch {
+	case options.archiveClient != nil:
+		// A supplied client keeps its own connections, so there is no server
+		// list to hand the service for rebuilding one.
+		rwd = rewards.New(options.archiveClient, nil)
+		stats = rewards.NewStatsWithClient(options.archiveClient)
+		log.Println("rewards service initialized on the supplied client")
+	default:
+		stats = rewards.NewStats(liteapi.WithLiteServers(options.archiveLiteServers))
+		if len(options.archiveLiteServers) != 0 {
+			cli, err := rewards.NewClient(options.archiveLiteServers)
+			if err == nil {
+				rwd = rewards.New(cli, options.archiveLiteServers)
+				log.Println("rewards service initialized")
+			} else {
+				log.Println("rewards service unavailable:", err)
+			}
 		}
 	}
 	return &Handler{
@@ -318,7 +342,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 		tonConnect:              tonConnect,
 		configPool:              configPool,
 		rewards:                 rwd,
-		stats:                   rewards.NewStats(liteapi.WithLiteServers(options.archiveLiteServers)),
+		stats:                   stats,
 	}, nil
 }
 

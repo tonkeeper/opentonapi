@@ -22,7 +22,6 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
@@ -63,7 +62,7 @@ type PriceFeeds interface {
 
 type LiteStorage struct {
 	logger                  *zap.Logger
-	client                  *liteapi.Client
+	client                  core.LiteClient
 	executor                abi.Executor
 	jettonMetaCache         *xsync.MapOf[string, tep64.Metadata]
 	transactionsIndexByHash *xsync.MapOf[tongo.Bits256, *core.Transaction]
@@ -149,7 +148,7 @@ func WithBlockChannel(ch <-chan indexer.IDandBlock) Option {
 
 type Option func(o *Options)
 
-func NewLiteStorage(log *zap.Logger, cli *liteapi.Client, opts ...Option) (*LiteStorage, error) {
+func NewLiteStorage(log *zap.Logger, cli core.LiteClient, opts ...Option) (*LiteStorage, error) {
 	o := &Options{}
 	for i := range opts {
 		opts[i](o)
