@@ -21,7 +21,7 @@ var errServiceUnavailable = errors.New("Service Unavailable")
 type Stats struct {
 	mu      sync.RWMutex
 	options []liteapi.Option
-	client  *liteapi.Client
+	client  LiteClient
 	rounds  []core.ElectorRound
 }
 
@@ -32,6 +32,17 @@ func NewStats(options ...liteapi.Option) *Stats {
 		v(&o)
 	}
 	if len(o.LiteServers) != 0 {
+		go res.updateProc()
+	}
+	return res
+}
+
+// NewStatsWithClient builds the statistics service on a blockchain connection
+// the caller supplies, for a deployment whose connection is not one this
+// package can construct from a list of liteservers.
+func NewStatsWithClient(client LiteClient) *Stats {
+	res := &Stats{client: client}
+	if client != nil {
 		go res.updateProc()
 	}
 	return res
@@ -116,12 +127,12 @@ func (s *Stats) updateProc() {
 
 func (s *Stats) update() {
 	if s.client == nil {
-		var err error
-		s.client, err = liteapi.NewClient(s.options...)
+		cli, err := liteapi.NewClient(s.options...)
 		if err != nil {
 			log.Println("rewards stats service:", err)
 			return
 		}
+		s.client = core.LiteAPIClient(cli)
 	}
 	iter := core.NewElectorRoundsIterator(context.Background(), s.client)
 	for v := range iter.Run {

@@ -90,7 +90,7 @@ func TestLiteStorage_runBlockchainConfigUpdate(t *testing.T) {
 	require.Nil(t, err)
 	s := &LiteStorage{
 		logger: zap.L(),
-		client: cli,
+		client: core.LiteAPIClient(cli),
 	}
 	s.runBlockchainConfigUpdate(100 * time.Millisecond)
 
@@ -105,7 +105,7 @@ func TestLiteStorage_TrimmedConfigBase64(t *testing.T) {
 	require.Nil(t, err)
 	s := &LiteStorage{
 		logger: zap.L(),
-		client: cli,
+		client: core.LiteAPIClient(cli),
 	}
 	conf := s.blockchainConfig()
 	require.Empty(t, conf)

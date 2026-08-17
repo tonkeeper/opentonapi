@@ -19,10 +19,18 @@ import (
 
 const ttl = 5 * 60 // in seconds
 
+// MessageSender is one blockchain connection an external message can be
+// broadcast through. MsgSender holds several - one per liteserver - because a
+// message wants to reach as many validators as it can, which is the opposite of
+// what a pool that picks a single best connection does for you.
+type MessageSender interface {
+	SendMessage(ctx context.Context, payload []byte) (uint32, error)
+}
+
 // MsgSender provides a method to send a message to the blockchain.
 type MsgSender struct {
 	logger         *zap.Logger
-	sendingClients []*liteapi.Client
+	sendingClients []MessageSender
 	// receivers get a copy of a message before sending it to the blockchain.
 	// receivers is a read-only map/field.
 	receivers map[string]chan<- ExtInMsgCopy
@@ -92,6 +100,20 @@ func NewMsgSender(logger *zap.Logger, servers []config.LiteServer, receivers map
 			}
 		}
 	}
+	if len(clients) == 0 {
+		return nil, fmt.Errorf("no lite clients available")
+	}
+	senders := make([]MessageSender, 0, len(clients))
+	for _, cli := range clients {
+		senders = append(senders, cli)
+	}
+	return NewMsgSenderWithClients(logger, senders, receivers)
+}
+
+// NewMsgSenderWithClients builds a sender over connections the caller supplies,
+// one per liteserver it wants messages broadcast to, for a deployment whose
+// connections are not ones this package can open from a list of liteservers.
+func NewMsgSenderWithClients(logger *zap.Logger, clients []MessageSender, receivers map[string]chan<- ExtInMsgCopy) (*MsgSender, error) {
 	if len(clients) == 0 {
 		return nil, fmt.Errorf("no lite clients available")
 	}

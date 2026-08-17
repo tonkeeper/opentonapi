@@ -76,7 +76,7 @@ func TestMsgSender_send_AllAttemptsFail(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	ms := &MsgSender{sendingClients: []*liteapi.Client{client}}
+	ms := &MsgSender{sendingClients: []MessageSender{client}}
 	sendCtx, sendCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer sendCancel()
 

@@ -10,7 +10,6 @@ import (
 	"slices"
 	"time"
 
-	"github.com/tonkeeper/tongo/liteapi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 )
@@ -22,7 +21,7 @@ type ElectorRoundsIterator struct {
 }
 
 type ValidatorSetIterator struct {
-	*liteapi.Client
+	LiteClient
 	ctx context.Context
 	err error
 }
@@ -72,14 +71,14 @@ type ElectorData struct {
 	ActiveHash    tlb.Bits256
 }
 
-func NewElectorRoundsIterator(ctx context.Context, client *liteapi.Client) ElectorRoundsIterator {
+func NewElectorRoundsIterator(ctx context.Context, client LiteClient) ElectorRoundsIterator {
 	return ElectorRoundsIterator{
 		NewValidatorSetIterator(ctx, client),
 	}
 }
 
-func NewValidatorSetIterator(ctx context.Context, client *liteapi.Client) *ValidatorSetIterator {
-	return &ValidatorSetIterator{ctx: ctx, Client: client}
+func NewValidatorSetIterator(ctx context.Context, client LiteClient) *ValidatorSetIterator {
+	return &ValidatorSetIterator{ctx: ctx, LiteClient: client}
 }
 
 func (cli *ElectorRoundsIterator) Run(yield func(ElectorRound) bool) {

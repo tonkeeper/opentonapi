@@ -12,6 +12,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/blockchain"
 	"github.com/tonkeeper/opentonapi/pkg/blockchain/indexer"
 	"github.com/tonkeeper/opentonapi/pkg/config"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/litestorage"
 	"github.com/tonkeeper/opentonapi/pkg/pyth"
 	"github.com/tonkeeper/opentonapi/pkg/spam"
@@ -59,7 +60,7 @@ func main() {
 	pythFeeds := pyth.GetUpdatedWithFallback(context.Background(), log)
 	storage, err := litestorage.NewLiteStorage(
 		log,
-		client,
+		core.LiteAPIClient(client),
 		litestorage.WithPreloadBlocks([]tongo.BlockID{
 			tongo.MustParseBlockID("(0,8000000000000000,72945279)"),
 		}),
@@ -92,7 +93,7 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create api handler", zap.Error(err))
 	}
-	idx := indexer.New(log, client)
+	idx := indexer.New(log, core.LiteAPIClient(client))
 	go idx.Run(context.TODO(), []chan indexer.IDandBlock{
 		storageBlockCh,
 	})

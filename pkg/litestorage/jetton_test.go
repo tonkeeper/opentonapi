@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteapi"
 	"go.uber.org/zap"
@@ -22,7 +23,7 @@ func TestGetJettonMasterData_PopulatesHashes(t *testing.T) {
 	cli, err := liteapi.NewClient(liteapi.FromEnvsOrMainnet())
 	require.NoError(t, err)
 
-	storage, err := NewLiteStorage(logger, cli)
+	storage, err := NewLiteStorage(logger, core.LiteAPIClient(cli))
 	require.NoError(t, err)
 
 	// Use a well-known jetton master (KINGYTON from existing tests).

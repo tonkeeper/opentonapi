@@ -33,6 +33,12 @@ func (s *Service) currentClient() LiteClient {
 	if !needsRefresh {
 		return client
 	}
+	// A client supplied by the caller comes with no server list to rebuild one
+	// from. It keeps its own connections healthy, so there is nothing here to
+	// refresh it with, and trying would log a failure on every call.
+	if len(s.liteServers) == 0 {
+		return client
+	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
