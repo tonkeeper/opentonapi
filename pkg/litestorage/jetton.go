@@ -201,7 +201,11 @@ func (s *LiteStorage) GetJettonsHoldersCount(ctx context.Context, accountIDs []t
 	return map[tongo.AccountID]int32{}, nil
 }
 
-func (s *LiteStorage) GetJettonHolders(ctx context.Context, jettonMaster tongo.AccountID, limit, offset int) ([]core.JettonHolder, error) {
+func (s *LiteStorage) GetJettonHoldersByBalance(ctx context.Context, jettonMaster tongo.AccountID, limit, offset int) ([]core.JettonHolder, error) {
+	return []core.JettonHolder{}, nil
+}
+
+func (s *LiteStorage) GetJettonHoldersByAddress(ctx context.Context, jettonMaster tongo.AccountID, limit int, lastAccountID *tongo.AccountID) ([]core.JettonHolder, error) {
 	return []core.JettonHolder{}, nil
 }
 

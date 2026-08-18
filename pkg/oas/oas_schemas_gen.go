@@ -7368,6 +7368,49 @@ func (s *GetChartRatesOK) SetPoints(val ChartPoints) {
 	s.Points = val
 }
 
+// Address allows unlimited pagination via last_account_id cursor, balance sorting allow getting top
+// holders.
+type GetJettonHoldersSortBy string
+
+const (
+	GetJettonHoldersSortByBalance GetJettonHoldersSortBy = "balance"
+	GetJettonHoldersSortByAddress GetJettonHoldersSortBy = "address"
+)
+
+// AllValues returns all GetJettonHoldersSortBy values.
+func (GetJettonHoldersSortBy) AllValues() []GetJettonHoldersSortBy {
+	return []GetJettonHoldersSortBy{
+		GetJettonHoldersSortByBalance,
+		GetJettonHoldersSortByAddress,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetJettonHoldersSortBy) MarshalText() ([]byte, error) {
+	switch s {
+	case GetJettonHoldersSortByBalance:
+		return []byte(s), nil
+	case GetJettonHoldersSortByAddress:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetJettonHoldersSortBy) UnmarshalText(data []byte) error {
+	switch GetJettonHoldersSortBy(data) {
+	case GetJettonHoldersSortByBalance:
+		*s = GetJettonHoldersSortByBalance
+		return nil
+	case GetJettonHoldersSortByAddress:
+		*s = GetJettonHoldersSortByAddress
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type GetJettonInfosByAddressesReq struct {
 	AccountIds []string `json:"account_ids"`
 }
@@ -15593,6 +15636,52 @@ func (o OptGetBlockchainRawAccountsReq) Get() (v GetBlockchainRawAccountsReq, ok
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetBlockchainRawAccountsReq) Or(d GetBlockchainRawAccountsReq) GetBlockchainRawAccountsReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetJettonHoldersSortBy returns new OptGetJettonHoldersSortBy with value set to v.
+func NewOptGetJettonHoldersSortBy(v GetJettonHoldersSortBy) OptGetJettonHoldersSortBy {
+	return OptGetJettonHoldersSortBy{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetJettonHoldersSortBy is optional GetJettonHoldersSortBy.
+type OptGetJettonHoldersSortBy struct {
+	Value GetJettonHoldersSortBy
+	Set   bool
+}
+
+// IsSet returns true if OptGetJettonHoldersSortBy was set.
+func (o OptGetJettonHoldersSortBy) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetJettonHoldersSortBy) Reset() {
+	var v GetJettonHoldersSortBy
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetJettonHoldersSortBy) SetTo(v GetJettonHoldersSortBy) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetJettonHoldersSortBy) Get() (v GetJettonHoldersSortBy, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetJettonHoldersSortBy) Or(d GetJettonHoldersSortBy) GetJettonHoldersSortBy {
 	if v, ok := o.Get(); ok {
 		return v
 	}
