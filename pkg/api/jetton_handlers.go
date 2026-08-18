@@ -241,6 +241,8 @@ func (h *Handler) GetJettons(ctx context.Context, params oas.GetJettonsParams) (
 	return &oas.Jettons{Jettons: results}, nil
 }
 
+const maxHoldersOffset = 9000
+
 func (h *Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHoldersParams) (*oas.JettonHolders, error) {
 	account, err := parseAccountID(params.AccountID)
 	if err != nil {
@@ -248,6 +250,9 @@ func (h *Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHold
 	}
 	if params.LastAccountID.Set && params.SortBy.Value != oas.GetJettonHoldersSortByAddress {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("last_account_id requires sort_by=address"))
+	}
+	if params.Offset.Value > maxHoldersOffset {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("offset is limited to %d; use sort_by=address with last_account_id cursor for deeper pagination", maxHoldersOffset))
 	}
 	var holders []core.JettonHolder
 	if params.SortBy.Value == oas.GetJettonHoldersSortByAddress {
