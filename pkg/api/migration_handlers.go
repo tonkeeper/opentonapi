@@ -83,6 +83,70 @@ var errJettonNotAvailableForMigration = errors.New("jetton not available for mig
 
 type jettonConverter func(core.JettonWallet) (oas.JettonBalance, error)
 
+type assembleMigrationPlanParams struct {
+	to                ton.AccountID
+	excessDestination ton.AccountID
+	relayFunded       bool
+	sweepSponsored    bool
+	gramBalance       tlb.Grams
+	nftTransfers      []tonwallet.RawMessage
+	jettonTransfers   []tonwallet.RawMessage
+}
+
+type prepareMigrationPlanParams struct {
+	sourceAddr        ton.Address
+	destAddr          ton.Address
+	relayFunded       bool
+	sweepSponsored    bool
+	excessDestination ton.AccountID
+	gramBalance       tlb.Grams
+	sourceWallet      *tonwallet.Wallet
+	gasJettonMaster   *ton.AccountID
+}
+
+type buildEmulatedTraceParams struct {
+	trace       *core.Trace
+	sourceAddr  ton.Address
+	batch       migrationBatch
+	destAddr    ton.Address
+	realBalance int64
+	currency    string
+	todayRates  map[string]float64
+	currencyPtr *string
+	unsignedMsg *boc.Cell
+	seqno       uint32
+	init        *tlb.StateInit
+}
+
+type convertTransactionParams struct {
+	unsignedMsg    *boc.Cell
+	seqno          uint32
+	batch          migrationBatch
+	outMessages    []oas.MigrationOutMessage
+	convertedTrace oas.Trace
+	event          oas.AccountEvent
+	oasRisk        oas.Risk
+	init           *tlb.StateInit
+	gasSpent       int64
+}
+
+type prepareJettonTransfersParams struct {
+	from              ton.AccountID
+	to                ton.AccountID
+	excessDestination ton.AccountID
+	jettons           []migratableJetton
+	gasJettonMaster   *ton.AccountID
+	gasReserve        *big.Int
+}
+
+type embedGaslessCommissionParams struct {
+	plan      []migrationBatch
+	buildPlan func(gasReserve *big.Int) ([]migrationBatch, error)
+	owner     ton.AccountID
+	pubkey    ed25519.PublicKey
+	master    ton.AccountID
+}
+
 func isSkippedNftCollection(collection *ton.AccountID) bool {
 	if collection == nil {
 		return false
@@ -313,6 +377,24 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	}
 	// todo allow battery for v4 and v3
 	relayFunded := (batteryPays || gaslessPays) && sourceWallet.IsRelaySupported()
+	// The final TON sweep has no jetton to pay a gasless commission with, so only battery — which
+	// funds gas for free rather than charging a jetton commission — can sponsor it.
+	sweepSponsored := batteryPays && sourceWallet.IsRelaySupported()
+	// excessDestination receives whatever gas a battery-sponsored transfer doesn't spend, so the
+	// relay reclaims what it fronted instead of losing it to the new wallet. Gasless prices its own
+	// gas via a commission instead, and self-paid transfers keep sending excess to the new wallet.
+	excessDestination := destAddr.ID
+	if sweepSponsored {
+		config, err := h.gasless.Config(ctx)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, fmt.Errorf("failed to get gasless config: %w", err))
+		}
+		relay, err := tongo.ParseAddress(config.RelayAddress)
+		if err != nil {
+			return nil, toError(http.StatusInternalServerError, fmt.Errorf("invalid relay address %q in gasless config: %w", config.RelayAddress, err))
+		}
+		excessDestination = relay.ID
+	}
 	var gramBalance tlb.Grams
 	if currColl, ok := sourceAccount.Account.CurrencyCollection(); ok {
 		gramBalance = currColl.Grams
@@ -329,7 +411,16 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 		}
 	}
 
-	plan, err := h.prepareMigrationPlan(ctx, sourceAddr, destAddr, relayFunded, gramBalance, sourceWallet, gasJettonMaster)
+	plan, err := h.prepareMigrationPlan(ctx, prepareMigrationPlanParams{
+		sourceAddr:        sourceAddr,
+		destAddr:          destAddr,
+		relayFunded:       relayFunded,
+		gramBalance:       gramBalance,
+		sourceWallet:      sourceWallet,
+		gasJettonMaster:   gasJettonMaster,
+		excessDestination: excessDestination,
+		sweepSponsored:    sweepSponsored,
+	})
 	if err != nil {
 		logger.Error("failed to prepare migration plan", slog.String("error", err.Error()))
 		return nil, toError(http.StatusInternalServerError, err)
@@ -440,7 +531,19 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 			dropOverfundFromBalances(trace, sourceAddr.ID, emulationOverfund)
 		}
 
-		transaction, err := h.buildEmulatedTrace(ctx, trace, sourceAddr, batch, destAddr, int64(gramBalance), currency, todayRates, currencyPtr, unsignedMsg, seqno, init)
+		transaction, err := h.buildEmulatedTrace(ctx, buildEmulatedTraceParams{
+			trace:       trace,
+			sourceAddr:  sourceAddr,
+			batch:       batch,
+			destAddr:    destAddr,
+			realBalance: int64(gramBalance),
+			currency:    currency,
+			todayRates:  todayRates,
+			currencyPtr: currencyPtr,
+			unsignedMsg: unsignedMsg,
+			seqno:       seqno,
+			init:        init,
+		})
 		if err != nil {
 			return fail(toError(http.StatusInternalServerError, err))
 		}
@@ -458,8 +561,12 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 
 // prepareMigrationPlan builds the chunked batch plan. gasJettonMaster, when set, is moved to the last sponsored slot
 // and the relay commission is priced and embedded into every sponsored batch.
-func (h *Handler) prepareMigrationPlan(ctx context.Context, sourceAddr ton.Address, destAddr ton.Address, relayFunded bool, gramBalance tlb.Grams, sourceWallet *tonwallet.Wallet, gasJettonMaster *ton.AccountID) (migrationPlan, error) {
-	nftTransfers, err := h.prepareNFTTransfers(ctx, sourceAddr.ID, destAddr.ID)
+func (h *Handler) prepareMigrationPlan(ctx context.Context, p prepareMigrationPlanParams) (migrationPlan, error) {
+	sourceAddr, destAddr := p.sourceAddr, p.destAddr
+	relayFunded, sweepSponsored := p.relayFunded, p.sweepSponsored
+	excessDestination, gramBalance := p.excessDestination, p.gramBalance
+	sourceWallet, gasJettonMaster := p.sourceWallet, p.gasJettonMaster
+	nftTransfers, err := h.prepareNFTTransfers(ctx, sourceAddr.ID, destAddr.ID, excessDestination)
 	if err != nil {
 		return nil, err
 	}
@@ -471,11 +578,26 @@ func (h *Handler) prepareMigrationPlan(ctx context.Context, sourceAddr ton.Addre
 		gasJettonMaster = nil // nothing to sponsor — plain (possibly sweep-only) plan
 	}
 	buildPlan := func(gasReserve *big.Int) ([]migrationBatch, error) {
-		jettonTransfers, err := prepareJettonTransfers(sourceAddr.ID, destAddr.ID, jettons, gasJettonMaster, gasReserve)
+		jettonTransfers, err := prepareJettonTransfers(prepareJettonTransfersParams{
+			from:              sourceAddr.ID,
+			to:                destAddr.ID,
+			jettons:           jettons,
+			gasJettonMaster:   gasJettonMaster,
+			gasReserve:        gasReserve,
+			excessDestination: excessDestination,
+		})
 		if err != nil {
 			return nil, err
 		}
-		plan, err := assembleMigrationPlan(destAddr.ID, relayFunded, gramBalance, nftTransfers, jettonTransfers)
+		plan, err := assembleMigrationPlan(assembleMigrationPlanParams{
+			to:                destAddr.ID,
+			relayFunded:       relayFunded,
+			sweepSponsored:    sweepSponsored,
+			gramBalance:       gramBalance,
+			nftTransfers:      nftTransfers,
+			jettonTransfers:   jettonTransfers,
+			excessDestination: excessDestination,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -496,14 +618,25 @@ func (h *Handler) prepareMigrationPlan(ctx context.Context, sourceAddr ton.Addre
 	if gasJettonMaster == nil {
 		return plan, nil
 	}
-	plan, err = h.embedGaslessCommission(ctx, plan, buildPlan, sourceAddr.ID, sourceWallet.GetPublicKey(), *gasJettonMaster)
+	plan, err = h.embedGaslessCommission(ctx, embedGaslessCommissionParams{
+		plan:      plan,
+		buildPlan: buildPlan,
+		owner:     sourceAddr.ID,
+		pubkey:    sourceWallet.GetPublicKey(),
+		master:    *gasJettonMaster,
+	})
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
 	return plan, nil
 }
 
-func (h *Handler) buildEmulatedTrace(ctx context.Context, trace *core.Trace, sourceAddr ton.Address, batch migrationBatch, destAddr ton.Address, realBalance int64, currency string, todayRates map[string]float64, currencyPtr *string, unsignedMsg *boc.Cell, seqno uint32, init *tlb.StateInit) (oas.MigrationTransaction, error) {
+func (h *Handler) buildEmulatedTrace(ctx context.Context, p buildEmulatedTraceParams) (oas.MigrationTransaction, error) {
+	trace, batch := p.trace, p.batch
+	sourceAddr, destAddr := p.sourceAddr, p.destAddr
+	currency, currencyPtr := p.currency, p.currencyPtr
+	realBalance, todayRates := p.realBalance, p.todayRates
+	unsignedMsg, seqno, init := p.unsignedMsg, p.seqno, p.init
 	convertedTrace := h.convertTrace(trace, h.addressBook)
 	actions, err := bath.FindActions(ctx, trace, bath.ForAccount(sourceAddr.ID), bath.WithInformationSource(h.storage), bath.WithAddressBook(h.addressBook))
 	if err != nil {
@@ -541,7 +674,17 @@ func (h *Handler) buildEmulatedTrace(ctx context.Context, trace *core.Trace, sou
 	if err != nil {
 		return oas.MigrationTransaction{}, toError(http.StatusInternalServerError, err)
 	}
-	return convertTransaction(unsignedMsg, seqno, batch, outMessages, convertedTrace, event, oasRisk, init, traceFees(trace))
+	return convertTransaction(convertTransactionParams{
+		unsignedMsg:    unsignedMsg,
+		seqno:          seqno,
+		batch:          batch,
+		outMessages:    outMessages,
+		convertedTrace: convertedTrace,
+		event:          event,
+		oasRisk:        oasRisk,
+		init:           init,
+		gasSpent:       traceFees(trace),
+	})
 }
 
 func (h *Handler) buildWalletMsgForEmulation(sourceWallet *tonwallet.Wallet, unsignedMsg *boc.Cell, init *tlb.StateInit, batch migrationBatch, sourceAddr ton.Address) (tlb.Message, error) {
@@ -549,25 +692,25 @@ func (h *Handler) buildWalletMsgForEmulation(sourceWallet *tonwallet.Wallet, uns
 	// but the contract still expects the signature bits to be present in the body.
 	signedBody, err := sourceWallet.AttachSignature(unsignedMsg, tlb.Bits512{})
 	if err != nil {
-		return tlb.Message{}, nil
+		return tlb.Message{}, err
 	}
 	var emuMsg tlb.Message
 	if batch.sponsored {
-		emuMsg, err = relayerMessage(batch, emuMsg, err, sourceAddr, signedBody, init)
+		emuMsg, err = relayerMessage(batch, sourceAddr, signedBody, init)
 	} else {
 		emuMsg, err = tongo.CreateExternalMessage(sourceAddr.ID, signedBody, init, tlb.VarUInteger16{})
 	}
 	if err != nil {
-		return tlb.Message{}, nil
+		return tlb.Message{}, err
 	}
 	return emuMsg, err
 }
 
-func relayerMessage(batch migrationBatch, emuMsg tlb.Message, err error, sourceAddr ton.Address, signedBody *boc.Cell, init *tlb.StateInit) (tlb.Message, error) {
+func relayerMessage(batch migrationBatch, sourceAddr ton.Address, signedBody *boc.Cell, init *tlb.StateInit) (tlb.Message, error) {
 	// Emulate what the relay would deliver: an internal message carrying the signed body,
 	// with enough TON attached to fund the batch (per-transfer gas plus a fee margin).
 	attach := int64(len(batch.messages)+1) * int64(migrationGasPerTransfer)
-	emuMsg, _, err = tonwallet.Message{
+	emuMsg, _, err := tonwallet.Message{
 		Amount:  tlb.Grams(attach),
 		Address: sourceAddr.ID,
 		Src:     &ton.AccountID{}, // mocked relay address
@@ -593,7 +736,10 @@ func chunkMigrationPlan(w *tonwallet.Wallet, relayFunded, reserveCommissionSlot 
 	return chunkedPlan
 }
 
-func assembleMigrationPlan(to ton.AccountID, relayFunded bool, gramBalance tlb.Grams, nftTransfers, jettonTransfers []tonwallet.RawMessage) (migrationPlan, error) {
+func assembleMigrationPlan(p assembleMigrationPlanParams) (migrationPlan, error) {
+	to, excessDestination := p.to, p.excessDestination
+	relayFunded, sweepSponsored := p.relayFunded, p.sweepSponsored
+	gramBalance, nftTransfers, jettonTransfers := p.gramBalance, p.nftTransfers, p.jettonTransfers
 	var plan []migrationBatch
 
 	if len(nftTransfers) > 0 {
@@ -605,18 +751,45 @@ func assembleMigrationPlan(to ton.AccountID, relayFunded bool, gramBalance tlb.G
 
 	// The final message sweeps the remaining TON balance to the destination.
 	// The sweep is a separate, final transaction: jetton/NFT transfers generate excess messages (and bounces on failure)
-	// To collect it, a separate transaction is needed
+	// To collect it, a separate transaction is needed.
+	//
+	// Self-paid and gasless sweeps stay a single mode-128 transfer to the destination, funding
+	// their own gas out of the swept balance. A battery-sponsored sweep instead sends the
+	// wallet's exact known balance to the destination — fees paid separately, out of the relay's
+	// fronted top-up (DefaultMessageMode) — and reclaims whatever the top-up didn't spend with a
+	// trailing mode-128 transfer to the relay. Order matters: the fixed payout must run first, or
+	// the mode-128 reclaim would sweep the user's payout too.
 	if gramBalance > minGramTransferFee {
-		sweepTransfer, err := tonwallet.ToRawMessage(tonwallet.Message{
-			Amount:  0,
-			Address: to,
-			Bounce:  false,
-			Mode:    migrationSweepMode,
-		})
-		if err != nil {
-			return nil, err
+		if sweepSponsored {
+			payout, err := tonwallet.ToRawMessage(tonwallet.Message{
+				Amount:  gramBalance,
+				Address: to,
+				Bounce:  false,
+				Mode:    tonwallet.DefaultMessageMode,
+			})
+			if err != nil {
+				return nil, err
+			}
+			reclaim, err := tonwallet.ToRawMessage(tonwallet.Message{
+				Address: excessDestination,
+				Bounce:  false,
+				Mode:    migrationSweepMode,
+			})
+			if err != nil {
+				return nil, err
+			}
+			plan = append(plan, migrationBatch{messages: []tonwallet.RawMessage{payout, reclaim}, sponsored: true})
+		} else {
+			sweepTransfer, err := tonwallet.ToRawMessage(tonwallet.Message{
+				Address: to,
+				Bounce:  false,
+				Mode:    migrationSweepMode,
+			})
+			if err != nil {
+				return nil, err
+			}
+			plan = append(plan, migrationBatch{messages: []tonwallet.RawMessage{sweepTransfer}})
 		}
-		plan = append(plan, migrationBatch{messages: []tonwallet.RawMessage{sweepTransfer}})
 	}
 
 	return plan, nil
@@ -633,7 +806,11 @@ func convertWalletMessage(msg tonwallet.RawMessage) (oas.MigrationOutMessage, er
 	}, nil
 }
 
-func convertTransaction(unsignedMsg *boc.Cell, seqno uint32, batch migrationBatch, outMessages []oas.MigrationOutMessage, convertedTrace oas.Trace, event oas.AccountEvent, oasRisk oas.Risk, init *tlb.StateInit, gasSpent int64) (oas.MigrationTransaction, error) {
+func convertTransaction(p convertTransactionParams) (oas.MigrationTransaction, error) {
+	seqno, batch, init := p.seqno, p.batch, p.init
+	outMessages, convertedTrace := p.outMessages, p.convertedTrace
+	event, oasRisk, gasSpent := p.event, p.oasRisk, p.gasSpent
+	unsignedMsg := p.unsignedMsg
 	bocBase64, err := unsignedMsg.ToBocBase64()
 	if err != nil {
 		return oas.MigrationTransaction{}, err
@@ -728,11 +905,14 @@ func (h *Handler) getJettonMigrations(ctx context.Context, wallets []core.Jetton
 	return out
 }
 
-// prepareJettonTransfers builds a full-balance transfer message for every jetton. Excesses
-// are sent to the destination (response_destination = to). When gasJettonMaster is set,
-// that jetton's transfer goes last with gasReserve kept back for the relay commission
-// (see embedGaslessCommission).
-func prepareJettonTransfers(from, to ton.AccountID, jettons []migratableJetton, gasJettonMaster *ton.AccountID, gasReserve *big.Int) ([]tonwallet.RawMessage, error) {
+// prepareJettonTransfers builds a full-balance transfer message for every jetton. Excesses go to
+// excessDestination — the new wallet for a self-paid transfer, or back to the relay when it
+// fronted the gas (see excessDestination in PrepareMigration). When gasJettonMaster is set, that
+// jetton's transfer goes last with gasReserve kept back for the relay commission (see
+// embedGaslessCommission).
+func prepareJettonTransfers(p prepareJettonTransfersParams) ([]tonwallet.RawMessage, error) {
+	from, to, excessDestination := p.from, p.to, p.excessDestination
+	jettons, gasJettonMaster, gasReserve := p.jettons, p.gasJettonMaster, p.gasReserve
 	var messages []tonwallet.RawMessage
 	var gasTransfer *tonwallet.RawMessage
 	for _, mj := range jettons {
@@ -744,14 +924,14 @@ func prepareJettonTransfers(from, to ton.AccountID, jettons []migratableJetton, 
 			if amount.Sign() <= 0 {
 				return nil, errGasJettonBalanceTooLow
 			}
-			transfer, err := jettonTransferRawMessage(from, to, mj.wallet.Address, amount)
+			transfer, err := jettonTransferRawMessage(from, to, excessDestination, mj.wallet.Address, amount)
 			if err != nil {
 				return nil, err
 			}
 			gasTransfer = &transfer
 			continue
 		}
-		msgRaw, err := jettonTransferRawMessage(from, to, mj.wallet.Address, amount)
+		msgRaw, err := jettonTransferRawMessage(from, to, excessDestination, mj.wallet.Address, amount)
 		if err != nil {
 			return nil, err
 		}
@@ -766,13 +946,13 @@ func prepareJettonTransfers(from, to ton.AccountID, jettons []migratableJetton, 
 	return messages, nil
 }
 
-func jettonTransferRawMessage(from, to, senderJettonWallet ton.AccountID, amount *big.Int) (tonwallet.RawMessage, error) {
+func jettonTransferRawMessage(from, to, excessDestination, senderJettonWallet ton.AccountID, amount *big.Int) (tonwallet.RawMessage, error) {
 	return tonwallet.ToRawMessage(jetton.TransferMessage{
 		Sender:              from,
 		SenderJettonWallet:  &senderJettonWallet,
 		JettonAmount:        amount,
 		Destination:         to,
-		ResponseDestination: &to,
+		ResponseDestination: &excessDestination,
 		AttachedGram:        migrationGasPerTransfer,
 		ForwardGramAmount:   migrationForwardAmount,
 	})
@@ -822,7 +1002,8 @@ func isGaslessJettonBalanceError(err error) bool {
 // growing (it shouldn't grow when the amount shrinks). Only the first batch's commission
 // is exact: later batches are re-prepared before signing (see the client contract in
 // docs/migration-gasless-design.md).
-func (h *Handler) embedGaslessCommission(ctx context.Context, plan []migrationBatch, buildPlan func(gasReserve *big.Int) ([]migrationBatch, error), owner ton.AccountID, pubkey ed25519.PublicKey, master ton.AccountID) ([]migrationBatch, error) {
+func (h *Handler) embedGaslessCommission(ctx context.Context, p embedGaslessCommissionParams) ([]migrationBatch, error) {
+	plan, buildPlan, owner, pubkey, master := p.plan, p.buildPlan, p.owner, p.pubkey, p.master
 	var sponsored []int
 	for i, b := range plan {
 		if b.sponsored {
@@ -896,8 +1077,9 @@ func (h *Handler) isWhitelistedNft(ctx context.Context, item core.NftItem, itemS
 
 // prepareNFTTransfers builds a transfer message for every migratable NFT owned by the wallet,
 // skipping blacklisted items, skipped collections, and non-transferable items (e.g. SBTs). Excesses
-// are sent to the destination (response_destination = to).
-func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to ton.AccountID) ([]tonwallet.RawMessage, error) {
+// go to excessDestination — the new wallet for a self-paid transfer, or back to the relay when it
+// fronted the gas (see excessDestination in PrepareMigration).
+func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to, excessDestination ton.AccountID) ([]tonwallet.RawMessage, error) {
 	nfts, err := h.collectOwnedNFTs(ctx, from)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
 		return nil, err
@@ -927,7 +1109,7 @@ func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to ton.AccountI
 		msgRaw, err := tonwallet.ToRawMessage(nft.ItemTransferMessage{
 			ItemAddress:         item.Address,
 			Destination:         to,
-			ResponseDestination: to,
+			ResponseDestination: excessDestination,
 			AttachedGram:        migrationGasPerTransfer,
 			ForwardGram:         migrationForwardAmount,
 		})
