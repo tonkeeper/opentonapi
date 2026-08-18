@@ -9565,6 +9565,14 @@ func (s *Server) handleGetJettonHoldersRequest(args [1]string, argsEscaped bool,
 					Name: "offset",
 					In:   "query",
 				}: params.Offset,
+				{
+					Name: "sort_by",
+					In:   "query",
+				}: params.SortBy,
+				{
+					Name: "last_account_id",
+					In:   "query",
+				}: params.LastAccountID,
 			},
 			Raw: r,
 		}

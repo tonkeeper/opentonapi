@@ -91,6 +91,25 @@ func toError(defaultCode int, err error) *oas.ErrorStatusCode {
 	return &oas.ErrorStatusCode{StatusCode: defaultCode, Response: oas.Error{Error: censor(err.Error())}}
 }
 
+func parseAccountID(raw string) (tongo.AccountID, error) {
+	addr, err := tongo.ParseAddress(raw)
+	if err != nil {
+		return tongo.AccountID{}, err
+	}
+	return addr.ID, nil
+}
+
+func parseOptionalAccountID(raw string) (*tongo.AccountID, error) {
+	if raw == "" {
+		return nil, nil
+	}
+	id, err := parseAccountID(raw)
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
+}
+
 func anyToJSONRawMap(a any) map[string]jx.Raw { //todo: переписать этот ужас
 	var m = map[string]jx.Raw{}
 	if am, ok := a.(map[string]any); ok {
@@ -135,7 +154,15 @@ var NoneAccount = oas.AccountAddress{
 }
 
 func convertAccountAddress(id tongo.AccountID, book addressBook) oas.AccountAddress {
-	address := oas.AccountAddress{Address: id.ToRaw()}
+	address := convertAccountAddressPure(id, book, false)
+	if wallet, err := book.IsWallet(id); err == nil {
+		address.IsWallet = wallet
+	}
+	return address
+}
+
+func convertAccountAddressPure(id tongo.AccountID, book addressBook, isWallet bool) oas.AccountAddress {
+	address := oas.AccountAddress{Address: id.ToRaw(), IsWallet: isWallet}
 	if i, prs := book.GetAddressInfoByAddress(id); prs {
 		if i.Name != "" {
 			address.SetName(oas.NewOptString(i.Name))
@@ -144,9 +171,6 @@ func convertAccountAddress(id tongo.AccountID, book addressBook) oas.AccountAddr
 			address.SetIcon(oas.NewOptString(imgGenerator.DefaultGenerator.GenerateImageUrl(i.Image, 200, 200)))
 		}
 		address.IsScam = i.IsScam
-	}
-	if wallet, err := book.IsWallet(id); err == nil {
-		address.IsWallet = wallet
 	}
 	return address
 }

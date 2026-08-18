@@ -7904,7 +7904,12 @@ type GetJettonHoldersParams struct {
 	// Account ID.
 	AccountID string
 	Limit     OptInt `json:",omitempty,omitzero"`
-	Offset    OptInt `json:",omitempty,omitzero"`
+	// Used only with sort_by=balance; has limit of 9000 rows.
+	Offset OptInt                    `json:",omitempty,omitzero"`
+	SortBy OptGetJettonHoldersSortBy `json:",omitempty,omitzero"`
+	// Used only with sort_by=address: the account_id of the last holder from the previous page, to fetch
+	// the next page after it.
+	LastAccountID OptString `json:",omitempty,omitzero"`
 }
 
 func unpackGetJettonHoldersParams(packed middleware.Parameters) (params GetJettonHoldersParams) {
@@ -7931,6 +7936,24 @@ func unpackGetJettonHoldersParams(packed middleware.Parameters) (params GetJetto
 		}
 		if v, ok := packed[key]; ok {
 			params.Offset = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "sort_by",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SortBy = v.(OptGetJettonHoldersSortBy)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "last_account_id",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.LastAccountID = v.(OptString)
 		}
 	}
 	return params
@@ -8121,6 +8144,108 @@ func decodeGetJettonHoldersParams(args [1]string, argsEscaped bool, r *http.Requ
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: sort_by.
+	{
+		val := GetJettonHoldersSortBy("balance")
+		params.SortBy.SetTo(val)
+	}
+	// Decode query: sort_by.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "sort_by",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSortByVal GetJettonHoldersSortBy
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSortByVal = GetJettonHoldersSortBy(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SortBy.SetTo(paramsDotSortByVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SortBy.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "sort_by",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: last_account_id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "last_account_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLastAccountIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLastAccountIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.LastAccountID.SetTo(paramsDotLastAccountIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "last_account_id",
 			In:   "query",
 			Err:  err,
 		}

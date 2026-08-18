@@ -10748,6 +10748,7 @@
       "$ref": "#/components/parameters/limitQuery"
      },
      {
+      "description": "used only with sort_by=balance; has limit of 9000 rows",
       "in": "query",
       "name": "offset",
       "required": false,
@@ -10755,6 +10756,31 @@
        "default": 0,
        "minimum": 0,
        "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "sort_by",
+      "required": false,
+      "schema": {
+       "default": "balance",
+       "description": "address allows unlimited pagination via last_account_id cursor, balance sorting allow getting top holders",
+       "enum": [
+        "balance",
+        "address"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "description": "used only with sort_by=address: the account_id of the last holder from the previous page, to fetch the next page after it",
+      "in": "query",
+      "name": "last_account_id",
+      "required": false,
+      "schema": {
+       "example": "0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621",
+       "format": "address",
+       "type": "string"
       }
      }
     ],

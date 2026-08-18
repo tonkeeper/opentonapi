@@ -26,6 +26,7 @@ type JettonHolder struct {
 	JettonAddress tongo.AccountID
 	Address       tongo.AccountID
 	Owner         *tongo.AccountID
+	OwnerIsWallet bool
 	Balance       decimal.Decimal
 }
 

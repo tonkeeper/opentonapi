@@ -1659,11 +1659,30 @@ paths:
         - $ref: '#/components/parameters/limitQuery'
         - in: query
           name: offset
+          description: "used only with sort_by=balance; has limit of 9000 rows"
           required: false
           schema:
             type: integer
             default: 0
             minimum: 0
+        - in: query
+          name: sort_by
+          required: false
+          schema:
+            type: string
+            description: "address allows unlimited pagination via last_account_id cursor, balance sorting allow getting top holders"
+            default: "balance"
+            enum:
+              - balance
+              - address
+        - in: query
+          name: last_account_id
+          description: "used only with sort_by=address: the account_id of the last holder from the previous page, to fetch the next page after it"
+          required: false
+          schema:
+            type: string
+            format: address
+            example: 0:97264395BD65A255A429B11326C84128B7D70FFED7949ABAE3036D506BA38621
       responses:
         '200':
           description: jetton's holders

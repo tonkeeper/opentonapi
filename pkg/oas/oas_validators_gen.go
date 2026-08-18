@@ -3236,6 +3236,17 @@ func (s *GetChartRatesOK) Validate() error {
 	return nil
 }
 
+func (s GetJettonHoldersSortBy) Validate() error {
+	switch s {
+	case "balance":
+		return nil
+	case "address":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *GetJettonInfosByAddressesReq) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
