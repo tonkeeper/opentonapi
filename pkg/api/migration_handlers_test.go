@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	tonwallet "github.com/tonkeeper/tongo/wallet"
@@ -195,9 +197,47 @@ func TestMigrationEligibilityIsShared(t *testing.T) {
 	}
 	require.Len(t, eligible, 2, "only the two non-zero, unlocked wallets are migratable")
 
-	messages, err := prepareJettonTransfers(from, to, eligible, nil, nil)
+	messages, err := prepareJettonTransfers(prepareJettonTransfersParams{
+		from: from, to: to, excessDestination: to, jettons: eligible,
+	})
 	require.NoError(t, err)
 	require.Len(t, messages, len(eligible), "the list endpoint and the migration plan must agree")
+}
+
+// decodedResponseDestination unmarshals a wallet.RawMessage built for a jetton transfer and
+// returns the response_destination/excess address encoded in its body.
+func decodedResponseDestination(t *testing.T, msg tonwallet.RawMessage) ton.AccountID {
+	var m abi.MessageRelaxed
+	msg.Message.ResetCounters()
+	require.NoError(t, tlb.Unmarshal(msg.Message, &m))
+	body, ok := m.MessageInternal.Body.Value.Value.(abi.JettonTransferMsgBody)
+	require.True(t, ok, "expected a jetton transfer body, got %T", m.MessageInternal.Body.Value.Value)
+	id, err := ton.AccountIDFromTlb(body.ResponseDestination)
+	require.NoError(t, err)
+	require.NotNil(t, id, "response_destination must be a real address")
+	return *id
+}
+
+// TestJettonTransferRawMessage_ExcessDestination pins the fix for battery migrations bleeding
+// relay funds: a battery-sponsored jetton transfer must return its unspent gas to the relay,
+// which fronted it, not to the new wallet — otherwise the relay loses the full attached amount on
+// every sponsored transfer instead of just what it actually cost.
+func TestJettonTransferRawMessage_ExcessDestination(t *testing.T) {
+	from := ton.MustParseAccountID("0:945c7be88b0d0c8250cbf42cbffa9137cecc4a98e3581fafa4413cf2dfe2c25d")
+	to := ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000001")
+	senderJettonWallet := ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000002")
+	relay := ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000004")
+
+	t.Run("self-paid sends excess to the new wallet", func(t *testing.T) {
+		msg, err := jettonTransferRawMessage(from, to, to, senderJettonWallet, big.NewInt(100))
+		require.NoError(t, err)
+		require.Equal(t, to, decodedResponseDestination(t, msg))
+	})
+	t.Run("battery-sponsored sends excess back to the relay", func(t *testing.T) {
+		msg, err := jettonTransferRawMessage(from, to, relay, senderJettonWallet, big.NewInt(100))
+		require.NoError(t, err)
+		require.Equal(t, relay, decodedResponseDestination(t, msg))
+	})
 }
 
 func TestHasMigratableAssets(t *testing.T) {
@@ -281,6 +321,47 @@ func TestRequiredGas(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require.Equal(t, tt.want, tt.plan.minGramBalanceRequired())
+		})
+	}
+}
+
+// TestAssembleMigrationPlan_SweepSponsorship pins the fix for a battery-eligible v5 wallet that
+// holds only TON: the plan then consists solely of the final sweep batch, so unless that batch
+// itself can be marked sponsored, the client sees sponsored:false everywhere and hides battery
+// even though it applies. It also pins the battery-sponsored sweep split (payout to the new
+// wallet, then a mode-128 reclaim to the relay) that keeps the relay's fronted gas from leaking
+// to the destination.
+func TestAssembleMigrationPlan_SweepSponsorship(t *testing.T) {
+	to := ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000001")
+	relay := ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000002")
+	tests := []struct {
+		name           string
+		relayFunded    bool
+		sweepSponsored bool
+		wantSponsored  bool
+		wantModes      []byte
+	}{
+		{name: "self-paid: sweep stays unsponsored, single mode-128 transfer", wantModes: []byte{migrationSweepMode}},
+		{name: "gasless: sweep has no jetton to bill, stays unsponsored", relayFunded: true, wantModes: []byte{migrationSweepMode}},
+		{
+			name:        "battery: sweep is sponsored, payout to the new wallet then a mode-128 reclaim to the relay",
+			relayFunded: true, sweepSponsored: true, wantSponsored: true,
+			wantModes: []byte{tonwallet.DefaultMessageMode, migrationSweepMode},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			plan, err := assembleMigrationPlan(assembleMigrationPlanParams{
+				to: to, excessDestination: relay, relayFunded: tt.relayFunded, sweepSponsored: tt.sweepSponsored,
+				gramBalance: minGramTransferFee + 1,
+			})
+			require.NoError(t, err)
+			require.Len(t, plan, 1, "a TON-only wallet's plan is just the sweep batch")
+			require.Equal(t, tt.wantSponsored, plan[0].sponsored)
+			require.Len(t, plan[0].messages, len(tt.wantModes))
+			for i, mode := range tt.wantModes {
+				require.Equal(t, mode, plan[0].messages[i].Mode, "message %d mode", i)
+			}
 		})
 	}
 }
