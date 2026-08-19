@@ -68,6 +68,9 @@ const migrationNftPageSize = 1000
 // batterySponsorshipCap see MaxHelp = 2.1 TON in custodial-battery
 const batterySponsorshipCap = 2_100_000_000
 
+// batterySponsorsSweep tells whether the relay can sponsor the final TON-only sweep batch.
+const batterySponsorsSweep = false
+
 // sponsoredBatchMaxMessages bounds a battery-sponsored batch so its gas fits the sponsorship cap.
 const sponsoredBatchMaxMessages = int(batterySponsorshipCap / migrationGasPerTransfer)
 
@@ -377,14 +380,13 @@ func (h *Handler) PrepareMigration(ctx context.Context, req *oas.MigrationPrepar
 	}
 	// todo allow battery for v4 and v3
 	relayFunded := (batteryPays || gaslessPays) && sourceWallet.IsRelaySupported()
-	// The final TON sweep has no jetton to pay a gasless commission with, so only battery — which
-	// funds gas for free rather than charging a jetton commission — can sponsor it.
-	sweepSponsored := batteryPays && sourceWallet.IsRelaySupported()
+	batteryFunded := batteryPays && sourceWallet.IsRelaySupported()
+	sweepSponsored := batterySponsorsSweep && batteryFunded
 	// excessDestination receives whatever gas a battery-sponsored transfer doesn't spend, so the
 	// relay reclaims what it fronted instead of losing it to the new wallet. Gasless prices its own
 	// gas via a commission instead, and self-paid transfers keep sending excess to the new wallet.
 	excessDestination := destAddr.ID
-	if sweepSponsored {
+	if batteryFunded {
 		config, err := h.gasless.Config(ctx)
 		if err != nil {
 			return nil, toError(http.StatusInternalServerError, fmt.Errorf("failed to get gasless config: %w", err))

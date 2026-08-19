@@ -6399,10 +6399,9 @@ components:
           description: >
             true — the Battery relay pays gas for this transaction; submit it via
             /v2/gasless/send. false — self-paid; sign and broadcast via
-            /v2/blockchain/message as usual. The final TON sweep is sponsored the same
-            way as any other batch when gas_payer=battery; with gas_payer=gasless or
-            self it is always self-paid, since there is no jetton balance left to bill
-            a commission against.
+            /v2/blockchain/message as usual. The final TON sweep is always self-paid,
+            whatever gas_payer says: the relay does not sponsor a TON-only batch, and
+            gasless has no jetton balance left to bill a commission against.
         commission:
           type: string
           description: >
