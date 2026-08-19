@@ -264,6 +264,9 @@ func (h *Handler) GetJettonHolders(ctx context.Context, params oas.GetJettonHold
 	} else {
 		holders, err = h.storage.GetJettonHoldersByBalance(ctx, account, params.Limit.Value, params.Offset.Value)
 	}
+	if errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusNotFound, err)
+	}
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}

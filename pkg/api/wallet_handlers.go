@@ -135,11 +135,14 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	}
 	walletVersion, err := tongoWallet.GetVersionByCode(*codeCell)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("contract is not a supported wallet: %v", err))
 	}
 	cells, err := boc.DeserializeBoc(rawAccount.Data)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
+	}
+	if len(cells) == 0 {
+		return nil, toError(http.StatusBadRequest, fmt.Errorf("contract doesn't have a seqno"))
 	}
 
 	switch walletVersion {
