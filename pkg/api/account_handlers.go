@@ -556,6 +556,9 @@ func (h *Handler) BlockchainAccountInspect(ctx context.Context, params oas.Block
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	if len(rawAccount.Code) == 0 {
+		return nil, toError(http.StatusNotFound, fmt.Errorf("account has no code"))
+	}
 	cells, err := boc.DeserializeBoc(rawAccount.Code)
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
