@@ -227,12 +227,19 @@ func (h *Handler) GetBlockchainAccountTransactions(ctx context.Context, params o
 	result := oas.Transactions{
 		Transactions: make([]oas.Transaction, len(txs)),
 	}
+	if len(txs) == 0 {
+		return &result, nil
+	}
 	accountObject, err := h.storage.GetRawAccount(ctx, account.ID)
-	if err != nil {
-		return nil, err
+	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	var interfaces []abi.ContractInterface
+	if accountObject != nil {
+		interfaces = accountObject.Interfaces
 	}
 	for i, tx := range txs {
-		result.Transactions[i] = h.convertTransaction(*tx, accountObject.Interfaces, h.addressBook)
+		result.Transactions[i] = h.convertTransaction(*tx, interfaces, h.addressBook)
 	}
 	return &result, nil
 }
