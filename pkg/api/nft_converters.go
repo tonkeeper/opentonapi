@@ -83,9 +83,15 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			nftItem.Metadata["buttons"] = buttons
 		}
 	}
-	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
+	switch {
+	case len(nftItem.ApprovedBy) > 0 && nftItem.Verified:
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
-	} else {
+	case trustType == core.TrustWhitelist || trustType == core.TrustGraylist:
+		// The item has been reviewed and cleared (support graylisted it, for instance). That
+		// verdict wins over every heuristic, including the spam filter blacklisting NFTs that
+		// nothing vouches for.
+		nftItem.Trust = oas.TrustType(trustType)
+	default:
 		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, item.OwnerAddress, collectionTrust, name, description, image)
 		if nftTrust == core.TrustNone && trustType != "" {
 			nftTrust = trustType
