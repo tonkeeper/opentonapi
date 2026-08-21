@@ -16,6 +16,10 @@ import (
 // Only AccountTrust is meaningful; everything else is a no-op.
 type mockSpamFilter struct {
 	blacklist map[ton.AccountID]bool
+	// nftTrust, when set, is returned verbatim by NftTrust; otherwise NftTrust mirrors the
+	// production rules that matter to converters (no collection => blacklist, else inherit).
+	nftTrust        core.TrustType
+	collectionTrust core.TrustType
 }
 
 func (m mockSpamFilter) IsScamEvent(actions []oas.Action, viewer *ton.AccountID, initiator ton.AccountID) bool {
@@ -45,8 +49,24 @@ func (m mockSpamFilter) TonDomainTrust(domain string) core.TrustType {
 	return core.TrustNone
 }
 
-func (m mockSpamFilter) NftTrust(address tongo.AccountID, collection, owner, collectionOwner *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType {
-	return core.TrustNone
+func (m mockSpamFilter) NftTrust(address tongo.AccountID, collection, owner *ton.AccountID, collectionTrust core.TrustType, name, description, image string) core.TrustType {
+	if m.nftTrust != "" {
+		return m.nftTrust
+	}
+	if collection == nil {
+		return core.TrustBlacklist
+	}
+	if collectionTrust == "" {
+		return core.TrustNone
+	}
+	return collectionTrust
+}
+
+func (m mockSpamFilter) NftCollectionTrust(address tongo.AccountID, owner *ton.AccountID, name, description, image string) core.TrustType {
+	if m.collectionTrust == "" {
+		return core.TrustNone
+	}
+	return m.collectionTrust
 }
 
 func (m mockSpamFilter) GetNftsScamData(ctx context.Context, addresses []ton.AccountID) (map[ton.AccountID]core.TrustType, error) {

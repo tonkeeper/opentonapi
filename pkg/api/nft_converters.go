@@ -42,7 +42,6 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		}))
 	}
 	var image, description, name string
-	var collectionName, collectionDescription string
 	if item.Metadata != nil {
 		if imageI, prs := item.Metadata["image"]; prs {
 			image, _ = imageI.(string)
@@ -54,13 +53,11 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 			name, _ = nameI.(string)
 		}
 	}
-	var collectionOwner *tongo.AccountID
+	collectionTrust := core.TrustNone
 	if item.CollectionAddress != nil {
 		collectionAddr := *item.CollectionAddress
 		cInfo, _ := metaCache.getCollectionMeta(ctx, collectionAddr)
-		collectionName = cInfo.Name
-		collectionDescription = cInfo.Description
-		collectionOwner = cInfo.Owner
+		collectionTrust = h.spamFilter.NftCollectionTrust(collectionAddr, cInfo.Owner, cInfo.Name, cInfo.Description, cInfo.Image)
 		if cc, prs := book.GetCollectionInfoByAddress(collectionAddr); prs {
 			for _, approver := range cc.Approvers {
 				nftItem.ApprovedBy = append(nftItem.ApprovedBy, oas.NftApprovedByItem(approver))
@@ -89,7 +86,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	if len(nftItem.ApprovedBy) > 0 && nftItem.Verified {
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
 	} else {
-		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, item.OwnerAddress, collectionOwner, name, description, image, collectionName, collectionDescription)
+		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, item.OwnerAddress, collectionTrust, name, description, image)
 		if nftTrust == core.TrustNone && trustType != "" {
 			nftTrust = trustType
 		}
@@ -134,7 +131,7 @@ func (h *Handler) convertNftCollection(collection core.NftCollection, book addre
 	if len(nftCollection.ApprovedBy) != 0 {
 		nftCollection.Trust = oas.TrustType(core.TrustWhitelist)
 	} else {
-		nftCollection.Trust = oas.TrustType(h.spamFilter.NftTrust(collection.Address, nil, collection.OwnerAddress, nil, name, description, image, "", ""))
+		nftCollection.Trust = oas.TrustType(h.spamFilter.NftCollectionTrust(collection.Address, collection.OwnerAddress, name, description, image))
 	}
 
 	if collection.ContentURL != "" && (strings.HasPrefix(collection.ContentURL, "http://") || strings.HasPrefix(collection.ContentURL, "https://")) {
@@ -224,8 +221,11 @@ func (h *Handler) convertNftHistory(ctx context.Context, account tongo.AccountID
 	return events, int64(lastLT), nil
 }
 
-func (h *Handler) convertNftOperation(ctx context.Context, op core.NftOperation) oas.NftOperation {
-	item := h.convertNFT(ctx, core.NftItem{Address: op.Nft}, h.addressBook, h.metaCache, core.TrustNone)
+// convertNftOperation converts a single NFT operation. nft is the operation's NFT as loaded from
+// storage and trust its trust from the spam filter's storage; both are supplied by the caller so a
+// page of operations can be resolved with one bulk lookup.
+func (h *Handler) convertNftOperation(ctx context.Context, op core.NftOperation, nft core.NftItem, trustType core.TrustType) oas.NftOperation {
+	item := h.convertNFT(ctx, nft, h.addressBook, h.metaCache, trustType)
 
 	operation := oas.NftOperation{
 		Operation:       op.Operation,
