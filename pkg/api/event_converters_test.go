@@ -17,7 +17,8 @@ import (
 type mockSpamFilter struct {
 	blacklist map[ton.AccountID]bool
 	// nftTrust, when set, is returned verbatim by NftTrust; otherwise NftTrust mirrors the
-	// production rules that matter to converters (no collection => blacklist, else inherit).
+	// production rules that matter to converters (inherit the collection trust, and blacklist
+	// an item nothing vouches for).
 	nftTrust        core.TrustType
 	collectionTrust core.TrustType
 }
@@ -53,11 +54,8 @@ func (m mockSpamFilter) NftTrust(address tongo.AccountID, collection, owner *ton
 	if m.nftTrust != "" {
 		return m.nftTrust
 	}
-	if collection == nil {
+	if collection == nil || collectionTrust == "" || collectionTrust == core.TrustNone {
 		return core.TrustBlacklist
-	}
-	if collectionTrust == "" {
-		return core.TrustNone
 	}
 	return collectionTrust
 }

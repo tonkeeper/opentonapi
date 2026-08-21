@@ -25,8 +25,9 @@ func newTestMetaCache(collections map[ton.AccountID]collectionMeta) metadataCach
 	return mc
 }
 
-// TestConvertNFTTrust locks in the trust rules tonviewer used to apply client-side: an NFT with
-// no collection is a scam, and an NFT inherits the trust of the collection it belongs to.
+// TestConvertNFTTrust locks in how the NFT trust sources are combined: an item nothing vouches
+// for is blacklisted so clients blur it, an item inherits the trust of its collection, and a
+// review — support graylisting the item, or the address book approving it — keeps it visible.
 func TestConvertNFTTrust(t *testing.T) {
 	nftID := ton.MustParseAccountID("EQCNmNR28mDfkwn4bwAlwJ1uhEFnjSQTZ3REz9d7IGZXU9EZ")
 	collectionID := ton.MustParseAccountID("EQDaaxtmY6Dk0YzIV0zNnbUpbjZ92TJHBvO72esc0srwv8K2")
@@ -48,9 +49,9 @@ func TestConvertNFTTrust(t *testing.T) {
 			expectedTrust: oas.TrustType(core.TrustBlacklist),
 		},
 		{
-			name:          "NFT in a clean collection is not a scam",
+			name:          "NFT in an unreviewed collection is blacklisted so clients blur it",
 			collection:    &collectionID,
-			expectedTrust: oas.TrustType(core.TrustNone),
+			expectedTrust: oas.TrustType(core.TrustBlacklist),
 		},
 		{
 			name:            "NFT inherits a blacklisted collection",
@@ -59,10 +60,28 @@ func TestConvertNFTTrust(t *testing.T) {
 			expectedTrust:   oas.TrustType(core.TrustBlacklist),
 		},
 		{
-			name:          "storage trust is used when the filter has no opinion",
+			name:            "NFT inherits a graylisted collection",
+			collection:      &collectionID,
+			collectionTrust: core.TrustGraylist,
+			expectedTrust:   oas.TrustType(core.TrustGraylist),
+		},
+		{
+			name:          "a blacklisted item stays blacklisted",
 			collection:    &collectionID,
 			trustType:     core.TrustBlacklist,
 			expectedTrust: oas.TrustType(core.TrustBlacklist),
+		},
+		{
+			name:          "a graylisted item stays visible even though nothing else vouches for it",
+			collection:    &collectionID,
+			trustType:     core.TrustGraylist,
+			expectedTrust: oas.TrustType(core.TrustGraylist),
+		},
+		{
+			name:          "a whitelisted item stays visible even without a collection",
+			collection:    nil,
+			trustType:     core.TrustWhitelist,
+			expectedTrust: oas.TrustType(core.TrustWhitelist),
 		},
 	}
 
