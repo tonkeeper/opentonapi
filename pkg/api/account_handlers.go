@@ -541,9 +541,48 @@ func (h *Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccoun
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
+	if len(history) == 0 {
+		return &oas.NftOperations{}, nil
+	}
+	// Resolve every NFT touched by this page in one shot, so each operation carries real
+	// metadata and trust instead of an empty placeholder item.
+	nftIDs := make([]ton.AccountID, 0, len(history))
+	seen := make(map[ton.AccountID]struct{}, len(history))
+	for _, op := range history {
+		if _, ok := seen[op.Nft]; ok {
+			continue
+		}
+		seen[op.Nft] = struct{}{}
+		nftIDs = append(nftIDs, op.Nft)
+	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	var nftsScamData map[ton.AccountID]core.TrustType
+	go func() {
+		defer wg.Done()
+		var err error
+		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, nftIDs)
+		if err != nil {
+			h.logger.Warn("error getting nft scam data", zap.Error(err))
+		}
+	}()
+	items, err := h.storage.GetNFTs(ctx, nftIDs)
+	wg.Wait()
+	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
+		return nil, toError(http.StatusInternalServerError, err)
+	}
+	nfts := make(map[ton.AccountID]core.NftItem, len(items))
+	for _, item := range items {
+		nfts[item.Address] = item
+	}
+
 	res := oas.NftOperations{}
 	for _, op := range history {
-		res.Operations = append(res.Operations, h.convertNftOperation(ctx, op))
+		nft, ok := nfts[op.Nft]
+		if !ok {
+			nft = core.NftItem{Address: op.Nft}
+		}
+		res.Operations = append(res.Operations, h.convertNftOperation(ctx, op, nft, nftsScamData[op.Nft]))
 		if len(res.Operations) == params.Limit {
 			res.NextFrom = oas.NewOptInt64(int64(op.Lt))
 		}

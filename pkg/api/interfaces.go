@@ -213,7 +213,12 @@ type SpamFilter interface {
 	AccountTrust(address tongo.AccountID) core.TrustType
 	HasBlacklistedComment(values ...string) bool
 	TonDomainTrust(domain string) core.TrustType
-	NftTrust(address tongo.AccountID, collection, owner, collectionOwner *ton.AccountID, name, description, image, collectionName, collectionDescription string) core.TrustType
+	// NftTrust resolves the trust of a single NFT item. collectionTrust is the trust of the
+	// collection the item belongs to (core.TrustNone when the item has no collection), so a
+	// scam collection taints every item in it.
+	NftTrust(address tongo.AccountID, collection, owner *ton.AccountID, collectionTrust core.TrustType, name, description, image string) core.TrustType
+	// NftCollectionTrust resolves the trust of an NFT collection itself.
+	NftCollectionTrust(address tongo.AccountID, owner *ton.AccountID, name, description, image string) core.TrustType
 	GetNftsScamData(ctx context.Context, addresses []ton.AccountID) (map[ton.AccountID]core.TrustType, error)
 }
 
