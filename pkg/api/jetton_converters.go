@@ -146,7 +146,7 @@ func (h *Handler) convertJettonOperation(ctx context.Context, op core.JettonOper
 
 func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWallet, currencies []string, scaledUiLt *int64, assetInfo *oas.JettonAssetInfo) (oas.JettonBalance, error) {
 	// the latest scaled ui parameters for jetton master if scaledUiLt == nil
-	todayRates, yesterdayRates, weekRates, monthRates, _ := h.getRates()
+	_, yesterdayRates, weekRates, monthRates, _ := h.getRates()
 	for idx, currency := range currencies {
 		if jetton, err := tongo.ParseAddress(currency); err == nil {
 			currency = jetton.ID.ToRaw()
@@ -173,7 +173,7 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 	}
 	rates := make(map[string]oas.TokenRates)
 	for _, currency := range currencies {
-		rates, err = h.convertRates(ctx, rates, wallet.JettonAddress.ToRaw(), currency, todayRates, yesterdayRates, weekRates, monthRates)
+		rates, err = h.convertRates(ctx, rates, wallet.JettonAddress.ToRaw(), currency, yesterdayRates, weekRates, monthRates)
 		if err != nil {
 			rates = make(map[string]oas.TokenRates)
 			continue
