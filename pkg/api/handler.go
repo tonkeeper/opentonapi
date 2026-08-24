@@ -48,7 +48,7 @@ type Handler struct {
 
 	limits         Limits
 	spamFilter     SpamFilter
-	ratesSource    ratesSource
+	ratesSource    conversionRatesSource
 	score          scoreSource
 	metaCache      metadataCache
 	tonConnect     *tonconnect.Server

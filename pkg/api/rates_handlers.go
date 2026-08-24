@@ -115,7 +115,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 		}
 	}
 
-	todayRates, yesterdayRates, weekRates, monthRates, err := h.getRates()
+	_, yesterdayRates, weekRates, monthRates, err := h.getRates()
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
@@ -123,7 +123,7 @@ func (h *Handler) GetRates(ctx context.Context, params oas.GetRatesParams) (*oas
 	rates := make(map[string]oas.TokenRates)
 	for _, token := range tokens {
 		for _, currency := range currencies {
-			rates, err = h.convertRates(ctx, rates, token, currency, todayRates, yesterdayRates, weekRates, monthRates)
+			rates, err = h.convertRates(ctx, rates, token, currency, yesterdayRates, weekRates, monthRates)
 			if err != nil {
 				return nil, err
 			}
@@ -176,11 +176,63 @@ func (h *Handler) getRates() (todayRates, yesterdayRates, weekRates, monthRates 
 	return results[0], results[1], results[2], results[3], nil
 }
 
+const maxGenerationSkewSeconds = 180
+
+func alignConversionPrices(
+	token, currency string,
+	todayRates map[string]float64, todayTs map[string]int64,
+	prevRates map[string]float64, prevTs map[string]int64,
+) (tokenPrice, currencyPrice float64) {
+	tokenPrice = todayRates[token]
+	currencyPrice = todayRates[currency]
+
+	tokenTs, currencyTs := todayTs[token], todayTs[currency]
+	if tokenTs == 0 || currencyTs == 0 || tokenTs == currencyTs {
+		return tokenPrice, currencyPrice
+	}
+	gap := tokenTs - currencyTs
+	if gap < 0 {
+		gap = -gap
+	}
+	if gap > maxGenerationSkewSeconds {
+		return tokenPrice, currencyPrice
+	}
+
+	if tokenTs < currencyTs {
+		// the token price is a cycle behind: take the currency price from the previous
+		// snapshot when its generation matches the token's better than the current one
+		if prev, ok := prevRates[currency]; ok && prev != 0 && closerTo(prevTs[currency], tokenTs, currencyTs) {
+			currencyPrice = prev
+		}
+	} else {
+		if prev, ok := prevRates[token]; ok && prev != 0 && closerTo(prevTs[token], currencyTs, tokenTs) {
+			tokenPrice = prev
+		}
+	}
+	return tokenPrice, currencyPrice
+}
+
+// closerTo reports whether candidate is strictly closer to target than current is
+func closerTo(candidate, target, current int64) bool {
+	if candidate == 0 {
+		return false
+	}
+	candidateDist := candidate - target
+	if candidateDist < 0 {
+		candidateDist = -candidateDist
+	}
+	currentDist := current - target
+	if currentDist < 0 {
+		currentDist = -currentDist
+	}
+	return candidateDist < currentDist
+}
+
 func (h *Handler) convertRates(
 	ctx context.Context,
 	rates map[string]oas.TokenRates,
 	token, currency string,
-	todayRates, yesterdayRates, weekRates, monthRates map[string]float64,
+	yesterdayRates, weekRates, monthRates map[string]float64,
 ) (map[string]oas.TokenRates, error) {
 	trust := core.TrustNone
 	if len(token) >= minTonAddressLength {
@@ -190,6 +242,8 @@ func (h *Handler) convertRates(
 			trust = meta.Verification
 		}
 	}
+
+	todayRates, todayTimestamps := h.ratesSource.GetTodayRatesWithTimestamps()
 
 	todayCurrencyPrice, ok := todayRates[currency]
 	if !ok {
@@ -206,7 +260,12 @@ func (h *Handler) convertRates(
 		}
 	}
 
-	tokenPrice := todayRates[token]
+	minuteAgoRates, minuteAgoTimestamps := h.ratesSource.GetMinuteAgoRatesWithTimestamps()
+	tokenPrice, todayCurrencyPrice := alignConversionPrices(
+		token, currency,
+		todayRates, todayTimestamps,
+		minuteAgoRates, minuteAgoTimestamps,
+	)
 	if trust == core.TrustBlacklist {
 		tokenPrice = 0
 	}
