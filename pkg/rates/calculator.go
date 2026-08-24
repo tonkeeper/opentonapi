@@ -3,6 +3,7 @@ package rates
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"sync"
 	"time"
 )
@@ -82,18 +83,22 @@ func (c *calculator) refresh() {
 		todayTimestamps = map[string]int64{}
 	}
 	if err != nil {
+		slog.Error("[refresh-rates] error getting today rates", slog.String("err", err.Error()))
 		return
 	}
 	yesterdayRates, err := c.source.GetRates(yesterday)
 	if err != nil {
+		slog.Error("[refresh-rates] error getting yesterday rates", slog.String("err", err.Error()))
 		return
 	}
 	weekRates, err := c.source.GetRates(weekAgo)
 	if err != nil {
+		slog.Error("[refresh-rates] error getting week rates", slog.String("err", err.Error()))
 		return
 	}
 	monthRates, err := c.source.GetRates(monthAgo)
 	if err != nil {
+		slog.Error("[refresh-rates] error getting month rates", slog.String("err", err.Error()))
 		return
 	}
 
