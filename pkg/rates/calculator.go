@@ -94,13 +94,12 @@ func (c *calculator) refresh() {
 	weekRates, err := c.source.GetRates(weekAgo)
 	if err != nil {
 		slog.Error("[refresh-rates] error getting week rates", slog.String("err", err.Error()))
-		// we dont return an error to test lack of data on dev
-		weekRates = map[string]float64{}
+		return
 	}
 	monthRates, err := c.source.GetRates(monthAgo)
 	if err != nil {
 		slog.Error("[refresh-rates] error getting month rates", slog.String("err", err.Error()))
-		monthRates = map[string]float64{}
+		return
 	}
 
 	c.mu.Lock()
