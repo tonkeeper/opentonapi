@@ -202,12 +202,6 @@ type ratesSource interface {
 	GetMarketsTonPrice() ([]rates.Market, error)
 }
 
-type conversionRatesSource interface {
-	ratesSource
-	GetTodayRatesWithTimestamps() (map[string]float64, map[string]int64)
-	GetMinuteAgoRatesWithTimestamps() (map[string]float64, map[string]int64)
-}
-
 type scoreSource interface {
 	GetJettonScore(masterID ton.AccountID) (int32, error)
 }

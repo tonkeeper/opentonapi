@@ -14,6 +14,9 @@ type ratesSource interface {
 	GetMarketsTonPrice() ([]Market, error)
 }
 
+// timestampedRatesSource is implemented by sources backed by the rates service's
+// /v1/rates/timestamped endpoint. Only its prices are consumed; the per-token
+// timestamps it reports are ignored.
 type timestampedRatesSource interface {
 	GetRatesWithTimestamps(date int64) (map[string]float64, map[string]int64, error)
 }
@@ -24,14 +27,7 @@ type calculator struct {
 	// See the Mock description for details
 	source                                            ratesSource
 	todayRates, yesterdayRates, weekRates, monthRates map[string]float64
-	// todayTimestamps holds, for each token in todayRates, the unix timestamp its price
-	// was produced at; empty when the source cannot report timestamps
-	todayTimestamps map[string]int64
-	// minuteAgoRates and minuteAgoTimestamps hold the today snapshot from the previous
-	// refresh cycle; empty until the second refresh completes (cold start)
-	minuteAgoRates      map[string]float64
-	minuteAgoTimestamps map[string]int64
-	marketsTonPrice     []Market
+	marketsTonPrice                                   []Market
 }
 
 type Point struct {
@@ -47,7 +43,6 @@ func InitCalculator(source ratesSource) *calculator {
 	c := &calculator{
 		source:          source,
 		todayRates:      map[string]float64{},
-		todayTimestamps: map[string]int64{},
 		yesterdayRates:  map[string]float64{},
 		weekRates:       map[string]float64{},
 		monthRates:      map[string]float64{},
@@ -74,13 +69,12 @@ func (c *calculator) refresh() {
 
 	marketsTonPrice, marketErr := c.source.GetMarketsTonPrice()
 	var todayRates map[string]float64
-	var todayTimestamps map[string]int64
 	var err error
 	if tsSource, ok := c.source.(timestampedRatesSource); ok {
-		todayRates, todayTimestamps, err = tsSource.GetRatesWithTimestamps(today.Unix())
+		// prices come from the timestamped endpoint; the timestamps are ignored
+		todayRates, _, err = tsSource.GetRatesWithTimestamps(today.Unix())
 	} else {
 		todayRates, err = c.source.GetRates(today.Unix())
-		todayTimestamps = map[string]int64{}
 	}
 	if err != nil {
 		slog.Error("[refresh-rates] error getting today rates", slog.String("err", err.Error()))
@@ -103,10 +97,7 @@ func (c *calculator) refresh() {
 	}
 
 	c.mu.Lock()
-	c.minuteAgoRates = c.todayRates
-	c.minuteAgoTimestamps = c.todayTimestamps
 	c.todayRates = todayRates
-	c.todayTimestamps = todayTimestamps
 	c.yesterdayRates = yesterdayRates
 	c.weekRates = weekRates
 	c.monthRates = monthRates
@@ -139,27 +130,6 @@ func (c *calculator) GetRates(date int64) (map[string]float64, error) {
 	}
 
 	return nil, fmt.Errorf("invalid period")
-}
-
-// GetTodayRatesWithTimestamps returns today's rates together with, for each token, the unix
-// timestamp its price was produced at. The timestamps map is empty when the source does not
-// implement timestampedRatesSource
-func (c *calculator) GetTodayRatesWithTimestamps() (map[string]float64, map[string]int64) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.todayRates, c.todayTimestamps
-}
-
-// GetMinuteAgoRatesWithTimestamps returns the today snapshot from the previous refresh
-// cycle. Until the second refresh completes (cold start) there is no previous snapshot,
-// so it falls back to the current one — callers always get a usable map
-func (c *calculator) GetMinuteAgoRatesWithTimestamps() (map[string]float64, map[string]int64) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	if len(c.minuteAgoRates) == 0 {
-		return c.todayRates, c.todayTimestamps
-	}
-	return c.minuteAgoRates, c.minuteAgoTimestamps
 }
 
 func (c *calculator) GetRatesChart(token string, currency string, pointsCount int, startDate *int64, endDate *int64) ([]Point, error) {
