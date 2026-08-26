@@ -5,8 +5,8 @@
          "Staker": "0:69ffc859cb1fb57a4cd300bad076a3623b8a7de0d5681aca0919f052df77474a",
          "Amount": {
            "Currency": {
-             "Type": "native",
-             "Jetton": null,
+             "Type": "jetton",
+             "Jetton": "0:bdf3fa8098d129b54b4f73b5bac5d1e1fd91eb054169c3916dfc8ccd536d1000",
              "CurrencyID": null
            },
            "Amount": 206418586791

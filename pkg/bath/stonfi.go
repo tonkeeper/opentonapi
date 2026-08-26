@@ -604,9 +604,10 @@ func (s UniversalStonfiStraw) processMultipleRouterSwaps(b *Bubble) stonfiSwapMu
 	if err != nil || outJettonWallet == nil {
 		return nil
 	}
-	success := srSwaps[0].payoutBody.ExitCode == StonfiExitCode_SwapOk
+	payoutAgreed := srSwaps[0].payoutBody.ExitCode == StonfiExitCode_SwapOk
+	success := payoutAgreed && finalTransfer.success
 	var out assetTransfer
-	if success {
+	if payoutAgreed {
 		out = assetTransfer{
 			Amount:       big.Int(finalTransfer.amount),
 			IsTon:        finalTransfer.isWrappedTon,
