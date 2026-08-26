@@ -1,30 +1,52 @@
 {
    "Actions": [
      {
-       "WithdrawTokenStakeRequest": {
-         "Staker": "0:4003cbbfb5d1a9085873f956f92040669990d9d371ce843741b5d7936f231238",
-         "Protocol": {
-           "Name": "Ethena",
-           "Image": "https://ethena.fi/shared/usde.png"
-         },
-         "StakeMeta": {
-           "Currency": {
-             "Type": "jetton",
-             "Jetton": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
-             "CurrencyID": null
-           },
-           "Amount": 3561999
-         }
+       "JettonTransfer": {
+         "Comment": null,
+         "EncryptedComment": null,
+         "Jetton": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
+         "Recipient": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
+         "Sender": "0:4003cbbfb5d1a9085873f956f92040669990d9d371ce843741b5d7936f231238",
+         "RecipientsWallet": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
+         "SendersWallet": "0:98967d18300af880b660d08f6d4dc03b080d81f334a1a9a0fe00587d4ab5dfda",
+         "Amount": "3561999",
+         "Refund": null
        },
        "Success": true,
-       "Type": "WithdrawTokenStakeRequest",
+       "Type": "JettonTransfer",
        "BaseTransactions": [
          "96dcf17373494225364c5b0c7f7adca6ab8e5bf0f9298b0f7bc395b428594b61",
-         "68790cea13a1717252d74d16a674a5d77fb969ebab1c27942559ff163da77e5b",
          "7eae0f164ff92e7ffb65e7cfca93d6fdfb6bbf0695be436699cb26a65a28e409",
          "80adfa60c6caedb596fb217de7fcdfa37daee309c7ab48f58fdafaee277570c4",
-         "ff13545fed6064c4ee68e495990314ac07c303e60eace6bcfe7d61aa310b39f5",
          "88653f902354f5d03ea880f62e932cb8a83b8998e9c7510503b71ecf507f01bf"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 81416523,
+         "Executor": "0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5",
+         "Contract": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
+         "Operation": "JettonMint",
+         "Payload": "QueryId: 4238277739104\nToAddress: 0:4003cbbfb5d1a9085873f956f92040669990d9d371ce843741b5d7936f231238\nTonAmount: \"35000000\"\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "ff13545fed6064c4ee68e495990314ac07c303e60eace6bcfe7d61aa310b39f5"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 70066523,
+         "Executor": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
+         "Contract": "0:98967d18300af880b660d08f6d4dc03b080d81f334a1a9a0fe00587d4ab5dfda",
+         "Operation": "0xb2583ed5",
+         "Payload": ""
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "68790cea13a1717252d74d16a674a5d77fb969ebab1c27942559ff163da77e5b"
        ]
      }
    ],
@@ -50,18 +72,18 @@
        "Account": "0:a11ae0f5bb47bb2945871f915a621ff281c2d786c746da74873d71d6f2aaa7a5",
        "Ton": -5046,
        "Fee": 18588523,
+       "Jettons": null
+     },
+     {
+       "Account": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
+       "Ton": -711,
+       "Fee": 17078711,
        "Jettons": [
          {
            "Address": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
            "Quantity": 3561999
          }
        ]
-     },
-     {
-       "Account": "0:d0e545323c7acb7102653c073377f7e3c67f122eb94d430a250739f109d4a57d",
-       "Ton": -711,
-       "Fee": 17078711,
-       "Jettons": null
      }
    ]
  }

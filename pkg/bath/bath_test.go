@@ -457,6 +457,9 @@ func TestFindActions(t *testing.T) {
 		"9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa": {
 			tongo.MustParseBlockID("(0,8000000000000000,62729945)"),
 		},
+		"a349ed88485f06f15410ddd0add8aa384f1dafc8e131a3732149d8b6d407eca4": {
+			tongo.MustParseBlockID("(0,8000000000000000,92385315)"),
+		},
 	}
 
 	type Case struct {
@@ -1231,6 +1234,13 @@ func TestFindActions(t *testing.T) {
 			name:           "swap snotfi then tonco",
 			filenamePrefix: "swap-snotfi-then-tonco",
 			hash:           "9610cbb609a44859d9cb726d9d1f01bc0a702c98270ed5a7e64749470ceeadfa",
+		},
+		{
+			// the pool paid out (stonfi_pay_to_v2 exit code is SwapOk),
+			// but the router's jetton transfer to the user failed and bounced back
+			name:           "stonfi v2 swap with failed payout",
+			filenamePrefix: "stonfi-v2-swap-failed-payout",
+			hash:           "a349ed88485f06f15410ddd0add8aa384f1dafc8e131a3732149d8b6d407eca4",
 		},
 	}
 
