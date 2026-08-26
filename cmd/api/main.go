@@ -23,7 +23,6 @@ import (
 )
 
 func main() {
-
 	cfg := config.Load()
 	log := app.Logger(cfg.App.LogLevel)
 
