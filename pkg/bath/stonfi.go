@@ -1,6 +1,7 @@
 package bath
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
@@ -80,6 +81,9 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.StonfiSwapMsgOp), HasInterface(abi.StonfiPool)},
 		Builder: func(newAction *BubbleJettonSwap, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
+			if tx.additionalInfo == nil || tx.additionalInfo.STONfiPool == nil {
+				return fmt.Errorf("stonfi pool additional info is not available for %v", tx.account.Address)
+			}
 			a, b := tx.additionalInfo.STONfiPool.Token0, tx.additionalInfo.STONfiPool.Token1
 			body := tx.decodedBody.Value.(abi.StonfiSwapMsgBody)
 			newAction.Out.Amount = big.Int(body.MinOut)
