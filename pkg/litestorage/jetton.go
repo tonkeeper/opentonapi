@@ -125,7 +125,9 @@ func (s *LiteStorage) GetJettonMasterData(ctx context.Context, master tongo.Acco
 		TotalSupply: big.Int(r.TotalSupply),
 		Mintable:    r.Mintable,
 	}
-	jettonMaster.Admin, _ = tongo.AccountIDFromTlb(r.AdminAddress)
+	if r.AdminAddress != nil {
+		jettonMaster.Admin, _ = tongo.AccountIDFromTlb(*r.AdminAddress)
+	}
 	if state, err := s.client.GetAccountState(ctx, master); err == nil {
 		jettonMaster.LastTransactionLt = state.LastTransLt
 		if state.Account.SumType == "Account" && state.Account.Account.Storage.State.SumType == "AccountActive" {
