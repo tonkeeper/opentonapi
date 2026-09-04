@@ -215,9 +215,8 @@ type SpamFilter interface {
 	TonDomainTrust(domain string) core.TrustType
 	// NftTrust resolves the trust of a single NFT item. collectionTrust is the trust of the
 	// collection the item belongs to (core.TrustNone when the item has no collection), so a
-	// scam collection taints every item in it. An implementation may blacklist an item that
-	// nothing vouches for, so callers must apply a reviewed status of their own (see
-	// convertNFT) before falling back to this.
+	// scam collection taints every item in it. An item that is neither whitelisted, graylisted,
+	// nor blacklisted resolves to core.TrustNone, same as every other Trust method.
 	NftTrust(address tongo.AccountID, collection, owner *ton.AccountID, collectionTrust core.TrustType, name, description, image string) core.TrustType
 	// NftCollectionTrust resolves the trust of an NFT collection itself.
 	NftCollectionTrust(address tongo.AccountID, owner *ton.AccountID, name, description, image string) core.TrustType
