@@ -26,8 +26,8 @@ func newTestMetaCache(collections map[ton.AccountID]collectionMeta) metadataCach
 }
 
 // TestConvertNFTTrust locks in how the NFT trust sources are combined: an item nothing vouches
-// for is blacklisted so clients blur it, an item inherits the trust of its collection, and a
-// review — support graylisting the item, or the address book approving it — keeps it visible.
+// for resolves to TrustNone, an item inherits the trust of its collection, and a review —
+// support graylisting the item, or the address book approving it — keeps it visible.
 func TestConvertNFTTrust(t *testing.T) {
 	nftID := ton.MustParseAccountID("EQCNmNR28mDfkwn4bwAlwJ1uhEFnjSQTZ3REz9d7IGZXU9EZ")
 	collectionID := ton.MustParseAccountID("EQDaaxtmY6Dk0YzIV0zNnbUpbjZ92TJHBvO72esc0srwv8K2")
@@ -44,14 +44,14 @@ func TestConvertNFTTrust(t *testing.T) {
 		expectedTrust   oas.TrustType
 	}{
 		{
-			name:          "NFT without a collection is a scam",
+			name:          "NFT without a collection is unreviewed",
 			collection:    nil,
-			expectedTrust: oas.TrustType(core.TrustBlacklist),
+			expectedTrust: oas.TrustType(core.TrustNone),
 		},
 		{
-			name:          "NFT in an unreviewed collection is blacklisted so clients blur it",
+			name:          "NFT in an unreviewed collection is unreviewed",
 			collection:    &collectionID,
-			expectedTrust: oas.TrustType(core.TrustBlacklist),
+			expectedTrust: oas.TrustType(core.TrustNone),
 		},
 		{
 			name:            "NFT inherits a blacklisted collection",
