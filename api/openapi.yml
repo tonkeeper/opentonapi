@@ -6628,6 +6628,12 @@ components:
           example: false
         trust:
           $ref: '#/components/schemas/TrustType'
+        trust_v2:
+          $ref: '#/components/schemas/TrustType'
+          description: >-
+            Corrected trust classification: an item that is neither whitelisted, graylisted, nor
+            blacklisted is TrustNone here (trust still reports TrustBlacklist for that case, for
+            backward compatibility with older clients).
         code_hash:
           type: string
           description: Hash of the NFT item account code cell (hex)

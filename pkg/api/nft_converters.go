@@ -86,14 +86,23 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	switch {
 	case len(nftItem.ApprovedBy) > 0 && nftItem.Verified:
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
+		nftItem.TrustV2.SetTo(oas.TrustType(core.TrustWhitelist))
 	case trustType == core.TrustWhitelist || trustType == core.TrustGraylist:
 		// The item has been reviewed and cleared (support graylisted it, for instance). That
 		// verdict wins over whatever the spam filter's heuristics would otherwise return.
 		nftItem.Trust = oas.TrustType(trustType)
+		nftItem.TrustV2.SetTo(oas.TrustType(trustType))
 	default:
 		nftTrust := h.spamFilter.NftTrust(item.Address, item.CollectionAddress, item.OwnerAddress, collectionTrust, name, description, image)
 		if nftTrust == core.TrustNone && trustType != "" {
 			nftTrust = trustType
+		}
+		nftItem.TrustV2.SetTo(oas.TrustType(nftTrust))
+		// trust keeps the historical contract for clients that can't update instantly: an item
+		// nothing vouches for is blacklisted so they keep blurring it. trust_v2 carries the
+		// corrected TrustNone value above.
+		if nftTrust == core.TrustNone {
+			nftTrust = core.TrustBlacklist
 		}
 		nftItem.Trust = oas.TrustType(nftTrust)
 	}
