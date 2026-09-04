@@ -40515,6 +40515,8 @@ func (s *PoolImplementationType) Decode(d *jx.Decoder) error {
 		*s = PoolImplementationTypeLiquidTF
 	case PoolImplementationTypeFfvault:
 		*s = PoolImplementationTypeFfvault
+	case PoolImplementationTypeHipo:
+		*s = PoolImplementationTypeHipo
 	default:
 		*s = PoolImplementationType(v)
 	}
