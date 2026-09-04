@@ -5225,7 +5225,7 @@
      },
      "sponsored": {
       "default": false,
-      "description": "true — the Battery relay pays gas for this transaction; submit it via /v2/gasless/send. false — self-paid; sign and broadcast via /v2/blockchain/message as usual. The final TON sweep is always self-paid, whatever gas_payer says: the relay does not sponsor a TON-only batch, and gasless has no jetton balance left to bill a commission against.\n",
+      "description": "true — the Battery relay pays gas for this transaction; submit it via /v2/gasless/send. false — self-paid; sign and broadcast via /v2/blockchain/message as usual (e.g. the final TON sweep).\n",
       "type": "boolean"
      },
      "state_init": {
@@ -5786,10 +5786,6 @@
      },
      "trust": {
       "$ref": "#/components/schemas/TrustType"
-     },
-     "trust_v2": {
-      "$ref": "#/components/schemas/TrustType",
-      "description": "Corrected trust classification: an item that is neither whitelisted, graylisted, nor blacklisted is TrustNone here (trust still reports TrustBlacklist for that case, for backward compatibility with older clients)."
      },
      "verified": {
       "description": "Collection master contract confirmed that this item is part of collection",

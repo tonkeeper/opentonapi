@@ -26,10 +26,10 @@ func newTestMetaCache(collections map[ton.AccountID]collectionMeta) metadataCach
 }
 
 // TestConvertNFTTrust locks in how the NFT trust sources are combined: an item nothing vouches
-// for is blacklisted in the legacy trust field (so older clients keep blurring it) but TrustNone
-// in trust_v2 (the corrected value, for clients that can read it); an item inherits the trust of
-// its collection; and a review — support graylisting the item, or the address book approving it —
-// keeps it visible in both fields.
+// for resolves to TrustBlacklist by default (nftTrustNoneEnabled off, e.g. mobile) or TrustNone
+// once nftTrustNoneEnabled is on (e.g. web); an item inherits the trust of its collection; and a
+// review — support graylisting the item, or the address book approving it — keeps it visible
+// regardless of the flag.
 func TestConvertNFTTrust(t *testing.T) {
 	nftID := ton.MustParseAccountID("EQCNmNR28mDfkwn4bwAlwJ1uhEFnjSQTZ3REz9d7IGZXU9EZ")
 	collectionID := ton.MustParseAccountID("EQDaaxtmY6Dk0YzIV0zNnbUpbjZ92TJHBvO72esc0srwv8K2")
@@ -39,75 +39,78 @@ func TestConvertNFTTrust(t *testing.T) {
 	})
 
 	tests := []struct {
-		name            string
-		collection      *ton.AccountID
-		collectionTrust core.TrustType
-		trustType       core.TrustType
-		expectedTrust   oas.TrustType
-		expectedTrustV2 oas.TrustType
+		name                string
+		collection          *ton.AccountID
+		collectionTrust     core.TrustType
+		trustType           core.TrustType
+		nftTrustNoneEnabled bool
+		expectedTrust       oas.TrustType
 	}{
 		{
-			name:            "NFT without a collection is unreviewed",
-			collection:      nil,
-			expectedTrust:   oas.TrustType(core.TrustBlacklist),
-			expectedTrustV2: oas.TrustType(core.TrustNone),
+			name:          "NFT without a collection is unreviewed",
+			collection:    nil,
+			expectedTrust: oas.TrustType(core.TrustBlacklist),
 		},
 		{
-			name:            "NFT in an unreviewed collection is unreviewed",
-			collection:      &collectionID,
-			expectedTrust:   oas.TrustType(core.TrustBlacklist),
-			expectedTrustV2: oas.TrustType(core.TrustNone),
+			name:          "NFT in an unreviewed collection is unreviewed",
+			collection:    &collectionID,
+			expectedTrust: oas.TrustType(core.TrustBlacklist),
+		},
+		{
+			name:                "NFT without a collection is TrustNone once nftTrustNoneEnabled is on",
+			collection:          nil,
+			nftTrustNoneEnabled: true,
+			expectedTrust:       oas.TrustType(core.TrustNone),
+		},
+		{
+			name:                "NFT in an unreviewed collection is TrustNone once nftTrustNoneEnabled is on",
+			collection:          &collectionID,
+			nftTrustNoneEnabled: true,
+			expectedTrust:       oas.TrustType(core.TrustNone),
 		},
 		{
 			name:            "NFT inherits a blacklisted collection",
 			collection:      &collectionID,
 			collectionTrust: core.TrustBlacklist,
 			expectedTrust:   oas.TrustType(core.TrustBlacklist),
-			expectedTrustV2: oas.TrustType(core.TrustBlacklist),
 		},
 		{
 			name:            "NFT inherits a graylisted collection",
 			collection:      &collectionID,
 			collectionTrust: core.TrustGraylist,
 			expectedTrust:   oas.TrustType(core.TrustGraylist),
-			expectedTrustV2: oas.TrustType(core.TrustGraylist),
 		},
 		{
-			name:            "a blacklisted item stays blacklisted",
-			collection:      &collectionID,
-			trustType:       core.TrustBlacklist,
-			expectedTrust:   oas.TrustType(core.TrustBlacklist),
-			expectedTrustV2: oas.TrustType(core.TrustBlacklist),
+			name:          "a blacklisted item stays blacklisted",
+			collection:    &collectionID,
+			trustType:     core.TrustBlacklist,
+			expectedTrust: oas.TrustType(core.TrustBlacklist),
 		},
 		{
-			name:            "a graylisted item stays visible even though nothing else vouches for it",
-			collection:      &collectionID,
-			trustType:       core.TrustGraylist,
-			expectedTrust:   oas.TrustType(core.TrustGraylist),
-			expectedTrustV2: oas.TrustType(core.TrustGraylist),
+			name:          "a graylisted item stays visible even though nothing else vouches for it",
+			collection:    &collectionID,
+			trustType:     core.TrustGraylist,
+			expectedTrust: oas.TrustType(core.TrustGraylist),
 		},
 		{
-			name:            "a whitelisted item stays visible even without a collection",
-			collection:      nil,
-			trustType:       core.TrustWhitelist,
-			expectedTrust:   oas.TrustType(core.TrustWhitelist),
-			expectedTrustV2: oas.TrustType(core.TrustWhitelist),
+			name:          "a whitelisted item stays visible even without a collection",
+			collection:    nil,
+			trustType:     core.TrustWhitelist,
+			expectedTrust: oas.TrustType(core.TrustWhitelist),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := &Handler{
-				addressBook: mockAddressBook{},
-				spamFilter:  mockSpamFilter{collectionTrust: tt.collectionTrust},
-				metaCache:   metaCache,
+				addressBook:         mockAddressBook{},
+				spamFilter:          mockSpamFilter{collectionTrust: tt.collectionTrust},
+				metaCache:           metaCache,
+				nftTrustNoneEnabled: tt.nftTrustNoneEnabled,
 			}
 			item := core.NftItem{Address: nftID, CollectionAddress: tt.collection}
 			got := h.convertNFT(context.Background(), item, h.addressBook, h.metaCache, tt.trustType)
 			assert.Equal(t, tt.expectedTrust, got.Trust)
-			gotTrustV2, ok := got.TrustV2.Get()
-			assert.True(t, ok, "trust_v2 should always be set")
-			assert.Equal(t, tt.expectedTrustV2, gotTrustV2)
 		})
 	}
 }
