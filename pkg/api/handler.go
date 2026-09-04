@@ -60,6 +60,8 @@ type Handler struct {
 
 	// parallelTraceProcessing enables parallel trace-to-action conversion.
 	parallelTraceProcessing bool
+	// nftTrustNoneEnabled reports an unreviewed NFT item as TrustNone instead of TrustBlacklist.
+	nftTrustNoneEnabled bool
 	// mempoolEmulate contains results of emulation of messages that are in the mempool.
 	mempoolEmulate mempoolEmulate
 	// ctxToDetails converts a request context to a details instance.
@@ -106,6 +108,7 @@ type Options struct {
 	defiAssets              defiAssetsSource
 	score                   scoreSource
 	parallelTraceProcessing bool
+	nftTrustNoneEnabled     bool
 	archiveLiteServers      []config.LiteServer
 	archiveClient           rewards.LiteClient
 	publicAPIURL            string
@@ -202,6 +205,12 @@ func WithDefiAssets(source defiAssetsSource) Option {
 func WithParallelTraceProcessing(enabled bool) Option {
 	return func(o *Options) {
 		o.parallelTraceProcessing = enabled
+	}
+}
+
+func WithNftTrustNoneEnabled(enabled bool) Option {
+	return func(o *Options) {
+		o.nftTrustNoneEnabled = enabled
 	}
 }
 
@@ -336,6 +345,7 @@ func NewHandler(logger *zap.Logger, opts ...Option) (*Handler, error) {
 			tongo.MustParseAddress("0:0000000000000000000000000000000000000000000000000000000000000000").ID: {},
 		},
 		parallelTraceProcessing: options.parallelTraceProcessing,
+		nftTrustNoneEnabled:     options.nftTrustNoneEnabled,
 		tongoVersion:            tongoVersion,
 		blacklistedBocCache:     cache.NewLRUCache[[32]byte, struct{}](100000, "blacklisted_boc_cache"),
 		getMethodsCache:         cache.NewLRUCache[string, *oas.MethodExecutionResult](100000, "get_methods_cache"),

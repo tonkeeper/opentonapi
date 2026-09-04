@@ -33773,12 +33773,6 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 		s.Trust.Encode(e)
 	}
 	{
-		if s.TrustV2.Set {
-			e.FieldStart("trust_v2")
-			s.TrustV2.Encode(e)
-		}
-	}
-	{
 		if s.CodeHash.Set {
 			e.FieldStart("code_hash")
 			s.CodeHash.Encode(e)
@@ -33792,7 +33786,7 @@ func (s *NftItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfNftItem = [15]string{
+var jsonFieldsNameOfNftItem = [14]string{
 	0:  "address",
 	1:  "index",
 	2:  "owner",
@@ -33805,9 +33799,8 @@ var jsonFieldsNameOfNftItem = [15]string{
 	9:  "approved_by",
 	10: "include_cnft",
 	11: "trust",
-	12: "trust_v2",
-	13: "code_hash",
-	14: "data_hash",
+	12: "code_hash",
+	13: "data_hash",
 }
 
 // Decode decodes NftItem from json.
@@ -33951,16 +33944,6 @@ func (s *NftItem) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"trust\"")
-			}
-		case "trust_v2":
-			if err := func() error {
-				s.TrustV2.Reset()
-				if err := s.TrustV2.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"trust_v2\"")
 			}
 		case "code_hash":
 			if err := func() error {
@@ -39292,39 +39275,6 @@ func (s OptTonTransferAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptTonTransferAction) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes TrustType as json.
-func (o OptTrustType) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Str(string(o.Value))
-}
-
-// Decode decodes TrustType from json.
-func (o *OptTrustType) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptTrustType to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptTrustType) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptTrustType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
