@@ -21,7 +21,7 @@ func TestExtractRisk(t *testing.T) {
 			name: "transfer ton",
 			boc:  "te6ccgEBAgEAqgAB4YgA2ZpktQsYby0n9cV5VWOFINBjScIU2HdondFsK3lDpEAAQ+B903cV6YIMdtd4QtdyekehadSk+QjIgoIiRgjZD9v81PVGEXBKHPgPUknVvxvr/LGcKkLNhY+I1Wuwi/7ACU1NGLsi5dhQAAAA8AAcAQBoQgApn5hvK5EKvcI4+qgdz+LABkbBy/PLofvLWI8wTW1zT6WWgvAAAAAAAAAAAAAAAAAAAA==",
 			want: &Risk{
-				Gram:     3_000_000_000,
+				Gram:    3_000_000_000,
 				Jettons: map[tongo.AccountID]big.Int{},
 				Nfts:    nil,
 			},
@@ -41,7 +41,7 @@ func TestExtractRisk(t *testing.T) {
 			boc:  "te6ccgECAwEAAQAAAeGIANmaZLULGG8tJ/XFeVVjhSDQY0nCFNh3aJ3RbCt5Q6RAAR/y7WiDk/zi6/QObgK7qDZRawFY0k5TaspQuK98GHfLWcVcMgc/kdpXj+nNrmpWHO2mJ6nyxhuxwzzphZVmuBlNTRi7I88W+AAAARAAHAEBaGIAYeITnAruocV3ZaCBjfbcIK27S8GFMv5jOh6XPwNuAUkgFykzCAAAAAAAAAAAAAAAAAECAKVfzD0UAAAAAAAAAACACmfmG8rkQq9wjj6qB3P4sAGRsHL88uh+8tYjzBNbXNPwAbM0yWoWMN5aT+uK8qrHCkGgxpOEKbDu0Tui2Fbyh0iAcxLQCA==",
 			want: &Risk{
 				Jettons: map[tongo.AccountID]big.Int{},
-				Gram:     48_572_001,
+				Gram:    48_572_001,
 				Nfts: []tongo.AccountID{
 					tongo.MustParseAccountID("0:c3c4273815dd438aeecb41031bedb8415b7697830a65fcc6743d2e7e06dc0292"),
 				},

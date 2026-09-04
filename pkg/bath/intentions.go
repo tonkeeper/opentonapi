@@ -6,8 +6,8 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
-	"slices"
 	"reflect"
+	"slices"
 )
 
 type OutMessage struct {

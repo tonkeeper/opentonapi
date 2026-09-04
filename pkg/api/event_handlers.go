@@ -407,7 +407,7 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 	}
 	for i, e := range events {
 		if e.InProgress {
-			for j, _ := range e.Actions {
+			for j := range e.Actions {
 				events[i].Actions[j].Status = oas.ActionStatusOk
 			}
 		}

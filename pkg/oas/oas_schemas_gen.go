@@ -10887,7 +10887,9 @@ type MigrationTransaction struct {
 	// body — sign and wrap it for /v2/gasless/send as in the gasless flow.
 	Boc string `json:"boc"`
 	// True — the Battery relay pays gas for this transaction; submit it via /v2/gasless/send. false
-	// — self-paid; sign and broadcast via /v2/blockchain/message as usual (e.g. the final TON sweep).
+	// — self-paid; sign and broadcast via /v2/blockchain/message as usual. The final TON sweep is
+	// always self-paid, whatever gas_payer says: the relay does not sponsor a TON-only batch, and
+	// gasless has no jetton balance left to bill a commission against.
 	Sponsored OptBool `json:"sponsored"`
 	// Gasless only; the relay commission in indivisible gas-jetton units, embedded in the boc as a
 	// jetton transfer to the relay. Exact for the first transaction; an estimate for later ones
@@ -11847,6 +11849,10 @@ type NftItem struct {
 	ApprovedBy  NftApprovedBy `json:"approved_by"`
 	IncludeCnft OptBool       `json:"include_cnft"`
 	Trust       TrustType     `json:"trust"`
+	// Corrected trust classification: an item that is neither whitelisted, graylisted, nor blacklisted
+	// is TrustNone here (trust still reports TrustBlacklist for that case, for backward compatibility
+	// with older clients).
+	TrustV2 OptTrustType `json:"trust_v2"`
 	// Hash of the NFT item account code cell (hex).
 	CodeHash OptString `json:"code_hash"`
 	// Hash of the NFT item account data cell (hex).
@@ -11911,6 +11917,11 @@ func (s *NftItem) GetIncludeCnft() OptBool {
 // GetTrust returns the value of Trust.
 func (s *NftItem) GetTrust() TrustType {
 	return s.Trust
+}
+
+// GetTrustV2 returns the value of TrustV2.
+func (s *NftItem) GetTrustV2() OptTrustType {
+	return s.TrustV2
 }
 
 // GetCodeHash returns the value of CodeHash.
@@ -11981,6 +11992,11 @@ func (s *NftItem) SetIncludeCnft(val OptBool) {
 // SetTrust sets the value of Trust.
 func (s *NftItem) SetTrust(val TrustType) {
 	s.Trust = val
+}
+
+// SetTrustV2 sets the value of TrustV2.
+func (s *NftItem) SetTrustV2(val OptTrustType) {
+	s.TrustV2 = val
 }
 
 // SetCodeHash sets the value of CodeHash.
@@ -18200,6 +18216,52 @@ func (o OptTonTransferAction) Get() (v TonTransferAction, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptTonTransferAction) Or(d TonTransferAction) TonTransferAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptTrustType returns new OptTrustType with value set to v.
+func NewOptTrustType(v TrustType) OptTrustType {
+	return OptTrustType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTrustType is optional TrustType.
+type OptTrustType struct {
+	Value TrustType
+	Set   bool
+}
+
+// IsSet returns true if OptTrustType was set.
+func (o OptTrustType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTrustType) Reset() {
+	var v TrustType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTrustType) SetTo(v TrustType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTrustType) Get() (v TrustType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTrustType) Or(d TrustType) TrustType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
