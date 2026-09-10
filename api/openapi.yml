@@ -8985,6 +8985,7 @@ components:
         - tf
         - liquidTF
         - ffvault
+        - hipo
     TokenRates:
       type: object
       properties:
