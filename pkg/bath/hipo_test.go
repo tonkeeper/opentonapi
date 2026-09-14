@@ -4,63 +4,75 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tonkeeper/opentonapi/pkg/core"
+	"github.com/tonkeeper/opentonapi/pkg/references"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 )
 
-func hipoOpBubble(opCode uint32) *Bubble {
-	op := opCode
-	return &Bubble{Info: BubbleTx{opCode: &op}}
+func hipoTx(account tongo.AccountID, operation string, children ...*Bubble) *Bubble {
+	return &Bubble{
+		Info: BubbleTx{
+			success:     true,
+			account:     Account{Address: account},
+			decodedBody: &core.DecodedMessageBody{Operation: operation},
+		},
+		Children:  children,
+		ValueFlow: newValueFlow(),
+	}
 }
 
-// TestHipoUnstakeNotRolledBack guards the negative case of the unstake straws without
-// needing a trace: a rolled-back unstake looks exactly like a deferred one except for the
-// proxy_rollback_unstake answer, and must not be reported as a withdraw request.
-func TestHipoUnstakeNotRolledBack(t *testing.T) {
+// hipoUnstake builds an hGRAM burn whose reserve_tokens transaction on the treasury answers
+// with the given children.
+func hipoUnstake(master tongo.AccountID, treasuryAnswer ...*Bubble) *Bubble {
+	return &Bubble{
+		Info:      BubbleJettonBurn{master: master},
+		ValueFlow: newValueFlow(),
+		Children: []*Bubble{
+			hipoTx(references.HipoParent, abi.HipoFinanceProxyReserveTokensMsgOp,
+				hipoTx(references.HipoTreasury, abi.HipoFinanceReserveTokensMsgOp, treasuryAnswer...),
+			),
+		},
+	}
+}
+
+// The rollback case has no golden trace: the last one on mainnet is older than public
+// liteservers keep, so the straw is exercised on a synthetic bubble tree instead.
+func TestWithdrawHipoStakeRequestStraw(t *testing.T) {
+	var someone tongo.AccountID
 	tests := []struct {
-		name     string
-		children []*Bubble
-		want     bool
+		name   string
+		bubble *Bubble
+		want   bool
 	}{
 		{
-			name:     "instant unstake pays out",
-			children: []*Bubble{hipoOpBubble(hipoProxyTokensBurnedMsgOpCode)},
-			want:     true,
+			name: "deferred unstake mints a bill",
+			bubble: hipoUnstake(references.HipoParent,
+				hipoTx(someone, abi.HipoFinanceMintBillMsgOp,
+					hipoTx(someone, abi.HipoFinanceAssignBillMsgOp),
+				),
+			),
+			want: true,
 		},
 		{
-			name:     "deferred unstake mints a bill",
-			children: []*Bubble{hipoOpBubble(hipoMintBillMsgOpCode)},
-			want:     true,
+			name:   "instant unstake pays out",
+			bubble: hipoUnstake(references.HipoParent, hipoTx(references.HipoParent, abi.HipoFinanceProxyTokensBurnedMsgOp)),
+			want:   true,
 		},
 		{
-			name:     "rolled back unstake",
-			children: []*Bubble{hipoOpBubble(hipoProxyRollbackUnstakeMsgOpCode)},
-			want:     false,
+			name:   "rolled back unstake",
+			bubble: hipoUnstake(references.HipoParent, hipoTx(references.HipoParent, abi.HipoFinanceProxyRollbackUnstakeMsgOp)),
+			want:   false,
 		},
 		{
-			name:     "no answer at all",
-			children: nil,
-			want:     true,
-		},
-		{
-			name:     "non-transaction children are ignored",
-			children: []*Bubble{{Info: BubbleContractDeploy{}}},
-			want:     true,
+			name:   "burn of another jetton",
+			bubble: hipoUnstake(someone, hipoTx(references.HipoParent, abi.HipoFinanceProxyTokensBurnedMsgOp)),
+			want:   false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bubble := &Bubble{Info: BubbleTx{}, Children: tt.children}
-			require.Equal(t, tt.want, hipoUnstakeNotRolledBack(bubble))
+			require.Equal(t, tt.want, WithdrawHipoStakeRequestStraw.Merge(tt.bubble))
 		})
 	}
-}
-
-// TestHipoBillAssigned covers both shapes a bill transaction can have by the time the Hipo
-// straws run: already merged into an NFT transfer by NftTransferNotifyStraw, or still a
-// plain assign_bill transaction.
-func TestHipoBillAssigned(t *testing.T) {
-	require.True(t, hipoBillAssigned(&Bubble{Info: BubbleNftTransfer{}}))
-	require.True(t, hipoBillAssigned(hipoOpBubble(hipoAssignBillMsgOpCode)))
-	require.False(t, hipoBillAssigned(hipoOpBubble(hipoMintBillMsgOpCode)))
-	require.False(t, hipoBillAssigned(&Bubble{Info: BubbleTx{}}))
-	require.False(t, hipoBillAssigned(&Bubble{Info: BubbleJettonBurn{}}))
 }

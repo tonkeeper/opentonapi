@@ -213,6 +213,31 @@ func Or(check1, check2 bubbleCheck) bubbleCheck {
 	}
 }
 
+func Not(check bubbleCheck) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		return !check(bubble)
+	}
+}
+
+// HasChild reports whether any child passes all checks, evaluated in order like CheckFuncs.
+func HasChild(checks ...bubbleCheck) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		for _, child := range bubble.Children {
+			matched := true
+			for _, check := range checks {
+				if !check(child) {
+					matched = false
+					break
+				}
+			}
+			if matched {
+				return true
+			}
+		}
+		return false
+	}
+}
+
 func HasOpcode(op uint32) bubbleCheck {
 	return func(b *Bubble) bool {
 		opCode := b.Info.(BubbleTx).opCode

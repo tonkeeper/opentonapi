@@ -476,9 +476,6 @@ func TestFindActions(t *testing.T) {
 		"9236ab916e92293a822e1bb701c970de97eac3df18f1a18bfca3a4d3fd049229": {
 			tongo.MustParseBlockID("(0,c000000000000000,88394637)"),
 		},
-		"ba0d8ea61d2caf1d870919362b8a9178726e8f3d71e45c0c866ae7fc450e6aff": {
-			tongo.MustParseBlockID("(0,8000000000000000,62680498)"),
-		},
 	}
 
 	type Case struct {
@@ -1292,19 +1289,6 @@ func TestFindActions(t *testing.T) {
 			name:           "hipo deferred unstake",
 			filenamePrefix: "hipo-deferred-unstake",
 			hash:           "9236ab916e92293a822e1bb701c970de97eac3df18f1a18bfca3a4d3fd049229",
-		},
-		{
-			// Negative case: the treasury refused the unstake and returned the hGRAM with
-			// proxy_rollback_unstake. It must not be reported as a withdrawal or a
-			// withdraw request - the expected output is a plain jetton burn. Rollbacks
-			// are rare, and this block is past the retention window of the public
-			// liteservers, so the golden file still has to be recorded against an archive
-			// liteserver (LITE_SERVERS). TestHipoUnstakeNotRolledBack covers the guard
-			// itself without network access.
-			skip:           true,
-			name:           "hipo rollback unstake",
-			filenamePrefix: "hipo-rollback-unstake",
-			hash:           "ba0d8ea61d2caf1d870919362b8a9178726e8f3d71e45c0c866ae7fc450e6aff",
 		},
 	}
 
