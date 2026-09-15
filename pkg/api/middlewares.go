@@ -37,6 +37,15 @@ func ogenLoggingMiddleware(logger *zap.Logger) middleware.Middleware {
 	}
 }
 
+// ogenUserAgentMiddleware puts the request's User-Agent into the context so handlers can
+// adapt a response to a particular client's quirks.
+func ogenUserAgentMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
+	if userAgent := req.Raw.UserAgent(); userAgent != "" {
+		req.SetContext(withUserAgent(req.Context, userAgent))
+	}
+	return next(req)
+}
+
 func asyncOperation(req *http.Request) string {
 	return req.URL.Path
 }

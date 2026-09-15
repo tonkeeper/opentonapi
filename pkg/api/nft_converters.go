@@ -95,7 +95,7 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 		if nftTrust == core.TrustNone && trustType != "" {
 			nftTrust = trustType
 		}
-		if nftTrust == core.TrustNone && !h.nftTrustNoneEnabled {
+		if nftTrust == core.TrustNone && !h.trustNoneAllowed(ctx) {
 			// Deployments that can't update their client instantly (e.g. mobile) keep the old
 			// contract: an item nothing vouches for is blacklisted so they keep blurring it.
 			// Flip NFT_TRUST_NONE_ENABLED once the client handles TrustNone correctly.
@@ -115,6 +115,16 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	}
 
 	return nftItem
+}
+
+// trustNoneAllowed reports whether the caller can handle TrustNone for an NFT nothing
+// vouches for. Tonkeeper clients still blur blacklisted items only, so they keep the old
+// contract no matter what NFT_TRUST_NONE_ENABLED says.
+func (h *Handler) trustNoneAllowed(ctx context.Context) bool {
+	if !h.nftTrustNoneEnabled {
+		return false
+	}
+	return !isTonkeeperUserAgent(userAgentFromContext(ctx))
 }
 
 func (h *Handler) convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
