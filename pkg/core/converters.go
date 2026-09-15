@@ -508,7 +508,7 @@ func ConvertToCurrencyCollection(collection tlb.CurrencyCollection) CurrencyColl
 		for _, item := range collection.Other.Dict.Items() {
 			value := big.Int(item.Value)
 			other = append(other, ExtraCurrency{
-				ID:    int64(item.Key),
+				ID:    int64(uint32(item.Key)),
 				Value: value.String(),
 			})
 		}

@@ -73,7 +73,7 @@ func NewServer(log *zap.Logger, handler *Handler, opts ...ServerOption) (*Server
 	for _, o := range opts {
 		o(options)
 	}
-	ogenMiddlewares := []oas.Middleware{ogenLoggingMiddleware(log), ogenMetricsMiddleware}
+	ogenMiddlewares := []oas.Middleware{ogenLoggingMiddleware(log), ogenMetricsMiddleware, ogenUserAgentMiddleware}
 	ogenMiddlewares = append(ogenMiddlewares, options.ogenMiddlewares...)
 
 	ogenServer, err := oas.NewServer(handler,

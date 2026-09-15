@@ -348,7 +348,9 @@ func convertConfig(logger *zap.Logger, cfg tlb.ConfigParams) (*oas.BlockchainCon
 		for _, item := range p7.ToMint.Dict.Items() {
 			value := big.Int(item.Value)
 			param7.Currencies = append(param7.Currencies, oas.BlockchainConfig7CurrenciesItem{
-				CurrencyID: int64(item.Key),
+				// The dict key is a 32-bit currency id; read it unsigned so the reported id does
+				// not change with how tongo happens to type the key.
+				CurrencyID: int64(uint32(item.Key)),
 				Amount:     value.String(),
 			})
 		}

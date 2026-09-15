@@ -29,7 +29,7 @@ func newTestMetaCache(collections map[ton.AccountID]collectionMeta) metadataCach
 // for resolves to TrustBlacklist by default (nftTrustNoneEnabled off, e.g. mobile) or TrustNone
 // once nftTrustNoneEnabled is on (e.g. web); an item inherits the trust of its collection; and a
 // review — support graylisting the item, or the address book approving it — keeps it visible
-// regardless of the flag.
+// regardless of the flag. Tonkeeper clients keep the pre-flag contract whatever the flag says.
 func TestConvertNFTTrust(t *testing.T) {
 	nftID := ton.MustParseAccountID("EQCNmNR28mDfkwn4bwAlwJ1uhEFnjSQTZ3REz9d7IGZXU9EZ")
 	collectionID := ton.MustParseAccountID("EQDaaxtmY6Dk0YzIV0zNnbUpbjZ92TJHBvO72esc0srwv8K2")
@@ -44,6 +44,7 @@ func TestConvertNFTTrust(t *testing.T) {
 		collectionTrust     core.TrustType
 		trustType           core.TrustType
 		nftTrustNoneEnabled bool
+		userAgent           string
 		expectedTrust       oas.TrustType
 	}{
 		{
@@ -66,6 +67,27 @@ func TestConvertNFTTrust(t *testing.T) {
 			name:                "NFT in an unreviewed collection is TrustNone once nftTrustNoneEnabled is on",
 			collection:          &collectionID,
 			nftTrustNoneEnabled: true,
+			expectedTrust:       oas.TrustType(core.TrustNone),
+		},
+		{
+			name:                "NFT stays blacklisted for Tonkeeper even once nftTrustNoneEnabled is on",
+			collection:          &collectionID,
+			nftTrustNoneEnabled: true,
+			userAgent:           "Tonkeeper/5.0.0 (iOS 18.0)",
+			expectedTrust:       oas.TrustType(core.TrustBlacklist),
+		},
+		{
+			name:                "NFT stays blacklisted for a keeper user agent in any case",
+			collection:          &collectionID,
+			nftTrustNoneEnabled: true,
+			userAgent:           "keeper",
+			expectedTrust:       oas.TrustType(core.TrustBlacklist),
+		},
+		{
+			name:                "NFT is TrustNone for a non-Tonkeeper user agent",
+			collection:          &collectionID,
+			nftTrustNoneEnabled: true,
+			userAgent:           "Mozilla/5.0",
 			expectedTrust:       oas.TrustType(core.TrustNone),
 		},
 		{
@@ -109,7 +131,8 @@ func TestConvertNFTTrust(t *testing.T) {
 				nftTrustNoneEnabled: tt.nftTrustNoneEnabled,
 			}
 			item := core.NftItem{Address: nftID, CollectionAddress: tt.collection}
-			got := h.convertNFT(context.Background(), item, h.addressBook, h.metaCache, tt.trustType)
+			ctx := withUserAgent(context.Background(), tt.userAgent)
+			got := h.convertNFT(ctx, item, h.addressBook, h.metaCache, tt.trustType)
 			assert.Equal(t, tt.expectedTrust, got.Trust)
 		})
 	}
