@@ -368,15 +368,10 @@ var WithdrawHipoStakeStraw = Straw[BubbleWithdrawStake]{
 
 // hipoSettledBill matches the treasury transaction that settles one unstake bill of a
 // finished round. What the treasury does with it depends on how much liquid GRAM is left:
-// it pays out, postpones to a later round, or - handled by JettonMintHipoRollbackStraw -
-// gives the hGRAM back.
-func hipoSettledBill(ops ...abi.MsgOpName) []bubbleCheck {
-	checks := []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(abi.HipoFinanceBurnTokensMsgOp)}
-	for _, op := range ops {
-		checks = append(checks, HasChild(IsTx, HasOperation(op)))
-	}
-	return checks
-}
+// it pays out, postpones the bill to a later round, or - handled by
+// JettonMintHipoRollbackStraw - gives the hGRAM back. The two straws below tell those
+// apart by the leg they require underneath, so the head only has to find the settlement.
+var hipoSettledBill = []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(abi.HipoFinanceBurnTokensMsgOp)}
 
 // WithdrawHipoStakeSettledStraw recognizes the payout half of a deferred unstake, which
 // lands in the round-end trace rather than in the one that requested it:
@@ -386,7 +381,7 @@ func hipoSettledBill(ops ...abi.MsgOpName) []bubbleCheck {
 //
 // The hGRAM left the wallet back when the request was made, so only GRAM is reported here.
 var WithdrawHipoStakeSettledStraw = Straw[BubbleWithdrawStake]{
-	CheckFuncs: hipoSettledBill(abi.HipoFinanceProxyTokensBurnedMsgOp),
+	CheckFuncs: hipoSettledBill,
 	Builder: func(newAction *BubbleWithdrawStake, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address
@@ -430,7 +425,7 @@ var WithdrawHipoStakeSettledStraw = Straw[BubbleWithdrawStake]{
 // Reporting it as a request again is what keeps the unstake from vanishing between the
 // round that could not pay and the one that finally does.
 var WithdrawHipoStakePostponedStraw = Straw[BubbleWithdrawStakeRequest]{
-	CheckFuncs: hipoSettledBill(abi.HipoFinanceMintBillMsgOp),
+	CheckFuncs: hipoSettledBill,
 	Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.Pool = tx.account.Address
