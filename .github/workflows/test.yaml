@@ -26,4 +26,9 @@ jobs:
           sudo apt-get install -y libsecp256k1-0
           mkdir -p ${{ env.LD_LIBRARY_PATH}}
           wget https://github.com/tonkeeper/tongo/raw/master/lib/linux/libemulator.so -O ${{ env.LD_LIBRARY_PATH}}/libemulator.so
+          # A pull request from a fork cannot read the secret, so LITE_SERVERS arrives set
+          # but empty, and liteapi.FromEnvsOrMainnet reads that as a configured server list
+          # with no servers in it rather than falling back to the public ones. Unsetting it
+          # lets the suite run on a fork instead of failing in TestLiteStorage.
+          if [ -z "$LITE_SERVERS" ]; then unset LITE_SERVERS; fi
           make test-ci
