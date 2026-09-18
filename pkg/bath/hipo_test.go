@@ -204,6 +204,28 @@ func TestHipoStrawsRejectForgeries(t *testing.T) {
 		require.False(t, JettonMintHipoRollbackStraw.Merge(forged))
 	})
 
+	// And the shape that matters, because the treasury really does send it: reserve_tokens
+	// authenticates nobody (contracts/treasury.fc), so anyone may send it one naming any
+	// owner, and it answers by returning proxy_rollback_unstake TO THE SENDER with that
+	// owner copied across. Coming from the treasury is therefore not evidence of anything;
+	// only arriving at the jetton master is.
+	t.Run("rollback the treasury sent to an impostor", func(t *testing.T) {
+		forged := hipoFrom(
+			hipoTx(attacker, abi.HipoFinanceProxyRollbackUnstakeMsgOp,
+				hipoTx(attacker, abi.HipoFinanceRollbackUnstakeMsgOp),
+			), references.HipoTreasury)
+		require.False(t, JettonMintHipoRollbackStraw.Merge(forged))
+	})
+
+	// The genuine one, for contrast: the treasury sends it to the jetton master.
+	t.Run("genuine rollback still mints", func(t *testing.T) {
+		real := hipoFrom(
+			hipoTx(references.HipoParent, abi.HipoFinanceProxyRollbackUnstakeMsgOp,
+				hipoTx(attacker, abi.HipoFinanceRollbackUnstakeMsgOp),
+			), references.HipoTreasury)
+		require.True(t, JettonMintHipoRollbackStraw.Merge(real))
+	})
+
 	// And in the debit direction: reserve_tokens really can be sent to the treasury by
 	// anyone (mainnet tx 4de4a490e0d9b523...), which answers it with a rollback. Wrapped
 	// in a proxy_reserve_tokens of the attacker's own, that would book hGRAM out of

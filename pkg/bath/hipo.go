@@ -121,6 +121,8 @@ func hipoFromParent(bubble *Bubble) bool {
 	return tx.inputFrom != nil && tx.inputFrom.Address == references.HipoParent
 }
 
+// hipoFromTreasury is only ever a partial check; see JettonMintHipoRollbackStraw for why
+// the treasury's signature on a message proves less than it looks.
 func hipoFromTreasury(bubble *Bubble) bool {
 	tx := bubble.Info.(BubbleTx)
 	return tx.inputFrom != nil && tx.inputFrom.Address == references.HipoTreasury
@@ -464,8 +466,15 @@ var WithdrawHipoStakePostponedStraw = Straw[BubbleWithdrawStakeRequest]{
 // round left to postpone a bill to, rounds after the request. Either way rollback_unstake
 // does tokens += amount on the wallet, so a mint is what actually happened - and it is what
 // keeps the burn above it from reading as hGRAM the holder lost.
+//
+// Coming from the treasury is necessary but nowhere near sufficient. reserve_tokens
+// authenticates no one: anyone may send the treasury one naming any owner, and it answers
+// by returning proxy_rollback_unstake TO THE SENDER with that owner copied across. So the
+// treasury genuinely does send this message to addresses of a scammer's choosing, carrying
+// a victim's address. What cannot be faked is the destination - only the real jetton master
+// relays it onwards to a wallet, so that is what the match is pinned to.
 var JettonMintHipoRollbackStraw = Straw[BubbleJettonMint]{
-	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceProxyRollbackUnstakeMsgOp), hipoFromTreasury},
+	CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoParent), HasOperation(abi.HipoFinanceProxyRollbackUnstakeMsgOp), hipoFromTreasury},
 	Builder: func(newAction *BubbleJettonMint, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.master = references.HipoParent
