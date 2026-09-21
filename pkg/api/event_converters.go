@@ -957,17 +957,20 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		if err != nil {
 			return oas.Action{}, err
 		}
-		var nft oas.NftItem
-		var nftImage string
-		var name string
+		// The item is not always known to the storage: it may have been destroyed since the
+		// purchase, or the storage may not implement GetNFTs() at all (litestorage). Fall back
+		// to a bare item so the required nft field still carries the address and a valid trust
+		// value instead of an empty object.
+		item := core.NftItem{Address: a.NftPurchase.Nft}
 		if len(items) == 1 {
-			// opentonapi doesn't implement GetNFTs() now
-			nft = h.convertNFT(ctx, items[0], h.addressBook, h.metaCache, "")
-			if len(nft.Previews) > 0 {
-				nftImage = nft.Previews[0].URL
-			}
-			name = optionalFromMeta(nft.Metadata, "name")
+			item = items[0]
 		}
+		nft := h.convertNFT(ctx, item, h.addressBook, h.metaCache, "")
+		var nftImage string
+		if len(nft.Previews) > 0 {
+			nftImage = nft.Previews[0].URL
+		}
+		name := optionalFromMeta(nft.Metadata, "name")
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "NFT Purchase",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{

@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
+	"github.com/tonkeeper/opentonapi/pkg/bath"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
@@ -139,4 +141,64 @@ func TestConvertTraceScamPropagation(t *testing.T) {
 		assert.True(t, got.Children[0].Transaction.Account.IsScam)
 		assert.True(t, got.Children[0].Children[0].Transaction.Account.IsScam)
 	})
+}
+
+// nftlessStorage is a storage whose GetNFTs never finds anything, like litestorage or the
+// production index when the item contract no longer exists. Every other method is left nil on
+// purpose: a test that reaches one is testing something else.
+type nftlessStorage struct {
+	storage
+}
+
+func (nftlessStorage) GetNFTs(ctx context.Context, accounts []tongo.AccountID) ([]core.NftItem, error) {
+	return nil, nil
+}
+
+// TestConvertNftPurchaseUnknownItem locks in the fallback for an NFT the storage knows nothing
+// about: the required nft field used to serialize as an empty object with an empty trust, which
+// is not a valid TrustType, instead of at least naming the item that was bought.
+func TestConvertNftPurchaseUnknownItem(t *testing.T) {
+	nftID := ton.MustParseAccountID("0:72478dd5eafa299fb7b0d83b75a47da960f67c9b2a687fa4bcd577a1ef396f4c")
+	buyer := ton.MustParseAccountID("0:df164d7eec2e34245f6c57c8c7fd6575079459ce53b350dd79c6070250911166")
+	seller := ton.MustParseAccountID("0:9fb3be20c2dec3a9c5e58cc6725f6f4b31ee1faa2105324be0901131dad4117a")
+
+	action := bath.Action{
+		Type:    bath.NftPurchase,
+		Success: true,
+		NftPurchase: &bath.NftPurchaseAction{
+			Nft:         nftID,
+			Buyer:       buyer,
+			Seller:      seller,
+			AuctionType: bath.GetGemsAuction,
+			Price:       core.PriceNanoGram(10_400_000_000),
+		},
+	}
+
+	for _, tt := range []struct {
+		name                string
+		nftTrustNoneEnabled bool
+		expectedTrust       oas.TrustType
+	}{
+		{name: "unreviewed item", expectedTrust: oas.TrustType(core.TrustBlacklist)},
+		{name: "unreviewed item, TrustNone allowed", nftTrustNoneEnabled: true, expectedTrust: oas.TrustType(core.TrustNone)},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			h := &Handler{
+				storage: nftlessStorage{},
+				addressBook: mockAddressBook{
+					OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
+						return addressbook.KnownAddress{}, false
+					},
+				},
+				spamFilter:          mockSpamFilter{},
+				metaCache:           newTestMetaCache(nil),
+				nftTrustNoneEnabled: tt.nftTrustNoneEnabled,
+			}
+			got, err := h.convertAction(context.Background(), &buyer, action, oas.OptString{}, 0)
+			require.NoError(t, err)
+			require.True(t, got.NftPurchase.Set)
+			assert.Equal(t, nftID.ToRaw(), got.NftPurchase.Value.Nft.Address)
+			assert.Equal(t, tt.expectedTrust, got.NftPurchase.Value.Nft.Trust)
+		})
+	}
 }
