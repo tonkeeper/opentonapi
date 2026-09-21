@@ -5385,6 +5385,8 @@ func (s *BlockchainAccountInspectCompiler) Decode(d *jx.Decoder) error {
 		*s = BlockchainAccountInspectCompilerFift
 	case BlockchainAccountInspectCompilerTact:
 		*s = BlockchainAccountInspectCompilerTact
+	case BlockchainAccountInspectCompilerTolk:
+		*s = BlockchainAccountInspectCompilerTolk
 	default:
 		*s = BlockchainAccountInspectCompiler(v)
 	}

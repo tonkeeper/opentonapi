@@ -1141,6 +1141,8 @@ func (s BlockchainAccountInspectCompiler) Validate() error {
 		return nil
 	case "tact":
 		return nil
+	case "tolk":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}

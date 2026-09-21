@@ -2332,6 +2332,7 @@ const (
 	BlockchainAccountInspectCompilerFunc BlockchainAccountInspectCompiler = "func"
 	BlockchainAccountInspectCompilerFift BlockchainAccountInspectCompiler = "fift"
 	BlockchainAccountInspectCompilerTact BlockchainAccountInspectCompiler = "tact"
+	BlockchainAccountInspectCompilerTolk BlockchainAccountInspectCompiler = "tolk"
 )
 
 // AllValues returns all BlockchainAccountInspectCompiler values.
@@ -2340,6 +2341,7 @@ func (BlockchainAccountInspectCompiler) AllValues() []BlockchainAccountInspectCo
 		BlockchainAccountInspectCompilerFunc,
 		BlockchainAccountInspectCompilerFift,
 		BlockchainAccountInspectCompilerTact,
+		BlockchainAccountInspectCompilerTolk,
 	}
 }
 
@@ -2351,6 +2353,8 @@ func (s BlockchainAccountInspectCompiler) MarshalText() ([]byte, error) {
 	case BlockchainAccountInspectCompilerFift:
 		return []byte(s), nil
 	case BlockchainAccountInspectCompilerTact:
+		return []byte(s), nil
+	case BlockchainAccountInspectCompilerTolk:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -2368,6 +2372,9 @@ func (s *BlockchainAccountInspectCompiler) UnmarshalText(data []byte) error {
 		return nil
 	case BlockchainAccountInspectCompilerTact:
 		*s = BlockchainAccountInspectCompilerTact
+		return nil
+	case BlockchainAccountInspectCompilerTolk:
+		*s = BlockchainAccountInspectCompilerTolk
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -10936,7 +10943,9 @@ type MigrationTransaction struct {
 	// body — sign and wrap it for /v2/gasless/send as in the gasless flow.
 	Boc string `json:"boc"`
 	// True — the Battery relay pays gas for this transaction; submit it via /v2/gasless/send. false
-	// — self-paid; sign and broadcast via /v2/blockchain/message as usual (e.g. the final TON sweep).
+	// — self-paid; sign and broadcast via /v2/blockchain/message as usual. The final TON sweep is
+	// always self-paid, whatever gas_payer says: the relay does not sponsor a TON-only batch, and
+	// gasless has no jetton balance left to bill a commission against.
 	Sponsored OptBool `json:"sponsored"`
 	// Gasless only; the relay commission in indivisible gas-jetton units, embedded in the boc as a
 	// jetton transfer to the relay. Exact for the first transaction; an estimate for later ones

@@ -10,6 +10,7 @@ const (
 	SourceCompilerFunc SourceCompiler = "func"
 	SourceCompilerFift SourceCompiler = "fift"
 	SourceCompilerTact SourceCompiler = "tact"
+	SourceCompilerTolk SourceCompiler = "tolk"
 )
 
 type File struct {

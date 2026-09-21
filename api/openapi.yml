@@ -8976,6 +8976,7 @@ components:
             - func
             - fift
             - tact
+            - tolk
         source:
           $ref: '#/components/schemas/Source'
     PoolImplementationType:
