@@ -12,8 +12,9 @@ import (
 	"net/http"
 	"slices"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/sourcegraph/conc"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
@@ -177,7 +178,7 @@ func (h *Handler) GetMigrationWallets(ctx context.Context, req oas.OptGetMigrati
 	nftCountByOwner := make(map[ton.AccountID]int32)
 	var jettonWallets map[ton.AccountID][]core.JettonWallet
 	var accountsErr, nftsErr, jettonsErr error
-	var wg sync.WaitGroup
+	var wg conc.WaitGroup
 	wg.Go(func() {
 		accounts, accountsErr = h.storage.GetRawAccounts(ctx, ids)
 	})

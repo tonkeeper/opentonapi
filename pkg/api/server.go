@@ -103,6 +103,7 @@ func NewServer(log *zap.Logger, handler *Handler, opts ...ServerOption) (*Server
 	if options.httpMiddleware != nil {
 		h = options.httpMiddleware(mux)
 	}
+	h = recoveryMiddleware(log, h)
 
 	serv := Server{
 		logger:           log,

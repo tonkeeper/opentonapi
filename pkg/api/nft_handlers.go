@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/tonkeeper/tongo/ton"
 	"net/http"
-	"sync"
+
+	"github.com/sourcegraph/conc"
+	"github.com/tonkeeper/tongo/ton"
 
 	"go.uber.org/zap"
 
@@ -33,17 +34,15 @@ func (h *Handler) GetNftItemsByAddresses(ctx context.Context, request oas.OptGet
 		}
 		accounts[i] = account.ID
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
+	var wg conc.WaitGroup
 	var nftsScamData map[ton.AccountID]core.TrustType
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		var err error
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, accounts)
 		if err != nil {
 			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
-	}()
+	})
 	items, err := h.storage.GetNFTs(ctx, accounts)
 	wg.Wait()
 	if errors.Is(err, core.ErrEntityNotFound) {
@@ -110,17 +109,15 @@ func (h *Handler) GetAccountNftItems(ctx context.Context, params oas.GetAccountN
 	if len(ids) == 0 {
 		return &result, nil
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
+	var wg conc.WaitGroup
 	var nftsScamData map[ton.AccountID]core.TrustType
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		var err error
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, ids)
 		if err != nil {
 			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
-	}()
+	})
 	items, err := h.storage.GetNFTs(ctx, ids)
 	wg.Wait()
 	if err != nil {
@@ -177,17 +174,15 @@ func (h *Handler) GetItemsFromCollection(ctx context.Context, params oas.GetItem
 	if len(ids) == 0 {
 		return &result, nil
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
+	var wg conc.WaitGroup
 	var nftsScamData map[ton.AccountID]core.TrustType
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		var err error
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, ids)
 		if err != nil {
 			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
-	}()
+	})
 	items, err := h.storage.GetNFTs(ctx, ids)
 	wg.Wait()
 	if err != nil {

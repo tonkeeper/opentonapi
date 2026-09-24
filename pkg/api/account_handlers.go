@@ -12,8 +12,9 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/sourcegraph/conc"
 
 	"maps"
 
@@ -405,16 +406,15 @@ func (h *Handler) GetAccountDnsExpiring(ctx context.Context, params oas.GetAccou
 			accounts = append(accounts, dns.DnsItem.Address)
 		}
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
+	var wg conc.WaitGroup
 	var nftsScamData map[ton.AccountID]core.TrustType
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
+		var err error
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, accounts)
 		if err != nil {
 			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
-	}()
+	})
 	nfts, err := h.storage.GetNFTs(ctx, accounts)
 	wg.Wait()
 	if err != nil {
@@ -555,17 +555,15 @@ func (h *Handler) GetAccountNftHistory(ctx context.Context, params oas.GetAccoun
 		seen[op.Nft] = struct{}{}
 		nftIDs = append(nftIDs, op.Nft)
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
+	var wg conc.WaitGroup
 	var nftsScamData map[ton.AccountID]core.TrustType
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		var err error
 		nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, nftIDs)
 		if err != nil {
 			h.logger.Warn("error getting nft scam data", zap.Error(err))
 		}
-	}()
+	})
 	items, err := h.storage.GetNFTs(ctx, nftIDs)
 	wg.Wait()
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
