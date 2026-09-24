@@ -79,7 +79,7 @@ func convertJettonDecimals(decimals string) int {
 		return 9
 	}
 	dec, err := strconv.Atoi(decimals)
-	if err != nil {
+	if err != nil || dec < 0 || dec > 255 {
 		return 9
 	}
 	return dec
