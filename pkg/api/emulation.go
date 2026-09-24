@@ -3,7 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -58,6 +60,13 @@ func (h *Handler) RunEmulation(ctx context.Context, msgCh <-chan blockchain.ExtI
 		case msgCopy := <-msgCh:
 			emulatedMessagesCounter.Inc()
 			go func() {
+				defer func() {
+					if rec := recover(); rec != nil {
+						h.logger.Error("panic in mempool emulation",
+							zap.String("panic", fmt.Sprint(rec)),
+							zap.ByteString("stack", debug.Stack()))
+					}
+				}()
 				ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 				defer cancel()
 

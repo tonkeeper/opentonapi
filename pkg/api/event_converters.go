@@ -12,7 +12,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
+
+	"github.com/sourcegraph/conc"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -161,17 +162,15 @@ func (h *Handler) convertRisk(ctx context.Context, risk wallet.Risk, walletAddre
 		oasRisk.TotalEquivalent = oas.NewOptFloat32(float32(total / curPrice))
 	}
 	if len(risk.Nfts) > 0 {
-		var wg sync.WaitGroup
-		wg.Add(1)
+		var wg conc.WaitGroup
 		var nftsScamData map[ton.AccountID]core.TrustType
-		var err error
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
+			var err error
 			nftsScamData, err = h.spamFilter.GetNftsScamData(ctx, risk.Nfts)
 			if err != nil {
 				h.logger.Warn("error getting nft scam data", zap.Error(err))
 			}
-		}()
+		})
 		items, err := h.storage.GetNFTs(ctx, risk.Nfts)
 		wg.Wait()
 		if err != nil {

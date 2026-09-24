@@ -9,8 +9,9 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/sourcegraph/conc"
 
 	"slices"
 
@@ -280,21 +281,20 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 
 	events := make([]oas.AccountEvent, 0, len(traceIDs))
 
-	var wg sync.WaitGroup
-	wg.Add(1)
+	var wg conc.WaitGroup
 
 	var isBannedTraces map[string]bool
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		var eventIDs []string
 		for _, traceID := range traceIDs {
 			eventIDs = append(eventIDs, traceID.Hash.Hex())
 		}
+		var err error
 		isBannedTraces, err = h.spamFilter.GetEventsScamData(ctx, eventIDs)
 		if err != nil {
 			h.logger.Warn("error getting events spam data", zap.Error(err))
 		}
-	}()
+	})
 
 	var lastLT uint64
 	if len(traceIDs) > 0 {
@@ -308,13 +308,11 @@ func (h *Handler) GetAccountEvents(ctx context.Context, params oas.GetAccountEve
 		// Disable via PARALLEL_TRACE_PROCESSING=false under DDoS.
 		results := make([]oas.AccountEvent, len(traceIDs))
 		initiators := make([]tongo.AccountID, len(traceIDs))
-		var traceWg sync.WaitGroup
+		var traceWg conc.WaitGroup
 		for i, traceID := range traceIDs {
-			traceWg.Add(1)
-			go func(idx int, tid core.TraceID) {
-				defer traceWg.Done()
-				results[idx], initiators[idx] = h.processTrace(ctx, account.ID, tid, params.AcceptLanguage, params.SubjectOnly.Value)
-			}(i, traceID)
+			traceWg.Go(func() {
+				results[i], initiators[i] = h.processTrace(ctx, account.ID, traceID, params.AcceptLanguage, params.SubjectOnly.Value)
+			})
 		}
 		traceWg.Wait()
 		events = append(events, results...)
@@ -451,16 +449,15 @@ func (h *Handler) GetAccountEvent(ctx context.Context, params oas.GetAccountEven
 	if err != nil {
 		return nil, toError(http.StatusBadRequest, err)
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
+	var wg conc.WaitGroup
 	var isBannedTraces map[string]bool
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
+		var err error
 		isBannedTraces, err = h.spamFilter.GetEventsScamData(ctx, []string{traceID.Hex()})
 		if err != nil {
 			h.logger.Warn("error getting events spam data", zap.Error(err))
 		}
-	}()
+	})
 	trace, emulated, err := h.getTraceByHash(ctx, traceID)
 	if errors.Is(err, core.ErrEntityNotFound) {
 		return nil, toError(http.StatusNotFound, err)
