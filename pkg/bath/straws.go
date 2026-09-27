@@ -23,6 +23,8 @@ var JettonTransfersBurnsMints = []Merger{
 	FlawedJettonTransferMinimalStraw,
 	JettonTransferClassicStraw,
 	JettonTransferMinimalStraw,
+	// Before JettonBurnStraw, which would name the wallet itself as the one burning.
+	JettonBurnHipoUnstakeAllStraw,
 	JettonBurnStraw,
 	JettonMintFromMasterStraw,
 	JettonMintStrawGovernance,
@@ -56,6 +58,8 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		JettonTransferClassicStraw,
 		JettonTransferMinimalStraw,
 		GasRelayerStraw(book),
+		// Before JettonBurnStraw, which would name the wallet itself as the one burning.
+		JettonBurnHipoUnstakeAllStraw,
 		JettonBurnStraw,
 		WtonMintStraw,
 		NftPurchaseStraw,

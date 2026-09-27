@@ -37,6 +37,15 @@ func hipoOwner(addr tlb.MsgAddress) (tongo.AccountID, bool) {
 	return *owner, true
 }
 
+// hipoCredit records owner as the account an action is about. The actions of an unstake or a
+// rollback are merged from transactions on Hipo's own contracts, so without it the owner is not
+// among the bubble's accounts at all and ForAccount - the wallet's signing preview and the
+// account's own history - drops the action. Every caller reads owner from a message that only
+// Hipo can have sent, the same anchoring that guards the jetton flow.
+func hipoCredit(bubble *Bubble, owner tongo.AccountID) {
+	bubble.Accounts = append(bubble.Accounts, owner)
+}
+
 // hipoBillAssigned matches a bill transaction either as a plain assign_bill or already
 // merged into a BubbleNftTransfer by NftTransferNotifyStraw, which usually claims it first.
 func hipoBillAssigned(bubble *Bubble) bool {
@@ -85,6 +94,7 @@ var JettonMintHipoStraw = Straw[BubbleJettonMint]{
 		newAction.amount = body.Tokens
 		if owner, ok := hipoOwner(body.Owner); ok {
 			newAction.recipient = Account{Address: owner}
+			hipoCredit(bubble, owner)
 		}
 		return nil
 	},
@@ -109,6 +119,63 @@ var JettonMintHipoStraw = Straw[BubbleJettonMint]{
 			Optional:   true,
 		},
 	},
+}
+
+// JettonBurnHipoUnstakeAllStraw recognizes the hGRAM burn of an unstake-all, which the
+// holder's wallet sends to itself: the owner's comment "w" reaches the treasury, which asks the
+// jetton master to have the wallet unstake everything, so the burn message arrives from the
+// wallet rather than from the owner.
+//
+//	hGRAM wallet -> burn -> hGRAM wallet -> proxy_reserve_tokens -> parent
+//
+// JettonBurnStraw would name the wallet as the one burning, so this straw runs before it and
+// takes the owner from proxy_reserve_tokens instead. That is only trustworthy because the
+// jetton master throws unless the message comes from the wallet it derives for that very owner,
+// so the match requires the master's transaction to have succeeded.
+var JettonBurnHipoUnstakeAllStraw = Straw[BubbleJettonBurn]{
+	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnMsgOp), hipoSelfBurn},
+	Builder: func(newAction *BubbleJettonBurn, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.master = references.HipoParent
+		newAction.senderWallet = tx.account.Address
+		newAction.sender = tx.account
+		newAction.success = tx.success
+		if body, ok := tx.decodedBody.Value.(abi.JettonBurnMsgBody); ok {
+			newAction.amount = body.Amount
+		}
+		if owner, ok := hipoReserveOwner(bubble); ok {
+			newAction.sender = Account{Address: owner}
+			hipoCredit(bubble, owner)
+		}
+		return nil
+	},
+}
+
+// hipoSelfBurn reports whether a burn is a wallet burning to itself on its way to a
+// proxy_reserve_tokens the jetton master accepted.
+func hipoSelfBurn(bubble *Bubble) bool {
+	tx := bubble.Info.(BubbleTx)
+	if tx.inputFrom == nil || tx.inputFrom.Address != tx.account.Address {
+		return false
+	}
+	_, ok := hipoReserveOwner(bubble)
+	return ok
+}
+
+// hipoReserveOwner is the owner named by the proxy_reserve_tokens a burn led to, when the
+// jetton master accepted it.
+func hipoReserveOwner(bubble *Bubble) (tongo.AccountID, bool) {
+	for _, child := range bubble.Children {
+		tx, ok := child.Info.(BubbleTx)
+		if !ok || !tx.success || tx.account.Address != references.HipoParent ||
+			!tx.operation(abi.HipoFinanceProxyReserveTokensMsgOp) {
+			continue
+		}
+		if body, ok := tx.decodedBody.Value.(abi.HipoFinanceProxyReserveTokensMsgBody); ok {
+			return hipoOwner(body.Owner)
+		}
+	}
+	return tongo.AccountID{}, false
 }
 
 // hipoFromParent and hipoFromTreasury guard the messages that move an hGRAM balance. Both
@@ -201,6 +268,7 @@ var DepositHipoStakeStraw = Straw[BubbleDepositStake]{
 			newAction.Amount = core.PriceNanoGram(coins.Int64())
 			if owner, ok := hipoOwner(body.Owner); ok {
 				newAction.Staker = owner
+				hipoCredit(bubble, owner)
 			}
 			return nil
 		},
@@ -231,6 +299,7 @@ var DepositHipoStakeDeferredStraw = Straw[BubbleDepositStake]{
 				newAction.Amount = core.PriceNanoGram(coins.Int64())
 				if owner, ok := hipoOwner(body.Owner); ok {
 					newAction.Staker = owner
+					hipoCredit(bubble, owner)
 				}
 				return nil
 			},
@@ -300,6 +369,7 @@ var WithdrawHipoStakeRequestStraw = Straw[BubbleWithdrawStakeRequest]{
 		}
 		if owner, ok := hipoOwner(body.Owner); ok {
 			newAction.Staker = owner
+			hipoCredit(bubble, owner)
 		}
 		return nil
 	},
@@ -400,6 +470,7 @@ var WithdrawHipoStakeSettledStraw = Straw[BubbleWithdrawStake]{
 			}
 			if owner, ok := hipoOwner(body.Owner); ok {
 				newAction.Staker = owner
+				hipoCredit(bubble, owner)
 			}
 			return nil
 		},
@@ -444,6 +515,7 @@ var WithdrawHipoStakePostponedStraw = Straw[BubbleWithdrawStakeRequest]{
 		}
 		if owner, ok := hipoOwner(body.Owner); ok {
 			newAction.Staker = owner
+			hipoCredit(bubble, owner)
 		}
 		return nil
 	},
@@ -487,6 +559,7 @@ var JettonMintHipoRollbackStraw = Straw[BubbleJettonMint]{
 		newAction.amount = body.Tokens
 		if owner, ok := hipoOwner(body.Owner); ok {
 			newAction.recipient = Account{Address: owner}
+			hipoCredit(bubble, owner)
 		}
 		return nil
 	},
