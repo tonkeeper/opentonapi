@@ -175,6 +175,15 @@ func TestJettonMintHipoStraw(t *testing.T) {
 	require.False(t, JettonMintHipoStraw.Merge(mint(someone)))
 }
 
+// hipoWithBody gives a bubble's message a decoded body and sets whether its transaction succeeded.
+func hipoWithBody(b *Bubble, body any, success bool) *Bubble {
+	tx := b.Info.(BubbleTx)
+	tx.decodedBody = &core.DecodedMessageBody{Operation: tx.decodedBody.Operation, Value: body}
+	tx.success = success
+	b.Info = tx
+	return b
+}
+
 // hipoFrom marks who sent the message a bubble is handling.
 func hipoFrom(b *Bubble, sender tongo.AccountID) *Bubble {
 	tx := b.Info.(BubbleTx)
@@ -224,6 +233,30 @@ func TestHipoStrawsRejectForgeries(t *testing.T) {
 				hipoTx(attacker, abi.HipoFinanceRollbackUnstakeMsgOp),
 			), references.HipoTreasury)
 		require.True(t, JettonMintHipoRollbackStraw.Merge(real))
+	})
+
+	// The unstake-all burn names whoever proxy_reserve_tokens names, so a contract of the
+	// attacker's could burn to itself and name a victim. The jetton master throws unless the
+	// message comes from the victim's own wallet, which is what the straw relies on.
+	victim := tongo.MustParseAccountID("0:2222222222222222222222222222222222222222222222222222222222222222")
+	// selfBurn is wallet burning to itself and reporting to master, which accepts it or not.
+	selfBurn := func(wallet, master tongo.AccountID, accepted bool) *Bubble {
+		reserve := hipoWithBody(hipoFrom(hipoTx(master, abi.HipoFinanceProxyReserveTokensMsgOp), wallet),
+			abi.HipoFinanceProxyReserveTokensMsgBody{Owner: victim.ToMsgAddress()}, accepted)
+		return hipoWithBody(hipoFrom(hipoTx(wallet, abi.JettonBurnMsgOp, reserve), wallet),
+			abi.JettonBurnMsgBody{}, true)
+	}
+	t.Run("self-burn whose unstake the jetton master refused", func(t *testing.T) {
+		require.False(t, JettonBurnHipoUnstakeAllStraw.Merge(selfBurn(attacker, references.HipoParent, false)))
+	})
+	t.Run("self-burn reporting to a jetton master of the attacker's", func(t *testing.T) {
+		require.False(t, JettonBurnHipoUnstakeAllStraw.Merge(selfBurn(attacker, attacker, true)))
+	})
+	t.Run("genuine unstake-all names the owner", func(t *testing.T) {
+		victimsWallet := tongo.MustParseAccountID("0:3333333333333333333333333333333333333333333333333333333333333333")
+		burn := selfBurn(victimsWallet, references.HipoParent, true)
+		require.True(t, JettonBurnHipoUnstakeAllStraw.Merge(burn))
+		require.Equal(t, victim, burn.Info.(BubbleJettonBurn).sender.Address)
 	})
 
 	// And in the debit direction: reserve_tokens really can be sent to the treasury by
