@@ -302,6 +302,15 @@ func TestRequiredGas(t *testing.T) {
 			want: 3 * migrationGasPerTransfer,
 		},
 		{
+			name: "nft transfers are charged at the nft rate",
+			plan: []migrationBatch{
+				{messages: []tonwallet.RawMessage{transfer, transfer}, gasPerTransfer: migrationNftGasPerTransfer},
+				{messages: []tonwallet.RawMessage{transfer}},
+				{messages: []tonwallet.RawMessage{sweep}},
+			},
+			want: 2*migrationNftGasPerTransfer + migrationGasPerTransfer,
+		},
+		{
 			name: "sponsored batches are funded by the relay",
 			plan: []migrationBatch{
 				{messages: []tonwallet.RawMessage{transfer, transfer}, sponsored: true},

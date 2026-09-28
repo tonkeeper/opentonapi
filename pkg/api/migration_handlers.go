@@ -35,9 +35,13 @@ import (
 	"go.uber.org/zap"
 )
 
-// migrationGasPerTransfer is attached to every jetton/NFT transfer to cover gas and forwarding.
+// migrationGasPerTransfer is attached to every jetton transfer to cover gas and forwarding.
 // Any unused part is reclaimed by the final mode-128 TON sweep, so over-estimating is safe.
 const migrationGasPerTransfer = ton.OneGRAM / 20 // 0.05 TON
+
+// migrationNftGasPerTransfer is attached to every NFT transfer. It is higher than the jetton one
+// because some NFT items keep a 0.05 TON storage balance and fail the transfer with less attached.
+const migrationNftGasPerTransfer = ton.OneGRAM * 6 / 100 // 0.06 TON
 
 // migrationForwardAmount is forwarded to the destination so it receives a transfer notification.
 const migrationForwardAmount = tlb.Grams(1)
@@ -71,9 +75,6 @@ const batterySponsorshipCap = 2_100_000_000
 
 // batterySponsorsSweep tells whether the relay can sponsor the final TON-only sweep batch.
 const batterySponsorsSweep = false
-
-// sponsoredBatchMaxMessages bounds a battery-sponsored batch so its gas fits the sponsorship cap.
-const sponsoredBatchMaxMessages = int(batterySponsorshipCap / migrationGasPerTransfer)
 
 var migrationSkipNftCollections = map[ton.AccountID]bool{
 	references.TonstakersAccountPool: true,
@@ -301,6 +302,8 @@ type migrationBatch struct {
 	messages   []tonwallet.RawMessage
 	sponsored  bool
 	commission *big.Int // fee set by gasless estimate
+	// gasPerTransfer is attached to every gas-funded message of the batch; zero means migrationGasPerTransfer.
+	gasPerTransfer tlb.Grams
 }
 
 type migrationPlan []migrationBatch
@@ -308,11 +311,24 @@ type migrationPlan []migrationBatch
 func (mb migrationBatch) chunk(n int) (batches []migrationBatch) {
 	for b := range slices.Chunk(mb.messages, n) {
 		batches = append(batches, migrationBatch{
-			messages:  b,
-			sponsored: mb.sponsored,
+			messages:       b,
+			sponsored:      mb.sponsored,
+			gasPerTransfer: mb.gasPerTransfer,
 		})
 	}
 	return
+}
+
+func (mb migrationBatch) gas() tlb.Grams {
+	if mb.gasPerTransfer == 0 {
+		return migrationGasPerTransfer
+	}
+	return mb.gasPerTransfer
+}
+
+// sponsoredMaxMessages bounds a battery-sponsored batch so its gas fits the sponsorship cap.
+func (mb migrationBatch) sponsoredMaxMessages() int {
+	return int(batterySponsorshipCap / mb.gas())
 }
 
 func (mb migrationBatch) gasFundedMessages() int {
@@ -329,7 +345,7 @@ func (plan migrationPlan) minGramBalanceRequired() tlb.Grams {
 	var res tlb.Grams
 	for _, batch := range plan {
 		if !batch.sponsored {
-			res += tlb.Grams(batch.gasFundedMessages()) * migrationGasPerTransfer
+			res += tlb.Grams(batch.gasFundedMessages()) * batch.gas()
 		}
 	}
 	return res
@@ -712,7 +728,7 @@ func (h *Handler) buildWalletMsgForEmulation(sourceWallet *tonwallet.Wallet, uns
 func relayerMessage(batch migrationBatch, sourceAddr ton.Address, signedBody *boc.Cell, init *tlb.StateInit) (tlb.Message, error) {
 	// Emulate what the relay would deliver: an internal message carrying the signed body,
 	// with enough TON attached to fund the batch (per-transfer gas plus a fee margin).
-	attach := int64(len(batch.messages)+1) * int64(migrationGasPerTransfer)
+	attach := int64(len(batch.messages)+1) * int64(batch.gas())
 	emuMsg, _, err := tonwallet.Message{
 		Amount:  tlb.Grams(attach),
 		Address: sourceAddr.ID,
@@ -729,11 +745,11 @@ func chunkMigrationPlan(w *tonwallet.Wallet, relayFunded, reserveCommissionSlot 
 	if reserveCommissionSlot {
 		reserved = 1
 	}
-	chunkSize := w.MaxMessageNumber() - reserved
-	if relayFunded {
-		chunkSize = min(sponsoredBatchMaxMessages-reserved, chunkSize)
-	}
 	for _, batch := range plan {
+		chunkSize := w.MaxMessageNumber() - reserved
+		if relayFunded {
+			chunkSize = min(batch.sponsoredMaxMessages()-reserved, chunkSize)
+		}
 		chunkedPlan = append(chunkedPlan, batch.chunk(chunkSize)...)
 	}
 	return chunkedPlan
@@ -746,7 +762,7 @@ func assembleMigrationPlan(p assembleMigrationPlanParams) (migrationPlan, error)
 	var plan []migrationBatch
 
 	if len(nftTransfers) > 0 {
-		plan = append(plan, migrationBatch{messages: nftTransfers, sponsored: relayFunded})
+		plan = append(plan, migrationBatch{messages: nftTransfers, sponsored: relayFunded, gasPerTransfer: migrationNftGasPerTransfer})
 	}
 	if len(jettonTransfers) > 0 {
 		plan = append(plan, migrationBatch{messages: jettonTransfers, sponsored: relayFunded})
@@ -1113,7 +1129,7 @@ func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to, excessDesti
 			ItemAddress:         item.Address,
 			Destination:         to,
 			ResponseDestination: excessDestination,
-			AttachedGram:        migrationGasPerTransfer,
+			AttachedGram:        migrationNftGasPerTransfer,
 			ForwardGram:         migrationForwardAmount,
 		})
 		if err != nil {
