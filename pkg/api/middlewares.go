@@ -37,11 +37,12 @@ func ogenLoggingMiddleware(logger *zap.Logger) middleware.Middleware {
 	}
 }
 
-// ogenUserAgentMiddleware puts the request's User-Agent into the context so handlers can
-// adapt a response to a particular client's quirks.
+// ogenUserAgentMiddleware puts the request's User-Agent and Origin into the context so
+// handlers can adapt a response to a particular client's quirks.
 func ogenUserAgentMiddleware(req middleware.Request, next middleware.Next) (middleware.Response, error) {
-	if userAgent := req.Raw.UserAgent(); userAgent != "" {
-		req.SetContext(withUserAgent(req.Context, userAgent))
+	c := client{userAgent: req.Raw.UserAgent(), origin: req.Raw.Header.Get("Origin")}
+	if c != (client{}) {
+		req.SetContext(withClient(req.Context, c))
 	}
 	return next(req)
 }

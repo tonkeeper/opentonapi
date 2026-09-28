@@ -2,28 +2,41 @@ package api
 
 import (
 	"context"
+	"net/url"
 	"strings"
 )
 
-type userAgentCtxKeyType struct{}
+type clientCtxKeyType struct{}
 
-var userAgentCtxKey = userAgentCtxKeyType{}
+var clientCtxKey = clientCtxKeyType{}
 
-// withUserAgent puts the request's User-Agent into ctx so handlers can adapt a response
-// to a particular client's quirks.
-func withUserAgent(ctx context.Context, userAgent string) context.Context {
-	return context.WithValue(ctx, userAgentCtxKey, userAgent)
+// client describes who sent a request, so handlers can adapt a response to a particular
+// client's quirks.
+type client struct {
+	userAgent string
+	origin    string
 }
 
-func userAgentFromContext(ctx context.Context) string {
-	userAgent, _ := ctx.Value(userAgentCtxKey).(string)
-	return userAgent
+// withClient puts the request's User-Agent and Origin into ctx.
+func withClient(ctx context.Context, c client) context.Context {
+	return context.WithValue(ctx, clientCtxKey, c)
 }
 
-// isTonkeeperUserAgent reports whether the User-Agent belongs to a Tonkeeper client. Clients
-// send either the bare name or a product token with a version, e.g. "Tonkeeper/5.0.0 (iOS 18.0)",
-// so only the first product token is matched.
-func isTonkeeperUserAgent(userAgent string) bool {
+func clientFromContext(ctx context.Context) client {
+	c, _ := ctx.Value(clientCtxKey).(client)
+	return c
+}
+
+// isTonkeeperUserAgent reports whether the request comes from a Tonkeeper client. Native
+// clients send either the bare name or a product token with a version in the User-Agent, e.g.
+// "Tonkeeper/5.0.0 (iOS 18.0)", so only the first product token is matched. Web clients
+// can't set the User-Agent, so they are recognized by an Origin on tonkeeper.com or any of
+// its subdomains, e.g. "https://wallet.tonkeeper.com".
+func isTonkeeperUserAgent(c client) bool {
+	return isTonkeeperOrigin(c.origin) || isTonkeeperProductToken(c.userAgent)
+}
+
+func isTonkeeperProductToken(userAgent string) bool {
 	name, _, _ := strings.Cut(userAgent, "/")
 	switch strings.ToLower(strings.TrimSpace(name)) {
 	case "keeper", "tonkeeper":
@@ -31,4 +44,16 @@ func isTonkeeperUserAgent(userAgent string) bool {
 	default:
 		return false
 	}
+}
+
+func isTonkeeperOrigin(origin string) bool {
+	if origin == "" {
+		return false
+	}
+	u, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+	host := strings.ToLower(u.Hostname())
+	return host == "tonkeeper.com" || strings.HasSuffix(host, ".tonkeeper.com")
 }
