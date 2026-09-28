@@ -124,7 +124,7 @@ func (h *Handler) trustNoneAllowed(ctx context.Context) bool {
 	if !h.nftTrustNoneEnabled {
 		return false
 	}
-	return !isTonkeeperUserAgent(userAgentFromContext(ctx))
+	return !isTonkeeperUserAgent(clientFromContext(ctx))
 }
 
 func (h *Handler) convertNftCollection(collection core.NftCollection, book addressBook) oas.NftCollection {
