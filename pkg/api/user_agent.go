@@ -29,14 +29,18 @@ func clientFromContext(ctx context.Context) client {
 
 // isTonkeeperUserAgent reports whether the request comes from a Tonkeeper client. Native
 // clients send either the bare name or a product token with a version in the User-Agent, e.g.
-// "Tonkeeper/5.0.0 (iOS 18.0)", so only the first product token is matched. Web clients
+// "Tonkeeper/5.0.0 (iOS 18.0)", so only the first product token is matched. The desktop client
+// keeps Electron's default User-Agent, so any User-Agent mentioning Electron counts. Web clients
 // can't set the User-Agent, so they are recognized by an Origin on tonkeeper.com or any of
 // its subdomains, e.g. "https://wallet.tonkeeper.com".
 func isTonkeeperUserAgent(c client) bool {
-	return isTonkeeperOrigin(c.origin) || isTonkeeperProductToken(c.userAgent)
+	return isTonkeeperOrigin(c.origin) || isTonkeeperUA(c.userAgent)
 }
 
-func isTonkeeperProductToken(userAgent string) bool {
+func isTonkeeperUA(userAgent string) bool {
+	if strings.Contains(userAgent, "Electron") {
+		return true
+	}
 	name, _, _ := strings.Cut(userAgent, "/")
 	switch strings.ToLower(strings.TrimSpace(name)) {
 	case "keeper", "tonkeeper":
