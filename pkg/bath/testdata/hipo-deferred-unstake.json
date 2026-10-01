@@ -1,6 +1,19 @@
 {
    "Actions": [
      {
+       "JettonBurn": {
+         "Jetton": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+         "Sender": "0:f1f1ad0f4fff9cf79d8af45381bcf98ae6afe1175ede0aa714495da92ca3f078",
+         "SendersWallet": "0:c922154be9e3213f0368e4b1b3e6792c23e5e02fc8b28b32ad6c16a0f447b5a6",
+         "Amount": "3200000000"
+       },
+       "Success": true,
+       "Type": "JettonBurn",
+       "BaseTransactions": [
+         "bc3fb478135067f67681f76e5f3a142805c139d8ae84edbabeafb3f29efb8c5f"
+       ]
+     },
+     {
        "WithdrawStakeRequest": {
          "Staker": "0:f1f1ad0f4fff9cf79d8af45381bcf98ae6afe1175ede0aa714495da92ca3f078",
          "Amount": {
@@ -21,8 +34,7 @@
          "d86e7f7d770a8825bd62d1790afd3e29fa37164217f5797a6bdc04ddeead44f5",
          "3f425784700d216bb3e989406252a8c88bcd935cf5d748f7b24c861b181ac599",
          "5b2def7909e4cacfe343ea0afc51bf44f1adf5a41644aca56858adccb67de07e",
-         "1badc50e386ab9de9571ea0c8657fdedc3254800c40dad49673b5575f20364f7",
-         "bc3fb478135067f67681f76e5f3a142805c139d8ae84edbabeafb3f29efb8c5f"
+         "1badc50e386ab9de9571ea0c8657fdedc3254800c40dad49673b5575f20364f7"
        ]
      }
    ],
@@ -61,7 +73,12 @@
        "Account": "0:f1f1ad0f4fff9cf79d8af45381bcf98ae6afe1175ede0aa714495da92ca3f078",
        "Ton": -100609275,
        "Fee": 609276,
-       "Jettons": null
+       "Jettons": [
+         {
+           "Address": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+           "Quantity": -3200000000
+         }
+       ]
      }
    ]
  }
