@@ -86,6 +86,10 @@ func (h *Handler) convertNFT(ctx context.Context, item core.NftItem, book addres
 	switch {
 	case len(nftItem.ApprovedBy) > 0 && nftItem.Verified:
 		nftItem.Trust = oas.TrustType(core.TrustWhitelist)
+	case item.CollectionAddress != nil && collectionTrust == core.TrustBlacklist:
+		// A banned collection taints every item in it, even one reviewed and cleared on its own:
+		// the item-level verdict usually predates the collection's ban.
+		nftItem.Trust = oas.TrustType(core.TrustBlacklist)
 	case trustType == core.TrustWhitelist || trustType == core.TrustGraylist:
 		// The item has been reviewed and cleared (support graylisted it, for instance). That
 		// verdict wins over whatever the spam filter's heuristics would otherwise return.

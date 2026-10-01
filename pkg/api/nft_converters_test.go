@@ -124,6 +124,20 @@ func TestConvertNFTTrust(t *testing.T) {
 			expectedTrust: oas.TrustType(core.TrustGraylist),
 		},
 		{
+			name:            "a graylisted item in a blacklisted collection is blacklisted",
+			collection:      &collectionID,
+			collectionTrust: core.TrustBlacklist,
+			trustType:       core.TrustGraylist,
+			expectedTrust:   oas.TrustType(core.TrustBlacklist),
+		},
+		{
+			name:            "a whitelisted item in a blacklisted collection is blacklisted",
+			collection:      &collectionID,
+			collectionTrust: core.TrustBlacklist,
+			trustType:       core.TrustWhitelist,
+			expectedTrust:   oas.TrustType(core.TrustBlacklist),
+		},
+		{
 			name:          "a whitelisted item stays visible even without a collection",
 			collection:    nil,
 			trustType:     core.TrustWhitelist,
