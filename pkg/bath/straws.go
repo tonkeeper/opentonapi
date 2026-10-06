@@ -23,10 +23,15 @@ var JettonTransfersBurnsMints = []Merger{
 	FlawedJettonTransferMinimalStraw,
 	JettonTransferClassicStraw,
 	JettonTransferMinimalStraw,
+	// Before JettonBurnStraw, which would name the wallet itself as the one burning.
+	JettonBurnHipoUnstakeAllStraw,
 	JettonBurnStraw,
 	JettonMintFromMasterStraw,
 	JettonMintStrawGovernance,
 	WtonMintStraw,
+	// hGRAM is minted with Hipo's own op.
+	JettonMintHipoStraw,
+	JettonMintHipoRollbackStraw,
 }
 
 var NFTStraws = []Merger{
@@ -52,6 +57,8 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		JettonTransferClassicStraw,
 		JettonTransferMinimalStraw,
 		GasRelayerStraw(book),
+		// Before JettonBurnStraw, which would name the wallet itself as the one burning.
+		JettonBurnHipoUnstakeAllStraw,
 		JettonBurnStraw,
 		WtonMintStraw,
 		NftPurchaseStraw,
@@ -122,13 +129,17 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		XTRDepositAction,
 		XTRBuyAction,
 		// 70
-		// Hipo. The unstake straws need JettonBurnStraw (13) to have merged the hGRAM
-		// burn first, and WithdrawHipoStakeStraw upgrades what
-		// WithdrawHipoStakeRequestStraw produced, so this relative order is required.
+		// Hipo, in this order: the deposit straws stop above the mint, and
+		// WithdrawHipoStakeStraw upgrades the request.
+		JettonMintHipoStraw,
 		DepositHipoStakeStraw,
 		DepositHipoStakeDeferredStraw,
 		WithdrawHipoStakeRequestStraw,
 		WithdrawHipoStakeStraw,
+		// 75
+		WithdrawHipoStakeSettledStraw,
+		WithdrawHipoStakePostponedStraw,
+		JettonMintHipoRollbackStraw,
 	}
 }
 
