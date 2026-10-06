@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -9,6 +10,19 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/liteclient"
 )
+
+// liteServerErrorNotFound is the code a liteserver answers with when it has no
+// block the request refers to, e.g. one it has not received yet.
+const liteServerErrorNotFound = 651
+
+// liteServerErrorStatus picks an HTTP status for an error returned by a liteserver.
+func liteServerErrorStatus(err error) int {
+	var e liteclient.LiteServerErrorC
+	if errors.As(err, &e) && e.Code == liteServerErrorNotFound {
+		return http.StatusNotFound
+	}
+	return http.StatusInternalServerError
+}
 
 func (h *Handler) GetRawMasterchainInfo(ctx context.Context) (*oas.GetRawMasterchainInfoOK, error) {
 	info, err := h.storage.GetMasterchainInfoRaw(ctx)
@@ -104,7 +118,7 @@ func (h *Handler) GetRawAccountState(ctx context.Context, params oas.GetRawAccou
 	}
 	accountState, err := h.storage.GetAccountStateRaw(ctx, account.ID, blockID)
 	if err != nil {
-		return nil, toError(http.StatusInternalServerError, err)
+		return nil, toError(liteServerErrorStatus(err), err)
 	}
 	resp, err := convertAccountState(accountState)
 	if err != nil {
