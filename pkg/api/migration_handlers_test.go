@@ -384,6 +384,60 @@ func TestGasFundedMessages(t *testing.T) {
 	require.Equal(t, 2, batch.gasFundedMessages(), "the balance-carrying sweep needs no attached gas")
 }
 
+// TestNftTransferGas pins the fix for telemint items (Telegram usernames, numbers, gifts) that failed
+// to migrate with exit code 206: such an item keeps 1 TON after a transfer, and once storage fees drain
+// it below that, the regular NFT gas is not enough.
+func TestNftTransferGas(t *testing.T) {
+	tests := []struct {
+		name string
+		item core.Account
+		want tlb.Grams
+	}{
+		{
+			name: "regular nft gets regular gas",
+			item: core.Account{Interfaces: []abi.ContractInterface{abi.NftItem}, GramBalance: 50_000_000},
+			want: migrationNftGasPerTransfer,
+		},
+		{
+			name: "telemint item at the minimum gets regular gas",
+			item: core.Account{Interfaces: []abi.ContractInterface{abi.NftItem, abi.Teleitem}, GramBalance: int64(telemintMinStorage)},
+			want: migrationNftGasPerTransfer,
+		},
+		{
+			name: "drained telemint item is topped up",
+			item: core.Account{Interfaces: []abi.ContractInterface{abi.NftItem, abi.Teleitem}, GramBalance: 884_312_073},
+			want: telemintMinStorage - 884_312_073 + migrationNftGasPerTransfer,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.want, nftTransferGas(&tt.item))
+		})
+	}
+}
+
+func TestAssembleMigrationPlan_NftTopUp(t *testing.T) {
+	to := ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000001")
+	relay := ton.MustParseAccountID("0:0000000000000000000000000000000000000000000000000000000000000002")
+	transfer := tonwallet.RawMessage{Mode: tonwallet.DefaultMessageMode}
+	topUpGas := telemintMinStorage / 2
+	plan, err := assembleMigrationPlan(assembleMigrationPlanParams{
+		to: to, excessDestination: relay, relayFunded: true,
+		nftTransfers: nftTransfers{
+			regular:  []tonwallet.RawMessage{transfer, transfer},
+			topUp:    []tonwallet.RawMessage{transfer},
+			topUpGas: topUpGas,
+		},
+	})
+	require.NoError(t, err)
+	require.Len(t, plan, 2)
+	require.True(t, plan[0].sponsored)
+	require.Equal(t, migrationNftGasPerTransfer, plan[0].gas())
+	require.False(t, plan[1].sponsored, "the relay must not pay for the top-up left on the item")
+	require.Equal(t, topUpGas, plan[1].gas())
+	require.Equal(t, topUpGas, plan.minGramBalanceRequired())
+}
+
 // TestMigrationValidUntilFollowsEmulationClock pins the fix for migrations that died partway down the
 // plan on v3/v4 sources. Those wallets carry only four messages per transaction, so a wallet with a
 // few dozen assets becomes a dozen-plus batches, and the emulator moves its clock forward by the chain
