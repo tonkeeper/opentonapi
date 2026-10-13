@@ -52,6 +52,8 @@ type Trace struct {
 type TraceAdditionalInfo struct {
 	// JettonMasters maps jetton wallets to their masters.
 	JettonMasters map[tongo.AccountID]tongo.AccountID
+	// JettonOwners maps jetton wallets to their owners.
+	JettonOwners map[tongo.AccountID]tongo.AccountID
 	// NftSaleContract is set, if a transaction's account implements "get_sale_data" method.
 	NftSaleContract *NftSaleContract
 	// STONfiPool is set, if a transaction's account implements "get_pool_data" method and abi.StonfiPool interface.
@@ -147,6 +149,7 @@ func (ts *traceSaved) copyInto(t *Trace) {
 func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 	type Alias struct {
 		JettonMasters       map[string]string    `json:",omitempty"`
+		JettonOwners        map[string]string    `json:",omitempty"`
 		NftSaleContract     *NftSaleContract     `json:",omitempty"`
 		STONfiPool          *STONfiPool          `json:",omitempty"`
 		EmulatedTeleitemNFT *EmulatedTeleitemNFT `json:",omitempty"`
@@ -160,9 +163,14 @@ func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 			masters[k.String()] = v.String()
 		}
 	}
+	owners := make(map[string]string)
+	for k, v := range t.JettonOwners {
+		owners[k.String()] = v.String()
+	}
 
 	return json.Marshal(&Alias{
 		JettonMasters:       masters,
+		JettonOwners:        owners,
 		NftSaleContract:     t.NftSaleContract,
 		STONfiPool:          t.STONfiPool,
 		EmulatedTeleitemNFT: t.EmulatedTeleitemNFT,
@@ -174,6 +182,7 @@ func (t *TraceAdditionalInfo) MarshalJSON() ([]byte, error) {
 func (t *TraceAdditionalInfo) UnmarshalJSON(data []byte) error {
 	type Alias struct {
 		JettonMasters       map[string]string    `json:",omitempty"`
+		JettonOwners        map[string]string    `json:",omitempty"`
 		NftSaleContract     *NftSaleContract     `json:",omitempty"`
 		STONfiPool          *STONfiPool          `json:",omitempty"`
 		EmulatedTeleitemNFT *EmulatedTeleitemNFT `json:",omitempty"`
@@ -192,6 +201,14 @@ func (t *TraceAdditionalInfo) UnmarshalJSON(data []byte) error {
 			key := ton.MustParseAccountID(kStr)
 			val := ton.MustParseAccountID(vStr)
 			t.JettonMasters[key] = val
+		}
+	}
+	if aux.JettonOwners != nil {
+		t.JettonOwners = make(map[tongo.AccountID]tongo.AccountID)
+		for kStr, vStr := range aux.JettonOwners {
+			key := ton.MustParseAccountID(kStr)
+			val := ton.MustParseAccountID(vStr)
+			t.JettonOwners[key] = val
 		}
 	}
 
@@ -304,9 +321,18 @@ type VaultPositionData struct {
 	JettonMaster *tongo.AccountID
 }
 
+// JettonWalletInfo holds partial results of a jetton wallet's "get_wallet_data" method.
+type JettonWalletInfo struct {
+	Master tongo.AccountID
+	// Owner is nil if the wallet's owner is not a standard address.
+	Owner *tongo.AccountID
+}
+
 // InformationSource provides methods to construct TraceAdditionalInfo.
 type InformationSource interface {
 	JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
+	// JettonWalletsInfo returns a master and an owner for each of the given jetton wallets.
+	JettonWalletsInfo(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]JettonWalletInfo, error)
 	NftSaleContracts(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]NftSaleContract, error)
 	STONfiPools(ctx context.Context, poolIDs []STONfiPoolID) (map[tongo.AccountID]STONfiPool, error)
 	DedustPools(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]DedustPool, error)
@@ -440,7 +466,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 	if err != nil {
 		return err
 	}
-	masters, err := infoSource.JettonMastersForWallets(ctx, jettonWallets)
+	jettonWalletInfos, err := infoSource.JettonWalletsInfo(ctx, jettonWallets)
 	if err != nil {
 		return err
 	}
@@ -474,7 +500,7 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		}
 		additionalInfo := &TraceAdditionalInfo{}
 		if hasInterface(trace.AccountInterfaces, abi.JettonWallet) {
-			additionalInfo.SetJettonMaster(trace.Account, masters[trace.Account])
+			additionalInfo.setJettonWalletInfo(trace.Account, jettonWalletInfos)
 		}
 		if hasInterface(trace.AccountInterfaces, abi.NftSaleV1) ||
 			hasInterface(trace.AccountInterfaces, abi.NftSaleV2) ||
@@ -489,8 +515,8 @@ func CollectAdditionalInfo(ctx context.Context, infoSource InformationSource, tr
 		if hasInterface(trace.AccountInterfaces, abi.StonfiPool) || hasInterface(trace.AccountInterfaces, abi.StonfiPoolV2) {
 			if pool, ok := stonfiPools[trace.Account]; ok {
 				additionalInfo.STONfiPool = &pool
-				additionalInfo.SetJettonMaster(pool.Token0, masters[pool.Token0])
-				additionalInfo.SetJettonMaster(pool.Token1, masters[pool.Token1])
+				additionalInfo.setJettonWalletInfo(pool.Token0, jettonWalletInfos)
+				additionalInfo.setJettonWalletInfo(pool.Token1, jettonWalletInfos)
 			}
 		}
 		if hasInterface(trace.AccountInterfaces, abi.DedustPool) {
@@ -529,4 +555,29 @@ func (info *TraceAdditionalInfo) SetJettonMaster(jettonWallet tongo.AccountID, j
 		info.JettonMasters = make(map[tongo.AccountID]tongo.AccountID)
 	}
 	info.JettonMasters[jettonWallet] = jettonMaster
+}
+
+func (info *TraceAdditionalInfo) JettonOwner(jettonWallet tongo.AccountID) (tongo.AccountID, bool) {
+	if info.JettonOwners == nil {
+		return tongo.AccountID{}, false
+	}
+	owner, ok := info.JettonOwners[jettonWallet]
+	return owner, ok
+}
+
+func (info *TraceAdditionalInfo) SetJettonOwner(jettonWallet tongo.AccountID, owner tongo.AccountID) {
+	if info.JettonOwners == nil {
+		info.JettonOwners = make(map[tongo.AccountID]tongo.AccountID)
+	}
+	info.JettonOwners[jettonWallet] = owner
+}
+
+// setJettonWalletInfo sets the wallet's master, even if it is unknown, as CollectAdditionalInfo has always done,
+// and the wallet's owner only if it is known.
+func (info *TraceAdditionalInfo) setJettonWalletInfo(jettonWallet tongo.AccountID, infos map[tongo.AccountID]JettonWalletInfo) {
+	walletInfo := infos[jettonWallet]
+	info.SetJettonMaster(jettonWallet, walletInfo.Master)
+	if walletInfo.Owner != nil {
+		info.SetJettonOwner(jettonWallet, *walletInfo.Owner)
+	}
 }

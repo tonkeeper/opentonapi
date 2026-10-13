@@ -8,9 +8,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tonkeeper/opentonapi/pkg/addressbook"
 	"github.com/tonkeeper/opentonapi/pkg/bath"
+	"github.com/tonkeeper/opentonapi/pkg/cache"
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/tep64"
 	"github.com/tonkeeper/tongo/ton"
 )
 
@@ -199,6 +201,78 @@ func TestConvertNftPurchaseUnknownItem(t *testing.T) {
 			require.True(t, got.NftPurchase.Set)
 			assert.Equal(t, nftID.ToRaw(), got.NftPurchase.Value.Nft.Address)
 			assert.Equal(t, tt.expectedTrust, got.NftPurchase.Value.Nft.Trust)
+		})
+	}
+}
+
+// scaledlessStorage is a storage that knows no scaled UI parameters. Every other method is left nil on purpose.
+type scaledlessStorage struct {
+	storage
+}
+
+func (scaledlessStorage) GetScaledUIParameters(ctx context.Context, jetton tongo.AccountID, beforeLt *int64) (*core.ScaledUIParameters, error) {
+	return nil, nil
+}
+
+type zeroScore struct{}
+
+func (zeroScore) GetJettonScore(masterID ton.AccountID) (int32, error) {
+	return 0, nil
+}
+
+// TestConvertJettonBurnPreviewAccounts checks that a burn lists every account once although the sender
+// may also be the owner (a normal burn) or the jetton (the master forcing a burn).
+func TestConvertJettonBurnPreviewAccounts(t *testing.T) {
+	owner := ton.MustParseAccountID("0:3996a30dd8d4728d84d8596730bff7d47e2c8ef88de888bf2f6c5aef8df134dc")
+	wallet := ton.MustParseAccountID("0:fc35e51a7890d259858bd1caab05052a942006d38e95bee1d8b5045174b63653")
+	master := ton.MustParseAccountID("0:5a01bc2497790051d28ccde06c09b2a43e205d8d089370bf0490bbba093cc5af")
+
+	jettonsCache := cache.NewLRUCache[tongo.AccountID, tep64.Metadata](16, "test_jetton_metadata_cache")
+	jettonsCache.Set(master, tep64.Metadata{Symbol: "RUBA", Decimals: "9"})
+	h := &Handler{
+		storage: scaledlessStorage{},
+		addressBook: mockAddressBook{
+			OnGetAddressInfoByAddress: func(a tongo.AccountID) (addressbook.KnownAddress, bool) {
+				return addressbook.KnownAddress{}, false
+			},
+		},
+		spamFilter: mockSpamFilter{},
+		metaCache:  metadataCache{jettonsCache: jettonsCache},
+		score:      zeroScore{},
+	}
+
+	tests := []struct {
+		name         string
+		sender       ton.AccountID
+		viewer       *ton.AccountID
+		wantAccounts []ton.AccountID
+	}{
+		{name: "normal burn", sender: owner, wantAccounts: []ton.AccountID{owner, master}},
+		{name: "normal burn seen by the owner", sender: owner, viewer: &owner, wantAccounts: []ton.AccountID{master}},
+		{name: "forced burn", sender: master, wantAccounts: []ton.AccountID{master, owner}},
+		{name: "forced burn seen by the owner", sender: master, viewer: &owner, wantAccounts: []ton.AccountID{master}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			action := bath.Action{
+				Type:    bath.JettonBurn,
+				Success: true,
+				JettonBurn: &bath.JettonBurnAction{
+					Jetton:        master,
+					Sender:        tt.sender,
+					SendersWallet: wallet,
+					Owner:         owner,
+				},
+			}
+			got, err := h.convertAction(context.Background(), tt.viewer, action, oas.OptString{}, 0)
+			require.NoError(t, err)
+			require.True(t, got.JettonBurn.Set)
+			assert.Equal(t, owner.ToRaw(), got.JettonBurn.Value.Owner.Value.Address)
+			var accounts []ton.AccountID
+			for _, a := range got.SimplePreview.Accounts {
+				accounts = append(accounts, ton.MustParseAccountID(a.Address))
+			}
+			assert.Equal(t, tt.wantAccounts, accounts)
 		})
 	}
 }

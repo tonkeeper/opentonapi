@@ -46,6 +46,7 @@ type result struct {
 
 type mockInfoSource struct {
 	OnJettonMastersForWallets func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error)
+	OnJettonWalletsInfo       func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]core.JettonWalletInfo, error)
 	OnNftSaleContracts        func(ctx context.Context, contracts []tongo.AccountID) (map[tongo.AccountID]core.NftSaleContract, error)
 	OnSubscriptionsInfos      func(ctx context.Context, ids []core.SubscriptionID) (map[tongo.AccountID]core.SubscriptionInfo, error)
 }
@@ -75,6 +76,13 @@ func (m *mockInfoSource) JettonMastersForWallets(ctx context.Context, wallets []
 		return map[tongo.AccountID]tongo.AccountID{}, nil
 	}
 	return m.OnJettonMastersForWallets(ctx, wallets)
+}
+
+func (m *mockInfoSource) JettonWalletsInfo(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]core.JettonWalletInfo, error) {
+	if m.OnJettonWalletsInfo == nil {
+		return map[tongo.AccountID]core.JettonWalletInfo{}, nil
+	}
+	return m.OnJettonWalletsInfo(ctx, wallets)
 }
 
 func (m *mockInfoSource) STONfiPools(ctx context.Context, pools []core.STONfiPoolID) (map[tongo.AccountID]core.STONfiPool, error) {

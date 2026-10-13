@@ -3,6 +3,7 @@ package bath
 import (
 	"fmt"
 	"math/big"
+	"slices"
 
 	"github.com/tonkeeper/opentonapi/internal/g"
 	"github.com/tonkeeper/tongo"
@@ -149,6 +150,9 @@ type BubbleJettonBurn struct {
 	master       tongo.AccountID
 	amount       tlb.VarUInteger16
 	success      bool
+	// owner of senderWallet. It differs from sender when someone else sends jetton_burn,
+	// e.g. the jetton master forcing a burn. Use ownerOrSender to read it.
+	owner *tongo.AccountID
 }
 
 func (b BubbleJettonBurn) ToAction() (action *Action) {
@@ -156,6 +160,7 @@ func (b BubbleJettonBurn) ToAction() (action *Action) {
 		JettonBurn: &JettonBurnAction{
 			Jetton:        b.master,
 			Sender:        b.sender.Address,
+			Owner:         b.ownerOrSender(),
 			SendersWallet: b.senderWallet,
 			Amount:        b.amount,
 		},
@@ -163,6 +168,22 @@ func (b BubbleJettonBurn) ToAction() (action *Action) {
 		Type:    JettonBurn,
 	}
 	return &a
+}
+
+// ownerOrSender falls back to the sender when the owner was found neither in additional info nor in burn_notification.
+func (b BubbleJettonBurn) ownerOrSender() tongo.AccountID {
+	if b.owner != nil {
+		return *b.owner
+	}
+	return b.sender.Address
+}
+
+// setOwner adds the owner to the bubble's accounts if it isn't there yet, so the burn shows up in the owner's history.
+func (b *BubbleJettonBurn) setOwner(owner tongo.AccountID, bubble *Bubble) {
+	b.owner = &owner
+	if owner != b.sender.Address && !slices.Contains(bubble.Accounts, owner) {
+		bubble.Accounts = append(bubble.Accounts, owner)
+	}
 }
 
 // JettonMintFromMasterStraw example: https://tonviewer.com/transaction/6d33487c44249d7844db8fac38a5cecf1502ec7e0c09d266e98e95a2b1be17b5
@@ -213,6 +234,9 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 				//todo: find why it doesn't set sometimes (maybe it already fixed but who knows?)
 				newAction.master = master
 			}
+			if owner, ok := tx.additionalInfo.JettonOwner(tx.account.Address); ok {
+				newAction.setOwner(owner, bubble)
+			}
 		}
 		newAction.senderWallet = tx.account.Address
 		newAction.success = tx.success
@@ -220,13 +244,21 @@ var JettonBurnStraw = Straw[BubbleJettonBurn]{
 	},
 	SingleChild: &Straw[BubbleJettonBurn]{
 		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonBurnNotificationMsgOp)},
-		Builder: func(newAction *BubbleJettonBurn, bubble *Bubble) error { //todo: remove after fixing additionalInfo few lines above
-			newAction.master = bubble.Info.(BubbleTx).account.Address
+		Builder: func(newAction *BubbleJettonBurn, bubble *Bubble) error {
+			tx := bubble.Info.(BubbleTx)
+			newAction.master = tx.account.Address //todo: remove after fixing additionalInfo few lines above
+			if newAction.owner == nil {
+				// the wallet reports its owner as the sender of burn_notification
+				body, _ := tx.decodedBody.Value.(abi.JettonBurnNotificationMsgBody)
+				if owner, err := ton.AccountIDFromTlb(body.Sender); err == nil && owner != nil {
+					newAction.setOwner(*owner, bubble)
+				}
+			}
 			return nil
 		},
 		ValueFlowUpdater: func(newAction *BubbleJettonBurn, flow *ValueFlow) {
 			if newAction.success {
-				flow.SubJettons(newAction.sender.Address, newAction.master, big.Int(newAction.amount))
+				flow.SubJettons(newAction.ownerOrSender(), newAction.master, big.Int(newAction.amount))
 			}
 		},
 		Optional: true,
