@@ -895,6 +895,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.JettonBurn.SetTo(oas.JettonBurnAction{
 			Amount:        g.Pointer(big.Int(a.JettonBurn.Amount)).String(),
 			Sender:        convertAccountAddress(a.JettonBurn.Sender, h.addressBook),
+			Owner:         oas.NewOptAccountAddress(convertAccountAddress(a.JettonBurn.Owner, h.addressBook)),
 			Jetton:        preview,
 			SendersWallet: a.JettonBurn.SendersWallet.ToRaw(),
 		})
@@ -902,6 +903,15 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 			action.SimplePreview.ValueImage = oas.NewOptString(preview.Image)
 		}
 		value := i18n.FormatTokens(big.Int(a.JettonBurn.Amount), int32(meta.Decimals), meta.Symbol, scaledUiParams)
+		// distinctAccounts compares pointers, so pass the owner and the jetton only when they differ from the sender:
+		// the owner is the sender in a normal burn, the jetton is the sender when its master forces a burn
+		var owner, jetton *tongo.AccountID
+		if a.JettonBurn.Owner != a.JettonBurn.Sender {
+			owner = &a.JettonBurn.Owner
+		}
+		if a.JettonBurn.Jetton != a.JettonBurn.Sender {
+			jetton = &a.JettonBurn.Jetton
+		}
 		action.SimplePreview = oas.ActionSimplePreview{
 			Name: "Jetton Burn",
 			Description: i18n.T(acceptLanguage.Value, i18n.C{
@@ -913,7 +923,7 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 					"Value": value,
 				},
 			}),
-			Accounts: distinctAccounts(viewer, h.addressBook, &a.JettonBurn.Sender, &a.JettonBurn.Jetton),
+			Accounts: distinctAccounts(viewer, h.addressBook, &a.JettonBurn.Sender, owner, jetton),
 			Value:    oas.NewOptString(value),
 		}
 	case bath.Subscribe:

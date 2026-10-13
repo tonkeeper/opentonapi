@@ -160,10 +160,22 @@ func (s *LiteStorage) GetJettonAccountHistoryByID(ctx context.Context, address, 
 }
 
 func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
-	masters := make(map[tongo.AccountID]tongo.AccountID)
+	infos, err := s.JettonWalletsInfo(ctx, wallets)
+	if err != nil {
+		return nil, err
+	}
+	masters := make(map[tongo.AccountID]tongo.AccountID, len(infos))
+	for wallet, info := range infos {
+		masters[wallet] = info.Master
+	}
+	return masters, nil
+}
+
+func (s *LiteStorage) JettonWalletsInfo(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]core.JettonWalletInfo, error) {
+	infos := make(map[tongo.AccountID]core.JettonWalletInfo)
 	for _, wallet := range wallets {
 		// deduplicate wallets
-		if _, ok := masters[wallet]; ok {
+		if _, ok := infos[wallet]; ok {
 			continue
 		}
 		_, value, err := abi.GetWalletData(ctx, s.executor, wallet)
@@ -178,11 +190,14 @@ func (s *LiteStorage) JettonMastersForWallets(ctx context.Context, wallets []ton
 		if err != nil {
 			return nil, err
 		}
-		if master != nil {
-			masters[wallet] = *master
+		if master == nil {
+			continue
 		}
+		// unlike the master, an unexpected owner address must not fail the whole lookup
+		owner, _ := tongo.AccountIDFromTlb(data.Owner)
+		infos[wallet] = core.JettonWalletInfo{Master: *master, Owner: owner}
 	}
-	return masters, nil
+	return infos, nil
 }
 
 func (s *LiteStorage) GetJettonMasters(ctx context.Context, limit int, lastAccountID *tongo.AccountID) ([]core.JettonMaster, error) {

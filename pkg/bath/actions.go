@@ -209,6 +209,9 @@ type (
 		Sender        tongo.AccountID
 		SendersWallet tongo.AccountID
 		Amount        tlb.VarUInteger16
+		// Owner of SendersWallet. It differs from Sender, the account that sent jetton_burn,
+		// when someone else initiated the burn, e.g. the jetton master forcing a burn.
+		Owner tongo.AccountID
 	}
 
 	ContractDeployAction struct {
@@ -585,7 +588,10 @@ func (a *ElectionsRecoverStakeAction) SubjectAccounts() []tongo.AccountID {
 }
 
 func (a *JettonBurnAction) SubjectAccounts() []tongo.AccountID {
-	return []tongo.AccountID{a.Sender}
+	if a.Owner == a.Sender {
+		return []tongo.AccountID{a.Sender}
+	}
+	return []tongo.AccountID{a.Sender, a.Owner}
 }
 
 func (a *JettonMintAction) SubjectAccounts() []tongo.AccountID {

@@ -9023,8 +9023,12 @@ func (s *JettonBridgePrices) SetDiscoverGasConsumption(val int64) {
 
 // Ref: #/components/schemas/JettonBurnAction
 type JettonBurnAction struct {
-	Sender        AccountAddress `json:"sender"`
-	SendersWallet string         `json:"senders_wallet"`
+	// Account that sent the burn message.
+	Sender AccountAddress `json:"sender"`
+	// Owner of the jetton wallet the tokens were burned from. Equals `sender` unless someone else
+	// initiated the burn (e.g. the jetton master forcing a burn).
+	Owner         OptAccountAddress `json:"owner"`
+	SendersWallet string            `json:"senders_wallet"`
 	// Amount in quanta of tokens.
 	Amount string        `json:"amount"`
 	Jetton JettonPreview `json:"jetton"`
@@ -9033,6 +9037,11 @@ type JettonBurnAction struct {
 // GetSender returns the value of Sender.
 func (s *JettonBurnAction) GetSender() AccountAddress {
 	return s.Sender
+}
+
+// GetOwner returns the value of Owner.
+func (s *JettonBurnAction) GetOwner() OptAccountAddress {
+	return s.Owner
 }
 
 // GetSendersWallet returns the value of SendersWallet.
@@ -9053,6 +9062,11 @@ func (s *JettonBurnAction) GetJetton() JettonPreview {
 // SetSender sets the value of Sender.
 func (s *JettonBurnAction) SetSender(val AccountAddress) {
 	s.Sender = val
+}
+
+// SetOwner sets the value of Owner.
+func (s *JettonBurnAction) SetOwner(val OptAccountAddress) {
+	s.Owner = val
 }
 
 // SetSendersWallet sets the value of SendersWallet.
@@ -9460,11 +9474,13 @@ type JettonOperation struct {
 	TransactionHash string                   `json:"transaction_hash"`
 	Source          OptAccountAddress        `json:"source"`
 	Destination     OptAccountAddress        `json:"destination"`
-	Amount          string                   `json:"amount"`
-	Jetton          JettonPreview            `json:"jetton"`
-	TraceID         string                   `json:"trace_id"`
-	QueryID         string                   `json:"query_id"`
-	Payload         jx.Raw                   `json:"payload"`
+	// Owner of the jetton wallet the tokens were burned from; present when operation = burn.
+	Owner   OptAccountAddress `json:"owner"`
+	Amount  string            `json:"amount"`
+	Jetton  JettonPreview     `json:"jetton"`
+	TraceID string            `json:"trace_id"`
+	QueryID string            `json:"query_id"`
+	Payload jx.Raw            `json:"payload"`
 }
 
 // GetOperation returns the value of Operation.
@@ -9495,6 +9511,11 @@ func (s *JettonOperation) GetSource() OptAccountAddress {
 // GetDestination returns the value of Destination.
 func (s *JettonOperation) GetDestination() OptAccountAddress {
 	return s.Destination
+}
+
+// GetOwner returns the value of Owner.
+func (s *JettonOperation) GetOwner() OptAccountAddress {
+	return s.Owner
 }
 
 // GetAmount returns the value of Amount.
@@ -9550,6 +9571,11 @@ func (s *JettonOperation) SetSource(val OptAccountAddress) {
 // SetDestination sets the value of Destination.
 func (s *JettonOperation) SetDestination(val OptAccountAddress) {
 	s.Destination = val
+}
+
+// SetOwner sets the value of Owner.
+func (s *JettonOperation) SetOwner(val OptAccountAddress) {
+	s.Owner = val
 }
 
 // SetAmount sets the value of Amount.

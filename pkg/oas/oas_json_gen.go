@@ -26566,6 +26566,12 @@ func (s *JettonBurnAction) encodeFields(e *jx.Encoder) {
 		s.Sender.Encode(e)
 	}
 	{
+		if s.Owner.Set {
+			e.FieldStart("owner")
+			s.Owner.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("senders_wallet")
 		e.Str(s.SendersWallet)
 	}
@@ -26579,11 +26585,12 @@ func (s *JettonBurnAction) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonBurnAction = [4]string{
+var jsonFieldsNameOfJettonBurnAction = [5]string{
 	0: "sender",
-	1: "senders_wallet",
-	2: "amount",
-	3: "jetton",
+	1: "owner",
+	2: "senders_wallet",
+	3: "amount",
+	4: "jetton",
 }
 
 // Decode decodes JettonBurnAction from json.
@@ -26605,8 +26612,18 @@ func (s *JettonBurnAction) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"sender\"")
 			}
+		case "owner":
+			if err := func() error {
+				s.Owner.Reset()
+				if err := s.Owner.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"owner\"")
+			}
 		case "senders_wallet":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.SendersWallet = string(v)
@@ -26618,7 +26635,7 @@ func (s *JettonBurnAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"senders_wallet\"")
 			}
 		case "amount":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Amount = string(v)
@@ -26630,7 +26647,7 @@ func (s *JettonBurnAction) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
 		case "jetton":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.Jetton.Decode(d); err != nil {
 					return err
@@ -26649,7 +26666,7 @@ func (s *JettonBurnAction) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -27726,6 +27743,12 @@ func (s *JettonOperation) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Owner.Set {
+			e.FieldStart("owner")
+			s.Owner.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("amount")
 		e.Str(s.Amount)
 	}
@@ -27749,18 +27772,19 @@ func (s *JettonOperation) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonOperation = [11]string{
+var jsonFieldsNameOfJettonOperation = [12]string{
 	0:  "operation",
 	1:  "utime",
 	2:  "lt",
 	3:  "transaction_hash",
 	4:  "source",
 	5:  "destination",
-	6:  "amount",
-	7:  "jetton",
-	8:  "trace_id",
-	9:  "query_id",
-	10: "payload",
+	6:  "owner",
+	7:  "amount",
+	8:  "jetton",
+	9:  "trace_id",
+	10: "query_id",
+	11: "payload",
 }
 
 // Decode decodes JettonOperation from json.
@@ -27838,8 +27862,18 @@ func (s *JettonOperation) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"destination\"")
 			}
+		case "owner":
+			if err := func() error {
+				s.Owner.Reset()
+				if err := s.Owner.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"owner\"")
+			}
 		case "amount":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Str()
 				s.Amount = string(v)
@@ -27851,7 +27885,7 @@ func (s *JettonOperation) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"amount\"")
 			}
 		case "jetton":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.Jetton.Decode(d); err != nil {
 					return err
@@ -27861,7 +27895,7 @@ func (s *JettonOperation) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"jetton\"")
 			}
 		case "trace_id":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.TraceID = string(v)
@@ -27873,7 +27907,7 @@ func (s *JettonOperation) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"trace_id\"")
 			}
 		case "query_id":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.QueryID = string(v)
@@ -27905,8 +27939,8 @@ func (s *JettonOperation) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11001111,
-		0b00000011,
+		0b10001111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

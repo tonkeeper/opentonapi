@@ -362,6 +362,9 @@ func EmulatedTreeToTrace(
 				continue
 			}
 			additionalInfo.SetJettonMaster(accountID, *master)
+			if owner, _ := ton.AccountIDFromTlb(data.Owner); owner != nil {
+				additionalInfo.SetJettonOwner(accountID, *owner)
+			}
 		case abi.GetSaleData_GetgemsResult:
 			price := big.Int(data.FullPrice)
 			owner, err := ton.AccountIDFromTlb(data.Owner)
@@ -464,5 +467,8 @@ func getAdditionalInfoStonfi(ctx context.Context, sharedExecutor *shardsAccountE
 		data := value.(abi.GetWalletDataResult)
 		master, _ := ton.AccountIDFromTlb(data.Jetton)
 		additionalInfo.SetJettonMaster(accountID, *master)
+		if owner, _ := ton.AccountIDFromTlb(data.Owner); owner != nil {
+			additionalInfo.SetJettonOwner(accountID, *owner)
+		}
 	}
 }

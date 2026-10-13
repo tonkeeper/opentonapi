@@ -67,6 +67,7 @@ type JettonOperation struct {
 	Operation      JettonOperationType
 	Source         *tongo.AccountID
 	Destination    *tongo.AccountID
+	Owner          *tongo.AccountID // owner of the jetton wallet the tokens were burned from, set only for burns
 	JettonMaster   tongo.AccountID
 	TraceID        ton.Bits256
 	TxID           ton.Bits256

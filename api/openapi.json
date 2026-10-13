@@ -4304,8 +4304,13 @@
      "jetton": {
       "$ref": "#/components/schemas/JettonPreview"
      },
+     "owner": {
+      "$ref": "#/components/schemas/AccountAddress",
+      "description": "Owner of the jetton wallet the tokens were burned from. Equals `sender` unless someone else initiated the burn (e.g. the jetton master forcing a burn)."
+     },
      "sender": {
-      "$ref": "#/components/schemas/AccountAddress"
+      "$ref": "#/components/schemas/AccountAddress",
+      "description": "Account that sent the burn message."
      },
      "senders_wallet": {
       "example": "0:E93E7D444180608B8520C00DC664383A387356FB6E16FDDF99DBE5E1415A574B",
@@ -4565,6 +4570,10 @@
       ],
       "example": "transfer",
       "type": "string"
+     },
+     "owner": {
+      "$ref": "#/components/schemas/AccountAddress",
+      "description": "Owner of the jetton wallet the tokens were burned from; present when operation = burn."
      },
      "payload": {},
      "query_id": {

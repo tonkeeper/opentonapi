@@ -7340,6 +7340,10 @@ components:
       properties:
         sender:
           $ref: '#/components/schemas/AccountAddress'
+          description: Account that sent the burn message.
+        owner:
+          $ref: '#/components/schemas/AccountAddress'
+          description: Owner of the jetton wallet the tokens were burned from. Equals `sender` unless someone else initiated the burn (e.g. the jetton master forcing a burn).
         senders_wallet:
           type: string
           format: address
@@ -9176,6 +9180,9 @@ components:
           $ref: '#/components/schemas/AccountAddress'
         destination:
           $ref: '#/components/schemas/AccountAddress'
+        owner:
+          $ref: '#/components/schemas/AccountAddress'
+          description: Owner of the jetton wallet the tokens were burned from; present when operation = burn.
         amount:
           type: string
           x-js-format: bigint

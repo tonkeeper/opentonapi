@@ -137,6 +137,7 @@ func (h *Handler) convertJettonOperation(ctx context.Context, op core.JettonOper
 		TraceID:         op.TraceID.Hex(),
 		Source:          convertOptAccountAddress(op.Source, h.addressBook),
 		Destination:     convertOptAccountAddress(op.Destination, h.addressBook),
+		Owner:           convertOptAccountAddress(op.Owner, h.addressBook),
 		Jetton:          jettonPreview(op.JettonMaster, h.GetJettonNormalizedMetadata(ctx, op.JettonMaster), 0, scaledUiParams),
 		Amount:          op.Amount.String(),
 		Payload:         b,
