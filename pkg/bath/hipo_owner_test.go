@@ -155,8 +155,9 @@ func hipoStake(sender tongo.AccountID, owner tlb.MsgAddress, notify bool) *core.
 func hipoOwnerActions(t *testing.T, trace *core.Trace) (all, mine []string, hgram int64) {
 	t.Helper()
 	source := &mockInfoSource{
-		OnJettonMastersForWallets: func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]tongo.AccountID, error) {
-			return map[tongo.AccountID]tongo.AccountID{hipoTestWallet: references.HipoParent}, nil
+		OnJettonWalletsInfo: func(ctx context.Context, wallets []tongo.AccountID) (map[tongo.AccountID]core.JettonWalletInfo, error) {
+			owner := hipoTestOwner
+			return map[tongo.AccountID]core.JettonWalletInfo{hipoTestWallet: {Master: references.HipoParent, Owner: &owner}}, nil
 		},
 	}
 	names := func(list *ActionsList) []string {

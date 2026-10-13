@@ -5,7 +5,8 @@
          "Jetton": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
          "Sender": "0:f1f1ad0f4fff9cf79d8af45381bcf98ae6afe1175ede0aa714495da92ca3f078",
          "SendersWallet": "0:c922154be9e3213f0368e4b1b3e6792c23e5e02fc8b28b32ad6c16a0f447b5a6",
-         "Amount": "3200000000"
+         "Amount": "3200000000",
+         "Owner": "0:f1f1ad0f4fff9cf79d8af45381bcf98ae6afe1175ede0aa714495da92ca3f078"
        },
        "Success": true,
        "Type": "JettonBurn",
