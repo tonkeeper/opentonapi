@@ -2,6 +2,7 @@ package bath
 
 import (
 	"math/big"
+	"slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/references"
@@ -28,7 +29,9 @@ func hipoOwner(addr tlb.MsgAddress) (tongo.AccountID, bool) {
 // hipoCredit lists the owner among the bubble's accounts, so that ForAccount keeps the action
 // even when the owner has no transaction in the bubble.
 func hipoCredit(bubble *Bubble, owner tongo.AccountID) {
-	bubble.Accounts = append(bubble.Accounts, owner)
+	if !slices.Contains(bubble.Accounts, owner) {
+		bubble.Accounts = append(bubble.Accounts, owner)
+	}
 }
 
 // hipoBillAssigned matches a bill transaction either as a plain assign_bill or already
@@ -116,8 +119,7 @@ var JettonBurnHipoUnstakeAllStraw = Straw[BubbleJettonBurn]{
 			newAction.amount = body.Amount
 		}
 		if owner, ok := hipoReserveOwner(bubble); ok {
-			newAction.sender = Account{Address: owner}
-			hipoCredit(bubble, owner)
+			newAction.setOwner(owner, bubble)
 		}
 		return nil
 	},

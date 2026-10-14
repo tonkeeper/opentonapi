@@ -256,7 +256,9 @@ func TestHipoStrawsRejectForgeries(t *testing.T) {
 		victimsWallet := tongo.MustParseAccountID("0:3333333333333333333333333333333333333333333333333333333333333333")
 		burn := selfBurn(victimsWallet, references.HipoParent, true)
 		require.True(t, JettonBurnHipoUnstakeAllStraw.Merge(burn))
-		require.Equal(t, victim, burn.Info.(BubbleJettonBurn).sender.Address)
+		burned := burn.Info.(BubbleJettonBurn)
+		require.Equal(t, victimsWallet, burned.sender.Address)
+		require.Equal(t, victim, burned.ownerOrSender())
 	})
 
 	// And in the debit direction: reserve_tokens really can be sent to the treasury by

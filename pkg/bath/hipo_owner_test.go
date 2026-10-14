@@ -193,7 +193,7 @@ func hipoActionOwner(a Action) (tongo.AccountID, string) {
 	case a.JettonMint != nil && a.JettonMint.Jetton == references.HipoParent:
 		return a.JettonMint.Recipient, "JettonMint"
 	case a.JettonBurn != nil && a.JettonBurn.Jetton == references.HipoParent:
-		return a.JettonBurn.Sender, "JettonBurn"
+		return a.JettonBurn.Owner, "JettonBurn"
 	}
 	return tongo.AccountID{}, ""
 }
