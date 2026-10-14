@@ -12,7 +12,6 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/gasless"
 	"github.com/tonkeeper/opentonapi/pkg/oas"
 	"github.com/tonkeeper/tongo/ton"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -22,7 +21,6 @@ func (h *Handler) GaslessConfig(ctx context.Context) (*oas.GaslessConfig, error)
 	}
 	config, err := h.gasless.Config(ctx)
 	if err != nil {
-		h.logger.Warn("failed to get gasless config", zap.Error(err))
 		return nil, toError(http.StatusInternalServerError, fmt.Errorf("failed to get gasless config"))
 	}
 	o := &oas.GaslessConfig{
