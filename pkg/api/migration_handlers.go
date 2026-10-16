@@ -24,6 +24,7 @@ import (
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/opentonapi/pkg/wallet"
 	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
 	"github.com/tonkeeper/tongo/contract/jetton"
 	"github.com/tonkeeper/tongo/contract/nft"
@@ -42,6 +43,11 @@ const migrationGasPerTransfer = ton.OneGRAM / 20 // 0.05 TON
 // migrationNftGasPerTransfer is attached to every NFT transfer. It is higher than the jetton one
 // because some NFT items keep a 0.05 TON storage balance and fail the transfer with less attached.
 const migrationNftGasPerTransfer = ton.OneGRAM * 6 / 100 // 0.06 TON
+
+// telemintMinStorage is the balance a telemint item (Telegram usernames, numbers, gifts) must keep
+// after a transfer, or it rejects the transfer with exit code 206 (err::not_enough_funds). Storage
+// fees slowly drain an item below it, so such an item needs the difference attached to its transfer.
+const telemintMinStorage = ton.OneGRAM
 
 // migrationForwardAmount is forwarded to the destination so it receives a transfer notification.
 const migrationForwardAmount = tlb.Grams(1)
@@ -94,8 +100,22 @@ type assembleMigrationPlanParams struct {
 	relayFunded       bool
 	sweepSponsored    bool
 	gramBalance       tlb.Grams
-	nftTransfers      []tonwallet.RawMessage
+	nftTransfers      nftTransfers
 	jettonTransfers   []tonwallet.RawMessage
+}
+
+// nftTransfers splits NFT transfers by the gas they need attached.
+type nftTransfers struct {
+	regular []tonwallet.RawMessage
+	// topUp transfers telemint items whose balance is below telemintMinStorage. Each carries topUpGas,
+	// which tops the poorest of them up to the minimum. They are always paid by the source wallet:
+	// the top-up stays on the item, so neither battery nor gasless relay should sponsor it.
+	topUp    []tonwallet.RawMessage
+	topUpGas tlb.Grams
+}
+
+func (t nftTransfers) empty() bool {
+	return len(t.regular) == 0 && len(t.topUp) == 0
 }
 
 type prepareMigrationPlanParams struct {
@@ -593,7 +613,7 @@ func (h *Handler) prepareMigrationPlan(ctx context.Context, p prepareMigrationPl
 	if err != nil {
 		return nil, err
 	}
-	if len(nftTransfers) == 0 && len(jettons) == 0 {
+	if nftTransfers.empty() && len(jettons) == 0 {
 		gasJettonMaster = nil // nothing to sponsor — plain (possibly sweep-only) plan
 	}
 	buildPlan := func(gasReserve *big.Int) ([]migrationBatch, error) {
@@ -747,7 +767,7 @@ func chunkMigrationPlan(w *tonwallet.Wallet, relayFunded, reserveCommissionSlot 
 	}
 	for _, batch := range plan {
 		chunkSize := w.MaxMessageNumber() - reserved
-		if relayFunded {
+		if relayFunded && batch.sponsored {
 			chunkSize = min(batch.sponsoredMaxMessages()-reserved, chunkSize)
 		}
 		chunkedPlan = append(chunkedPlan, batch.chunk(chunkSize)...)
@@ -761,8 +781,11 @@ func assembleMigrationPlan(p assembleMigrationPlanParams) (migrationPlan, error)
 	gramBalance, nftTransfers, jettonTransfers := p.gramBalance, p.nftTransfers, p.jettonTransfers
 	var plan []migrationBatch
 
-	if len(nftTransfers) > 0 {
-		plan = append(plan, migrationBatch{messages: nftTransfers, sponsored: relayFunded, gasPerTransfer: migrationNftGasPerTransfer})
+	if len(nftTransfers.regular) > 0 {
+		plan = append(plan, migrationBatch{messages: nftTransfers.regular, sponsored: relayFunded, gasPerTransfer: migrationNftGasPerTransfer})
+	}
+	if len(nftTransfers.topUp) > 0 {
+		plan = append(plan, migrationBatch{messages: nftTransfers.topUp, gasPerTransfer: nftTransfers.topUpGas})
 	}
 	if len(jettonTransfers) > 0 {
 		plan = append(plan, migrationBatch{messages: jettonTransfers, sponsored: relayFunded})
@@ -1097,11 +1120,12 @@ func (h *Handler) isWhitelistedNft(ctx context.Context, item core.NftItem, itemS
 // prepareNFTTransfers builds a transfer message for every migratable NFT owned by the wallet,
 // skipping blacklisted items, skipped collections, and non-transferable items (e.g. SBTs). Excesses
 // go to excessDestination — the new wallet for a self-paid transfer, or back to the relay when it
-// fronted the gas (see excessDestination in PrepareMigration).
-func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to, excessDestination ton.AccountID) ([]tonwallet.RawMessage, error) {
+// fronted the gas (see excessDestination in PrepareMigration). Top-up transfers are always self-paid,
+// so their excesses go to the new wallet.
+func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to, excessDestination ton.AccountID) (nftTransfers, error) {
 	nfts, err := h.collectOwnedNFTs(ctx, from)
 	if err != nil && !errors.Is(err, core.ErrEntityNotFound) {
-		return nil, err
+		return nftTransfers{}, err
 	}
 	nftItemIDs := make([]ton.AccountID, 0, len(nfts))
 	for _, item := range nfts {
@@ -1111,7 +1135,7 @@ func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to, excessDesti
 	if scamErr != nil {
 		h.logger.Warn("error getting nft scam data", zap.Error(scamErr))
 	}
-	var messages []tonwallet.RawMessage
+	var migratable []ton.AccountID
 	for _, item := range nfts {
 		if item.OwnerAddress == nil || *item.OwnerAddress != from {
 			continue
@@ -1125,19 +1149,60 @@ func (h *Handler) prepareNFTTransfers(ctx context.Context, from, to, excessDesti
 		if !item.Transferable {
 			continue
 		}
-		msgRaw, err := tonwallet.ToRawMessage(nft.ItemTransferMessage{
-			ItemAddress:         item.Address,
-			Destination:         to,
-			ResponseDestination: excessDestination,
-			AttachedGram:        migrationNftGasPerTransfer,
-			ForwardGram:         migrationForwardAmount,
-		})
-		if err != nil {
-			return nil, err
-		}
-		messages = append(messages, msgRaw)
+		migratable = append(migratable, item.Address)
 	}
-	return messages, nil
+	if len(migratable) == 0 {
+		return nftTransfers{}, nil
+	}
+	accounts, err := h.storage.GetRawAccounts(ctx, migratable)
+	if err != nil {
+		return nftTransfers{}, err
+	}
+	gasByItem := make(map[ton.AccountID]tlb.Grams, len(accounts))
+	for _, account := range accounts {
+		gasByItem[account.AccountAddress] = nftTransferGas(account)
+	}
+	var transfers nftTransfers
+	var topUpItems []ton.AccountID
+	for _, item := range migratable {
+		gas, ok := gasByItem[item]
+		if !ok || gas == migrationNftGasPerTransfer {
+			msg, err := nftTransferRawMessage(item, to, excessDestination, migrationNftGasPerTransfer)
+			if err != nil {
+				return nftTransfers{}, err
+			}
+			transfers.regular = append(transfers.regular, msg)
+			continue
+		}
+		topUpItems = append(topUpItems, item)
+		transfers.topUpGas = max(transfers.topUpGas, gas)
+	}
+	for _, item := range topUpItems {
+		msg, err := nftTransferRawMessage(item, to, to, transfers.topUpGas)
+		if err != nil {
+			return nftTransfers{}, err
+		}
+		transfers.topUp = append(transfers.topUp, msg)
+	}
+	return transfers, nil
+}
+
+func nftTransferRawMessage(item, to, excessDestination ton.AccountID, gas tlb.Grams) (tonwallet.RawMessage, error) {
+	return tonwallet.ToRawMessage(nft.ItemTransferMessage{
+		ItemAddress:         item,
+		Destination:         to,
+		ResponseDestination: excessDestination,
+		AttachedGram:        gas,
+		ForwardGram:         migrationForwardAmount,
+	})
+}
+
+// nftTransferGas tops a telemint item up to telemintMinStorage on top of the regular transfer gas.
+func nftTransferGas(item *core.Account) tlb.Grams {
+	if !slices.Contains(item.Interfaces, abi.Teleitem) || item.GramBalance >= int64(telemintMinStorage) {
+		return migrationNftGasPerTransfer
+	}
+	return telemintMinStorage - tlb.Grams(max(item.GramBalance, 0)) + migrationNftGasPerTransfer
 }
 
 func (h *Handler) collectOwnedNFTs(ctx context.Context, owner ton.AccountID) ([]core.NftItem, error) {
