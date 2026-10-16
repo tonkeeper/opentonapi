@@ -367,6 +367,10 @@ func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescriptio
 	case "ExtOutMsgInfo":
 		var decodedBody *DecodedMessageBody
 		info := message.Info.ExtOutMsgInfo
+		source, err := ton.AccountIDFromTlb(info.Src)
+		if err != nil {
+			return Message{}, err
+		}
 		tag, op, value, err := abi.ExtOutMessageDecoder(&cell, ci, info.Dest)
 		if err == nil && op != nil {
 			decodedBody = &DecodedMessageBody{
@@ -374,9 +378,10 @@ func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescriptio
 				Value:     value,
 			}
 		}
-		source, err := ton.AccountIDFromTlb(info.Src)
-		if err != nil {
-			return Message{}, err
+		// Hipo's treasury logs by topic, which abi cannot read, and the first 32 bits of the
+		// body are not an op-code but the round.
+		if log, ok := decodeHipoLog(source, externalAddressFromTlb(info.Dest), body, info.CreatedAt); ok {
+			tag, decodedBody = nil, log
 		}
 		return Message{
 			MessageID: MessageID{
