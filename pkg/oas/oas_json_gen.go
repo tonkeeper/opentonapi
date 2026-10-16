@@ -25853,6 +25853,12 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.BalanceLt.Set {
+			e.FieldStart("balance_lt")
+			s.BalanceLt.Encode(e)
+		}
+	}
+	{
 		if s.Lock.Set {
 			e.FieldStart("lock")
 			s.Lock.Encode(e)
@@ -25860,14 +25866,15 @@ func (s *JettonBalance) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfJettonBalance = [7]string{
+var jsonFieldsNameOfJettonBalance = [8]string{
 	0: "balance",
 	1: "price",
 	2: "wallet_address",
 	3: "jetton",
 	4: "defi_asset",
 	5: "extensions",
-	6: "lock",
+	6: "balance_lt",
+	7: "lock",
 }
 
 // Decode decodes JettonBalance from json.
@@ -25949,6 +25956,16 @@ func (s *JettonBalance) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"extensions\"")
+			}
+		case "balance_lt":
+			if err := func() error {
+				s.BalanceLt.Reset()
+				if err := s.BalanceLt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"balance_lt\"")
 			}
 		case "lock":
 			if err := func() error {

@@ -4157,6 +4157,13 @@
       "type": "string",
       "x-js-format": "bigint"
      },
+     "balance_lt": {
+      "description": "logical time of the jetton wallet's transaction the balance is as of; absent when unknown, such as for an unclaimed mintless balance",
+      "example": 25713146000001,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
      "defi_asset": {
       "$ref": "#/components/schemas/JettonAssetInfo"
      },

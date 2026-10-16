@@ -20,6 +20,9 @@ type JettonWallet struct {
 	JettonAddress tongo.AccountID
 	Lock          *JettonWalletLockData
 	Extensions    []string
+	// BalanceLt is the logical time of the jetton wallet's transaction Balance is as of, nil when
+	// unknown.
+	BalanceLt *int64
 }
 
 type JettonHolder struct {
