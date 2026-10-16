@@ -6224,6 +6224,12 @@ components:
           example:
             - custom_payload
             - non_transferable
+        balance_lt:
+          type: integer
+          format: int64
+          x-js-format: bigint
+          description: logical time of the jetton wallet's transaction the balance is as of; absent when unknown, such as for an unclaimed mintless balance
+          example: 25713146000001
         lock:
           type: object
           required:

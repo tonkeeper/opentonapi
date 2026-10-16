@@ -161,6 +161,9 @@ func (h *Handler) convertJettonBalance(ctx context.Context, wallet core.JettonWa
 		WalletAddress: convertAccountAddress(wallet.Address, h.addressBook),
 		Extensions:    wallet.Extensions,
 	}
+	if wallet.BalanceLt != nil {
+		jettonBalance.BalanceLt = oas.NewOptInt64(*wallet.BalanceLt)
+	}
 	scaledUiParams, err := h.storage.GetScaledUIParameters(ctx, wallet.JettonAddress, scaledUiLt)
 	if err != nil {
 		h.logger.Warn(fmt.Sprintf("failed to get scaled ui parameters for master: %v", wallet.JettonAddress.ToRaw()))

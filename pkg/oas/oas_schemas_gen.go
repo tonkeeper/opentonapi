@@ -8738,13 +8738,16 @@ func (s *JettonAssetInfo) SetPoolAssets(val OptDefiLiquidPoolAssets) {
 
 // Ref: #/components/schemas/JettonBalance
 type JettonBalance struct {
-	Balance       string               `json:"balance"`
-	Price         OptTokenRates        `json:"price"`
-	WalletAddress AccountAddress       `json:"wallet_address"`
-	Jetton        JettonPreview        `json:"jetton"`
-	DefiAsset     OptJettonAssetInfo   `json:"defi_asset"`
-	Extensions    []string             `json:"extensions"`
-	Lock          OptJettonBalanceLock `json:"lock"`
+	Balance       string             `json:"balance"`
+	Price         OptTokenRates      `json:"price"`
+	WalletAddress AccountAddress     `json:"wallet_address"`
+	Jetton        JettonPreview      `json:"jetton"`
+	DefiAsset     OptJettonAssetInfo `json:"defi_asset"`
+	Extensions    []string           `json:"extensions"`
+	// Logical time of the jetton wallet's transaction the balance is as of; absent when unknown, such as
+	// for an unclaimed mintless balance.
+	BalanceLt OptInt64             `json:"balance_lt"`
+	Lock      OptJettonBalanceLock `json:"lock"`
 }
 
 // GetBalance returns the value of Balance.
@@ -8775,6 +8778,11 @@ func (s *JettonBalance) GetDefiAsset() OptJettonAssetInfo {
 // GetExtensions returns the value of Extensions.
 func (s *JettonBalance) GetExtensions() []string {
 	return s.Extensions
+}
+
+// GetBalanceLt returns the value of BalanceLt.
+func (s *JettonBalance) GetBalanceLt() OptInt64 {
+	return s.BalanceLt
 }
 
 // GetLock returns the value of Lock.
@@ -8810,6 +8818,11 @@ func (s *JettonBalance) SetDefiAsset(val OptJettonAssetInfo) {
 // SetExtensions sets the value of Extensions.
 func (s *JettonBalance) SetExtensions(val []string) {
 	s.Extensions = val
+}
+
+// SetBalanceLt sets the value of BalanceLt.
+func (s *JettonBalance) SetBalanceLt(val OptInt64) {
+	s.BalanceLt = val
 }
 
 // SetLock sets the value of Lock.
