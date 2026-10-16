@@ -269,6 +269,36 @@ var DepositHipoStakeDeferredStraw = Straw[BubbleDepositStake]{
 	},
 }
 
+// WithdrawHipoStakeAllRequestStraw is the request to unstake a whole balance, sent as
+// send_unstake_all or as the text comment "w". It names no amount: the wallet burns whatever it
+// holds, and that burn and its payout are actions of their own below it.
+//
+//	send_unstake_all -> treasury -> proxy_unstake_all -> parent -> unstake_all -> hGRAM wallet
+var WithdrawHipoStakeAllRequestStraw = Straw[BubbleWithdrawStakeRequest]{
+	CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), Or(
+		HasOperation(abi.HipoFinanceSendUnstakeAllMsgOp),
+		func(bubble *Bubble) bool { return HasTextComment("w")(bubble) || HasTextComment("W")(bubble) },
+	)},
+	Builder: func(newAction *BubbleWithdrawStakeRequest, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Pool = tx.account.Address
+		newAction.Success = tx.success
+		newAction.Implementation = core.StakingImplementationHipo
+		if tx.inputFrom != nil {
+			newAction.Staker = tx.inputFrom.Address
+		}
+		return nil
+	},
+	SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+		CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoParent), HasOperation(abi.HipoFinanceProxyUnstakeAllMsgOp)},
+		Optional:   true,
+		SingleChild: &Straw[BubbleWithdrawStakeRequest]{
+			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceUnstakeAllMsgOp)},
+			Optional:   true,
+		},
+	},
+}
+
 func hipoRolledBack(bubble *Bubble) bool {
 	return HasChild(IsTx, HasOperation(abi.HipoFinanceProxyRollbackUnstakeMsgOp))(bubble)
 }
