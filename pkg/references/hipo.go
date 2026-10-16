@@ -15,4 +15,7 @@ var (
 	// HipoParent is the jetton master of hGRAM (formerly hTON). It proxies every message
 	// between the treasury and a staker's hGRAM wallet.
 	HipoParent = ton.MustParseAccountID("0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87")
+	// HipoBurner receives the borrower fee the treasury takes from each loan's reward,
+	// stakes it, swaps the hGRAM for HPO and burns the HPO.
+	HipoBurner = ton.MustParseAccountID("0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030")
 )

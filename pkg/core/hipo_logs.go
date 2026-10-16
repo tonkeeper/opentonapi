@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/tonkeeper/opentonapi/pkg/references"
 	"github.com/tonkeeper/tongo/boc"
@@ -273,4 +274,71 @@ func ParseHipoLog(body []byte, dst any) error {
 		return fmt.Errorf("%d bits left unread: the layout does not match the contract", left)
 	}
 	return nil
+}
+
+// Hipo's burner logs the same way, with topics of its own (contracts/burner.fc in
+// HipoFinance/burner). Each log is read only from the burner.
+type HipoBurnerReceivedLog struct {
+	Op            uint32
+	Value         tlb.Grams
+	TotalReceived tlb.Grams
+	Source        tlb.MsgAddress
+}
+
+type HipoBurnerDepositLog struct {
+	QueryId uint64
+	Stake   tlb.Grams
+}
+
+type HipoBurnerSwapLog struct {
+	QueryId      uint64
+	Amount       tlb.Grams
+	TotalSwapped tlb.Grams
+}
+
+type HipoBurnerBurnLog struct {
+	QueryId     uint64
+	Amount      tlb.Grams
+	TotalBurned tlb.Grams
+}
+
+type HipoBurnerDiscoveryLog struct {
+	QueryId uint64
+}
+
+type HipoBurnerUpgradeLog struct {
+	QueryId uint64
+	Source  tlb.MsgAddress
+}
+
+var hipoBurnerLogs = map[uint64]struct {
+	operation string
+	layout    func() any
+}{
+	1: {"HipoBurnerLogReceived", func() any { return &HipoBurnerReceivedLog{} }},
+	2: {"HipoBurnerLogDeposit", func() any { return &HipoBurnerDepositLog{} }},
+	3: {"HipoBurnerLogSwap", func() any { return &HipoBurnerSwapLog{} }},
+	4: {"HipoBurnerLogBurn", func() any { return &HipoBurnerBurnLog{} }},
+	5: {"HipoBurnerLogDiscovery", func() any { return &HipoBurnerDiscoveryLog{} }},
+	6: {"HipoBurnerLogUpgrade", func() any { return &HipoBurnerUpgradeLog{} }},
+}
+
+func decodeHipoBurnerLog(source *ton.AccountID, dest *ExternalAddress, body []byte) (*DecodedMessageBody, bool) {
+	if source == nil || *source != references.HipoBurner || dest == nil || dest.BitsAvailableForRead() != 256 {
+		return nil, false
+	}
+	copied := dest.Copy()
+	topic, err := copied.ReadBigUint(256)
+	if err != nil || !topic.IsUint64() {
+		return nil, false
+	}
+	log, ok := hipoBurnerLogs[topic.Uint64()]
+	if !ok {
+		return nil, false
+	}
+	value := log.layout()
+	if ParseHipoLog(body, value) != nil {
+		return nil, false
+	}
+	return &DecodedMessageBody{Operation: log.operation, Value: reflect.ValueOf(value).Elem().Interface()}, true
 }

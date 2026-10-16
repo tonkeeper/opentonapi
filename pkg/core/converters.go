@@ -378,10 +378,17 @@ func ConvertMessage(message tlb.Message, txLT uint64, cd *abi.ContractDescriptio
 				Value:     value,
 			}
 		}
-		// Hipo's treasury logs by topic, which abi cannot read, and the first 32 bits of the
-		// body are not an op-code but the round.
-		if log, ok := decodeHipoLog(source, externalAddressFromTlb(info.Dest), body, info.CreatedAt); ok {
-			tag, decodedBody = nil, log
+		// Hipo's treasury and burner log by topic, which abi cannot read, and the first 32
+		// bits of the body are not an op-code.
+		// body is not always a BOC: one starting with 32 zero bits is kept as text.
+		logCell := boc.Cell(message.Body.Value)
+		if logBody, err := logCell.ToBoc(); err == nil {
+			dest := externalAddressFromTlb(info.Dest)
+			if log, ok := decodeHipoLog(source, dest, logBody, info.CreatedAt); ok {
+				tag, decodedBody = nil, log
+			} else if log, ok := decodeHipoBurnerLog(source, dest, logBody); ok {
+				tag, decodedBody = nil, log
+			}
 		}
 		return Message{
 			MessageID: MessageID{

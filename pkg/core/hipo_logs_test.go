@@ -211,3 +211,20 @@ func TestHipoLoanLogEraIsByTime(t *testing.T) {
 	require.Equal(t, old.AccrueAmount, log.AccrueAmount)
 	require.Equal(t, uint16(17*257), log.BorrowerRewardShare)
 }
+
+// The burner logs by topic too. A real swap log, written when the burner sold 15.647 hGRAM.
+func TestHipoBurnerLogsDecodeOnlyFromTheBurner(t *testing.T) {
+	topic := boc.NewBitString(256)
+	require.NoError(t, topic.WriteBigUint(big.NewInt(3), 256))
+	body := mustHex(t, "b5ee9c720101010100160000280000000000000185503a4a5123e60154ee22f17f")
+
+	burner := references.HipoBurner
+	decoded, ok := decodeHipoBurnerLog(&burner, &topic, body)
+	require.True(t, ok)
+	require.Equal(t, "HipoBurnerLogSwap", decoded.Operation)
+	require.Equal(t, HipoBurnerSwapLog{QueryId: 389, Amount: 15647183422, TotalSwapped: 1464284148095}, decoded.Value)
+
+	treasury := references.HipoTreasury
+	_, ok = decodeHipoBurnerLog(&treasury, &topic, body)
+	require.False(t, ok)
+}
