@@ -1,0 +1,464 @@
+{
+   "Actions": [
+     {
+       "PoolRoundTransition": {
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "RoundSince": 1791971080,
+         "Transition": "ended",
+         "TotalStaked": null,
+         "TotalRecovered": null,
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "PoolRoundTransition",
+       "BaseTransactions": [
+         "3239221a9ea152065260d6410eec8cda9ea8eb852f664f40d116ff79c6ee9c2f",
+         "a0b6b9fdedceee19929e1247c72e4b34e40ee6647fa193e9f4d3e2281ab4ce63",
+         "ac57cbe3d868263d99ca2f2e398129b65267d8d0d2f97ed889627c672088518a",
+         "d8d505bceb48b1916f7211faa604168d42f10932ab939f831515c84a2b5d2de6"
+       ]
+     },
+     {
+       "ElectionsRecoverStake": {
+         "Amount": 2039594349848138,
+         "Elector": "-1:3333333333333333333333333333333333333333333333333333333333333333",
+         "Staker": "-1:ee9ab316f8ea953833267a1efc9bf973bc9346d02781f2c6ae2601eb59923ea7"
+       },
+       "Success": true,
+       "Type": "ElectionsRecoverStake",
+       "BaseTransactions": [
+         "2912e6201746e4157298b59a527126c126245d18dfb664cd7d8a5ec27922edfe",
+         "bd8a6b2bce5d27cb2e40551ace7efecd47062ec7b6cd4d371951c2fc90bf6e90"
+       ]
+     },
+     {
+       "LoanRepayment": {
+         "Borrower": "0:95b13f0e84671d294ae84bf70a7e59f1c5963c485ed1eed7b2e1fe8d583bbcab",
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "Loan": "-1:ee9ab316f8ea953833267a1efc9bf973bc9346d02781f2c6ae2601eb59923ea7",
+         "RoundSince": 1791971080,
+         "Amount": 1870000000000000,
+         "Accrued": 166933201032707,
+         "Recovered": 2039594284238138,
+         "PoolReward": 1352872211594,
+         "ProtocolFee": 0,
+         "BorrowerPayout": 1289864469718,
+         "BurnAmount": 18058665452,
+         "Shortfall": null,
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "LoanRepayment",
+       "BaseTransactions": [
+         "b5627daaaab38e1629e610008f27285d87a34dd84df4d9962897382502d6c924",
+         "f3d0977269d85a1e9939b7b6011375a7c5977fe9ad7dad5b21f3f77064ffc254",
+         "6bfb66cd77796599ccc953a319491c6f029fc5a72037387f5f59f2c11971a82e",
+         "c0bfd20a949523d6ba8b91e8b7efcbb9348fc12f9495ed2a8f000fc87dbc5f89"
+       ]
+     },
+     {
+       "DepositStake": {
+         "Staker": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "Amount": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 18529644780
+         },
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "DepositStake",
+       "BaseTransactions": [
+         "ae97030635ac673eec19c04631b203a7570c1fbf248a31ae135dbffca37f346b",
+         "80e85ade708dff76972dc4f7e4b97757d985f769c2aa45ab2915846c5e23d767"
+       ]
+     },
+     {
+       "JettonMint": {
+         "Jetton": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+         "Recipient": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "RecipientsWallet": "0:08a58b6cf90f80e4248fd7c21033c4e3e70b1e6ee0b5c12642343880f1e53404",
+         "Amount": "15647183422"
+       },
+       "Success": true,
+       "Type": "JettonMint",
+       "BaseTransactions": [
+         "5aaa0f09b134c3595fed419ef79ba7e37ba9fbdd3fef4f5873752a2e97632155",
+         "725af49be291269a270d0a33a9d1a94f16011154b73db50ec0b5577ddc3a0e12"
+       ]
+     },
+     {
+       "JettonSwap": {
+         "Dex": "dedust",
+         "UserWallet": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "Router": "0:9726eef35014082ddcedd67233cff3610df559f85c8476771c1436033d1680a9",
+         "In": {
+           "Amount": 15647183422,
+           "IsTon": false,
+           "JettonMaster": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+           "JettonWallet": "0:08a58b6cf90f80e4248fd7c21033c4e3e70b1e6ee0b5c12642343880f1e53404"
+         },
+         "Out": {
+           "Amount": 6277889905227,
+           "IsTon": false,
+           "JettonMaster": "0:d0114af42cf8bc9ba0fa1745abbeea24eed65b01caf4ca7d98ee12b6f7530ccc",
+           "JettonWallet": "0:a16cdaf289f76a01ad6f168ac6f6220f48db6406a11938d218674768d1f10bb2"
+         }
+       },
+       "Success": true,
+       "Type": "JettonSwap",
+       "BaseTransactions": [
+         "fa079572ed1d54079203752f15b6e5f91820f273d554e4d0a3c4250c3c4033f9",
+         "03d31ffed6f64318e1b354301c3b47db8b09018a0c81be18c3dbd92336655f22",
+         "714688ae627baf1acd0f5878a5071cda72dca60a95927e9ca63d9d25f5b058c1",
+         "d648bb50b9f8b8295dd35878c228b6a4f5fea03e404665278bb6b64c9cb5985d",
+         "038212fa7f422c41ea790785ac5911a9a15688e9d9978a05de28534bc59c98af",
+         "8f2278987439b95bcb57b4b4eec2912e8f0c69de1d9b0682736ad6070f62a13c",
+         "889de8c500191f80b52cc36ebfe4296f77d8a8acd12a9144afbd29dba007f694",
+         "252b26d9e926358a6d6eae7b03b7789e5c1d01352cf7dd21d3a0ad4192bf32e5",
+         "728af9ff181a37c1031b62f38a984075e5600d752aa3159b55f696c7e4206afe",
+         "300dc78bf195cde26251847d48f2609f11e43ec2d7a0525544dedc375151d5aa"
+       ]
+     },
+     {
+       "JettonBurn": {
+         "Jetton": "0:d0114af42cf8bc9ba0fa1745abbeea24eed65b01caf4ca7d98ee12b6f7530ccc",
+         "Sender": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "SendersWallet": "0:cc67b804fa5ee26421a1dbc8da5810a4447bf4cc697bb3da858b80684bcd323a",
+         "Amount": "6277889905227",
+         "Owner": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030"
+       },
+       "Success": true,
+       "Type": "JettonBurn",
+       "BaseTransactions": [
+         "191b2932e5542c597d761e6c100566865b158d6668554b0c6c6613afbeb27945",
+         "3bf83f3ff2788fce5af7142d0e98eeb2b5ab9b19fb18a22946df3d26d2eacf8d"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 98985330,
+         "Executor": "0:d0114af42cf8bc9ba0fa1745abbeea24eed65b01caf4ca7d98ee12b6f7530ccc",
+         "Contract": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "Operation": "Excess",
+         "Payload": "QueryId: 391\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "e262432a9ec642fc5ea24b2f58391f7b04e43dd356847d34ac6be4d19827cc9c"
+       ]
+     },
+     {
+       "ElectionsRecoverStake": {
+         "Amount": 2039594349848138,
+         "Elector": "-1:3333333333333333333333333333333333333333333333333333333333333333",
+         "Staker": "-1:658046730ded813ea99f58128a179b7058f53c21c289ff3fc809cc5279f30900"
+       },
+       "Success": true,
+       "Type": "ElectionsRecoverStake",
+       "BaseTransactions": [
+         "e9cc9589a9832c3dd850e5d35d39eba47584e8b03ed4106e7fdbad81cca19203",
+         "e974f27f1b1583d6fa5ed882854412b4df4acb442f945abc70ca7a2b628f967a"
+       ]
+     },
+     {
+       "LoanRepayment": {
+         "Borrower": "0:d368e77f6dae535e64478539803a2f71f07dd7b9155482057a2a7723ee168986",
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "Loan": "-1:658046730ded813ea99f58128a179b7058f53c21c289ff3fc809cc5279f30900",
+         "RoundSince": 1791971080,
+         "Amount": 1870000000000000,
+         "Accrued": 166933201032707,
+         "Recovered": 2039594284238138,
+         "PoolReward": 1352872211594,
+         "ProtocolFee": 0,
+         "BorrowerPayout": 1289864469718,
+         "BurnAmount": 18058665452,
+         "Shortfall": null,
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "LoanRepayment",
+       "BaseTransactions": [
+         "b630711dfceb7619bb74cb46888f0d9a07f51af3c4d1b5af1e3474feb804d79c",
+         "f1c1a46cb29a21d0e35ffee14d990fc166fa94733f8442e7bbfb3d8b260926af",
+         "d1250a4d5cf6edd645177bcf7af9e2b86ef5a9714953a498ccc354b346322a03",
+         "f53ca868519e2af8cf42f7789a1c9bbfd0193c4fc59814dd9ccaa665bfbb3246"
+       ]
+     },
+     {
+       "PoolRoundTransition": {
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "RoundSince": 1791971080,
+         "Transition": "settled",
+         "TotalStaked": 4073866402065414,
+         "TotalRecovered": 4076572146488602,
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "PoolRoundTransition",
+       "BaseTransactions": [
+         "28e5c11b8b448614fb4f83e84ebf1c61205ccb35b599e18ff0b1caa45534aa50",
+         "1f47d8ccd8d4281bdd30bd387645b6c75de69e9160ebb4f9a74d20d005239522",
+         "7560b2a733326198cc2265d59a80470f4b8f5ea65d56046654625eb8d75a99db",
+         "7af0c6183171ead098cc83cc80f466cbed54a5bb336e926b4c323d7761a06e43"
+       ]
+     },
+     {
+       "WithdrawStake": {
+         "Staker": "0:a732d044d31f709b6174024d7ae1898110f672c38443f2d5ae853a0ac474c893",
+         "Amount": 3755037590918,
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "WithdrawStake",
+       "BaseTransactions": [
+         "437f00c428d903329ed633c0596efee698ec7c1577ede82095a8f2b8c64d4ff4",
+         "215cf2cff3b0723e0ca246d58b1aaa2601fd85ecf72053657e2424a90f8d9349",
+         "64ac2c7ea0c82c6bf68c193df45ade72375bfe3596585fb1f37ba0c7ef6a1111",
+         "d2bddd58b3ff96dd49188082dd1ab1191260070e3ba993759aef2b1a65261b5d"
+       ]
+     },
+     {
+       "DepositStake": {
+         "Staker": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "Amount": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 17557118581
+         },
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "DepositStake",
+       "BaseTransactions": [
+         "59b63ad2c86d5d3f553df2f4b3e72a359f504ca95f261d233f2600e0a641fc58",
+         "e492243f5ace43707557fd1b8023d8ca97c26f8d097d1d37bb5f25b270744e01"
+       ]
+     },
+     {
+       "JettonMint": {
+         "Jetton": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+         "Recipient": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "RecipientsWallet": "0:08a58b6cf90f80e4248fd7c21033c4e3e70b1e6ee0b5c12642343880f1e53404",
+         "Amount": "14825942864"
+       },
+       "Success": true,
+       "Type": "JettonMint",
+       "BaseTransactions": [
+         "c1e37508ccf4bb90522a42d8fd5a3e09f779f4fc3a81cadfa27606e486908fc2",
+         "b74e582a710b94e879691b8d871bd4afd2fa29d690d5535fd00946185d8e9de4"
+       ]
+     },
+     {
+       "JettonSwap": {
+         "Dex": "dedust",
+         "UserWallet": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "Router": "0:9726eef35014082ddcedd67233cff3610df559f85c8476771c1436033d1680a9",
+         "In": {
+           "Amount": 14825942864,
+           "IsTon": false,
+           "JettonMaster": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+           "JettonWallet": "0:08a58b6cf90f80e4248fd7c21033c4e3e70b1e6ee0b5c12642343880f1e53404"
+         },
+         "Out": {
+           "Amount": 5833803953619,
+           "IsTon": false,
+           "JettonMaster": "0:d0114af42cf8bc9ba0fa1745abbeea24eed65b01caf4ca7d98ee12b6f7530ccc",
+           "JettonWallet": "0:a16cdaf289f76a01ad6f168ac6f6220f48db6406a11938d218674768d1f10bb2"
+         }
+       },
+       "Success": true,
+       "Type": "JettonSwap",
+       "BaseTransactions": [
+         "b7658829c1534f1a89510aaa3a0d11bb7acb85c47301417bbd35b01d922d93f8",
+         "56c295d3d31e342a69d169bc93d7d43a2910a5f90fcb8df5d611efadfdcb8446",
+         "8bb71ebc21bf2c52bf6fa73163213f9fe1d4994f08e535e16d654b906be5e91a",
+         "ac4b43ac477e5e57cde659d46701b3b94057f8c69b73524f3928ac4aa417c75d",
+         "b7e0bd6877eab27276af832e0776a4784f551da50f1150b7cbda00fa4c89e753",
+         "00dc232836ab9585fe0fa458101764f32bd46f09046ba315a776e8ace3c7230f",
+         "87b32017dd569690b16304de9626859dfc218200f190bbdc08c200e647b317bd",
+         "d2c793dc4213369278ccf4b7b02d38d8efdd7dfcdf33f3924f3b51afdf284078",
+         "0457d08918e0d49dfb893c35b45a49e1c6b05c739401fdde48919f969379e533",
+         "59ad7d89b7be0eb999be78143628aa8628d77d44b995bc0d1532b4dd489e8485"
+       ]
+     },
+     {
+       "JettonBurn": {
+         "Jetton": "0:d0114af42cf8bc9ba0fa1745abbeea24eed65b01caf4ca7d98ee12b6f7530ccc",
+         "Sender": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "SendersWallet": "0:cc67b804fa5ee26421a1dbc8da5810a4447bf4cc697bb3da858b80684bcd323a",
+         "Amount": "5833803953619",
+         "Owner": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030"
+       },
+       "Success": true,
+       "Type": "JettonBurn",
+       "BaseTransactions": [
+         "df06ba14dfcf8232f6abadf3920a1df9d6ac1ce6c0393c2ad46a587249c867b1",
+         "c513b710a64de3accb7ac8e9d5792a80cebb880bb6abc8b28e5efc4f2a0d543c"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 98985330,
+         "Executor": "0:d0114af42cf8bc9ba0fa1745abbeea24eed65b01caf4ca7d98ee12b6f7530ccc",
+         "Contract": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+         "Operation": "Excess",
+         "Payload": "QueryId: 392\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "d25e65cc247a99792e7e375852e197bb91b613b252c9750fecbef57ed4bbf7ac"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "-1:3333333333333333333333333333333333333333333333333333333333333333",
+       "Ton": -4079186293286326,
+       "Fee": 0,
+       "Jettons": null
+     },
+     {
+       "Account": "-1:658046730ded813ea99f58128a179b7058f53c21c289ff3fc809cc5279f30900",
+       "Ton": -983080000,
+       "Fee": 123343692,
+       "Jettons": null
+     },
+     {
+       "Account": "-1:ee9ab316f8ea953833267a1efc9bf973bc9346d02781f2c6ae2601eb59923ea7",
+       "Ton": -983080000,
+       "Fee": 123343692,
+       "Jettons": null
+     },
+     {
+       "Account": "0:08a58b6cf90f80e4248fd7c21033c4e3e70b1e6ee0b5c12642343880f1e53404",
+       "Ton": 0,
+       "Fee": 2970278,
+       "Jettons": null
+     },
+     {
+       "Account": "0:50e74913216cb06936b4d69fc99c78646a212e93076dd563ef74722f3f557948",
+       "Ton": 9734,
+       "Fee": 1471471,
+       "Jettons": [
+         {
+           "Address": "0:d0114af42cf8bc9ba0fa1745abbeea24eed65b01caf4ca7d98ee12b6f7530ccc",
+           "Quantity": -12111693858846
+         }
+       ]
+     },
+     {
+       "Account": "0:7e40f97d20d6eea148846608cd6e0163e1325f5812392cdee307b5c96508c68c",
+       "Ton": 0,
+       "Fee": 1419298,
+       "Jettons": null
+     },
+     {
+       "Account": "0:8b5fe4adec8f730419485effa12b22010f31fb02d7c14f6ec32c8a7c0cd935e7",
+       "Ton": -96528855,
+       "Fee": 553073,
+       "Jettons": null
+     },
+     {
+       "Account": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+       "Ton": 4072852711234669,
+       "Fee": 32039647,
+       "Jettons": null
+     },
+     {
+       "Account": "0:918c82e6243d190fbcba3ce17289c0b1db43e8ca9904c0727ae00309eefc245c",
+       "Ton": 0,
+       "Fee": 1442271,
+       "Jettons": [
+         {
+           "Address": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+           "Quantity": 30473126286
+         }
+       ]
+     },
+     {
+       "Account": "0:95b13f0e84671d294ae84bf70a7e59f1c5963c485ed1eed7b2e1fe8d583bbcab",
+       "Ton": 1289864334012,
+       "Fee": 69039,
+       "Jettons": null
+     },
+     {
+       "Account": "0:9726eef35014082ddcedd67233cff3610df559f85c8476771c1436033d1680a9",
+       "Ton": 0,
+       "Fee": 3009609,
+       "Jettons": null
+     },
+     {
+       "Account": "0:a16cdaf289f76a01ad6f168ac6f6220f48db6406a11938d218674768d1f10bb2",
+       "Ton": -1,
+       "Fee": 1562005,
+       "Jettons": null
+     },
+     {
+       "Account": "0:a62c2600bb53e19646f771420a0c5c03a417cfdaf5c30a31425268298a6091ef",
+       "Ton": 567157681,
+       "Fee": 390178,
+       "Jettons": null
+     },
+     {
+       "Account": "0:a732d044d31f709b6174024d7ae1898110f672c38443f2d5ae853a0ac474c893",
+       "Ton": 3755037524336,
+       "Fee": 66582,
+       "Jettons": null
+     },
+     {
+       "Account": "0:cc67b804fa5ee26421a1dbc8da5810a4447bf4cc697bb3da858b80684bcd323a",
+       "Ton": 0,
+       "Fee": 2679348,
+       "Jettons": null
+     },
+     {
+       "Account": "0:cf76af318c0872b58a9f1925fc29c156211782b9fb01f56760d292e56123bf87",
+       "Ton": -171,
+       "Fee": 1825444,
+       "Jettons": null
+     },
+     {
+       "Account": "0:d0114af42cf8bc9ba0fa1745abbeea24eed65b01caf4ca7d98ee12b6f7530ccc",
+       "Ton": -3646,
+       "Fee": 1037916,
+       "Jettons": null
+     },
+     {
+       "Account": "0:d368e77f6dae535e64478539803a2f71f07dd7b9155482057a2a7723ee168986",
+       "Ton": 1289864334012,
+       "Fee": 69039,
+       "Jettons": null
+     },
+     {
+       "Account": "0:dc8d90d6be8b68544d17e0749db76a51ddbdac059e178a4cd255274f8aa75030",
+       "Ton": 3379,
+       "Fee": 11608364,
+       "Jettons": null
+     },
+     {
+       "Account": "0:e5524d594d0bf39cd7e812aebe73b8e0f36701b76aed35bfa00a26b3b30f7309",
+       "Ton": 17085,
+       "Fee": 537672,
+       "Jettons": null
+     },
+     {
+       "Account": "0:faaa4eab4b5d12f26010a042f88337d79b8d70aec42c24ae1fdce934cefc0216",
+       "Ton": 0,
+       "Fee": 1925473,
+       "Jettons": null
+     }
+   ]
+ }

@@ -54,6 +54,10 @@ const (
 	BuyXTR                    ActionType = "BuyXTR"
 	DepositXTR                ActionType = "DepositXTR"
 	WithdrawXTR               ActionType = "WithdrawXTR"
+	LoanRequest               ActionType = "LoanRequest"
+	LoanIssue                 ActionType = "LoanIssue"
+	LoanRepayment             ActionType = "LoanRepayment"
+	PoolRoundTransition       ActionType = "PoolRoundTransition"
 	Unknown                   ActionType = "Unknown"
 )
 
@@ -112,6 +116,10 @@ type (
 		BuyXTR                    *BuyXTRAction                    `json:",omitempty"`
 		DepositXTR                *DepositXTRAction                `json:",omitempty"`
 		WithdrawXTR               *WithdrawXTRAction               `json:",omitempty"`
+		LoanRequest               *LoanRequestAction               `json:",omitempty"`
+		LoanIssue                 *LoanIssueAction                 `json:",omitempty"`
+		LoanRepayment             *LoanRepaymentAction             `json:",omitempty"`
+		PoolRoundTransition       *PoolRoundTransitionAction       `json:",omitempty"`
 		Success                   bool
 		Type                      ActionType
 		Error                     *string `json:",omitempty"`
@@ -382,7 +390,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed, FlawedJettonTransfer, OracleRequest, BuyXTR, WithdrawXTR, DepositXTR: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed, FlawedJettonTransfer, OracleRequest, BuyXTR, WithdrawXTR, DepositXTR, PoolRoundTransition: // actions without extra
 		return 0
 	case Purchase:
 		if a.Purchase.Price.Currency.Type == core.CurrencyNative {
@@ -444,6 +452,12 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
+	case LoanRequest:
+		return detectDirection(account, a.LoanRequest.Borrower, a.LoanRequest.Pool, a.LoanRequest.TonAttached)
+	case LoanIssue:
+		return detectDirection(account, a.LoanIssue.Pool, a.LoanIssue.Loan, a.LoanIssue.tonAttached)
+	case LoanRepayment:
+		return detectDirection(account, a.LoanRepayment.Pool, a.LoanRepayment.Borrower, a.LoanRepayment.payoutReceived)
 	case LiquidityDeposit:
 		extra := int64(0)
 		for _, token := range a.LiquidityDepositAction.Tokens {
@@ -488,6 +502,10 @@ func (a Action) IsSubject(account tongo.AccountID) bool {
 		a.RemoveExtension,
 		a.SetSignatureAllowed,
 		a.LiquidityDepositAction,
+		a.LoanRequest,
+		a.LoanIssue,
+		a.LoanRepayment,
+		a.PoolRoundTransition,
 	} {
 		if i != nil && !reflect.ValueOf(i).IsNil() {
 			return slices.Contains(i.SubjectAccounts(), account)

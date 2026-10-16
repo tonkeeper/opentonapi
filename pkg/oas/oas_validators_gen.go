@@ -682,6 +682,78 @@ func (s *Action) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.LoanRequest.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "LoanRequest",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.LoanIssue.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "LoanIssue",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.LoanRepayment.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "LoanRepayment",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.PoolRoundTransition.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "PoolRoundTransition",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.SimplePreview.Validate(); err != nil {
 			return err
 		}
@@ -808,6 +880,14 @@ func (s ActionType) Validate() error {
 	case "DepositXTR":
 		return nil
 	case "WithdrawXTR":
+		return nil
+	case "LoanRequest":
+		return nil
+	case "LoanIssue":
+		return nil
+	case "LoanRepayment":
+		return nil
+	case "PoolRoundTransition":
 		return nil
 	case "Unknown":
 		return nil
@@ -4481,6 +4561,75 @@ func (s *LiquidityDepositAction) Validate() error {
 	return nil
 }
 
+func (s *LoanIssueAction) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *LoanRepaymentAction) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *LoanRequestAction) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *MarketTonRates) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -5660,6 +5809,57 @@ func (s *PoolInfo) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "apy",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s PoolRoundTransition) Validate() error {
+	switch s {
+	case "election":
+		return nil
+	case "began":
+		return nil
+	case "validated":
+		return nil
+	case "ended":
+		return nil
+	case "settled":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *PoolRoundTransitionAction) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Transition.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "transition",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Implementation.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "implementation",
 			Error: err,
 		})
 	}

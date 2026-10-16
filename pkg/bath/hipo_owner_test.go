@@ -243,13 +243,14 @@ func TestHipoOwnerSeesTheirOwnFlow(t *testing.T) {
 		{
 			name:  "unstake-all by comment, paid now",
 			trace: hipoUnstakeAll(hipoPayout()),
-			want:  []string{"JettonBurn", "WithdrawStake"},
+			// the request names no amount, the burn and the payout below it do
+			want:  []string{"WithdrawStakeRequest", "JettonBurn", "WithdrawStake"},
 			hgram: -hipoTestTokens,
 		},
 		{
 			name:  "unstake-all by comment, deferred",
 			trace: hipoUnstakeAll(hipoBill(references.HipoTreasury, 0)),
-			want:  []string{"JettonBurn", "WithdrawStakeRequest"},
+			want:  []string{"WithdrawStakeRequest", "JettonBurn", "WithdrawStakeRequest"},
 			hgram: -hipoTestTokens,
 		},
 		{
