@@ -1,0 +1,72 @@
+{
+   "Actions": [
+     {
+       "PoolRoundTransition": {
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "RoundSince": 1788759816,
+         "Transition": "election",
+         "TotalStaked": null,
+         "TotalRecovered": null,
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "PoolRoundTransition",
+       "BaseTransactions": [
+         "046a4f3214343224ea7406f15767ef4fdbb50ec75e7b8976fc9f0bcbba093a90",
+         "42b2852b100ba5a8de60fae82c50cb5f7b13fafdeee5926def6355ade9b137b0",
+         "93a7eb39d4e5efe539c99484c073d24ceecd61d69f6e623c8673e00831e2356c"
+       ]
+     },
+     {
+       "LoanIssue": {
+         "Borrower": "0:d368e77f6dae535e64478539803a2f71f07dd7b9155482057a2a7723ee168986",
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "Loan": "-1:d608dbd87ebf6ad63b1fe270d97613f11300eff4e36ff7e4ab96e838fdf92694",
+         "RoundSince": 1788759816,
+         "Amount": 1000000000000000,
+         "Accrued": 2516623493168879,
+         "Collateral": 153275652320,
+         "MinPayment": 50000000000,
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "LoanIssue",
+       "BaseTransactions": [
+         "6da5b3396e705cf241543ba3aade78b287ddb06ddaeefaabd9dbe565db7e9ed2"
+       ]
+     },
+     {
+       "ElectionsDepositStake": {
+         "Amount": 3516777095561199,
+         "Elector": "-1:3333333333333333333333333333333333333333333333333333333333333333",
+         "Staker": "-1:d608dbd87ebf6ad63b1fe270d97613f11300eff4e36ff7e4ab96e838fdf92694"
+       },
+       "Success": true,
+       "Type": "ElectionsDepositStake",
+       "BaseTransactions": [
+         "30a14fb8fa189e5741dde534d3c0d410f855afa814df632e0d442585537ee46f",
+         "6adb33d627660ff1871ee1dea9a0222472e92f85398a4b71291f063a241af235"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "-1:3333333333333333333333333333333333333333333333333333333333333333",
+       "Ton": 3516776095561199,
+       "Fee": 0,
+       "Jettons": null
+     },
+     {
+       "Account": "-1:d608dbd87ebf6ad63b1fe270d97613f11300eff4e36ff7e4ab96e838fdf92694",
+       "Ton": 983080000,
+       "Fee": 107360000,
+       "Jettons": null
+     },
+     {
+       "Account": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+       "Ton": -3516777223992553,
+       "Fee": 37991354,
+       "Jettons": null
+     }
+   ]
+ }

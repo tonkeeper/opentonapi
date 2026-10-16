@@ -1,0 +1,34 @@
+{
+   "Actions": [
+     {
+       "LoanRequest": {
+         "Borrower": "0:9c9b4ce7de3773c2a5f905f6f72c90392f0d79e149e8886df0aaa95bbe2b0fff",
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "RoundSince": 1792102152,
+         "Amount": 1925374834094334,
+         "MinPayment": 1219770712064,
+         "TonAttached": 1322568227845,
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "LoanRequest",
+       "BaseTransactions": [
+         "9f04f4bab2f587c110da66dbee299f33a185f3041bcc3c2b350474d71de2dce3"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+       "Ton": 1322566434388,
+       "Fee": 1793457,
+       "Jettons": null
+     },
+     {
+       "Account": "0:9c9b4ce7de3773c2a5f905f6f72c90392f0d79e149e8886df0aaa95bbe2b0fff",
+       "Ton": -1322568811481,
+       "Fee": 583636,
+       "Jettons": null
+     }
+   ]
+ }

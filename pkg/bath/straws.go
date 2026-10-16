@@ -140,6 +140,21 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		WithdrawHipoStakeSettledStraw,
 		WithdrawHipoStakePostponedStraw,
 		JettonMintHipoRollbackStraw,
+		// Hipo's loans and rounds, after the staking straws: a settled round folds in the
+		// bills' burning but leaves their settlements to the straws above.
+		LoanRequestHipoStraw,
+		LoanIssueHipoStraw,
+		// 80
+		LoanRepaymentHipoStraw,
+		PoolRoundElectionHipoStraw,
+		PoolRoundBeganHipoStraw,
+		PoolRoundEndedHipoStraw,
+		PoolRoundSettledHipoStraw,
+		// 85
+		hipoRoundStepStraw,
+		hipoRoundRecoverStraw,
+		hipoRoundBillStraw,
+		hipoRoundMintStraw,
 	}
 }
 
