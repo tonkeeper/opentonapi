@@ -1,0 +1,51 @@
+{
+   "Actions": [
+     {
+       "WithdrawStake": {
+         "Staker": "0:3a71df22920839dcd1c4606169b6a190a63a9a1b335aa36a944f7e53602abc03",
+         "Amount": 1075846978,
+         "Pool": "0:3d1f01190ffb4e35f573ea5252d0f54a479be2122106ca3f40b907b01905675c",
+         "Implementation": "kton"
+       },
+       "Success": true,
+       "Type": "WithdrawStake",
+       "BaseTransactions": [
+         "6743037c3674cf0570f3fdfd71c4c2648cb524191d686c7d77c47fda24335ba1",
+         "9f79302734260a507dd8ca1458de38b11438ff438b0106bb544b1d96384b8dd0",
+         "81246a24d73f64bdaac6230a4661741caf85622b103a8bf08eba9f096d2def4d",
+         "670a030b1d5e40cbedd1d5277b0694dc99451fcdf9e4e1cd8686a4b58beff80f"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:3a71df22920839dcd1c4606169b6a190a63a9a1b335aa36a944f7e53602abc03",
+       "Ton": 1074093187,
+       "Fee": 551587,
+       "Jettons": [
+         {
+           "Address": "0:6e2215cd36459ff405bd9a234635348efee159db77a37c85ab89e5e07b97fbdf",
+           "Quantity": -1000000000
+         }
+       ]
+     },
+     {
+       "Account": "0:3d1f01190ffb4e35f573ea5252d0f54a479be2122106ca3f40b907b01905675c",
+       "Ton": -1077466582,
+       "Fee": 1619604,
+       "Jettons": null
+     },
+     {
+       "Account": "0:6e2215cd36459ff405bd9a234635348efee159db77a37c85ab89e5e07b97fbdf",
+       "Ton": -2724,
+       "Fee": 683193,
+       "Jettons": null
+     },
+     {
+       "Account": "0:ceee94a0d21628fefa6c56c6de6da6813780ec654bff74376e9b745c4ae4fc3b",
+       "Ton": -1381,
+       "Fee": 523116,
+       "Jettons": null
+     }
+   ]
+ }

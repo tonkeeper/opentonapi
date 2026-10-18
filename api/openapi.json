@@ -6177,7 +6177,8 @@
      "tf",
      "liquidTF",
      "ffvault",
-     "hipo"
+     "hipo",
+     "kton"
     ],
     "type": "string"
    },

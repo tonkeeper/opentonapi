@@ -299,6 +299,16 @@ var WithdrawalRequestFFVaultStraw = Straw[BubbleWithdrawStakeRequest]{
 	},
 }
 
+// liquidStakingImplementation names the liquid staking pool behind an
+// action: KTON runs its own pool on a newer version of the Tonstakers
+// contract, so the contract alone does not say whose pool it is.
+func liquidStakingImplementation(pool tongo.AccountID) core.StakingImplementation {
+	if pool == references.KtonAccountPool {
+		return core.StakingImplementationKton
+	}
+	return core.StakingImplementationLiquidTF
+}
+
 var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.TonstakePoolDepositMsgOp)}, //todo: check interface HasInterface(abi.TonstakePool),
 	Builder: func(newAction *BubbleDepositStake, bubble *Bubble) error {
@@ -307,7 +317,7 @@ var DepositLiquidStakeStraw = Straw[BubbleDepositStake]{
 		newAction.Staker = tx.inputFrom.Address
 		newAction.Amount = core.PriceNanoGram(max(tx.inputAmount-int64(ton.OneGRAM), 0))
 		newAction.Success = tx.success
-		newAction.Implementation = core.StakingImplementationLiquidTF
+		newAction.Implementation = liquidStakingImplementation(tx.account.Address)
 		return nil
 	},
 	SingleChild: &Straw[BubbleDepositStake]{
@@ -342,6 +352,9 @@ var PendingWithdrawRequestLiquidStraw = Straw[BubbleWithdrawStakeRequest]{
 		newAction.Staker = burn.sender.Address
 		newAction.Success = true
 		newAction.Implementation = core.StakingImplementationLiquidTF
+		if burn.master == references.KtonJettonMaster {
+			newAction.Implementation = core.StakingImplementationKton
+		}
 		master := burn.master
 		newAction.Amount = &core.Price{
 			Currency: core.Currency{
