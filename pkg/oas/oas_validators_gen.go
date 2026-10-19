@@ -5779,6 +5779,8 @@ func (s PoolImplementationType) Validate() error {
 		return nil
 	case "hipo":
 		return nil
+	case "kton":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}

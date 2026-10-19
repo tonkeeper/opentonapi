@@ -1,0 +1,108 @@
+{
+   "Actions": [
+     {
+       "DepositStake": {
+         "Staker": "0:3a71df22920839dcd1c4606169b6a190a63a9a1b335aa36a944f7e53602abc03",
+         "Amount": {
+           "Currency": {
+             "Type": "native",
+             "Jetton": null,
+             "CurrencyID": null
+           },
+           "Amount": 1000000000
+         },
+         "Pool": "0:3d1f01190ffb4e35f573ea5252d0f54a479be2122106ca3f40b907b01905675c",
+         "Implementation": "kton"
+       },
+       "Success": true,
+       "Type": "DepositStake",
+       "BaseTransactions": [
+         "e1945e3d01a68355a9d2875a6a172a5e9a6c787393873114940d0a97898b75a9"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 998690531,
+         "Executor": "0:3d1f01190ffb4e35f573ea5252d0f54a479be2122106ca3f40b907b01905675c",
+         "Contract": "0:6e2215cd36459ff405bd9a234635348efee159db77a37c85ab89e5e07b97fbdf",
+         "Operation": "TonstakePayoutMintJettons",
+         "Payload": "Amount: \"925779186\"\nDestination: 0:3a71df22920839dcd1c4606169b6a190a63a9a1b335aa36a944f7e53602abc03\nForward: \"0\"\nNotification: \"100000000\"\nQueryId: 0\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "f113f52f8487c1f3c89b9584729fc2082b64e77610a86b40631141b50e9e1590"
+       ]
+     },
+     {
+       "SmartContractExec": {
+         "TonAttached": 997936596,
+         "Executor": "0:6e2215cd36459ff405bd9a234635348efee159db77a37c85ab89e5e07b97fbdf",
+         "Contract": "0:ceee94a0d21628fefa6c56c6de6da6813780ec654bff74376e9b745c4ae4fc3b",
+         "Operation": "JettonInternalTransfer",
+         "Payload": "Amount: \"925779186\"\nForwardPayload:\n  IsRight: false\n  Value: {}\nForwardTonAmount: \"100000000\"\nFrom: \"\"\nQueryId: 0\nResponseAddress: 0:3a71df22920839dcd1c4606169b6a190a63a9a1b335aa36a944f7e53602abc03\n"
+       },
+       "Success": true,
+       "Type": "SmartContractExec",
+       "BaseTransactions": [
+         "2e78b567167094848ca7a399122ebac219325cddfa8a56065d5bcb36dbaf2e63"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 100000000,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:3a71df22920839dcd1c4606169b6a190a63a9a1b335aa36a944f7e53602abc03",
+         "Sender": "0:ceee94a0d21628fefa6c56c6de6da6813780ec654bff74376e9b745c4ae4fc3b",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "0aab10ac1659392dd866157600b2f999b9a0df34f80dd581ecc352674a8bdf59"
+       ]
+     },
+     {
+       "TonTransfer": {
+         "Amount": 897059536,
+         "Comment": null,
+         "EncryptedComment": null,
+         "Recipient": "0:3a71df22920839dcd1c4606169b6a190a63a9a1b335aa36a944f7e53602abc03",
+         "Sender": "0:ceee94a0d21628fefa6c56c6de6da6813780ec654bff74376e9b745c4ae4fc3b",
+         "Refund": null
+       },
+       "Success": true,
+       "Type": "TonTransfer",
+       "BaseTransactions": [
+         "907cd25d32be28daad1958cacd18ed56eb5538dbe8a4fba8010c0e993d45f3ae"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:3a71df22920839dcd1c4606169b6a190a63a9a1b335aa36a944f7e53602abc03",
+       "Ton": -1003454169,
+       "Fee": 513705,
+       "Jettons": null
+     },
+     {
+       "Account": "0:3d1f01190ffb4e35f573ea5252d0f54a479be2122106ca3f40b907b01905675c",
+       "Ton": 999997000,
+       "Fee": 1312469,
+       "Jettons": null
+     },
+     {
+       "Account": "0:6e2215cd36459ff405bd9a234635348efee159db77a37c85ab89e5e07b97fbdf",
+       "Ton": -973,
+       "Fee": 754908,
+       "Jettons": null
+     },
+     {
+       "Account": "0:ceee94a0d21628fefa6c56c6de6da6813780ec654bff74376e9b745c4ae4fc3b",
+       "Ton": 0,
+       "Fee": 877060,
+       "Jettons": null
+     }
+   ]
+ }

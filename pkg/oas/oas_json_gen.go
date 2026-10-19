@@ -41616,6 +41616,8 @@ func (s *PoolImplementationType) Decode(d *jx.Decoder) error {
 		*s = PoolImplementationTypeFfvault
 	case PoolImplementationTypeHipo:
 		*s = PoolImplementationTypeHipo
+	case PoolImplementationTypeKton:
+		*s = PoolImplementationTypeKton
 	default:
 		*s = PoolImplementationType(v)
 	}

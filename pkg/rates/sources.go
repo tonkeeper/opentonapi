@@ -26,6 +26,7 @@ import (
 func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 	const (
 		tonstakers = "tonstakers"
+		kton       = "kton"
 		bemo       = "bemo"
 		beetroot   = "beetroot"
 		tsUSDe     = "tsUSDe"
@@ -85,6 +86,7 @@ func (m *Mock) GetCurrentRates() (map[string]float64, error) {
 		fetch func(float64, map[ton.AccountID]float64) (map[ton.AccountID]float64, error)
 	}{
 		{tonstakers, m.getTonstakersPrice},
+		{kton, m.getKtonPrice},
 		{bemo, m.getBemoPrice},
 		{beetroot, m.getBeetrootPrice},
 		{tsUSDe, m.getTsUSDePrice},
@@ -264,6 +266,50 @@ func (m *Mock) getTonstakersPrice(_ float64, _ map[ton.AccountID]float64) (map[t
 	price := float64(result.Decoded.ProjectBalance) / float64(result.Decoded.ProjectedSupply)
 
 	return map[ton.AccountID]float64{account: price}, nil
+}
+
+// getKtonPrice fetches KTON price by smart contract data. The pool's
+// get_pool_full_data has more fields than the Tonstakers layout and is not
+// decoded, so the projected ratio is read from the raw stack.
+func (m *Mock) getKtonPrice(_ float64, _ map[ton.AccountID]float64) (map[ton.AccountID]float64, error) {
+	url := fmt.Sprintf("https://tonapi.io/v2/blockchain/accounts/%v/methods/get_pool_full_data", references.KtonAccountPool.ToRaw())
+	headers := http.Header{"Content-Type": {"application/json"}}
+	respBody, err := sendRequest(url, m.TonApiToken, headers)
+	if err != nil {
+		return nil, err
+	}
+	var result ExecutionResult
+	if err = json.Unmarshal(respBody, &result); err != nil {
+		return nil, err
+	}
+	price, err := projectedRatioFromStack(result)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[ton.AccountID]float64{references.KtonJettonMaster: price}, nil
+}
+
+// projectedRatioFromStack reads a liquid staking pool's get_pool_full_data
+// result: it ends with projected_balance and projected_supply in every
+// version of the contract, whatever comes before them.
+func projectedRatioFromStack(result ExecutionResult) (float64, error) {
+	if !result.Success || len(result.Stack) < 2 {
+		return 0, errors.New("invalid data")
+	}
+	balance, err := strconv.ParseInt(result.Stack[len(result.Stack)-2].Num, 0, 64)
+	if err != nil {
+		return 0, err
+	}
+	supply, err := strconv.ParseInt(result.Stack[len(result.Stack)-1].Num, 0, 64)
+	if err != nil {
+		return 0, err
+	}
+	if balance <= 0 || supply <= 0 {
+		return 0, errors.New("invalid data")
+	}
+
+	return float64(balance) / float64(supply), nil
 }
 
 // getTonstakersPrice fetches Beetroot price by smart contract data

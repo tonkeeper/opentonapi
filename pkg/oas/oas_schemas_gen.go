@@ -19660,6 +19660,7 @@ const (
 	PoolImplementationTypeLiquidTF PoolImplementationType = "liquidTF"
 	PoolImplementationTypeFfvault  PoolImplementationType = "ffvault"
 	PoolImplementationTypeHipo     PoolImplementationType = "hipo"
+	PoolImplementationTypeKton     PoolImplementationType = "kton"
 )
 
 // AllValues returns all PoolImplementationType values.
@@ -19670,6 +19671,7 @@ func (PoolImplementationType) AllValues() []PoolImplementationType {
 		PoolImplementationTypeLiquidTF,
 		PoolImplementationTypeFfvault,
 		PoolImplementationTypeHipo,
+		PoolImplementationTypeKton,
 	}
 }
 
@@ -19685,6 +19687,8 @@ func (s PoolImplementationType) MarshalText() ([]byte, error) {
 	case PoolImplementationTypeFfvault:
 		return []byte(s), nil
 	case PoolImplementationTypeHipo:
+		return []byte(s), nil
+	case PoolImplementationTypeKton:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -19708,6 +19712,9 @@ func (s *PoolImplementationType) UnmarshalText(data []byte) error {
 		return nil
 	case PoolImplementationTypeHipo:
 		*s = PoolImplementationTypeHipo
+		return nil
+	case PoolImplementationTypeKton:
+		*s = PoolImplementationTypeKton
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

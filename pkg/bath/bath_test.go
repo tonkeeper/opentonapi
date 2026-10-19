@@ -459,6 +459,15 @@ func TestFindActions(t *testing.T) {
 		"fe1482f280383bbd791f0cd8df1920a726335d2843b7b68190f9f9d777bd3bc8": {
 			tongo.MustParseBlockID("(0,8000000000000000,62341628)"),
 		},
+		"44d117553cccee5a340cb16351ff57f280b20e7a10f92d434ab0b238ad561005": {
+			tongo.MustParseBlockID("(0,8000000000000000,104410847)"),
+		},
+		"5e845245bbd9dea73e4f08ee3eee059416b01084d99c49b9d2928c75547873ae": {
+			tongo.MustParseBlockID("(0,8000000000000000,104394284)"),
+		},
+		"60d3c01eebe65db4595f1d0ab020924b3d45d6a5e64add52e233348873b4c2d3": {
+			tongo.MustParseBlockID("(0,8000000000000000,104270081)"),
+		},
 		"9a8054e9b42f8290c820b39c6496b13d00d9bd8aad516e1d0e83bbf673c1571e": {
 			tongo.MustParseBlockID("(0,8000000000000000,61823141)"),
 		},
@@ -1266,6 +1275,21 @@ func TestFindActions(t *testing.T) {
 			name:           "tonstakers stake withdraw",
 			filenamePrefix: "tonstakers-stake-withdraw",
 			hash:           "fe1482f280383bbd791f0cd8df1920a726335d2843b7b68190f9f9d777bd3bc8",
+		},
+		{
+			name:           "kton deposit stake",
+			filenamePrefix: "kton-deposit-stake",
+			hash:           "44d117553cccee5a340cb16351ff57f280b20e7a10f92d434ab0b238ad561005",
+		},
+		{
+			name:           "kton withdraw stake request",
+			filenamePrefix: "kton-withdraw-stake-request",
+			hash:           "5e845245bbd9dea73e4f08ee3eee059416b01084d99c49b9d2928c75547873ae",
+		},
+		{
+			name:           "kton instant withdraw",
+			filenamePrefix: "kton-instant-withdraw",
+			hash:           "60d3c01eebe65db4595f1d0ab020924b3d45d6a5e64add52e233348873b4c2d3",
 		},
 		{
 			name:           "stonfi partial cross-swap",
