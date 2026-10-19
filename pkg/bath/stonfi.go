@@ -129,15 +129,7 @@ var StonfiSwapStraw = Straw[BubbleJettonSwap]{
 }
 
 var StonfiV1PTONStraw = Straw[BubbleJettonTransfer]{
-	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp), func(bubble *Bubble) bool {
-		tx := bubble.Info.(BubbleTx)
-		body := tx.decodedBody.Value.(abi.JettonTransferMsgBody)
-		amount := big.Int(body.Amount)
-		if big.NewInt(tx.inputAmount).Cmp(&amount) < 1 {
-			return false
-		}
-		return true
-	}},
+	CheckFuncs: []bubbleCheck{IsTx, HasInterface(abi.JettonWallet), HasOperation(abi.JettonTransferMsgOp)},
 	Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		newAction.master, _ = tx.additionalInfo.JettonMaster(tx.account.Address)
@@ -154,7 +146,13 @@ var StonfiV1PTONStraw = Straw[BubbleJettonTransfer]{
 		return nil
 	},
 	SingleChild: &Straw[BubbleJettonTransfer]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp)},
+		// pTON wallet may pay out of its own balance, so check the TON the recipient actually got
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.JettonNotifyMsgOp), func(bubble *Bubble) bool {
+			tx := bubble.Info.(BubbleTx)
+			body := tx.decodedBody.Value.(abi.JettonNotifyMsgBody)
+			amount := big.Int(body.Amount)
+			return big.NewInt(tx.inputAmount).Cmp(&amount) >= 0
+		}},
 		Builder: func(newAction *BubbleJettonTransfer, bubble *Bubble) error {
 			tx := bubble.Info.(BubbleTx)
 			newAction.success = true
