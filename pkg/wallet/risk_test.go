@@ -73,3 +73,11 @@ func TestExtractRisk(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractRiskWalletTg(t *testing.T) {
+	root, err := boc.DeserializeSinglRootBase64("te6ccgEBBgEA+gACRYgAWn5Zry9N0hmIe/77TOOnZPRFwxLfJUVbEDRBLa/4AegeAQICATQDBAGic2uzKWM4jSK3TtQ6hNKbR9psKzGjNKsvMyrsjgQ67RnRig+DRx41dz/pkJ7VCWo/9ecj88fSe60xBLD0nbqzBmOJbnV//38RatWenwAAAAADBQAw/wAgmCHXSYMIufJA34CF+DPQ7R4g7VPZAFIAAAAAAH//fxGz5PkKRWy5F7oxTr8dK0cQNsF0bihrG6Mzys8LkhGL2QBmQgAWn5Zry9N0hmIe/77TOOnZPRFwxLfJUVbEDRBLa/4AehzEtAAAAAAAAAAAAAAAAAAA")
+	require.Nil(t, err)
+	risk, err := ExtractRisk(wallet.WalletTg, root)
+	require.Nil(t, err)
+	require.Equal(t, &Risk{Gram: 10_000_000, Jettons: map[tongo.AccountID]big.Int{}}, risk)
+}

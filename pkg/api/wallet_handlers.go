@@ -17,7 +17,6 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
-	"github.com/tonkeeper/tongo/tlb"
 	"github.com/tonkeeper/tongo/ton"
 	tongoWallet "github.com/tonkeeper/tongo/wallet"
 )
@@ -133,8 +132,7 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	if err != nil {
 		return nil, toError(http.StatusInternalServerError, err)
 	}
-	walletVersion, err := tongoWallet.GetVersionByCode(*codeCell)
-	if err != nil {
+	if _, err := tongoWallet.GetVersionByCode(*codeCell); err != nil {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("contract is not a supported wallet: %v", err))
 	}
 	cells, err := boc.DeserializeBoc(rawAccount.Data)
@@ -144,23 +142,8 @@ func (h *Handler) GetAccountSeqno(ctx context.Context, params oas.GetAccountSeqn
 	if len(cells) == 0 {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("contract doesn't have a seqno"))
 	}
-
-	switch walletVersion {
-	case tongoWallet.V1R1, tongoWallet.V1R2, tongoWallet.V1R3:
-		var data tongoWallet.DataV1V2
-		err = tlb.Unmarshal(cells[0], &data)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		seqno = data.Seqno
-	case tongoWallet.V3R1:
-		var data tongoWallet.DataV3
-		err = tlb.Unmarshal(cells[0], &data)
-		if err != nil {
-			return nil, toError(http.StatusInternalServerError, err)
-		}
-		seqno = data.Seqno
-	default:
+	_, seqno, err = tongoWallet.NewFromCodeAndData(*codeCell, *cells[0])
+	if err != nil {
 		return nil, toError(http.StatusBadRequest, fmt.Errorf("contract doesn't have a seqno"))
 	}
 	return &oas.Seqno{Seqno: int32(seqno)}, nil
@@ -190,6 +173,7 @@ func (h *Handler) processWallet(ctx context.Context, account *core.Account) (*oa
 		abi.WalletV3R1: {}, abi.WalletV3R2: {},
 		abi.WalletV4R1: {}, abi.WalletV4R2: {},
 		abi.WalletV5Beta: {}, abi.WalletV5R1: {},
+		abi.WalletTg: {},
 	}
 	var (
 		walletVersion abi.ContractInterface
