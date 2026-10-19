@@ -743,6 +743,10 @@ type Action struct {
 	WithdrawXTR               OptWithdrawXTRAction               `json:"WithdrawXTR"`
 	DepositXTR                OptDepositXTRAction                `json:"DepositXTR"`
 	BuyXTR                    OptBuyXTRAction                    `json:"BuyXTR"`
+	LoanRequest               OptLoanRequestAction               `json:"LoanRequest"`
+	LoanIssue                 OptLoanIssueAction                 `json:"LoanIssue"`
+	LoanRepayment             OptLoanRepaymentAction             `json:"LoanRepayment"`
+	PoolRoundTransition       OptPoolRoundTransitionAction       `json:"PoolRoundTransition"`
 	SimplePreview             ActionSimplePreview                `json:"simple_preview"`
 	BaseTransactions          []string                           `json:"base_transactions"`
 }
@@ -915,6 +919,26 @@ func (s *Action) GetDepositXTR() OptDepositXTRAction {
 // GetBuyXTR returns the value of BuyXTR.
 func (s *Action) GetBuyXTR() OptBuyXTRAction {
 	return s.BuyXTR
+}
+
+// GetLoanRequest returns the value of LoanRequest.
+func (s *Action) GetLoanRequest() OptLoanRequestAction {
+	return s.LoanRequest
+}
+
+// GetLoanIssue returns the value of LoanIssue.
+func (s *Action) GetLoanIssue() OptLoanIssueAction {
+	return s.LoanIssue
+}
+
+// GetLoanRepayment returns the value of LoanRepayment.
+func (s *Action) GetLoanRepayment() OptLoanRepaymentAction {
+	return s.LoanRepayment
+}
+
+// GetPoolRoundTransition returns the value of PoolRoundTransition.
+func (s *Action) GetPoolRoundTransition() OptPoolRoundTransitionAction {
+	return s.PoolRoundTransition
 }
 
 // GetSimplePreview returns the value of SimplePreview.
@@ -1095,6 +1119,26 @@ func (s *Action) SetDepositXTR(val OptDepositXTRAction) {
 // SetBuyXTR sets the value of BuyXTR.
 func (s *Action) SetBuyXTR(val OptBuyXTRAction) {
 	s.BuyXTR = val
+}
+
+// SetLoanRequest sets the value of LoanRequest.
+func (s *Action) SetLoanRequest(val OptLoanRequestAction) {
+	s.LoanRequest = val
+}
+
+// SetLoanIssue sets the value of LoanIssue.
+func (s *Action) SetLoanIssue(val OptLoanIssueAction) {
+	s.LoanIssue = val
+}
+
+// SetLoanRepayment sets the value of LoanRepayment.
+func (s *Action) SetLoanRepayment(val OptLoanRepaymentAction) {
+	s.LoanRepayment = val
+}
+
+// SetPoolRoundTransition sets the value of PoolRoundTransition.
+func (s *Action) SetPoolRoundTransition(val OptPoolRoundTransitionAction) {
+	s.PoolRoundTransition = val
 }
 
 // SetSimplePreview sets the value of SimplePreview.
@@ -1349,6 +1393,10 @@ const (
 	ActionTypeBuyXTR                    ActionType = "BuyXTR"
 	ActionTypeDepositXTR                ActionType = "DepositXTR"
 	ActionTypeWithdrawXTR               ActionType = "WithdrawXTR"
+	ActionTypeLoanRequest               ActionType = "LoanRequest"
+	ActionTypeLoanIssue                 ActionType = "LoanIssue"
+	ActionTypeLoanRepayment             ActionType = "LoanRepayment"
+	ActionTypePoolRoundTransition       ActionType = "PoolRoundTransition"
 	ActionTypeUnknown                   ActionType = "Unknown"
 )
 
@@ -1387,6 +1435,10 @@ func (ActionType) AllValues() []ActionType {
 		ActionTypeBuyXTR,
 		ActionTypeDepositXTR,
 		ActionTypeWithdrawXTR,
+		ActionTypeLoanRequest,
+		ActionTypeLoanIssue,
+		ActionTypeLoanRepayment,
+		ActionTypePoolRoundTransition,
 		ActionTypeUnknown,
 	}
 }
@@ -1457,6 +1509,14 @@ func (s ActionType) MarshalText() ([]byte, error) {
 	case ActionTypeDepositXTR:
 		return []byte(s), nil
 	case ActionTypeWithdrawXTR:
+		return []byte(s), nil
+	case ActionTypeLoanRequest:
+		return []byte(s), nil
+	case ActionTypeLoanIssue:
+		return []byte(s), nil
+	case ActionTypeLoanRepayment:
+		return []byte(s), nil
+	case ActionTypePoolRoundTransition:
 		return []byte(s), nil
 	case ActionTypeUnknown:
 		return []byte(s), nil
@@ -1563,6 +1623,18 @@ func (s *ActionType) UnmarshalText(data []byte) error {
 		return nil
 	case ActionTypeWithdrawXTR:
 		*s = ActionTypeWithdrawXTR
+		return nil
+	case ActionTypeLoanRequest:
+		*s = ActionTypeLoanRequest
+		return nil
+	case ActionTypeLoanIssue:
+		*s = ActionTypeLoanIssue
+		return nil
+	case ActionTypeLoanRepayment:
+		*s = ActionTypeLoanRepayment
+		return nil
+	case ActionTypePoolRoundTransition:
+		*s = ActionTypePoolRoundTransition
 		return nil
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
@@ -10214,6 +10286,362 @@ func (s *LiquidityDepositAction) SetTokens(val []VaultDepositInfo) {
 	s.Tokens = val
 }
 
+// A staking pool lending to a validator, which stakes the loan with the elector.
+// Ref: #/components/schemas/LoanIssueAction
+type LoanIssueAction struct {
+	Borrower AccountAddress `json:"borrower"`
+	Pool     AccountAddress `json:"pool"`
+	// Contract that holds the loan and stakes it.
+	Loan AccountAddress `json:"loan"`
+	// Start of the validation round the loan is for, as its unix time.
+	RoundSince int64 `json:"round_since"`
+	// Loan granted, in nanograms.
+	Amount int64 `json:"amount"`
+	// Pool coins added to the loan beyond what was asked for, in nanograms.
+	Accrued int64 `json:"accrued"`
+	// The borrower's own coins staked alongside the loan, in nanograms.
+	Collateral int64 `json:"collateral"`
+	// Least the borrower pays the pool from the round's reward, in nanograms.
+	MinPayment     int64                  `json:"min_payment"`
+	Implementation PoolImplementationType `json:"implementation"`
+}
+
+// GetBorrower returns the value of Borrower.
+func (s *LoanIssueAction) GetBorrower() AccountAddress {
+	return s.Borrower
+}
+
+// GetPool returns the value of Pool.
+func (s *LoanIssueAction) GetPool() AccountAddress {
+	return s.Pool
+}
+
+// GetLoan returns the value of Loan.
+func (s *LoanIssueAction) GetLoan() AccountAddress {
+	return s.Loan
+}
+
+// GetRoundSince returns the value of RoundSince.
+func (s *LoanIssueAction) GetRoundSince() int64 {
+	return s.RoundSince
+}
+
+// GetAmount returns the value of Amount.
+func (s *LoanIssueAction) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetAccrued returns the value of Accrued.
+func (s *LoanIssueAction) GetAccrued() int64 {
+	return s.Accrued
+}
+
+// GetCollateral returns the value of Collateral.
+func (s *LoanIssueAction) GetCollateral() int64 {
+	return s.Collateral
+}
+
+// GetMinPayment returns the value of MinPayment.
+func (s *LoanIssueAction) GetMinPayment() int64 {
+	return s.MinPayment
+}
+
+// GetImplementation returns the value of Implementation.
+func (s *LoanIssueAction) GetImplementation() PoolImplementationType {
+	return s.Implementation
+}
+
+// SetBorrower sets the value of Borrower.
+func (s *LoanIssueAction) SetBorrower(val AccountAddress) {
+	s.Borrower = val
+}
+
+// SetPool sets the value of Pool.
+func (s *LoanIssueAction) SetPool(val AccountAddress) {
+	s.Pool = val
+}
+
+// SetLoan sets the value of Loan.
+func (s *LoanIssueAction) SetLoan(val AccountAddress) {
+	s.Loan = val
+}
+
+// SetRoundSince sets the value of RoundSince.
+func (s *LoanIssueAction) SetRoundSince(val int64) {
+	s.RoundSince = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *LoanIssueAction) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetAccrued sets the value of Accrued.
+func (s *LoanIssueAction) SetAccrued(val int64) {
+	s.Accrued = val
+}
+
+// SetCollateral sets the value of Collateral.
+func (s *LoanIssueAction) SetCollateral(val int64) {
+	s.Collateral = val
+}
+
+// SetMinPayment sets the value of MinPayment.
+func (s *LoanIssueAction) SetMinPayment(val int64) {
+	s.MinPayment = val
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *LoanIssueAction) SetImplementation(val PoolImplementationType) {
+	s.Implementation = val
+}
+
+// A loan coming back from the elector and its reward being split.
+// Ref: #/components/schemas/LoanRepaymentAction
+type LoanRepaymentAction struct {
+	Borrower AccountAddress `json:"borrower"`
+	Pool     AccountAddress `json:"pool"`
+	Loan     AccountAddress `json:"loan"`
+	// Start of the validation round the loan is for, as its unix time.
+	RoundSince int64 `json:"round_since"`
+	// Loan that was granted, in nanograms.
+	Amount int64 `json:"amount"`
+	// Pool coins added to the loan beyond what was asked for, in nanograms.
+	Accrued int64 `json:"accrued"`
+	// What came back to the pool: the stake and the reward, less what the loan contract spent to forward
+	// it, in nanograms.
+	Recovered int64 `json:"recovered"`
+	// What the pool's stakers earned, in nanograms.
+	PoolReward int64 `json:"pool_reward"`
+	// The pool operator's share of the pool's reward, in nanograms; the operator may also receive what
+	// is left over from fees.
+	ProtocolFee int64 `json:"protocol_fee"`
+	// Returned to the borrower: collateral and the borrower's reward, in nanograms.
+	BorrowerPayout int64 `json:"borrower_payout"`
+	// Taken from the borrower's reward to be burned, in nanograms.
+	BurnAmount int64 `json:"burn_amount"`
+	// Part of the loan the elector did not return and the collateral could not cover, in nanograms.
+	Shortfall      OptInt64               `json:"shortfall"`
+	Implementation PoolImplementationType `json:"implementation"`
+}
+
+// GetBorrower returns the value of Borrower.
+func (s *LoanRepaymentAction) GetBorrower() AccountAddress {
+	return s.Borrower
+}
+
+// GetPool returns the value of Pool.
+func (s *LoanRepaymentAction) GetPool() AccountAddress {
+	return s.Pool
+}
+
+// GetLoan returns the value of Loan.
+func (s *LoanRepaymentAction) GetLoan() AccountAddress {
+	return s.Loan
+}
+
+// GetRoundSince returns the value of RoundSince.
+func (s *LoanRepaymentAction) GetRoundSince() int64 {
+	return s.RoundSince
+}
+
+// GetAmount returns the value of Amount.
+func (s *LoanRepaymentAction) GetAmount() int64 {
+	return s.Amount
+}
+
+// GetAccrued returns the value of Accrued.
+func (s *LoanRepaymentAction) GetAccrued() int64 {
+	return s.Accrued
+}
+
+// GetRecovered returns the value of Recovered.
+func (s *LoanRepaymentAction) GetRecovered() int64 {
+	return s.Recovered
+}
+
+// GetPoolReward returns the value of PoolReward.
+func (s *LoanRepaymentAction) GetPoolReward() int64 {
+	return s.PoolReward
+}
+
+// GetProtocolFee returns the value of ProtocolFee.
+func (s *LoanRepaymentAction) GetProtocolFee() int64 {
+	return s.ProtocolFee
+}
+
+// GetBorrowerPayout returns the value of BorrowerPayout.
+func (s *LoanRepaymentAction) GetBorrowerPayout() int64 {
+	return s.BorrowerPayout
+}
+
+// GetBurnAmount returns the value of BurnAmount.
+func (s *LoanRepaymentAction) GetBurnAmount() int64 {
+	return s.BurnAmount
+}
+
+// GetShortfall returns the value of Shortfall.
+func (s *LoanRepaymentAction) GetShortfall() OptInt64 {
+	return s.Shortfall
+}
+
+// GetImplementation returns the value of Implementation.
+func (s *LoanRepaymentAction) GetImplementation() PoolImplementationType {
+	return s.Implementation
+}
+
+// SetBorrower sets the value of Borrower.
+func (s *LoanRepaymentAction) SetBorrower(val AccountAddress) {
+	s.Borrower = val
+}
+
+// SetPool sets the value of Pool.
+func (s *LoanRepaymentAction) SetPool(val AccountAddress) {
+	s.Pool = val
+}
+
+// SetLoan sets the value of Loan.
+func (s *LoanRepaymentAction) SetLoan(val AccountAddress) {
+	s.Loan = val
+}
+
+// SetRoundSince sets the value of RoundSince.
+func (s *LoanRepaymentAction) SetRoundSince(val int64) {
+	s.RoundSince = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *LoanRepaymentAction) SetAmount(val int64) {
+	s.Amount = val
+}
+
+// SetAccrued sets the value of Accrued.
+func (s *LoanRepaymentAction) SetAccrued(val int64) {
+	s.Accrued = val
+}
+
+// SetRecovered sets the value of Recovered.
+func (s *LoanRepaymentAction) SetRecovered(val int64) {
+	s.Recovered = val
+}
+
+// SetPoolReward sets the value of PoolReward.
+func (s *LoanRepaymentAction) SetPoolReward(val int64) {
+	s.PoolReward = val
+}
+
+// SetProtocolFee sets the value of ProtocolFee.
+func (s *LoanRepaymentAction) SetProtocolFee(val int64) {
+	s.ProtocolFee = val
+}
+
+// SetBorrowerPayout sets the value of BorrowerPayout.
+func (s *LoanRepaymentAction) SetBorrowerPayout(val int64) {
+	s.BorrowerPayout = val
+}
+
+// SetBurnAmount sets the value of BurnAmount.
+func (s *LoanRepaymentAction) SetBurnAmount(val int64) {
+	s.BurnAmount = val
+}
+
+// SetShortfall sets the value of Shortfall.
+func (s *LoanRepaymentAction) SetShortfall(val OptInt64) {
+	s.Shortfall = val
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *LoanRepaymentAction) SetImplementation(val PoolImplementationType) {
+	s.Implementation = val
+}
+
+// A validator asking a staking pool for a loan to stake in the next validation round.
+// Ref: #/components/schemas/LoanRequestAction
+type LoanRequestAction struct {
+	Borrower AccountAddress `json:"borrower"`
+	Pool     AccountAddress `json:"pool"`
+	// Start of the validation round the loan is for, as its unix time; 0 if the round is unknown.
+	RoundSince int64 `json:"round_since"`
+	// Loan asked for, in nanograms; absent if too large to represent.
+	Amount OptInt64 `json:"amount"`
+	// Least the borrower promises to pay the pool from the round's reward, in nanograms; absent if too
+	// large to represent.
+	MinPayment OptInt64 `json:"min_payment"`
+	// Sent with the request: the borrower's collateral and the pool's fees, in nanograms.
+	TonAttached    int64                  `json:"ton_attached"`
+	Implementation PoolImplementationType `json:"implementation"`
+}
+
+// GetBorrower returns the value of Borrower.
+func (s *LoanRequestAction) GetBorrower() AccountAddress {
+	return s.Borrower
+}
+
+// GetPool returns the value of Pool.
+func (s *LoanRequestAction) GetPool() AccountAddress {
+	return s.Pool
+}
+
+// GetRoundSince returns the value of RoundSince.
+func (s *LoanRequestAction) GetRoundSince() int64 {
+	return s.RoundSince
+}
+
+// GetAmount returns the value of Amount.
+func (s *LoanRequestAction) GetAmount() OptInt64 {
+	return s.Amount
+}
+
+// GetMinPayment returns the value of MinPayment.
+func (s *LoanRequestAction) GetMinPayment() OptInt64 {
+	return s.MinPayment
+}
+
+// GetTonAttached returns the value of TonAttached.
+func (s *LoanRequestAction) GetTonAttached() int64 {
+	return s.TonAttached
+}
+
+// GetImplementation returns the value of Implementation.
+func (s *LoanRequestAction) GetImplementation() PoolImplementationType {
+	return s.Implementation
+}
+
+// SetBorrower sets the value of Borrower.
+func (s *LoanRequestAction) SetBorrower(val AccountAddress) {
+	s.Borrower = val
+}
+
+// SetPool sets the value of Pool.
+func (s *LoanRequestAction) SetPool(val AccountAddress) {
+	s.Pool = val
+}
+
+// SetRoundSince sets the value of RoundSince.
+func (s *LoanRequestAction) SetRoundSince(val int64) {
+	s.RoundSince = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *LoanRequestAction) SetAmount(val OptInt64) {
+	s.Amount = val
+}
+
+// SetMinPayment sets the value of MinPayment.
+func (s *LoanRequestAction) SetMinPayment(val OptInt64) {
+	s.MinPayment = val
+}
+
+// SetTonAttached sets the value of TonAttached.
+func (s *LoanRequestAction) SetTonAttached(val int64) {
+	s.TonAttached = val
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *LoanRequestAction) SetImplementation(val PoolImplementationType) {
+	s.Implementation = val
+}
+
 // Ref: #/components/schemas/MarketTonRates
 type MarketTonRates struct {
 	Market         string  `json:"market"`
@@ -16646,6 +17074,144 @@ func (o OptLiquidityDepositAction) Or(d LiquidityDepositAction) LiquidityDeposit
 	return d
 }
 
+// NewOptLoanIssueAction returns new OptLoanIssueAction with value set to v.
+func NewOptLoanIssueAction(v LoanIssueAction) OptLoanIssueAction {
+	return OptLoanIssueAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLoanIssueAction is optional LoanIssueAction.
+type OptLoanIssueAction struct {
+	Value LoanIssueAction
+	Set   bool
+}
+
+// IsSet returns true if OptLoanIssueAction was set.
+func (o OptLoanIssueAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLoanIssueAction) Reset() {
+	var v LoanIssueAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLoanIssueAction) SetTo(v LoanIssueAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLoanIssueAction) Get() (v LoanIssueAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLoanIssueAction) Or(d LoanIssueAction) LoanIssueAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptLoanRepaymentAction returns new OptLoanRepaymentAction with value set to v.
+func NewOptLoanRepaymentAction(v LoanRepaymentAction) OptLoanRepaymentAction {
+	return OptLoanRepaymentAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLoanRepaymentAction is optional LoanRepaymentAction.
+type OptLoanRepaymentAction struct {
+	Value LoanRepaymentAction
+	Set   bool
+}
+
+// IsSet returns true if OptLoanRepaymentAction was set.
+func (o OptLoanRepaymentAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLoanRepaymentAction) Reset() {
+	var v LoanRepaymentAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLoanRepaymentAction) SetTo(v LoanRepaymentAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLoanRepaymentAction) Get() (v LoanRepaymentAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLoanRepaymentAction) Or(d LoanRepaymentAction) LoanRepaymentAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptLoanRequestAction returns new OptLoanRequestAction with value set to v.
+func NewOptLoanRequestAction(v LoanRequestAction) OptLoanRequestAction {
+	return OptLoanRequestAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLoanRequestAction is optional LoanRequestAction.
+type OptLoanRequestAction struct {
+	Value LoanRequestAction
+	Set   bool
+}
+
+// IsSet returns true if OptLoanRequestAction was set.
+func (o OptLoanRequestAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLoanRequestAction) Reset() {
+	var v LoanRequestAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLoanRequestAction) SetTo(v LoanRequestAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLoanRequestAction) Get() (v LoanRequestAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLoanRequestAction) Or(d LoanRequestAction) LoanRequestAction {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptMessage returns new OptMessage with value set to v.
 func NewOptMessage(v Message) OptMessage {
 	return OptMessage{
@@ -17410,6 +17976,52 @@ func (o OptPictureDNS) Get() (v PictureDNS, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptPictureDNS) Or(d PictureDNS) PictureDNS {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPoolRoundTransitionAction returns new OptPoolRoundTransitionAction with value set to v.
+func NewOptPoolRoundTransitionAction(v PoolRoundTransitionAction) OptPoolRoundTransitionAction {
+	return OptPoolRoundTransitionAction{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPoolRoundTransitionAction is optional PoolRoundTransitionAction.
+type OptPoolRoundTransitionAction struct {
+	Value PoolRoundTransitionAction
+	Set   bool
+}
+
+// IsSet returns true if OptPoolRoundTransitionAction was set.
+func (o OptPoolRoundTransitionAction) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPoolRoundTransitionAction) Reset() {
+	var v PoolRoundTransitionAction
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPoolRoundTransitionAction) SetTo(v PoolRoundTransitionAction) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPoolRoundTransitionAction) Get() (v PoolRoundTransitionAction, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPoolRoundTransitionAction) Or(d PoolRoundTransitionAction) PoolRoundTransitionAction {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -19265,6 +19877,148 @@ func (s *PoolInfo) SetValidatorStake(val int64) {
 // SetCycleLength sets the value of CycleLength.
 func (s *PoolInfo) SetCycleLength(val OptInt64) {
 	s.CycleLength = val
+}
+
+// Election: the pool decided which loans to make and staked them with the elector; began: the
+// validation round started; validated: the round's validators finished validating and the stakes are
+// held until the elector releases them; ended: the round's stakes were released and the pool is
+// recovering them; settled: every loan was recovered and the round's deposits and withdrawals were
+// settled.
+// Ref: #/components/schemas/PoolRoundTransition
+type PoolRoundTransition string
+
+const (
+	PoolRoundTransitionElection  PoolRoundTransition = "election"
+	PoolRoundTransitionBegan     PoolRoundTransition = "began"
+	PoolRoundTransitionValidated PoolRoundTransition = "validated"
+	PoolRoundTransitionEnded     PoolRoundTransition = "ended"
+	PoolRoundTransitionSettled   PoolRoundTransition = "settled"
+)
+
+// AllValues returns all PoolRoundTransition values.
+func (PoolRoundTransition) AllValues() []PoolRoundTransition {
+	return []PoolRoundTransition{
+		PoolRoundTransitionElection,
+		PoolRoundTransitionBegan,
+		PoolRoundTransitionValidated,
+		PoolRoundTransitionEnded,
+		PoolRoundTransitionSettled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PoolRoundTransition) MarshalText() ([]byte, error) {
+	switch s {
+	case PoolRoundTransitionElection:
+		return []byte(s), nil
+	case PoolRoundTransitionBegan:
+		return []byte(s), nil
+	case PoolRoundTransitionValidated:
+		return []byte(s), nil
+	case PoolRoundTransitionEnded:
+		return []byte(s), nil
+	case PoolRoundTransitionSettled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PoolRoundTransition) UnmarshalText(data []byte) error {
+	switch PoolRoundTransition(data) {
+	case PoolRoundTransitionElection:
+		*s = PoolRoundTransitionElection
+		return nil
+	case PoolRoundTransitionBegan:
+		*s = PoolRoundTransitionBegan
+		return nil
+	case PoolRoundTransitionValidated:
+		*s = PoolRoundTransitionValidated
+		return nil
+	case PoolRoundTransitionEnded:
+		*s = PoolRoundTransitionEnded
+		return nil
+	case PoolRoundTransitionSettled:
+		*s = PoolRoundTransitionSettled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// A staking pool moving one of its validation rounds to its next stage.
+// Ref: #/components/schemas/PoolRoundTransitionAction
+type PoolRoundTransitionAction struct {
+	Pool AccountAddress `json:"pool"`
+	// Start of the validation round, as its unix time; 0 if the round is unknown.
+	RoundSince int64               `json:"round_since"`
+	Transition PoolRoundTransition `json:"transition"`
+	// Settled only: lent out for the round, in nanograms.
+	TotalStaked OptInt64 `json:"total_staked"`
+	// Settled only: recovered from the round, in nanograms.
+	TotalRecovered OptInt64               `json:"total_recovered"`
+	Implementation PoolImplementationType `json:"implementation"`
+}
+
+// GetPool returns the value of Pool.
+func (s *PoolRoundTransitionAction) GetPool() AccountAddress {
+	return s.Pool
+}
+
+// GetRoundSince returns the value of RoundSince.
+func (s *PoolRoundTransitionAction) GetRoundSince() int64 {
+	return s.RoundSince
+}
+
+// GetTransition returns the value of Transition.
+func (s *PoolRoundTransitionAction) GetTransition() PoolRoundTransition {
+	return s.Transition
+}
+
+// GetTotalStaked returns the value of TotalStaked.
+func (s *PoolRoundTransitionAction) GetTotalStaked() OptInt64 {
+	return s.TotalStaked
+}
+
+// GetTotalRecovered returns the value of TotalRecovered.
+func (s *PoolRoundTransitionAction) GetTotalRecovered() OptInt64 {
+	return s.TotalRecovered
+}
+
+// GetImplementation returns the value of Implementation.
+func (s *PoolRoundTransitionAction) GetImplementation() PoolImplementationType {
+	return s.Implementation
+}
+
+// SetPool sets the value of Pool.
+func (s *PoolRoundTransitionAction) SetPool(val AccountAddress) {
+	s.Pool = val
+}
+
+// SetRoundSince sets the value of RoundSince.
+func (s *PoolRoundTransitionAction) SetRoundSince(val int64) {
+	s.RoundSince = val
+}
+
+// SetTransition sets the value of Transition.
+func (s *PoolRoundTransitionAction) SetTransition(val PoolRoundTransition) {
+	s.Transition = val
+}
+
+// SetTotalStaked sets the value of TotalStaked.
+func (s *PoolRoundTransitionAction) SetTotalStaked(val OptInt64) {
+	s.TotalStaked = val
+}
+
+// SetTotalRecovered sets the value of TotalRecovered.
+func (s *PoolRoundTransitionAction) SetTotalRecovered(val OptInt64) {
+	s.TotalRecovered = val
+}
+
+// SetImplementation sets the value of Implementation.
+func (s *PoolRoundTransitionAction) SetImplementation(val PoolImplementationType) {
+	s.Implementation = val
 }
 
 // Ref: #/components/schemas/Price

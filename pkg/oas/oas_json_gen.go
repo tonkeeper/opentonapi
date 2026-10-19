@@ -2039,6 +2039,30 @@ func (s *Action) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.LoanRequest.Set {
+			e.FieldStart("LoanRequest")
+			s.LoanRequest.Encode(e)
+		}
+	}
+	{
+		if s.LoanIssue.Set {
+			e.FieldStart("LoanIssue")
+			s.LoanIssue.Encode(e)
+		}
+	}
+	{
+		if s.LoanRepayment.Set {
+			e.FieldStart("LoanRepayment")
+			s.LoanRepayment.Encode(e)
+		}
+	}
+	{
+		if s.PoolRoundTransition.Set {
+			e.FieldStart("PoolRoundTransition")
+			s.PoolRoundTransition.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("simple_preview")
 		s.SimplePreview.Encode(e)
 	}
@@ -2052,7 +2076,7 @@ func (s *Action) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAction = [36]string{
+var jsonFieldsNameOfAction = [40]string{
 	0:  "type",
 	1:  "status",
 	2:  "TonTransfer",
@@ -2087,8 +2111,12 @@ var jsonFieldsNameOfAction = [36]string{
 	31: "WithdrawXTR",
 	32: "DepositXTR",
 	33: "BuyXTR",
-	34: "simple_preview",
-	35: "base_transactions",
+	34: "LoanRequest",
+	35: "LoanIssue",
+	36: "LoanRepayment",
+	37: "PoolRoundTransition",
+	38: "simple_preview",
+	39: "base_transactions",
 }
 
 // Decode decodes Action from json.
@@ -2440,8 +2468,48 @@ func (s *Action) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"BuyXTR\"")
 			}
+		case "LoanRequest":
+			if err := func() error {
+				s.LoanRequest.Reset()
+				if err := s.LoanRequest.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"LoanRequest\"")
+			}
+		case "LoanIssue":
+			if err := func() error {
+				s.LoanIssue.Reset()
+				if err := s.LoanIssue.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"LoanIssue\"")
+			}
+		case "LoanRepayment":
+			if err := func() error {
+				s.LoanRepayment.Reset()
+				if err := s.LoanRepayment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"LoanRepayment\"")
+			}
+		case "PoolRoundTransition":
+			if err := func() error {
+				s.PoolRoundTransition.Reset()
+				if err := s.PoolRoundTransition.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"PoolRoundTransition\"")
+			}
 		case "simple_preview":
-			requiredBitSet[4] |= 1 << 2
+			requiredBitSet[4] |= 1 << 6
 			if err := func() error {
 				if err := s.SimplePreview.Decode(d); err != nil {
 					return err
@@ -2451,7 +2519,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"simple_preview\"")
 			}
 		case "base_transactions":
-			requiredBitSet[4] |= 1 << 3
+			requiredBitSet[4] |= 1 << 7
 			if err := func() error {
 				s.BaseTransactions = make([]string, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -2484,7 +2552,7 @@ func (s *Action) Decode(d *jx.Decoder) error {
 		0b00000000,
 		0b00000000,
 		0b00000000,
-		0b00001100,
+		0b11000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -3056,6 +3124,14 @@ func (s *ActionType) Decode(d *jx.Decoder) error {
 		*s = ActionTypeDepositXTR
 	case ActionTypeWithdrawXTR:
 		*s = ActionTypeWithdrawXTR
+	case ActionTypeLoanRequest:
+		*s = ActionTypeLoanRequest
+	case ActionTypeLoanIssue:
+		*s = ActionTypeLoanIssue
+	case ActionTypeLoanRepayment:
+		*s = ActionTypeLoanRepayment
+	case ActionTypePoolRoundTransition:
+		*s = ActionTypePoolRoundTransition
 	case ActionTypeUnknown:
 		*s = ActionTypeUnknown
 	default:
@@ -29492,6 +29568,716 @@ func (s *LiquidityDepositAction) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *LoanIssueAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *LoanIssueAction) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("borrower")
+		s.Borrower.Encode(e)
+	}
+	{
+		e.FieldStart("pool")
+		s.Pool.Encode(e)
+	}
+	{
+		e.FieldStart("loan")
+		s.Loan.Encode(e)
+	}
+	{
+		e.FieldStart("round_since")
+		e.Int64(s.RoundSince)
+	}
+	{
+		e.FieldStart("amount")
+		e.Int64(s.Amount)
+	}
+	{
+		e.FieldStart("accrued")
+		e.Int64(s.Accrued)
+	}
+	{
+		e.FieldStart("collateral")
+		e.Int64(s.Collateral)
+	}
+	{
+		e.FieldStart("min_payment")
+		e.Int64(s.MinPayment)
+	}
+	{
+		e.FieldStart("implementation")
+		s.Implementation.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfLoanIssueAction = [9]string{
+	0: "borrower",
+	1: "pool",
+	2: "loan",
+	3: "round_since",
+	4: "amount",
+	5: "accrued",
+	6: "collateral",
+	7: "min_payment",
+	8: "implementation",
+}
+
+// Decode decodes LoanIssueAction from json.
+func (s *LoanIssueAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode LoanIssueAction to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "borrower":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Borrower.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"borrower\"")
+			}
+		case "pool":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Pool.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool\"")
+			}
+		case "loan":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Loan.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"loan\"")
+			}
+		case "round_since":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.RoundSince = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"round_since\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.Amount = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"amount\"")
+			}
+		case "accrued":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.Accrued = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"accrued\"")
+			}
+		case "collateral":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int64()
+				s.Collateral = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"collateral\"")
+			}
+		case "min_payment":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int64()
+				s.MinPayment = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"min_payment\"")
+			}
+		case "implementation":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				if err := s.Implementation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"implementation\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode LoanIssueAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfLoanIssueAction) {
+					name = jsonFieldsNameOfLoanIssueAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *LoanIssueAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *LoanIssueAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *LoanRepaymentAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *LoanRepaymentAction) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("borrower")
+		s.Borrower.Encode(e)
+	}
+	{
+		e.FieldStart("pool")
+		s.Pool.Encode(e)
+	}
+	{
+		e.FieldStart("loan")
+		s.Loan.Encode(e)
+	}
+	{
+		e.FieldStart("round_since")
+		e.Int64(s.RoundSince)
+	}
+	{
+		e.FieldStart("amount")
+		e.Int64(s.Amount)
+	}
+	{
+		e.FieldStart("accrued")
+		e.Int64(s.Accrued)
+	}
+	{
+		e.FieldStart("recovered")
+		e.Int64(s.Recovered)
+	}
+	{
+		e.FieldStart("pool_reward")
+		e.Int64(s.PoolReward)
+	}
+	{
+		e.FieldStart("protocol_fee")
+		e.Int64(s.ProtocolFee)
+	}
+	{
+		e.FieldStart("borrower_payout")
+		e.Int64(s.BorrowerPayout)
+	}
+	{
+		e.FieldStart("burn_amount")
+		e.Int64(s.BurnAmount)
+	}
+	{
+		if s.Shortfall.Set {
+			e.FieldStart("shortfall")
+			s.Shortfall.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("implementation")
+		s.Implementation.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfLoanRepaymentAction = [13]string{
+	0:  "borrower",
+	1:  "pool",
+	2:  "loan",
+	3:  "round_since",
+	4:  "amount",
+	5:  "accrued",
+	6:  "recovered",
+	7:  "pool_reward",
+	8:  "protocol_fee",
+	9:  "borrower_payout",
+	10: "burn_amount",
+	11: "shortfall",
+	12: "implementation",
+}
+
+// Decode decodes LoanRepaymentAction from json.
+func (s *LoanRepaymentAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode LoanRepaymentAction to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "borrower":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Borrower.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"borrower\"")
+			}
+		case "pool":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Pool.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool\"")
+			}
+		case "loan":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Loan.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"loan\"")
+			}
+		case "round_since":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int64()
+				s.RoundSince = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"round_since\"")
+			}
+		case "amount":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int64()
+				s.Amount = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"amount\"")
+			}
+		case "accrued":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.Accrued = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"accrued\"")
+			}
+		case "recovered":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int64()
+				s.Recovered = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"recovered\"")
+			}
+		case "pool_reward":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int64()
+				s.PoolReward = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool_reward\"")
+			}
+		case "protocol_fee":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int64()
+				s.ProtocolFee = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"protocol_fee\"")
+			}
+		case "borrower_payout":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.BorrowerPayout = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"borrower_payout\"")
+			}
+		case "burn_amount":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.BurnAmount = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"burn_amount\"")
+			}
+		case "shortfall":
+			if err := func() error {
+				s.Shortfall.Reset()
+				if err := s.Shortfall.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"shortfall\"")
+			}
+		case "implementation":
+			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				if err := s.Implementation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"implementation\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode LoanRepaymentAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00010111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfLoanRepaymentAction) {
+					name = jsonFieldsNameOfLoanRepaymentAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *LoanRepaymentAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *LoanRepaymentAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *LoanRequestAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *LoanRequestAction) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("borrower")
+		s.Borrower.Encode(e)
+	}
+	{
+		e.FieldStart("pool")
+		s.Pool.Encode(e)
+	}
+	{
+		e.FieldStart("round_since")
+		e.Int64(s.RoundSince)
+	}
+	{
+		if s.Amount.Set {
+			e.FieldStart("amount")
+			s.Amount.Encode(e)
+		}
+	}
+	{
+		if s.MinPayment.Set {
+			e.FieldStart("min_payment")
+			s.MinPayment.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("ton_attached")
+		e.Int64(s.TonAttached)
+	}
+	{
+		e.FieldStart("implementation")
+		s.Implementation.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfLoanRequestAction = [7]string{
+	0: "borrower",
+	1: "pool",
+	2: "round_since",
+	3: "amount",
+	4: "min_payment",
+	5: "ton_attached",
+	6: "implementation",
+}
+
+// Decode decodes LoanRequestAction from json.
+func (s *LoanRequestAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode LoanRequestAction to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "borrower":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Borrower.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"borrower\"")
+			}
+		case "pool":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Pool.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool\"")
+			}
+		case "round_since":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int64()
+				s.RoundSince = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"round_since\"")
+			}
+		case "amount":
+			if err := func() error {
+				s.Amount.Reset()
+				if err := s.Amount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"amount\"")
+			}
+		case "min_payment":
+			if err := func() error {
+				s.MinPayment.Reset()
+				if err := s.MinPayment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"min_payment\"")
+			}
+		case "ton_attached":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int64()
+				s.TonAttached = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ton_attached\"")
+			}
+		case "implementation":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				if err := s.Implementation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"implementation\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode LoanRequestAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b01100111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfLoanRequestAction) {
+					name = jsonFieldsNameOfLoanRequestAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *LoanRequestAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *LoanRequestAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *MarketTonRates) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -38260,6 +39046,105 @@ func (s *OptLiquidityDepositAction) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes LoanIssueAction as json.
+func (o OptLoanIssueAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes LoanIssueAction from json.
+func (o *OptLoanIssueAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptLoanIssueAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptLoanIssueAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptLoanIssueAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes LoanRepaymentAction as json.
+func (o OptLoanRepaymentAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes LoanRepaymentAction from json.
+func (o *OptLoanRepaymentAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptLoanRepaymentAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptLoanRepaymentAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptLoanRepaymentAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes LoanRequestAction as json.
+func (o OptLoanRequestAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes LoanRequestAction from json.
+func (o *OptLoanRequestAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptLoanRequestAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptLoanRequestAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptLoanRequestAction) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes Message as json.
 func (o OptMessage) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -38822,6 +39707,39 @@ func (s OptPictureDNS) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptPictureDNS) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PoolRoundTransitionAction as json.
+func (o OptPoolRoundTransitionAction) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes PoolRoundTransitionAction from json.
+func (o *OptPoolRoundTransitionAction) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPoolRoundTransitionAction to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPoolRoundTransitionAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPoolRoundTransitionAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -41030,6 +41948,227 @@ func (s *PoolInfo) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *PoolInfo) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PoolRoundTransition as json.
+func (s PoolRoundTransition) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PoolRoundTransition from json.
+func (s *PoolRoundTransition) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PoolRoundTransition to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PoolRoundTransition(v) {
+	case PoolRoundTransitionElection:
+		*s = PoolRoundTransitionElection
+	case PoolRoundTransitionBegan:
+		*s = PoolRoundTransitionBegan
+	case PoolRoundTransitionValidated:
+		*s = PoolRoundTransitionValidated
+	case PoolRoundTransitionEnded:
+		*s = PoolRoundTransitionEnded
+	case PoolRoundTransitionSettled:
+		*s = PoolRoundTransitionSettled
+	default:
+		*s = PoolRoundTransition(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PoolRoundTransition) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PoolRoundTransition) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *PoolRoundTransitionAction) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *PoolRoundTransitionAction) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("pool")
+		s.Pool.Encode(e)
+	}
+	{
+		e.FieldStart("round_since")
+		e.Int64(s.RoundSince)
+	}
+	{
+		e.FieldStart("transition")
+		s.Transition.Encode(e)
+	}
+	{
+		if s.TotalStaked.Set {
+			e.FieldStart("total_staked")
+			s.TotalStaked.Encode(e)
+		}
+	}
+	{
+		if s.TotalRecovered.Set {
+			e.FieldStart("total_recovered")
+			s.TotalRecovered.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("implementation")
+		s.Implementation.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfPoolRoundTransitionAction = [6]string{
+	0: "pool",
+	1: "round_since",
+	2: "transition",
+	3: "total_staked",
+	4: "total_recovered",
+	5: "implementation",
+}
+
+// Decode decodes PoolRoundTransitionAction from json.
+func (s *PoolRoundTransitionAction) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PoolRoundTransitionAction to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "pool":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Pool.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pool\"")
+			}
+		case "round_since":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int64()
+				s.RoundSince = int64(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"round_since\"")
+			}
+		case "transition":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Transition.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"transition\"")
+			}
+		case "total_staked":
+			if err := func() error {
+				s.TotalStaked.Reset()
+				if err := s.TotalStaked.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_staked\"")
+			}
+		case "total_recovered":
+			if err := func() error {
+				s.TotalRecovered.Reset()
+				if err := s.TotalRecovered.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total_recovered\"")
+			}
+		case "implementation":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.Implementation.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"implementation\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PoolRoundTransitionAction")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00100111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfPoolRoundTransitionAction) {
+					name = jsonFieldsNameOfPoolRoundTransitionAction[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PoolRoundTransitionAction) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PoolRoundTransitionAction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
