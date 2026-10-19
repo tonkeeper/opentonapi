@@ -1217,6 +1217,14 @@ func (h *Handler) convertAction(ctx context.Context, viewer *tongo.AccountID, a 
 		action.DepositXTR, action.SimplePreview = h.convertDepositXTRAction(ctx, a.DepositXTR, acceptLanguage.Value, viewer)
 	case bath.WithdrawXTR:
 		action.WithdrawXTR, action.SimplePreview = h.convertWithdrawXTRAction(ctx, a.WithdrawXTR, acceptLanguage.Value, viewer)
+	case bath.LoanRequest:
+		action.LoanRequest, action.SimplePreview = h.convertLoanRequestAction(a.LoanRequest, acceptLanguage.Value, viewer)
+	case bath.LoanIssue:
+		action.LoanIssue, action.SimplePreview = h.convertLoanIssueAction(a.LoanIssue, acceptLanguage.Value, viewer)
+	case bath.LoanRepayment:
+		action.LoanRepayment, action.SimplePreview = h.convertLoanRepaymentAction(a.LoanRepayment, acceptLanguage.Value, viewer)
+	case bath.PoolRoundTransition:
+		action.PoolRoundTransition, action.SimplePreview = h.convertPoolRoundTransitionAction(a.PoolRoundTransition, acceptLanguage.Value, viewer)
 	}
 	return action, nil
 }

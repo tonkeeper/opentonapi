@@ -21,6 +21,12 @@ type BubbleTx struct {
 	decodedBody      *core.DecodedMessageBody
 	init             []byte
 	externalOut      []core.Message
+	// inputLt and senderExternalOut let a straw read what the sender logged about this
+	// message: contracts that log write the log next to the message it describes, in the
+	// sender's transaction.
+	inputLt           uint64
+	senderExternalOut []core.Message
+	utime             int64
 
 	additionalInfo                  *core.TraceAdditionalInfo
 	accountWasActiveAtComputingTime bool

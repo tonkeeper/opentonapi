@@ -85,12 +85,11 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 	var newBubble newBubbleT
 	var newChildren []*Bubble
 	var potentialChildren []*Bubble
+	// The head's accounts and transactions are added with the rest of the mapping below, after
+	// its builder has run. Starting from them as well would double them each time a straw
+	// extends an action it built before.
 	var newAccounts []tongo.AccountID
 	var newTransaction []ton.Bits256
-	if !s.NotMergeBubble {
-		newAccounts = bubble.Accounts
-		newTransaction = bubble.Transaction
-	}
 	nvf := newValueFlow()
 	var finalizer func(newAction *newBubbleT, flow *ValueFlow)
 	merged := make(map[*Bubble]struct{}, len(mapping))

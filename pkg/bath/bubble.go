@@ -61,6 +61,7 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 		external:                        trace.InMsg == nil || trace.InMsg.IsExternal(),
 		accountWasActiveAtComputingTime: trace.Type != core.OrdinaryTx || trace.ComputePhase == nil || trace.ComputePhase.SkipReason != tlb.ComputeSkipReasonNoState,
 		additionalInfo:                  trace.AdditionalInfo(),
+		utime:                           trace.Utime,
 	}
 
 	accounts := []tongo.AccountID{trace.Account}
@@ -87,6 +88,7 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 		btx.decodedBody = msg.DecodedBody
 		btx.inputFrom = source
 		btx.init = msg.Init
+		btx.inputLt = msg.CreatedLt
 		initInterfaces = msg.InitInterfaces
 	}
 	var inputAmount int64
@@ -139,6 +141,10 @@ func fromTrace(trace *core.Trace, parent *core.Trace) *Bubble {
 		}
 
 		b.Children[i] = fromTrace(c, trace)
+		if child, ok := b.Children[i].Info.(BubbleTx); ok && len(btx.externalOut) > 0 {
+			child.senderExternalOut = btx.externalOut
+			b.Children[i].Info = child
+		}
 	}
 	if actionPhase := trace.Transaction.ActionPhase; actionPhase != nil {
 		aggregatedFee += int64(actionPhase.FwdFees)

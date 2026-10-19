@@ -484,6 +484,24 @@ func TestFindActions(t *testing.T) {
 		"9236ab916e92293a822e1bb701c970de97eac3df18f1a18bfca3a4d3fd049229": {
 			tongo.MustParseBlockID("(0,c000000000000000,88394637)"),
 		},
+		"421fa03279386d307ad993e1fc131d2e5de9da85478755b35beb98d037f90f8e": {
+			tongo.MustParseBlockID("(0,8000000000000000,103773211)"),
+		},
+		"046a4f3214343224ea7406f15767ef4fdbb50ec75e7b8976fc9f0bcbba093a90": {
+			tongo.MustParseBlockID("(0,8000000000000000,95501781)"),
+			tongo.MustParseBlockID("(-1,8000000000000000,91096683)"),
+		},
+		"57074455cf497e7cded8d790b8de2d6c7e5d6148252565de1d5eeee25020fc5d": {
+			tongo.MustParseBlockID("(0,8000000000000000,103852891)"),
+		},
+		"87a89f582a6d372beece6a29aa5d306240065fdfe00897263fd5925d0e248e60": {
+			tongo.MustParseBlockID("(0,8000000000000000,103852891)"),
+		},
+		"d8d505bceb48b1916f7211faa604168d42f10932ab939f831515c84a2b5d2de6": {
+			tongo.MustParseBlockID("(0,8000000000000000,103771382)"),
+			tongo.MustParseBlockID("(-1,8000000000000000,99187813)"),
+			tongo.MustParseBlockID("(0,8000000000000000,103771385)"),
+		},
 	}
 
 	type Case struct {
@@ -1297,6 +1315,40 @@ func TestFindActions(t *testing.T) {
 			name:           "hipo deferred unstake",
 			filenamePrefix: "hipo-deferred-unstake",
 			hash:           "9236ab916e92293a822e1bb701c970de97eac3df18f1a18bfca3a4d3fd049229",
+		},
+		{
+			// A validator asks the treasury for a loan for the next round.
+			name:           "hipo loan request",
+			filenamePrefix: "hipo-loan-request",
+			hash:           "421fa03279386d307ad993e1fc131d2e5de9da85478755b35beb98d037f90f8e",
+		},
+		{
+			// Bidding closes: the treasury decides the round's loans and stakes each one, and
+			// its logs say which borrower each loan is for. A round with one loan: two loans
+			// staked in one masterchain block send new_stake at the same lt, and the test
+			// storage then resolves both to the first elector transaction.
+			name:           "hipo round election",
+			filenamePrefix: "hipo-round-election",
+			hash:           "046a4f3214343224ea7406f15767ef4fdbb50ec75e7b8976fc9f0bcbba093a90",
+		},
+		{
+			// The validator set changes: the round before stops validating ...
+			name:           "hipo round validated",
+			filenamePrefix: "hipo-round-validated",
+			hash:           "57074455cf497e7cded8d790b8de2d6c7e5d6148252565de1d5eeee25020fc5d",
+		},
+		{
+			// ... and, in a second message, the new round begins.
+			name:           "hipo round began",
+			filenamePrefix: "hipo-round-began",
+			hash:           "87a89f582a6d372beece6a29aa5d306240065fdfe00897263fd5925d0e248e60",
+		},
+		{
+			// The stakes are released: each loan is repaid and split by its log, the borrower
+			// fee goes on to the burner, and the round's bills are burned.
+			name:           "hipo round end",
+			filenamePrefix: "hipo-round-end",
+			hash:           "d8d505bceb48b1916f7211faa604168d42f10932ab939f831515c84a2b5d2de6",
 		},
 	}
 
