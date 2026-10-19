@@ -36,5 +36,9 @@ var SlpAccounts = map[SlpType]ton.AccountID{
 var TonstakersSocialLinks = []string{"https://t.me/thetonstakers", "https://twitter.com/tonstakers"}
 var TonstakersAccountPool = ton.MustParseAccountID("EQCkWxfyhAkim3g2DjKQQg8T5P4g-Q1-K_jErGcDJZ4i-vqR")
 
+// KTON: a liquid staking pool on a newer version of the same contract.
+var KtonAccountPool = ton.MustParseAccountID("EQA9HwEZD_tONfVz6lJS0PVKR5viEiEGyj9AuQewGQVnXPg0")
+var KtonJettonMaster = ton.MustParseAccountID("EQBuIhXNNkWf9AW9miNGNTSO_uFZ23ejfIWrieXge5f733mw")
+
 var TFLiquidPoolCodeHash = tongo.MustParseHash("192535677eed65c20ac387efe4dd7415ad9ebb9349103e87c60e592538c9dcf3")
 var TFLiquidPool = ton.MustParseAccountID("0:a45b17f28409229b78360e3290420f13e4fe20f90d7e2bf8c4ac6703259e22fa")
