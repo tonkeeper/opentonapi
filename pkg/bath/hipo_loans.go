@@ -2,9 +2,11 @@ package bath
 
 import (
 	"math/big"
+	"slices"
 
 	"github.com/tonkeeper/opentonapi/pkg/core"
 	"github.com/tonkeeper/opentonapi/pkg/references"
+	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/tlb"
 )
@@ -14,67 +16,7 @@ import (
 // treasury wrote in its own transaction: anyone can send these ops, but only the treasury can
 // write its logs.
 
-// hipoLogs collects the logs of one treasury transaction, by topic. Only the treasury's own
-// transaction is read: the topic is an address, so any contract may emit a message that
-// looks like one of these, and a log is only Hipo's if Hipo's treasury sent it.
-func hipoLogs(bubble *Bubble) map[core.HipoLogTopic][]core.Message {
-	tx, ok := bubble.Info.(BubbleTx)
-	if !ok || tx.account.Address != references.HipoTreasury {
-		return nil
-	}
-	var found map[core.HipoLogTopic][]core.Message
-	for _, msg := range tx.externalOut {
-		topic, ok := core.HipoLogTopicOf(msg)
-		if !ok {
-			continue
-		}
-		if found == nil {
-			found = make(map[core.HipoLogTopic][]core.Message, 2)
-		}
-		found[topic] = append(found[topic], msg)
-	}
-	return found
-}
-
-func hipoGrams(g tlb.Grams) int64 {
-	return int64(g)
-}
-
-// hipoVarCoins reads an amount from a request, which may claim any 120-bit number; one past
-// int64 is reported as 0 rather than wrapped, and the treasury refuses it anyway.
-func hipoVarCoins(c tlb.VarUInteger16) int64 {
-	v := big.Int(c)
-	if !v.IsInt64() {
-		return 0
-	}
-	return v.Int64()
-}
-
-// hipoTreasuryExternal matches one of the three ops the treasury takes as an external message.
-func hipoTreasuryExternal(op abi.MsgOpName) []bubbleCheck {
-	return []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(op), func(bubble *Bubble) bool {
-		return bubble.Info.(BubbleTx).external
-	}}
-}
-
-func hipoRoundBuilder(transition PoolRoundTransitionType) func(*BubblePoolRoundTransition, *Bubble) error {
-	return func(newAction *BubblePoolRoundTransition, bubble *Bubble) error {
-		tx := bubble.Info.(BubbleTx)
-		newAction.Pool = tx.account.Address
-		newAction.Transition = transition
-		newAction.Implementation = core.StakingImplementationHipo
-		newAction.Success = tx.success
-		switch body := tx.decodedBody.Value.(type) {
-		case abi.HipoFinanceParticipateInElectionExtInMsgBody:
-			newAction.RoundSince = body.RoundSince
-		case abi.HipoFinanceVsetChangedExtInMsgBody:
-			newAction.RoundSince = body.RoundSince
-		case abi.HipoFinanceFinishParticipationExtInMsgBody:
-			newAction.RoundSince = body.RoundSince
-		}
-		return nil
-	}
-}
+const hipoRoundStartedWithin = 65536 / 2
 
 // PoolRoundElectionHipoStraw: bidding has closed and the treasury decides the round's loans.
 //
@@ -103,8 +45,6 @@ var PoolRoundBeganHipoStraw = Straw[BubblePoolRoundTransition]{
 	},
 }
 
-const hipoRoundStartedWithin = 65536 / 2
-
 // PoolRoundEndedHipoStraw: the stakes are released and the treasury asks for them back.
 //
 //	finish_participation (external) -> treasury -> recover_stakes -> treasury ->
@@ -112,50 +52,6 @@ const hipoRoundStartedWithin = 65536 / 2
 var PoolRoundEndedHipoStraw = Straw[BubblePoolRoundTransition]{
 	CheckFuncs: hipoTreasuryExternal(abi.HipoFinanceFinishParticipationExtInMsgOp),
 	Builder:    hipoRoundBuilder(PoolRoundEnded),
-}
-
-func hipoRoundIs(transitions ...PoolRoundTransitionType) bubbleCheck {
-	return func(bubble *Bubble) bool {
-		round, ok := bubble.Info.(BubblePoolRoundTransition)
-		if !ok || round.Implementation != core.StakingImplementationHipo {
-			return false
-		}
-		for _, t := range transitions {
-			if round.Transition == t {
-				return true
-			}
-		}
-		return false
-	}
-}
-
-func hipoKeepRound(newAction *BubblePoolRoundTransition, bubble *Bubble) error {
-	*newAction = bubble.Info.(BubblePoolRoundTransition)
-	return nil
-}
-
-// hipoRoundStepStraw folds the treasury's messages to itself into the round, one per pass:
-// there are as many as the round's loans need, since each one stops at a gas budget and sends
-// the next.
-var hipoRoundStepStraw = Straw[BubblePoolRoundTransition]{
-	CheckFuncs: []bubbleCheck{hipoRoundIs(PoolRoundElection, PoolRoundEnded)},
-	Builder:    hipoKeepRound,
-	SingleChild: &Straw[BubblePoolRoundTransition]{
-		CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), hipoFromTreasury, Or(
-			Or(HasOperation(abi.HipoFinanceDecideLoanRequestsMsgOp), HasOperation(abi.HipoFinanceProcessLoanRequestsMsgOp)),
-			HasOperation(abi.HipoFinanceRecoverStakesMsgOp),
-		)},
-	},
-}
-
-// hipoRoundRecoverStraw folds each loan's proxy_recover_stake into the round that asked for
-// it; the elector leg below it stays an ElectionsRecoverStake.
-var hipoRoundRecoverStraw = Straw[BubblePoolRoundTransition]{
-	CheckFuncs: []bubbleCheck{hipoRoundIs(PoolRoundEnded)},
-	Builder:    hipoKeepRound,
-	SingleChild: &Straw[BubblePoolRoundTransition]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceProxyRecoverStakeMsgOp), hipoFromTreasury},
-	},
 }
 
 // PoolRoundSettledHipoStraw: every loan is back, and the round's bills are burned. The bills'
@@ -172,64 +68,19 @@ var PoolRoundSettledHipoStraw = Straw[BubblePoolRoundTransition]{
 		newAction.Transition = PoolRoundSettled
 		newAction.Implementation = core.StakingImplementationHipo
 		newAction.Success = tx.success
+		newAction.add(bubble)
+		// When burn_all is sent on recovering the round's last loan, that loan's repayment log
+		// names the round. last_bill_burned names it too, but may never come.
+		for _, msg := range tx.senderExternalOut {
+			if _, value, ok := core.DecodeHipoLog(msg); ok {
+				if log, ok := value.(core.HipoRepaymentLog); ok {
+					newAction.RoundSince = log.RoundSince
+				}
+			}
+		}
 		return nil
 	},
 	SingleChild: hipoOptionalLastBill(),
-}
-
-// hipoRoundBillStraw folds one burned bill into the settled round, one per pass.
-var hipoRoundBillStraw = Straw[BubblePoolRoundTransition]{
-	CheckFuncs: []bubbleCheck{hipoRoundIs(PoolRoundSettled)},
-	Builder:    hipoKeepRound,
-	SingleChild: &Straw[BubblePoolRoundTransition]{
-		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.SbtRevokeMsgOp)},
-		SingleChild: &Straw[BubblePoolRoundTransition]{
-			CheckFuncs:  []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceBillBurnedMsgOp)},
-			SingleChild: hipoOptionalLastBill(),
-		},
-	},
-}
-
-// hipoRoundMintStraw folds the treasury's half of a deposit bill's settlement into the settled
-// round, one per pass. The hGRAM it mints stays a JettonMint, from JettonMintHipoStraw.
-//
-//	bill_burned -> collection -> mint_tokens -> treasury -> proxy_tokens_minted -> parent ->
-//	tokens_minted -> hGRAM wallet
-var hipoRoundMintStraw = Straw[BubblePoolRoundTransition]{
-	CheckFuncs: []bubbleCheck{hipoRoundIs(PoolRoundSettled)},
-	Builder:    hipoKeepRound,
-	SingleChild: &Straw[BubblePoolRoundTransition]{
-		CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(abi.HipoFinanceMintTokensMsgOp)},
-		SingleChild: &Straw[BubblePoolRoundTransition]{
-			CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoParent), HasOperation(abi.HipoFinanceProxyTokensMintedMsgOp)},
-		},
-	},
-}
-
-func hipoOptionalLastBill() *Straw[BubblePoolRoundTransition] {
-	s := Optional(hipoLastBillBurned)
-	return &s
-}
-
-var hipoLastBillBurned = Straw[BubblePoolRoundTransition]{
-	CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(abi.HipoFinanceLastBillBurnedMsgOp)},
-	Builder: func(newAction *BubblePoolRoundTransition, bubble *Bubble) error {
-		tx := bubble.Info.(BubbleTx)
-		if body, ok := tx.decodedBody.Value.(abi.HipoFinanceLastBillBurnedMsgBody); ok {
-			newAction.RoundSince = body.RoundSince
-		}
-		for _, raw := range hipoLogs(bubble)[core.HipoLogFinish] {
-			var log core.HipoFinishLog
-			if core.ParseHipoLog(raw.Body, &log) != nil {
-				continue
-			}
-			staked, recovered := hipoGrams(log.TotalStaked), hipoGrams(log.TotalRecovered)
-			newAction.RoundSince = log.RoundSince
-			newAction.TotalStaked = &staked
-			newAction.TotalRecovered = &recovered
-		}
-		return nil
-	},
 }
 
 // LoanRequestHipoStraw: a validator asks for a loan. The treasury accepts any of the request
@@ -245,6 +96,7 @@ var LoanRequestHipoStraw = Straw[BubbleLoanRequest]{
 		newAction.Implementation = core.StakingImplementationHipo
 		newAction.TonAttached = tx.inputAmount
 		newAction.Success = tx.success
+		newAction.add(bubble)
 		if tx.inputFrom != nil {
 			newAction.Borrower = tx.inputFrom.Address
 		}
@@ -262,31 +114,9 @@ var LoanRequestHipoStraw = Straw[BubbleLoanRequest]{
 	},
 	SingleChild: &Straw[BubbleLoanRequest]{
 		CheckFuncs: []bubbleCheck{IsTx, IsBounced},
+		Builder:    addTransfer[BubbleLoanRequest],
 		Optional:   true,
 	},
-}
-
-// hipoIssueLog finds the log::loan the treasury wrote straight after sending this loan's
-// proxy_new_stake, in the same transaction. The log names the borrower and the amounts; the
-// message names neither.
-func hipoIssueLog(tx BubbleTx) (core.HipoLoanLog, bool) {
-	if tx.inputFrom == nil || tx.inputFrom.Address != references.HipoTreasury {
-		return core.HipoLoanLog{}, false
-	}
-	for _, msg := range tx.senderExternalOut {
-		if msg.CreatedLt != tx.inputLt+1 {
-			continue
-		}
-		if topic, ok := core.HipoLogTopicOf(msg); !ok || topic != core.HipoLogLoan {
-			continue
-		}
-		log, err := core.ParseHipoLoanLog(msg.Body, msg.CreatedAt)
-		if err != nil {
-			return core.HipoLoanLog{}, false
-		}
-		return log, true
-	}
-	return core.HipoLoanLog{}, false
 }
 
 // LoanIssueHipoStraw: the treasury lends, and the loan contract stakes it. The elector leg
@@ -295,26 +125,24 @@ func hipoIssueLog(tx BubbleTx) (core.HipoLoanLog, bool) {
 //	treasury -> proxy_new_stake -> loan -> new_stake -> elector
 var LoanIssueHipoStraw = Straw[BubbleLoanIssue]{
 	CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceProxyNewStakeMsgOp), func(bubble *Bubble) bool {
-		_, ok := hipoIssueLog(bubble.Info.(BubbleTx))
+		_, _, ok := hipoIssueLog(bubble.Info.(BubbleTx))
 		return ok
 	}},
 	Builder: func(newAction *BubbleLoanIssue, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
-		log, _ := hipoIssueLog(tx)
+		log, borrower, _ := hipoIssueLog(tx)
+		newAction.Borrower = borrower
 		newAction.Pool = references.HipoTreasury
 		newAction.Loan = tx.account.Address
 		newAction.Implementation = core.StakingImplementationHipo
 		newAction.Success = tx.success
-		newAction.tonAttached = tx.inputAmount
+		newAction.add(bubble)
 		newAction.RoundSince = log.RoundSince
 		newAction.Amount = hipoGrams(log.LoanAmount)
 		newAction.Accrued = hipoGrams(log.AccrueAmount)
 		newAction.Collateral = hipoGrams(log.StakeAmount)
 		newAction.MinPayment = hipoGrams(log.MinPayment)
-		if borrower, ok := hipoOwner(log.Borrower); ok {
-			newAction.Borrower = borrower
-			hipoCredit(bubble, borrower)
-		}
+		hipoCredit(bubble, borrower)
 		return nil
 	},
 	SingleChild: &Straw[BubbleLoanIssue]{
@@ -331,19 +159,18 @@ var LoanIssueHipoStraw = Straw[BubbleLoanIssue]{
 //	                                         -> take_profit -> governor
 var LoanRepaymentHipoStraw = Straw[BubbleLoanRepayment]{
 	CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(abi.HipoFinanceRecoverStakeResultMsgOp), func(bubble *Bubble) bool {
-		return len(hipoLogs(bubble)[core.HipoLogRepayment]) == 1
+		_, _, ok := hipoRepaymentLog(hipoLogs(bubble))
+		return ok
 	}},
 	Builder: func(newAction *BubbleLoanRepayment, bubble *Bubble) error {
 		tx := bubble.Info.(BubbleTx)
 		logs := hipoLogs(bubble)
-		repayment := logs[core.HipoLogRepayment][0]
-		log, err := core.ParseHipoRepaymentLog(repayment.Body, repayment.CreatedAt)
-		if err != nil {
-			return err
-		}
+		log, borrower, _ := hipoRepaymentLog(logs)
+		newAction.Borrower = borrower
 		newAction.Pool = tx.account.Address
 		newAction.Implementation = core.StakingImplementationHipo
 		newAction.Success = tx.success
+		newAction.add(bubble)
 		if tx.inputFrom != nil {
 			newAction.Loan = tx.inputFrom.Address
 		}
@@ -355,13 +182,9 @@ var LoanRepaymentHipoStraw = Straw[BubbleLoanRepayment]{
 		newAction.ProtocolFee = hipoGrams(log.GovernorShare)
 		newAction.BorrowerPayout = hipoGrams(log.BorrowerShare)
 		newAction.BurnAmount = hipoGrams(log.BurnShare)
-		if borrower, ok := hipoOwner(log.Borrower); ok {
-			newAction.Borrower = borrower
-			hipoCredit(bubble, borrower)
-		}
-		for _, raw := range logs[core.HipoLogDeficit] {
-			var deficit core.HipoDeficitLog
-			if core.ParseHipoLog(raw.Body, &deficit) == nil {
+		hipoCredit(bubble, borrower)
+		for _, value := range logs[core.HipoLogDeficit] {
+			if deficit, ok := value.(core.HipoDeficitLog); ok {
 				shortfall := hipoGrams(deficit.Shortfall)
 				newAction.Shortfall = &shortfall
 			}
@@ -371,19 +194,226 @@ var LoanRepaymentHipoStraw = Straw[BubbleLoanRepayment]{
 	Children: []Straw[BubbleLoanRepayment]{
 		{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceLoanResultMsgOp), hipoFromTreasury},
-			Builder: func(newAction *BubbleLoanRepayment, bubble *Bubble) error {
-				newAction.payoutReceived = bubble.Info.(BubbleTx).inputAmount
-				return nil
-			},
-			Optional: true,
+			Builder:    addTransfer[BubbleLoanRepayment],
+			Optional:   true,
 		},
 		{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceTakeBorrowerFeeMsgOp), hipoFromTreasury},
+			Builder:    addTransfer[BubbleLoanRepayment],
 			Optional:   true,
 		},
 		{
 			CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceTakeProfitMsgOp), hipoFromTreasury},
+			Builder:    addTransfer[BubbleLoanRepayment],
 			Optional:   true,
 		},
 	},
+}
+
+// hipoRoundStepStraw folds the treasury's messages to itself into the round, one per pass:
+// there are as many as the round's loans need, since each one stops at a gas budget and sends
+// the next.
+var hipoRoundStepStraw = Straw[BubblePoolRoundTransition]{
+	CheckFuncs: []bubbleCheck{hipoRoundIs(PoolRoundElection, PoolRoundEnded)},
+	Builder:    hipoKeepRound,
+	SingleChild: &Straw[BubblePoolRoundTransition]{
+		CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), hipoFromTreasury, Or(
+			Or(HasOperation(abi.HipoFinanceDecideLoanRequestsMsgOp), HasOperation(abi.HipoFinanceProcessLoanRequestsMsgOp)),
+			HasOperation(abi.HipoFinanceRecoverStakesMsgOp),
+		)},
+		Builder: addTransfer[BubblePoolRoundTransition],
+	},
+}
+
+// hipoRoundRecoverStraw folds each loan's proxy_recover_stake into the round that asked for
+// it; the elector leg below it stays an ElectionsRecoverStake.
+var hipoRoundRecoverStraw = Straw[BubblePoolRoundTransition]{
+	CheckFuncs: []bubbleCheck{hipoRoundIs(PoolRoundEnded)},
+	Builder:    hipoKeepRound,
+	SingleChild: &Straw[BubblePoolRoundTransition]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceProxyRecoverStakeMsgOp), hipoFromTreasury},
+		Builder:    addTransfer[BubblePoolRoundTransition],
+	},
+}
+
+// hipoRoundBillStraw folds one burned bill into the settled round, one per pass.
+var hipoRoundBillStraw = Straw[BubblePoolRoundTransition]{
+	CheckFuncs: []bubbleCheck{hipoRoundIs(PoolRoundSettled)},
+	Builder:    hipoKeepRound,
+	SingleChild: &Straw[BubblePoolRoundTransition]{
+		CheckFuncs: []bubbleCheck{IsTx, HasOperation(abi.SbtRevokeMsgOp)},
+		Builder:    addTransfer[BubblePoolRoundTransition],
+		SingleChild: &Straw[BubblePoolRoundTransition]{
+			CheckFuncs:  []bubbleCheck{IsTx, HasOperation(abi.HipoFinanceBillBurnedMsgOp)},
+			Builder:     addTransfer[BubblePoolRoundTransition],
+			SingleChild: hipoOptionalLastBill(),
+		},
+	},
+}
+
+// hipoRoundMintStraw folds the treasury's half of a deposit bill's settlement into the settled
+// round, one per pass. The hGRAM it mints stays a JettonMint, from JettonMintHipoStraw.
+//
+//	bill_burned -> collection -> mint_tokens -> treasury -> proxy_tokens_minted -> parent ->
+//	tokens_minted -> hGRAM wallet
+var hipoRoundMintStraw = Straw[BubblePoolRoundTransition]{
+	CheckFuncs: []bubbleCheck{hipoRoundIs(PoolRoundSettled)},
+	Builder:    hipoKeepRound,
+	SingleChild: &Straw[BubblePoolRoundTransition]{
+		CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(abi.HipoFinanceMintTokensMsgOp)},
+		Builder:    addTransfer[BubblePoolRoundTransition],
+		SingleChild: &Straw[BubblePoolRoundTransition]{
+			CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoParent), HasOperation(abi.HipoFinanceProxyTokensMintedMsgOp)},
+			Builder:    addTransfer[BubblePoolRoundTransition],
+		},
+	},
+}
+
+var hipoLastBillBurned = Straw[BubblePoolRoundTransition]{
+	CheckFuncs: []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(abi.HipoFinanceLastBillBurnedMsgOp)},
+	Builder: func(newAction *BubblePoolRoundTransition, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.add(bubble)
+		if body, ok := tx.decodedBody.Value.(abi.HipoFinanceLastBillBurnedMsgBody); ok {
+			newAction.RoundSince = body.RoundSince
+		}
+		for _, value := range hipoLogs(bubble)[core.HipoLogFinish] {
+			if log, ok := value.(core.HipoFinishLog); ok {
+				staked, recovered := hipoGrams(log.TotalStaked), hipoGrams(log.TotalRecovered)
+				newAction.RoundSince = log.RoundSince
+				newAction.TotalStaked = &staked
+				newAction.TotalRecovered = &recovered
+			}
+		}
+		return nil
+	},
+}
+
+func hipoTreasuryExternal(op abi.MsgOpName) []bubbleCheck {
+	return []bubbleCheck{IsTx, IsAccount(references.HipoTreasury), HasOperation(op), func(bubble *Bubble) bool {
+		return bubble.Info.(BubbleTx).external
+	}}
+}
+
+func hipoRoundBuilder(transition PoolRoundTransitionType) func(*BubblePoolRoundTransition, *Bubble) error {
+	return func(newAction *BubblePoolRoundTransition, bubble *Bubble) error {
+		tx := bubble.Info.(BubbleTx)
+		newAction.Pool = tx.account.Address
+		newAction.Transition = transition
+		newAction.Implementation = core.StakingImplementationHipo
+		newAction.Success = tx.success
+		switch body := tx.decodedBody.Value.(type) {
+		case abi.HipoFinanceParticipateInElectionExtInMsgBody:
+			newAction.RoundSince = body.RoundSince
+		case abi.HipoFinanceVsetChangedExtInMsgBody:
+			newAction.RoundSince = body.RoundSince
+		case abi.HipoFinanceFinishParticipationExtInMsgBody:
+			newAction.RoundSince = body.RoundSince
+		}
+		return nil
+	}
+}
+
+func hipoRoundIs(transitions ...PoolRoundTransitionType) bubbleCheck {
+	return func(bubble *Bubble) bool {
+		round, ok := bubble.Info.(BubblePoolRoundTransition)
+		if !ok || round.Implementation != core.StakingImplementationHipo {
+			return false
+		}
+		return slices.Contains(transitions, round.Transition)
+	}
+}
+
+func hipoKeepRound(newAction *BubblePoolRoundTransition, bubble *Bubble) error {
+	*newAction = bubble.Info.(BubblePoolRoundTransition)
+	// the transfers folded in next must not write into the kept round's backing array
+	newAction.transfers = slices.Clip(newAction.transfers)
+	return nil
+}
+
+func hipoOptionalLastBill() *Straw[BubblePoolRoundTransition] {
+	s := Optional(hipoLastBillBurned)
+	return &s
+}
+
+func hipoIssueLog(tx BubbleTx) (core.HipoLoanLog, tongo.AccountID, bool) {
+	// The treasury writes the loan's log::loan straight after sending its proxy_new_stake, in
+	// the same transaction. The log names the borrower and the amounts; the message names
+	// neither.
+	if tx.inputFrom == nil || tx.inputFrom.Address != references.HipoTreasury {
+		return core.HipoLoanLog{}, tongo.AccountID{}, false
+	}
+	for _, msg := range tx.senderExternalOut {
+		if msg.CreatedLt != tx.inputLt+1 {
+			continue
+		}
+		topic, value, ok := core.DecodeHipoLog(msg)
+		if !ok || topic != core.HipoLogLoan {
+			continue
+		}
+		log, ok := value.(core.HipoLoanLog)
+		if !ok {
+			return core.HipoLoanLog{}, tongo.AccountID{}, false
+		}
+		borrower, ok := hipoOwner(log.Borrower)
+		return log, borrower, ok
+	}
+	return core.HipoLoanLog{}, tongo.AccountID{}, false
+}
+
+func hipoLogs(bubble *Bubble) map[core.HipoLogTopic][]any {
+	// Only the treasury's own transaction is read: the topic is an address, so any contract
+	// may emit a message that looks like one of these, and a log is only Hipo's if Hipo's
+	// treasury sent it.
+	tx, ok := bubble.Info.(BubbleTx)
+	if !ok || tx.account.Address != references.HipoTreasury {
+		return nil
+	}
+	var found map[core.HipoLogTopic][]any
+	for _, msg := range tx.externalOut {
+		topic, value, ok := core.DecodeHipoLog(msg)
+		if !ok {
+			continue
+		}
+		if found == nil {
+			found = make(map[core.HipoLogTopic][]any, 2)
+		}
+		found[topic] = append(found[topic], value)
+	}
+	return found
+}
+
+func hipoRepaymentLog(logs map[core.HipoLogTopic][]any) (core.HipoRepaymentLog, tongo.AccountID, bool) {
+	repayments := logs[core.HipoLogRepayment]
+	if len(repayments) != 1 {
+		return core.HipoRepaymentLog{}, tongo.AccountID{}, false
+	}
+	log, ok := repayments[0].(core.HipoRepaymentLog)
+	if !ok {
+		return core.HipoRepaymentLog{}, tongo.AccountID{}, false
+	}
+	borrower, ok := hipoOwner(log.Borrower)
+	return log, borrower, ok
+}
+
+func hipoGrams(g tlb.Grams) int64 {
+	return int64(g)
+}
+
+func hipoVarCoins(c tlb.VarUInteger16) int64 {
+	// A request may claim any 120-bit number; one past int64 is reported as 0 rather than
+	// wrapped, and the treasury refuses it anyway.
+	v := big.Int(c)
+	if !v.IsInt64() {
+		return 0
+	}
+	return v.Int64()
+}
+
+func addTransfer[T any, P interface {
+	*T
+	add(*Bubble)
+}](newAction P, bubble *Bubble) error {
+	newAction.add(bubble)
+	return nil
 }

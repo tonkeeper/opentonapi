@@ -11,8 +11,6 @@ import (
 // round moves through its stages. They are generic, like DepositStake, and say which pool
 // implementation produced them.
 
-type PoolRoundTransitionType string
-
 const (
 	// PoolRoundElection: the pool decided which loans to make and staked them with the elector.
 	PoolRoundElection PoolRoundTransitionType = "election"
@@ -28,6 +26,8 @@ const (
 	PoolRoundSettled PoolRoundTransitionType = "settled"
 )
 
+type PoolRoundTransitionType string
+
 type (
 	LoanRequestAction struct {
 		Borrower       tongo.AccountID
@@ -37,6 +37,7 @@ type (
 		MinPayment     int64
 		TonAttached    int64
 		Implementation core.StakingImplementation
+		transfers
 	}
 	LoanIssueAction struct {
 		Borrower       tongo.AccountID
@@ -48,8 +49,7 @@ type (
 		Collateral     int64
 		MinPayment     int64
 		Implementation core.StakingImplementation
-		// what the pool sent the loan contract: the stake and the fees to place it
-		tonAttached int64
+		transfers
 	}
 	LoanRepaymentAction struct {
 		Borrower       tongo.AccountID
@@ -65,8 +65,7 @@ type (
 		BurnAmount     int64
 		Shortfall      *int64
 		Implementation core.StakingImplementation
-		// what reached the borrower, which is the payout less the cost of sending it
-		payoutReceived int64
+		transfers
 	}
 	PoolRoundTransitionAction struct {
 		Pool           tongo.AccountID
@@ -75,6 +74,15 @@ type (
 		TotalStaked    *int64
 		TotalRecovered *int64
 		Implementation core.StakingImplementation
+		transfers
+	}
+	// transfers are the coins carried by the messages an action absorbed, so that they count
+	// towards the action rather than as an account's unexplained extra
+	transfers []transfer
+	transfer  struct {
+		from   tongo.AccountID
+		to     tongo.AccountID
+		amount int64
 	}
 )
 
@@ -132,4 +140,20 @@ type BubblePoolRoundTransition struct {
 func (b BubblePoolRoundTransition) ToAction() *Action {
 	a := b.PoolRoundTransitionAction
 	return &Action{PoolRoundTransition: &a, Success: b.Success, Type: PoolRoundTransition}
+}
+
+func (t *transfers) add(bubble *Bubble) {
+	tx := bubble.Info.(BubbleTx)
+	if tx.inputFrom == nil {
+		return
+	}
+	*t = append(*t, transfer{from: tx.inputFrom.Address, to: tx.account.Address, amount: tx.inputAmount})
+}
+
+func (t transfers) contributeToExtra(account tongo.AccountID) int64 {
+	var extra int64
+	for _, tr := range t {
+		extra += detectDirection(account, tr.from, tr.to, tr.amount)
+	}
+	return extra
 }

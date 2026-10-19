@@ -390,7 +390,7 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 		return 0
 	}
 	switch a.Type {
-	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed, FlawedJettonTransfer, OracleRequest, BuyXTR, WithdrawXTR, DepositXTR, PoolRoundTransition: // actions without extra
+	case NftItemTransfer, ContractDeploy, UnSubscribe, JettonMint, JettonBurn, WithdrawStakeRequest, DomainRenew, ExtraCurrencyTransfer, DepositTokenStake, WithdrawTokenStakeRequest, AddExtension, RemoveExtension, SetSignatureAllowed, FlawedJettonTransfer, OracleRequest, BuyXTR, WithdrawXTR, DepositXTR: // actions without extra
 		return 0
 	case Purchase:
 		if a.Purchase.Price.Currency.Type == core.CurrencyNative {
@@ -453,11 +453,13 @@ func (a Action) ContributeToExtra(account tongo.AccountID) int64 {
 	case WithdrawStake:
 		return detectDirection(account, a.WithdrawStake.Pool, a.WithdrawStake.Staker, a.WithdrawStake.Amount)
 	case LoanRequest:
-		return detectDirection(account, a.LoanRequest.Borrower, a.LoanRequest.Pool, a.LoanRequest.TonAttached)
+		return a.LoanRequest.contributeToExtra(account)
 	case LoanIssue:
-		return detectDirection(account, a.LoanIssue.Pool, a.LoanIssue.Loan, a.LoanIssue.tonAttached)
+		return a.LoanIssue.contributeToExtra(account)
 	case LoanRepayment:
-		return detectDirection(account, a.LoanRepayment.Pool, a.LoanRepayment.Borrower, a.LoanRepayment.payoutReceived)
+		return a.LoanRepayment.contributeToExtra(account)
+	case PoolRoundTransition:
+		return a.PoolRoundTransition.contributeToExtra(account)
 	case LiquidityDeposit:
 		extra := int64(0)
 		for _, token := range a.LiquidityDepositAction.Tokens {

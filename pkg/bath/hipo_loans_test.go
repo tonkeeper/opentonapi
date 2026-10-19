@@ -11,6 +11,7 @@ import (
 	"github.com/tonkeeper/tongo"
 	"github.com/tonkeeper/tongo/abi"
 	"github.com/tonkeeper/tongo/boc"
+	"github.com/tonkeeper/tongo/tlb"
 )
 
 // Real logs, the same ones pkg/core's parser tests read.
@@ -175,4 +176,101 @@ func TestHipoLoanStrawsRejectForgeries(t *testing.T) {
 		forged := hipoFrom(hipoTx(attacker, abi.HipoFinanceRequestLoanV4MsgOp), attacker)
 		require.False(t, LoanRequestHipoStraw.Merge(forged))
 	})
+}
+
+func TestHipoLoanActionsAccountForTheirTransfers(t *testing.T) {
+	loan := tongo.MustParseAccountID("-1:1e530983ee3f8be8529cc6c03199953f9fe9b46f7845219f78e888968e9c54ea")
+	borrower := tongo.MustParseAccountID("0:2222222222222222222222222222222222222222222222222222222222222222")
+	governor := tongo.MustParseAccountID("0:3333333333333333333333333333333333333333333333333333333333333333")
+	collection := tongo.MustParseAccountID("0:4444444444444444444444444444444444444444444444444444444444444444")
+
+	t.Run("a repayment counts every leg it absorbs", func(t *testing.T) {
+		result := hipoLogged(hipoPaid(hipoFrom(hipoTx(references.HipoTreasury, abi.HipoFinanceRecoverStakeResultMsgOp,
+			hipoPaid(hipoFrom(hipoTx(borrower, abi.HipoFinanceLoanResultMsgOp), references.HipoTreasury), 30),
+			hipoPaid(hipoFrom(hipoTx(references.HipoBurner, abi.HipoFinanceTakeBorrowerFeeMsgOp), references.HipoTreasury), 5),
+			hipoPaid(hipoFrom(hipoTx(governor, abi.HipoFinanceTakeProfitMsgOp), references.HipoTreasury), 7),
+		), loan), 1000), hipoLogMsg(t, core.HipoLogRepayment, 1, hipoRepaymentLogBody))
+		require.True(t, LoanRepaymentHipoStraw.Merge(result))
+		action := result.Info.(BubbleLoanRepayment).ToAction()
+		require.Equal(t, int64(-1000), action.ContributeToExtra(loan))
+		require.Equal(t, int64(1000-30-5-7), action.ContributeToExtra(references.HipoTreasury))
+		require.Equal(t, int64(30), action.ContributeToExtra(borrower))
+		require.Equal(t, int64(5), action.ContributeToExtra(references.HipoBurner))
+		require.Equal(t, int64(7), action.ContributeToExtra(governor))
+	})
+
+	t.Run("a refused request counts its refund", func(t *testing.T) {
+		request := hipoPaid(hipoFrom(hipoTx(references.HipoTreasury, abi.HipoFinanceRequestLoanV4MsgOp,
+			hipoBounced(hipoPaid(hipoFrom(hipoTx(borrower, abi.HipoFinanceRequestLoanV4MsgOp), references.HipoTreasury), 999)),
+		), borrower), 1000)
+		require.True(t, LoanRequestHipoStraw.Merge(request))
+		action := request.Info.(BubbleLoanRequest).ToAction()
+		require.Equal(t, int64(-1), action.ContributeToExtra(borrower))
+		require.Equal(t, int64(1), action.ContributeToExtra(references.HipoTreasury))
+	})
+
+	t.Run("a round counts the stakes it asks back and the bills it burns", func(t *testing.T) {
+		round := hipoExternal(hipoTx(references.HipoTreasury, abi.HipoFinanceFinishParticipationExtInMsgOp,
+			hipoFrom(hipoTx(references.HipoTreasury, abi.HipoFinanceRecoverStakesMsgOp,
+				hipoPaid(hipoFrom(hipoTx(loan, abi.HipoFinanceProxyRecoverStakeMsgOp), references.HipoTreasury), 2),
+			), references.HipoTreasury),
+		), abi.HipoFinanceFinishParticipationExtInMsgBody{RoundSince: 1792102152})
+		MergeAllBubbles(round, []Merger{PoolRoundEndedHipoStraw, hipoRoundStepStraw, hipoRoundRecoverStraw})
+		action := round.Info.(BubblePoolRoundTransition).ToAction()
+		require.Equal(t, int64(-2), action.ContributeToExtra(references.HipoTreasury))
+		require.Equal(t, int64(2), action.ContributeToExtra(loan))
+
+		burn := hipoPaid(hipoFrom(hipoTx(collection, abi.HipoFinanceBurnAllMsgOp,
+			hipoPaid(hipoFrom(hipoTx(references.HipoTreasury, abi.HipoFinanceLastBillBurnedMsgOp), collection), 3),
+		), references.HipoTreasury), 4)
+		require.True(t, PoolRoundSettledHipoStraw.Merge(burn))
+		action = burn.Info.(BubblePoolRoundTransition).ToAction()
+		require.Equal(t, int64(-4+3), action.ContributeToExtra(references.HipoTreasury))
+		require.Equal(t, int64(4-3), action.ContributeToExtra(collection))
+	})
+}
+
+func TestHipoLoanStrawsSkipUnreadableLogs(t *testing.T) {
+	loan := tongo.MustParseAccountID("-1:1e530983ee3f8be8529cc6c03199953f9fe9b46f7845219f78e888968e9c54ea")
+
+	t.Run("a repayment log that does not fit its layout", func(t *testing.T) {
+		log := hipoLogMsg(t, core.HipoLogRepayment, 1, hipoRepaymentLogBody)
+		log.CreatedAt = 0
+		result := hipoLogged(hipoFrom(hipoTx(references.HipoTreasury, abi.HipoFinanceRecoverStakeResultMsgOp), loan), log)
+		require.False(t, LoanRepaymentHipoStraw.Merge(result))
+	})
+	t.Run("a loan log that names no borrower", func(t *testing.T) {
+		cell := boc.NewCell()
+		require.NoError(t, tlb.Marshal(cell, core.HipoLoanLog{RoundSince: 1, Borrower: tlb.MsgAddress{SumType: "AddrNone"}}))
+		body, err := cell.ToBoc()
+		require.NoError(t, err)
+		log := hipoLogMsg(t, core.HipoLogLoan, 101, hipoLoanLogBody)
+		log.Body = body
+		issue := hipoSent(hipoFrom(hipoTx(loan, abi.HipoFinanceProxyNewStakeMsgOp), references.HipoTreasury), 100, log)
+		require.False(t, LoanIssueHipoStraw.Merge(issue))
+	})
+}
+
+func TestHipoSettledRoundIsNamedByTheLastRepayment(t *testing.T) {
+	collection := tongo.MustParseAccountID("0:4444444444444444444444444444444444444444444444444444444444444444")
+	burn := hipoSent(hipoFrom(hipoTx(collection, abi.HipoFinanceBurnAllMsgOp), references.HipoTreasury), 10,
+		hipoLogMsg(t, core.HipoLogRepayment, 11, hipoRepaymentLogBody))
+	require.True(t, PoolRoundSettledHipoStraw.Merge(burn))
+	want, err := core.ParseHipoRepaymentLog(mustHex(t, hipoRepaymentLogBody), hipoRepaymentLogAt)
+	require.NoError(t, err)
+	require.Equal(t, want.RoundSince, burn.Info.(BubblePoolRoundTransition).RoundSince)
+}
+
+func hipoPaid(b *Bubble, amount int64) *Bubble {
+	tx := b.Info.(BubbleTx)
+	tx.inputAmount = amount
+	b.Info = tx
+	return b
+}
+
+func hipoBounced(b *Bubble) *Bubble {
+	tx := b.Info.(BubbleTx)
+	tx.bounced = true
+	b.Info = tx
+	return b
 }

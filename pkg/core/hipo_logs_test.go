@@ -228,3 +228,31 @@ func TestHipoBurnerLogsDecodeOnlyFromTheBurner(t *testing.T) {
 	_, ok = decodeHipoBurnerLog(&treasury, &topic, body)
 	require.False(t, ok)
 }
+
+func TestHipoDecodeLog(t *testing.T) {
+	topic := boc.NewBitString(256)
+	require.NoError(t, topic.WriteBigUint(big.NewInt(int64(HipoLogRepayment)), 256))
+	msg := Message{MsgType: ExtOutMsg, DestinationExtern: &topic, Body: mustHex(t, hipoRepaymentLogBody), CreatedAt: hipoBorrowerFeeRelease - 1}
+
+	t.Run("parses the body when nothing decoded it", func(t *testing.T) {
+		got, value, ok := DecodeHipoLog(msg)
+		require.True(t, ok)
+		require.Equal(t, HipoLogRepayment, got)
+		require.IsType(t, HipoRepaymentLog{}, value)
+	})
+	t.Run("reuses the decoded body", func(t *testing.T) {
+		decoded := HipoRepaymentLog{RoundSince: 42}
+		reused := msg
+		reused.Body = []byte{1, 2, 3}
+		reused.DecodedBody = &DecodedMessageBody{Operation: "HipoFinanceLogRepayment", Value: decoded}
+		_, value, ok := DecodeHipoLog(reused)
+		require.True(t, ok)
+		require.Equal(t, decoded, value)
+	})
+	t.Run("a body that does not fit is refused", func(t *testing.T) {
+		unknownTime := msg
+		unknownTime.CreatedAt = 0
+		_, _, ok := DecodeHipoLog(unknownTime)
+		require.False(t, ok)
+	})
+}

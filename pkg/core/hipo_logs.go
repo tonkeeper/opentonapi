@@ -25,7 +25,6 @@ import (
 // Layouts follow log_loan, log_repayment and log_finish in contracts/imports/utils.fc, and
 // log_deficit in treasury.fc. Amounts are Coins; borrower_reward_share and borrower_fee are
 // rates out of 65535, not amounts.
-type HipoLogTopic uint64
 
 const (
 	HipoLogLoan                HipoLogTopic = 1
@@ -44,11 +43,28 @@ const (
 // 2026-09-05 at 17:29:33 UTC; every log written after it is in the new layout.
 const hipoBorrowerFeeRelease = 1788629373
 
-// hipoCurrentLayout also takes a log of unknown time, 0, as current: a store that does not
-// keep the time of external-out messages would otherwise misread every new log.
-func hipoCurrentLayout(createdAt uint32) bool {
-	return createdAt == 0 || createdAt >= hipoBorrowerFeeRelease
+// each log is named the way a decoded message is named
+var hipoLogOperations = map[HipoLogTopic]string{
+	HipoLogLoan:                "HipoFinanceLogLoan",
+	HipoLogRepayment:           "HipoFinanceLogRepayment",
+	HipoLogFinish:              "HipoFinanceLogFinish",
+	HipoLogFailedBurningTokens: "HipoFinanceLogFailedBurningTokens",
+	HipoLogDeficit:             "HipoFinanceLogDeficit",
 }
+
+var hipoBurnerLogs = map[uint64]struct {
+	operation string
+	layout    func() any
+}{
+	1: {"HipoBurnerLogReceived", func() any { return &HipoBurnerReceivedLog{} }},
+	2: {"HipoBurnerLogDeposit", func() any { return &HipoBurnerDepositLog{} }},
+	3: {"HipoBurnerLogSwap", func() any { return &HipoBurnerSwapLog{} }},
+	4: {"HipoBurnerLogBurn", func() any { return &HipoBurnerBurnLog{} }},
+	5: {"HipoBurnerLogDiscovery", func() any { return &HipoBurnerDiscoveryLog{} }},
+	6: {"HipoBurnerLogUpgrade", func() any { return &HipoBurnerUpgradeLog{} }},
+}
+
+type HipoLogTopic uint64
 
 // HipoLoanLog is emitted once per loan the treasury hands out, as the round is distributed.
 type HipoLoanLog struct {
@@ -83,74 +99,6 @@ type HipoRepaymentLog struct {
 	Borrower  tlb.MsgAddress
 }
 
-// the pre-2026-09-05 shapes, kept only so that history still parses
-type hipoLoanLogV1 struct {
-	RoundSince          uint32
-	MinPayment          tlb.Grams
-	BorrowerRewardShare uint8
-	LoanAmount          tlb.Grams
-	AccrueAmount        tlb.Grams
-	StakeAmount         tlb.Grams
-	Borrower            tlb.MsgAddress
-}
-
-type hipoRepaymentLogV1 struct {
-	RoundSince      uint32
-	RepaymentAmount tlb.Grams
-	LoanAmount      tlb.Grams
-	AccrueAmount    tlb.Grams
-	StakersShare    tlb.Grams
-	GovernorShare   tlb.Grams
-	BorrowerShare   tlb.Grams
-	Borrower        tlb.MsgAddress
-}
-
-// ParseHipoLoanLog reads a log::loan body written at createdAt.
-func ParseHipoLoanLog(body []byte, createdAt uint32) (HipoLoanLog, error) {
-	if hipoCurrentLayout(createdAt) {
-		var log HipoLoanLog
-		err := ParseHipoLog(body, &log)
-		return log, err
-	}
-	var old hipoLoanLogV1
-	if err := ParseHipoLog(body, &old); err != nil {
-		return HipoLoanLog{}, err
-	}
-	return HipoLoanLog{
-		RoundSince: old.RoundSince,
-		MinPayment: old.MinPayment,
-		// 255 -> 65535, the conversion the contract's own note prescribes.
-		BorrowerRewardShare: uint16(old.BorrowerRewardShare) * 257,
-		LoanAmount:          old.LoanAmount,
-		AccrueAmount:        old.AccrueAmount,
-		StakeAmount:         old.StakeAmount,
-		Borrower:            old.Borrower,
-	}, nil
-}
-
-// ParseHipoRepaymentLog reads a log::repayment body written at createdAt.
-func ParseHipoRepaymentLog(body []byte, createdAt uint32) (HipoRepaymentLog, error) {
-	if hipoCurrentLayout(createdAt) {
-		var log HipoRepaymentLog
-		err := ParseHipoLog(body, &log)
-		return log, err
-	}
-	var old hipoRepaymentLogV1
-	if err := ParseHipoLog(body, &old); err != nil {
-		return HipoRepaymentLog{}, err
-	}
-	return HipoRepaymentLog{
-		RoundSince:      old.RoundSince,
-		RepaymentAmount: old.RepaymentAmount,
-		LoanAmount:      old.LoanAmount,
-		AccrueAmount:    old.AccrueAmount,
-		StakersShare:    old.StakersShare,
-		GovernorShare:   old.GovernorShare,
-		BorrowerShare:   old.BorrowerShare,
-		Borrower:        old.Borrower,
-	}, nil
-}
-
 // HipoFinishLog is emitted once per round, when its last loan has been recovered.
 type HipoFinishLog struct {
 	RoundSince     uint32
@@ -179,101 +127,6 @@ type HipoDeficitLog struct {
 	Shortfall    tlb.Grams
 	Deficit      tlb.Grams
 	Borrower     tlb.MsgAddress
-}
-
-// HipoLogTopicOf reads the topic out of a message's destination, which is where emit_log
-// writes it. It returns false for anything that is not one of Hipo's logs. It does not check
-// who wrote the message: a topic is just an address, and any contract can write to it, so
-// callers must check that the treasury did.
-func HipoLogTopicOf(msg Message) (HipoLogTopic, bool) {
-	if msg.MsgType != ExtOutMsg {
-		return 0, false
-	}
-	return hipoTopic(msg.DestinationExtern)
-}
-
-func hipoTopic(dest *ExternalAddress) (HipoLogTopic, bool) {
-	if dest == nil || dest.BitsAvailableForRead() != 256 {
-		return 0, false
-	}
-	copied := dest.Copy()
-	// ReadUint stops at 64 bits.
-	value, err := copied.ReadBigUint(256)
-	if err != nil || !value.IsUint64() {
-		return 0, false
-	}
-	switch topic := HipoLogTopic(value.Uint64()); topic {
-	case HipoLogLoan, HipoLogRepayment, HipoLogFinish, HipoLogFailedBurningTokens, HipoLogDeficit:
-		return topic, true
-	}
-	return 0, false
-}
-
-// hipoLogOperations names each log the way a decoded message is named.
-var hipoLogOperations = map[HipoLogTopic]string{
-	HipoLogLoan:                "HipoFinanceLogLoan",
-	HipoLogRepayment:           "HipoFinanceLogRepayment",
-	HipoLogFinish:              "HipoFinanceLogFinish",
-	HipoLogFailedBurningTokens: "HipoFinanceLogFailedBurningTokens",
-	HipoLogDeficit:             "HipoFinanceLogDeficit",
-}
-
-// decodeHipoLog decodes an external-out message the treasury wrote with emit_log, which abi
-// cannot: it dispatches on a body op-code, and these bodies start at round_since. Only the
-// treasury's own messages are read.
-func decodeHipoLog(source *ton.AccountID, dest *ExternalAddress, body []byte, createdAt uint32) (*DecodedMessageBody, bool) {
-	if source == nil || *source != references.HipoTreasury {
-		return nil, false
-	}
-	topic, ok := hipoTopic(dest)
-	if !ok {
-		return nil, false
-	}
-	var value any
-	var err error
-	switch topic {
-	case HipoLogLoan:
-		value, err = ParseHipoLoanLog(body, createdAt)
-	case HipoLogRepayment:
-		value, err = ParseHipoRepaymentLog(body, createdAt)
-	case HipoLogFinish:
-		var log HipoFinishLog
-		err, value = ParseHipoLog(body, &log), log
-	case HipoLogFailedBurningTokens:
-		var log HipoFailedBurningLog
-		err, value = ParseHipoLog(body, &log), log
-	case HipoLogDeficit:
-		var log HipoDeficitLog
-		err, value = ParseHipoLog(body, &log), log
-	}
-	if err != nil {
-		return nil, false
-	}
-	return &DecodedMessageBody{Operation: hipoLogOperations[topic], Value: value}, true
-}
-
-// ParseHipoLog unmarshals one log body into dst and insists the body was consumed exactly.
-// That last part is the only defence against a layout that has drifted from the contract: a
-// field read at the wrong width still decodes and still yields a plausible number, and
-// nothing but the leftover bits says otherwise.
-func ParseHipoLog(body []byte, dst any) error {
-	if len(body) == 0 {
-		return fmt.Errorf("empty body")
-	}
-	cells, err := boc.DeserializeBoc(body)
-	if err != nil {
-		return err
-	}
-	if len(cells) != 1 {
-		return fmt.Errorf("expected one root cell, got %d", len(cells))
-	}
-	if err := tlb.Unmarshal(cells[0], dst); err != nil {
-		return err
-	}
-	if left := cells[0].BitsAvailableForRead(); left != 0 {
-		return fmt.Errorf("%d bits left unread: the layout does not match the contract", left)
-	}
-	return nil
 }
 
 // Hipo's burner logs the same way, with topics of its own (contracts/burner.fc in
@@ -311,16 +164,183 @@ type HipoBurnerUpgradeLog struct {
 	Source  tlb.MsgAddress
 }
 
-var hipoBurnerLogs = map[uint64]struct {
-	operation string
-	layout    func() any
-}{
-	1: {"HipoBurnerLogReceived", func() any { return &HipoBurnerReceivedLog{} }},
-	2: {"HipoBurnerLogDeposit", func() any { return &HipoBurnerDepositLog{} }},
-	3: {"HipoBurnerLogSwap", func() any { return &HipoBurnerSwapLog{} }},
-	4: {"HipoBurnerLogBurn", func() any { return &HipoBurnerBurnLog{} }},
-	5: {"HipoBurnerLogDiscovery", func() any { return &HipoBurnerDiscoveryLog{} }},
-	6: {"HipoBurnerLogUpgrade", func() any { return &HipoBurnerUpgradeLog{} }},
+// the pre-2026-09-05 shapes, kept only so that history still parses
+type hipoLoanLogV1 struct {
+	RoundSince          uint32
+	MinPayment          tlb.Grams
+	BorrowerRewardShare uint8
+	LoanAmount          tlb.Grams
+	AccrueAmount        tlb.Grams
+	StakeAmount         tlb.Grams
+	Borrower            tlb.MsgAddress
+}
+
+type hipoRepaymentLogV1 struct {
+	RoundSince      uint32
+	RepaymentAmount tlb.Grams
+	LoanAmount      tlb.Grams
+	AccrueAmount    tlb.Grams
+	StakersShare    tlb.Grams
+	GovernorShare   tlb.Grams
+	BorrowerShare   tlb.Grams
+	Borrower        tlb.MsgAddress
+}
+
+func ParseHipoLoanLog(body []byte, createdAt uint32) (HipoLoanLog, error) {
+	if hipoCurrentLayout(createdAt) {
+		var log HipoLoanLog
+		err := ParseHipoLog(body, &log)
+		return log, err
+	}
+	var old hipoLoanLogV1
+	if err := ParseHipoLog(body, &old); err != nil {
+		return HipoLoanLog{}, err
+	}
+	return HipoLoanLog{
+		RoundSince: old.RoundSince,
+		MinPayment: old.MinPayment,
+		// 255 -> 65535, the conversion the contract's own note prescribes.
+		BorrowerRewardShare: uint16(old.BorrowerRewardShare) * 257,
+		LoanAmount:          old.LoanAmount,
+		AccrueAmount:        old.AccrueAmount,
+		StakeAmount:         old.StakeAmount,
+		Borrower:            old.Borrower,
+	}, nil
+}
+
+func ParseHipoRepaymentLog(body []byte, createdAt uint32) (HipoRepaymentLog, error) {
+	if hipoCurrentLayout(createdAt) {
+		var log HipoRepaymentLog
+		err := ParseHipoLog(body, &log)
+		return log, err
+	}
+	var old hipoRepaymentLogV1
+	if err := ParseHipoLog(body, &old); err != nil {
+		return HipoRepaymentLog{}, err
+	}
+	return HipoRepaymentLog{
+		RoundSince:      old.RoundSince,
+		RepaymentAmount: old.RepaymentAmount,
+		LoanAmount:      old.LoanAmount,
+		AccrueAmount:    old.AccrueAmount,
+		StakersShare:    old.StakersShare,
+		GovernorShare:   old.GovernorShare,
+		BorrowerShare:   old.BorrowerShare,
+		Borrower:        old.Borrower,
+	}, nil
+}
+
+func HipoLogTopicOf(msg Message) (HipoLogTopic, bool) {
+	// The topic is just an address any contract can write to: callers must check that the
+	// treasury wrote the message.
+	if msg.MsgType != ExtOutMsg {
+		return 0, false
+	}
+	return hipoTopic(msg.DestinationExtern)
+}
+
+func DecodeHipoLog(msg Message) (HipoLogTopic, any, bool) {
+	topic, ok := HipoLogTopicOf(msg)
+	if !ok {
+		return 0, nil, false
+	}
+	// ConvertMessage has already decoded the logs of the treasury it saw; a store may not have.
+	if msg.DecodedBody != nil && msg.DecodedBody.Operation == hipoLogOperations[topic] {
+		switch msg.DecodedBody.Value.(type) {
+		case HipoLoanLog, HipoRepaymentLog, HipoFinishLog, HipoFailedBurningLog, HipoDeficitLog:
+			return topic, msg.DecodedBody.Value, true
+		}
+	}
+	value, err := parseHipoLog(topic, msg.Body, msg.CreatedAt)
+	if err != nil {
+		return 0, nil, false
+	}
+	return topic, value, true
+}
+
+func ParseHipoLog(body []byte, dst any) error {
+	if len(body) == 0 {
+		return fmt.Errorf("empty body")
+	}
+	cells, err := boc.DeserializeBoc(body)
+	if err != nil {
+		return err
+	}
+	if len(cells) != 1 {
+		return fmt.Errorf("expected one root cell, got %d", len(cells))
+	}
+	if err := tlb.Unmarshal(cells[0], dst); err != nil {
+		return err
+	}
+	// The body must be consumed exactly. That is the only defence against a layout that has
+	// drifted from the contract: a field read at the wrong width still decodes and still
+	// yields a plausible number, and nothing but the leftover bits says otherwise.
+	if left := cells[0].BitsAvailableForRead(); left != 0 {
+		return fmt.Errorf("%d bits left unread: the layout does not match the contract", left)
+	}
+	return nil
+}
+
+func decodeHipoLog(source *ton.AccountID, dest *ExternalAddress, body []byte, createdAt uint32) (*DecodedMessageBody, bool) {
+	// abi cannot decode these: it dispatches on a body op-code, and these bodies start at
+	// round_since. Only the treasury's own messages are read.
+	if source == nil || *source != references.HipoTreasury {
+		return nil, false
+	}
+	topic, ok := hipoTopic(dest)
+	if !ok {
+		return nil, false
+	}
+	value, err := parseHipoLog(topic, body, createdAt)
+	if err != nil {
+		return nil, false
+	}
+	return &DecodedMessageBody{Operation: hipoLogOperations[topic], Value: value}, true
+}
+
+func parseHipoLog(topic HipoLogTopic, body []byte, createdAt uint32) (any, error) {
+	switch topic {
+	case HipoLogLoan:
+		return ParseHipoLoanLog(body, createdAt)
+	case HipoLogRepayment:
+		return ParseHipoRepaymentLog(body, createdAt)
+	case HipoLogFinish:
+		var log HipoFinishLog
+		err := ParseHipoLog(body, &log)
+		return log, err
+	case HipoLogFailedBurningTokens:
+		var log HipoFailedBurningLog
+		err := ParseHipoLog(body, &log)
+		return log, err
+	case HipoLogDeficit:
+		var log HipoDeficitLog
+		err := ParseHipoLog(body, &log)
+		return log, err
+	}
+	return nil, fmt.Errorf("unknown hipo log topic %d", topic)
+}
+
+func hipoCurrentLayout(createdAt uint32) bool {
+	// A log of unknown time, 0, is taken as current: a store that does not keep the time of
+	// external-out messages would otherwise misread every new log.
+	return createdAt == 0 || createdAt >= hipoBorrowerFeeRelease
+}
+
+func hipoTopic(dest *ExternalAddress) (HipoLogTopic, bool) {
+	if dest == nil || dest.BitsAvailableForRead() != 256 {
+		return 0, false
+	}
+	copied := dest.Copy()
+	// ReadUint stops at 64 bits.
+	value, err := copied.ReadBigUint(256)
+	if err != nil || !value.IsUint64() {
+		return 0, false
+	}
+	switch topic := HipoLogTopic(value.Uint64()); topic {
+	case HipoLogLoan, HipoLogRepayment, HipoLogFinish, HipoLogFailedBurningTokens, HipoLogDeficit:
+		return topic, true
+	}
+	return 0, false
 }
 
 func decodeHipoBurnerLog(source *ton.AccountID, dest *ExternalAddress, body []byte) (*DecodedMessageBody, bool) {

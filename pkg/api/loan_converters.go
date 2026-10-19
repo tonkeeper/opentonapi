@@ -9,9 +9,12 @@ import (
 	"github.com/tonkeeper/tongo"
 )
 
-// roundStart names a validation round by when it starts, which is what round_since is.
-func roundStart(roundSince uint32) string {
-	return time.Unix(int64(roundSince), 0).UTC().Format("2006-01-02 15:04 UTC")
+var poolRoundTransitionMessages = map[bath.PoolRoundTransitionType]i18n.M{
+	bath.PoolRoundElection:  {ID: "poolRoundElection", Other: "Loans decided for the validation round starting {{.Round}}"},
+	bath.PoolRoundBegan:     {ID: "poolRoundBegan", Other: "Validation round starting {{.Round}} began"},
+	bath.PoolRoundValidated: {ID: "poolRoundValidated", Other: "Validation round starting {{.Round}} finished, its stakes are held"},
+	bath.PoolRoundEnded:     {ID: "poolRoundEnded", Other: "Stakes of the validation round starting {{.Round}} released"},
+	bath.PoolRoundSettled:   {ID: "poolRoundSettled", Other: "Validation round starting {{.Round}} settled"},
 }
 
 func (h *Handler) convertLoanRequestAction(a *bath.LoanRequestAction, acceptLanguage string, viewer *tongo.AccountID) (oas.OptLoanRequestAction, oas.ActionSimplePreview) {
@@ -119,18 +122,12 @@ func (h *Handler) convertPoolRoundTransitionAction(a *bath.PoolRoundTransitionAc
 	}
 	var action oas.OptPoolRoundTransitionAction
 	action.SetTo(transition)
-	messages := map[bath.PoolRoundTransitionType]i18n.M{
-		bath.PoolRoundElection:  {ID: "poolRoundElection", Other: "Loans decided for the validation round starting {{.Round}}"},
-		bath.PoolRoundBegan:     {ID: "poolRoundBegan", Other: "Validation round starting {{.Round}} began"},
-		bath.PoolRoundValidated: {ID: "poolRoundValidated", Other: "Validation round starting {{.Round}} finished, its stakes are held"},
-		bath.PoolRoundEnded:     {ID: "poolRoundEnded", Other: "Stakes of the validation round starting {{.Round}} released"},
-		bath.PoolRoundSettled:   {ID: "poolRoundSettled", Other: "Validation round starting {{.Round}} settled"},
-	}
 	preview := oas.ActionSimplePreview{
 		Name:     "Validation Round",
 		Accounts: distinctAccounts(viewer, h.addressBook, &a.Pool),
 	}
-	if message, ok := messages[a.Transition]; ok {
+	// a round of unknown start is left undescribed rather than dated 1970
+	if message, ok := poolRoundTransitionMessages[a.Transition]; ok && a.RoundSince != 0 {
 		preview.Description = i18n.T(acceptLanguage, i18n.C{
 			DefaultMessage: &message,
 			TemplateData:   i18n.Template{"Round": roundStart(a.RoundSince)},
@@ -140,4 +137,8 @@ func (h *Handler) convertPoolRoundTransitionAction(a *bath.PoolRoundTransitionAc
 		preview.Value = oas.NewOptString(i18n.FormatGrams(*a.TotalRecovered - *a.TotalStaked))
 	}
 	return action, preview
+}
+
+func roundStart(roundSince uint32) string {
+	return time.Unix(int64(roundSince), 0).UTC().Format("2006-01-02 15:04 UTC")
 }
