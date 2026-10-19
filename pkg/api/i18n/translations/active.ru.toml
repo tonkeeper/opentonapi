@@ -85,3 +85,47 @@ other = "Продление домена {{.Value}}"
 [purchaseAction]
 hash = "sha1-980bac6469ccaf2a7cb30f4969696164587599aa"
 other = "Оплата инвойса #{{.InvoiceID}}"
+
+[loanRequestAction]
+hash = "sha1-0219cb6c8a822e50f1a9851363d22381cc5bac36"
+other = "Запрос займа {{.Amount}} на раунд валидации с {{.Round}}"
+
+[loanRequestActionNoAmount]
+hash = "sha1-76f7a8ce80a985773b4d91f276d88fdb75035eff"
+other = "Запрос займа на раунд валидации с {{.Round}}"
+
+[loanRequestActionNoRound]
+hash = "sha1-3d60b7a1b7bc3cbe8be69e6e714cfbd7b7d537f9"
+other = "Запрос займа {{.Amount}}"
+
+[loanRequestActionNoAmountNoRound]
+hash = "sha1-e4d6e764b0b1db536309320874a24b4c4959338b"
+other = "Запрос займа"
+
+[loanIssueAction]
+hash = "sha1-3d379be019c3b56497df2dec3d745ad0e5d380a8"
+other = "Заём {{.Amount}} валидатору на раунд с {{.Round}}"
+
+[loanRepaymentAction]
+hash = "sha1-c302addb6b3820552191fac6d50d3487f86589e2"
+other = "Заём {{.Amount}} погашен, стейкеры заработали {{.Reward}}"
+
+[poolRoundElection]
+hash = "sha1-359508a03cbb4e6fd22da276d0c5971044448257"
+other = "Займы на раунд валидации с {{.Round}} распределены"
+
+[poolRoundBegan]
+hash = "sha1-8040e6a6ad559ff686898e199df98b0aa6bd01b3"
+other = "Раунд валидации с {{.Round}} начался"
+
+[poolRoundValidated]
+hash = "sha1-65d7ffdec8e38d6d18ab67ef7bb6c36f1a5d781d"
+other = "Раунд валидации с {{.Round}} завершён, стейки удерживаются"
+
+[poolRoundEnded]
+hash = "sha1-4bd25ed40dd559c31248ac93fa76fad1a255e265"
+other = "Стейки раунда валидации с {{.Round}} освобождены"
+
+[poolRoundSettled]
+hash = "sha1-99e721d3c3f554f301b73e2816712baf3690c388"
+other = "Раунд валидации с {{.Round}} рассчитан"

@@ -1,0 +1,27 @@
+{
+   "Actions": [
+     {
+       "PoolRoundTransition": {
+         "Pool": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+         "RoundSince": 1792102152,
+         "Transition": "began",
+         "TotalStaked": null,
+         "TotalRecovered": null,
+         "Implementation": "hipo"
+       },
+       "Success": true,
+       "Type": "PoolRoundTransition",
+       "BaseTransactions": [
+         "87a89f582a6d372beece6a29aa5d306240065fdfe00897263fd5925d0e248e60"
+       ]
+     }
+   ],
+   "Accounts": [
+     {
+       "Account": "0:8bc991cfe177bc7e9721433efa3befd199485a55cffd040a06c89af026b71bcf",
+       "Ton": -618761,
+       "Fee": 618761,
+       "Jettons": null
+     }
+   ]
+ }

@@ -1223,6 +1223,15 @@
      "LiquidityDeposit": {
       "$ref": "#/components/schemas/LiquidityDepositAction"
      },
+     "LoanIssue": {
+      "$ref": "#/components/schemas/LoanIssueAction"
+     },
+     "LoanRepayment": {
+      "$ref": "#/components/schemas/LoanRepaymentAction"
+     },
+     "LoanRequest": {
+      "$ref": "#/components/schemas/LoanRequestAction"
+     },
      "NftItemTransfer": {
       "$ref": "#/components/schemas/NftItemTransferAction"
      },
@@ -1231,6 +1240,9 @@
      },
      "OracleRequest": {
       "$ref": "#/components/schemas/OracleRequestAction"
+     },
+     "PoolRoundTransition": {
+      "$ref": "#/components/schemas/PoolRoundTransitionAction"
      },
      "Purchase": {
       "$ref": "#/components/schemas/PurchaseAction"
@@ -1318,6 +1330,10 @@
        "BuyXTR",
        "DepositXTR",
        "WithdrawXTR",
+       "LoanRequest",
+       "LoanIssue",
+       "LoanRepayment",
+       "PoolRoundTransition",
        "Unknown"
       ],
       "example": "TonTransfer",
@@ -4898,6 +4914,213 @@
     ],
     "type": "object"
    },
+   "LoanIssueAction": {
+    "description": "a staking pool lending to a validator, which stakes the loan with the elector",
+    "properties": {
+     "accrued": {
+      "description": "pool coins added to the loan beyond what was asked for, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "amount": {
+      "description": "loan granted, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "borrower": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "collateral": {
+      "description": "the borrower's own coins staked alongside the loan, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "implementation": {
+      "$ref": "#/components/schemas/PoolImplementationType"
+     },
+     "loan": {
+      "$ref": "#/components/schemas/AccountAddress",
+      "description": "contract that holds the loan and stakes it"
+     },
+     "min_payment": {
+      "description": "least the borrower pays the pool from the round's reward, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "pool": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "round_since": {
+      "description": "start of the validation round the loan is for, as its unix time",
+      "example": 1792102152,
+      "format": "int64",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "borrower",
+     "pool",
+     "loan",
+     "round_since",
+     "amount",
+     "accrued",
+     "collateral",
+     "min_payment",
+     "implementation"
+    ],
+    "type": "object"
+   },
+   "LoanRepaymentAction": {
+    "description": "a loan coming back from the elector and its reward being split",
+    "properties": {
+     "accrued": {
+      "description": "pool coins added to the loan beyond what was asked for, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "amount": {
+      "description": "loan that was granted, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "borrower": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "borrower_payout": {
+      "description": "returned to the borrower: collateral and the borrower's reward, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "burn_amount": {
+      "description": "taken from the borrower's reward to be burned, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "implementation": {
+      "$ref": "#/components/schemas/PoolImplementationType"
+     },
+     "loan": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "pool": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "pool_reward": {
+      "description": "what the pool's stakers earned, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "protocol_fee": {
+      "description": "the pool operator's share of the pool's reward, in nanograms; the operator may also receive what is left over from fees",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "recovered": {
+      "description": "what came back to the pool: the stake and the reward, less what the loan contract spent to forward it, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "round_since": {
+      "description": "start of the validation round the loan is for, as its unix time",
+      "example": 1792102152,
+      "format": "int64",
+      "type": "integer"
+     },
+     "shortfall": {
+      "description": "part of the loan the elector did not return and the collateral could not cover, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "borrower",
+     "pool",
+     "loan",
+     "round_since",
+     "amount",
+     "accrued",
+     "recovered",
+     "pool_reward",
+     "protocol_fee",
+     "borrower_payout",
+     "burn_amount",
+     "implementation"
+    ],
+    "type": "object"
+   },
+   "LoanRequestAction": {
+    "description": "a validator asking a staking pool for a loan to stake in the next validation round",
+    "properties": {
+     "amount": {
+      "description": "loan asked for, in nanograms; absent if too large to represent",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "borrower": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "implementation": {
+      "$ref": "#/components/schemas/PoolImplementationType"
+     },
+     "min_payment": {
+      "description": "least the borrower promises to pay the pool from the round's reward, in nanograms; absent if too large to represent",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "pool": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "round_since": {
+      "description": "start of the validation round the loan is for, as its unix time; 0 if the round is unknown",
+      "example": 1792102152,
+      "format": "int64",
+      "type": "integer"
+     },
+     "ton_attached": {
+      "description": "sent with the request: the borrower's collateral and the pool's fees, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     }
+    },
+    "required": [
+     "borrower",
+     "pool",
+     "round_since",
+     "ton_attached",
+     "implementation"
+    ],
+    "type": "object"
+   },
    "MarketTonRates": {
     "properties": {
      "last_date_update": {
@@ -6277,6 +6500,58 @@
      "max_nominators",
      "nominators_stake",
      "validator_stake"
+    ],
+    "type": "object"
+   },
+   "PoolRoundTransition": {
+    "description": "election: the pool decided which loans to make and staked them with the elector; began: the validation round started; validated: the round's validators finished validating and the stakes are held until the elector releases them; ended: the round's stakes were released and the pool is recovering them; settled: every loan was recovered and the round's deposits and withdrawals were settled\n",
+    "enum": [
+     "election",
+     "began",
+     "validated",
+     "ended",
+     "settled"
+    ],
+    "type": "string"
+   },
+   "PoolRoundTransitionAction": {
+    "description": "a staking pool moving one of its validation rounds to its next stage",
+    "properties": {
+     "implementation": {
+      "$ref": "#/components/schemas/PoolImplementationType"
+     },
+     "pool": {
+      "$ref": "#/components/schemas/AccountAddress"
+     },
+     "round_since": {
+      "description": "start of the validation round, as its unix time; 0 if the round is unknown",
+      "example": 1792102152,
+      "format": "int64",
+      "type": "integer"
+     },
+     "total_recovered": {
+      "description": "settled only: recovered from the round, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "total_staked": {
+      "description": "settled only: lent out for the round, in nanograms",
+      "example": 1660050553,
+      "format": "int64",
+      "type": "integer",
+      "x-js-format": "bigint"
+     },
+     "transition": {
+      "$ref": "#/components/schemas/PoolRoundTransition"
+     }
+    },
+    "required": [
+     "pool",
+     "round_since",
+     "transition",
+     "implementation"
     ],
     "type": "object"
    },

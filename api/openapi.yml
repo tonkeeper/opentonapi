@@ -6878,6 +6878,10 @@ components:
             - BuyXTR
             - DepositXTR
             - WithdrawXTR
+            - LoanRequest
+            - LoanIssue
+            - LoanRepayment
+            - PoolRoundTransition
             - Unknown
         status:
           type: string
@@ -6949,6 +6953,14 @@ components:
           $ref: '#/components/schemas/DepositXTRAction'
         BuyXTR:
           $ref: '#/components/schemas/BuyXTRAction'
+        LoanRequest:
+          $ref: '#/components/schemas/LoanRequestAction'
+        LoanIssue:
+          $ref: '#/components/schemas/LoanIssueAction'
+        LoanRepayment:
+          $ref: '#/components/schemas/LoanRepaymentAction'
+        PoolRoundTransition:
+          $ref: '#/components/schemas/PoolRoundTransitionAction'
         simple_preview:
           $ref: '#/components/schemas/ActionSimplePreview'
         base_transactions:
@@ -7534,6 +7546,221 @@ components:
         stake_meta:
           description: "If present, should be used instead of amount"
           $ref: '#/components/schemas/Price'
+    LoanRequestAction:
+      description: "a validator asking a staking pool for a loan to stake in the next validation round"
+      type: object
+      required:
+        - borrower
+        - pool
+        - round_since
+        - ton_attached
+        - implementation
+      properties:
+        borrower:
+          $ref: '#/components/schemas/AccountAddress'
+        pool:
+          $ref: '#/components/schemas/AccountAddress'
+        round_since:
+          description: "start of the validation round the loan is for, as its unix time; 0 if the round is unknown"
+          type: integer
+          format: int64
+          example: 1792102152
+        amount:
+          description: "loan asked for, in nanograms; absent if too large to represent"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        min_payment:
+          description: "least the borrower promises to pay the pool from the round's reward, in nanograms; absent if too large to represent"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        ton_attached:
+          description: "sent with the request: the borrower's collateral and the pool's fees, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        implementation:
+          $ref: '#/components/schemas/PoolImplementationType'
+    LoanIssueAction:
+      description: "a staking pool lending to a validator, which stakes the loan with the elector"
+      type: object
+      required:
+        - borrower
+        - pool
+        - loan
+        - round_since
+        - amount
+        - accrued
+        - collateral
+        - min_payment
+        - implementation
+      properties:
+        borrower:
+          $ref: '#/components/schemas/AccountAddress'
+        pool:
+          $ref: '#/components/schemas/AccountAddress'
+        loan:
+          description: "contract that holds the loan and stakes it"
+          $ref: '#/components/schemas/AccountAddress'
+        round_since:
+          description: "start of the validation round the loan is for, as its unix time"
+          type: integer
+          format: int64
+          example: 1792102152
+        amount:
+          description: "loan granted, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        accrued:
+          description: "pool coins added to the loan beyond what was asked for, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        collateral:
+          description: "the borrower's own coins staked alongside the loan, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        min_payment:
+          description: "least the borrower pays the pool from the round's reward, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        implementation:
+          $ref: '#/components/schemas/PoolImplementationType'
+    LoanRepaymentAction:
+      description: "a loan coming back from the elector and its reward being split"
+      type: object
+      required:
+        - borrower
+        - pool
+        - loan
+        - round_since
+        - amount
+        - accrued
+        - recovered
+        - pool_reward
+        - protocol_fee
+        - borrower_payout
+        - burn_amount
+        - implementation
+      properties:
+        borrower:
+          $ref: '#/components/schemas/AccountAddress'
+        pool:
+          $ref: '#/components/schemas/AccountAddress'
+        loan:
+          $ref: '#/components/schemas/AccountAddress'
+        round_since:
+          description: "start of the validation round the loan is for, as its unix time"
+          type: integer
+          format: int64
+          example: 1792102152
+        amount:
+          description: "loan that was granted, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        accrued:
+          description: "pool coins added to the loan beyond what was asked for, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        recovered:
+          description: "what came back to the pool: the stake and the reward, less what the loan contract spent to forward it, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        pool_reward:
+          description: "what the pool's stakers earned, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        protocol_fee:
+          description: "the pool operator's share of the pool's reward, in nanograms; the operator may also receive what is left over from fees"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        borrower_payout:
+          description: "returned to the borrower: collateral and the borrower's reward, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        burn_amount:
+          description: "taken from the borrower's reward to be burned, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        shortfall:
+          description: "part of the loan the elector did not return and the collateral could not cover, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        implementation:
+          $ref: '#/components/schemas/PoolImplementationType'
+    PoolRoundTransition:
+      type: string
+      description: >
+        election: the pool decided which loans to make and staked them with the elector;
+        began: the validation round started;
+        validated: the round's validators finished validating and the stakes are held until the elector releases them;
+        ended: the round's stakes were released and the pool is recovering them;
+        settled: every loan was recovered and the round's deposits and withdrawals were settled
+      enum:
+        - election
+        - began
+        - validated
+        - ended
+        - settled
+    PoolRoundTransitionAction:
+      description: "a staking pool moving one of its validation rounds to its next stage"
+      type: object
+      required:
+        - pool
+        - round_since
+        - transition
+        - implementation
+      properties:
+        pool:
+          $ref: '#/components/schemas/AccountAddress'
+        round_since:
+          description: "start of the validation round, as its unix time; 0 if the round is unknown"
+          type: integer
+          format: int64
+          example: 1792102152
+        transition:
+          $ref: '#/components/schemas/PoolRoundTransition'
+        total_staked:
+          description: "settled only: lent out for the round, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        total_recovered:
+          description: "settled only: recovered from the round, in nanograms"
+          type: integer
+          format: int64
+          x-js-format: bigint
+          example: 1660050553
+        implementation:
+          $ref: '#/components/schemas/PoolImplementationType'
     ElectionsRecoverStakeAction:
       type: object
       required:

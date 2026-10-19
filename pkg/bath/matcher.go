@@ -1,6 +1,7 @@
 package bath
 
 import (
+	"slices"
 	"unsafe"
 
 	"github.com/tonkeeper/opentonapi/pkg/sentry"
@@ -85,12 +86,11 @@ func (s Straw[newBubbleT]) Merge(bubble *Bubble) bool {
 	var newBubble newBubbleT
 	var newChildren []*Bubble
 	var potentialChildren []*Bubble
+	// The head's accounts and transactions are added with the rest of the mapping below, after
+	// its builder has run. Starting from them as well would double them each time a straw
+	// extends an action it built before.
 	var newAccounts []tongo.AccountID
 	var newTransaction []ton.Bits256
-	if !s.NotMergeBubble {
-		newAccounts = bubble.Accounts
-		newTransaction = bubble.Transaction
-	}
 	nvf := newValueFlow()
 	var finalizer func(newAction *newBubbleT, flow *ValueFlow)
 	merged := make(map[*Bubble]struct{}, len(mapping))
@@ -177,6 +177,11 @@ func IsTx(b *Bubble) bool {
 	return ok
 }
 
+func IsSuccess(b *Bubble) bool {
+	tx, ok := b.Info.(BubbleTx)
+	return ok && tx.success
+}
+
 type interfaceType struct {
 	typ  unsafe.Pointer
 	word unsafe.Pointer
@@ -254,6 +259,13 @@ func HasOperation(name abi.MsgOpName) bubbleCheck {
 		return b.Info.(BubbleTx).operation(name)
 	}
 }
+
+func HasAnyOperation(names ...abi.MsgOpName) bubbleCheck {
+	return func(b *Bubble) bool {
+		return slices.ContainsFunc(names, b.Info.(BubbleTx).operation)
+	}
+}
+
 func IsAccount(id tongo.AccountID) bubbleCheck {
 	return func(bubble *Bubble) bool {
 		return bubble.Info.(BubbleTx).account.Address == id

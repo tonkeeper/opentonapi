@@ -60,86 +60,104 @@ func DefaultStraws(book AddressBook, infoSource core.InformationSource) []Merger
 		// Before JettonBurnStraw, which names no owner for it without additional info.
 		JettonBurnHipoUnstakeAllStraw,
 		JettonBurnStraw,
+		// 15
 		WtonMintStraw,
 		NftPurchaseStraw,
-		// 15
 		StonfiSwapStraw,
 		UniversalStonfiStraw{},
 		UniversalDedustStraw{},
+		// 20
 		TgAuctionV1InitialBidStraw,
 		StrawAuctionBigGetgems,
-		// 20
 		StrawAuctionBuyGetgems,
 		StrawAuctionBuyFragments,
 		JettonMintFromMasterStraw,
+		// 25
 		JettonMintStrawGovernance,
 		InvoicePaymentStrawNative,
-		// 25
 		InvoicePaymentStrawJetton,
 		MegatonFiJettonSwap,
 		UnSubscriptionBySubscriberStraw,
+		// 30
 		UnSubscriptionByBeneficiaryOrExpiredStraw,
 		SubscriptionDeployStraw,
-		// 30
 		SubscriptionPaymentStraw,
 		SubscriptionPaymentWithRequestFundsStraw,
 		DepositLiquidStakeStraw,
+		// 35
 		PendingWithdrawRequestLiquidStraw,
 		ElectionsDepositStakeStraw,
-		// 35
 		ElectionsRecoverStakeStraw,
 		DepositTFStakeStraw,
 		WithdrawTFStakeRequestStraw,
+		// 40
 		WithdrawStakeImmediatelyStraw,
 		WithdrawLiquidStake,
-		// 40
 		DNSRenewStraw,
 		BidaskLiquidityDepositBothNativeStraw,
 		BidaskLiquidityDepositBothJettonStraw,
+		// 45
 		BidaskLiquidityDepositJettonStraw,
 		StonfiLiquidityDepositSingle,
-		// 45
 		StonfiLiquidityDepositBoth,
 		DepositEthenaStakeStraw,
 		WithdrawEthenaStakeRequestStraw,
+		// 50
 		BidaskSwapStraw,
 		BidaskSwapStrawReverse,
-		// 50
 		BidaskJettonSwapStraw,
 		MooncxSwapStraw,
 		MooncxSwapStrawReverse,
+		// 55
 		MoocxLiquidityDepositJettonStraw,
 		MoocxLiquidityDepositNativeStraw,
-		// 55
 		MoocxLiquidityDepositBothStraw,
 		ToncoSwapStraw,
 		ToncoDepositLiquiditySingleStraw,
+		// 60
 		ToncoDepositLiquidityBothStraw,
 		ToncoDepositLiquidityWithRefundStraw,
-		// 60
 		DepositAffluentEarnStraw,
 		DepositAffluentEarnWithOraclesStraw,
 		WithdrawAffluentEarnRequestStraw,
+		// 65
 		InstantWithdrawAffluentEarnStraw,
 		InstantWithdrawAffluentEarnWithOraclesStraw,
-		// 65
 		PythOraclePriceUpdateStraw(infoSource),
 		DepositFFVaultStakeStraw,
 		WithdrawalRequestFFVaultStraw,
+		// 70
 		XTRDepositAction,
 		XTRBuyAction,
-		// 70
 		// Hipo, in this order: the deposit straws stop above the mint, and
 		// WithdrawHipoStakeStraw upgrades the request.
 		JettonMintHipoStraw,
 		DepositHipoStakeStraw,
 		DepositHipoStakeDeferredStraw,
+		// 75
 		WithdrawHipoStakeRequestStraw,
 		WithdrawHipoStakeStraw,
-		// 75
 		WithdrawHipoStakeSettledStraw,
 		WithdrawHipoStakePostponedStraw,
 		JettonMintHipoRollbackStraw,
+		// 80
+		WithdrawHipoStakeAllRequestStraw,
+		// Hipo's loans and rounds, after the staking straws: a settled round folds in the
+		// bills' burning but leaves their settlements to the straws above.
+		LoanRequestHipoStraw,
+		LoanIssueHipoStraw,
+		LoanRepaymentHipoStraw,
+		PoolRoundElectionHipoStraw,
+		// 85
+		PoolRoundBeganHipoStraw,
+		PoolRoundEndedHipoStraw,
+		PoolRoundSettledHipoStraw,
+		hipoRoundElectionStepStraw,
+		hipoRoundEndedStepStraw,
+		// 90
+		hipoRoundRecoverStraw,
+		hipoRoundBillStraw,
+		hipoRoundMintStraw,
 	}
 }
 
